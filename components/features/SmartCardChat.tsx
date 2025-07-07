@@ -212,8 +212,8 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     if (message.role === 'user') {
       return (
         <div className="flex justify-end mb-6">
-          <div className="max-w-[85%] rounded-2xl px-5 py-3.5 bg-gradient-to-r from-rose to-burgundy text-white shadow-sm">
-            <p className="text-[16px] leading-relaxed">{message.content}</p>
+          <div className="max-w-[85%] rounded-3xl px-6 py-4 bg-gradient-to-br from-rose via-dusty-rose to-burgundy text-white shadow-lg shadow-rose/20">
+            <p className="text-[16px] leading-[1.6] font-light">{message.content}</p>
           </div>
         </div>
       );
@@ -225,20 +225,20 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       <div className="flex justify-start mb-6">
         <div className="max-w-[85%]">
           {message.isStreaming ? (
-            <div className="rounded-2xl bg-white border border-gray-100 px-5 py-4 shadow-sm">
-              <p className="text-[15px] text-gray-700 leading-relaxed">{message.content || 'Thinking...'}</p>
+            <div className="rounded-3xl bg-white/80 backdrop-blur-xl border border-white/50 px-6 py-4 shadow-lg shadow-gray-100/50">
+              <p className="text-[15px] text-primary-text leading-relaxed">{message.content || 'Thinking...'}</p>
             </div>
           ) : (
-            <div className="rounded-2xl bg-white shadow-sm border border-gray-100 overflow-hidden">
-              <div className="p-5 space-y-4">
+            <div className="rounded-3xl bg-white shadow-lg shadow-gray-100/50 overflow-hidden">
+              <div className="p-6 space-y-5">
                 {/* Emergency Alert */}
                 {parsed?.attentionRequired === 'emergency' && (
-                  <div className="rounded-xl border-2 border-red-200 bg-red-50 p-4">
+                  <div className="rounded-2xl bg-gradient-to-r from-rose/10 to-burgundy/10 border border-rose/20 p-4">
                     <div className="flex items-start space-x-3">
-                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                      <AlertCircle className="w-5 h-5 text-burgundy flex-shrink-0 mt-0.5" />
                       <div>
-                        <h4 className="font-semibold text-gray-900 mb-1">Immediate Attention Required</h4>
-                        <p className="text-sm text-gray-600">{parsed.emergencyReasoning}</p>
+                        <h4 className="font-semibold text-primary-text mb-1">Immediate Attention Required</h4>
+                        <p className="text-sm text-secondary-text">{parsed.emergencyReasoning}</p>
                       </div>
                     </div>
                   </div>
@@ -246,19 +246,19 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
 
                 {/* Greeting */}
                 {parsed?.greeting && (
-                  <p className="text-[16px] text-gray-800 leading-relaxed">{parsed.greeting}</p>
+                  <p className="text-[17px] text-primary-text leading-[1.7] font-light">{parsed.greeting}</p>
                 )}
 
                 {/* Action Items */}
                 {parsed?.actionItems && parsed.actionItems.length > 0 && (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {parsed.actionItems.map((item, idx) => (
-                      <div key={idx} className="rounded-xl bg-gray-50 p-4">
-                        <h4 className="font-semibold text-gray-900 mb-2 text-[17px]">
+                      <div key={idx} className="rounded-2xl bg-gradient-to-br from-soft-blush/30 to-soft-lavender/20 p-5 border border-dusty-rose/10">
+                        <h4 className="font-semibold text-primary-text mb-3 text-[18px]">
                           {item.title}
                         </h4>
                         <div 
-                          className="text-[15px] text-gray-600 leading-relaxed prose prose-sm max-w-none"
+                          className="text-[15px] text-secondary-text leading-[1.7] prose prose-sm max-w-none prose-strong:text-primary-text prose-em:text-burgundy"
                           dangerouslySetInnerHTML={{ __html: item.content || item.description || '' }}
                         />
                       </div>
@@ -269,20 +269,21 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                 {/* Additional Information */}
                 {parsed?.additionalInformation && (
                   <div 
-                    className="text-[15px] text-gray-600 leading-relaxed prose prose-sm max-w-none"
+                    className="text-[15px] text-light-text leading-[1.7] italic"
                     dangerouslySetInnerHTML={{ __html: parsed.additionalInformation }}
                   />
                 )}
 
                 {/* Actionable Items */}
                 {parsed?.actionableItems && parsed.actionableItems.length > 0 && (
-                  <div className="space-y-3 pt-2">
+                  <div className="space-y-3 pt-1">
                     {parsed.actionableItems.map((item, idx) => {
                       let Icon = Heart;
+                      let gradientClass = "from-rose to-burgundy";
                       
                       // Use icon from response if provided
                       if (item.icon) {
-                        const iconMap: Record<string, any> = {
+                        const iconMap = {
                           'calendar': Calendar,
                           'pill': Pill,
                           'heart': Heart,
@@ -293,20 +294,39 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                           'file-text': FileText,
                           'globe': Globe,
                           'book-open': BookOpen
-                        };
-                        Icon = iconMap[item.icon] || Heart;
+                        } as const;
+                        Icon = iconMap[item.icon as keyof typeof iconMap] || Heart;
                       } else {
                         // Fallback to type-based icon selection
-                        if (item.type === 'appointment') Icon = Calendar;
-                        else if (item.type === 'medicine') Icon = Pill;
-                        else if (item.type === 'prescription') Icon = FileText;
-                        else if (item.type === 'resource') Icon = BookOpen;
-                        else if (item.type === 'link') Icon = Globe;
-                        else if (item.type === 'routine' || item.type === 'create_routine') {
-                          if (item.routineType === 'sleep_routine') Icon = Moon;
-                          else if (item.routineType === 'stress_management') Icon = Brain;
-                          else if (item.routineType === 'exercise') Icon = Activity;
-                          else Icon = Sparkles;
+                        if (item.type === 'appointment') {
+                          Icon = Calendar;
+                          gradientClass = "from-sage to-sage-dark";
+                        } else if (item.type === 'medicine') {
+                          Icon = Pill;
+                          gradientClass = "from-dusty-rose to-rose";
+                        } else if (item.type === 'prescription') {
+                          Icon = FileText;
+                          gradientClass = "from-soft-lavender to-burgundy";
+                        } else if (item.type === 'resource') {
+                          Icon = BookOpen;
+                          gradientClass = "from-sage-light to-sage";
+                        } else if (item.type === 'link') {
+                          Icon = Globe;
+                          gradientClass = "from-primary-text to-secondary-text";
+                        } else if (item.type === 'routine' || item.type === 'create_routine') {
+                          if (item.routineType === 'sleep_routine') {
+                            Icon = Moon;
+                            gradientClass = "from-soft-lavender to-dark-burgundy";
+                          } else if (item.routineType === 'stress_management') {
+                            Icon = Brain;
+                            gradientClass = "from-sage to-sage-dark";
+                          } else if (item.routineType === 'exercise') {
+                            Icon = Activity;
+                            gradientClass = "from-rose to-strong-rose";
+                          } else {
+                            Icon = Sparkles;
+                            gradientClass = "from-dusty-rose to-burgundy";
+                          }
                         }
                       }
                       
@@ -314,20 +334,20 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                         <button
                           key={idx}
                           onClick={() => handleActionClick(item)}
-                          className="w-full rounded-xl border border-gray-200 p-4 bg-white hover:shadow-md transition-all text-left group overflow-hidden relative"
+                          className="w-full rounded-2xl border border-gray-100 p-4 bg-white hover:shadow-lg hover:shadow-gray-100/50 transition-all duration-300 text-left group overflow-hidden relative"
                         >
-                          <div className="absolute inset-0 bg-gradient-to-r from-rose/5 to-burgundy/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <div className="absolute inset-0 bg-gradient-to-r from-soft-blush/0 to-soft-lavender/0 group-hover:from-soft-blush/20 group-hover:to-soft-lavender/10 transition-all duration-300" />
                           <div className="relative flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center shadow-sm">
-                                <Icon className="w-6 h-6 text-white" />
+                            <div className="flex items-center space-x-4">
+                              <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${gradientClass} flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow`}>
+                                <Icon className="w-5 h-5 text-white" />
                               </div>
                               <div className="flex-1">
-                                <h4 className="font-semibold text-gray-900 text-[16px]">{item.title}</h4>
-                                <p className="text-sm text-gray-500 mt-0.5">{item.description || item.details}</p>
+                                <h4 className="font-medium text-primary-text text-[16px] group-hover:text-dark-burgundy transition-colors">{item.title}</h4>
+                                <p className="text-[13px] text-light-text mt-1">{item.description || item.details}</p>
                               </div>
                             </div>
-                            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-rose group-hover:translate-x-1 transition-all" />
+                            <ChevronRight className="w-4 h-4 text-dusty-rose opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                           </div>
                         </button>
                       );
@@ -337,30 +357,10 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
 
                 {/* Fallback for plain text */}
                 {!parsed && message.content && (
-                  <p className="text-[16px] text-gray-800 leading-relaxed">{message.content}</p>
+                  <p className="text-[17px] text-primary-text leading-[1.7] font-light">{message.content}</p>
                 )}
               </div>
 
-              {/* Questions Section */}
-              {parsed?.questions && parsed.questions.length > 0 && (
-                <div className="border-t border-gray-100 px-5 py-4 bg-gray-50">
-                  <p className="text-sm text-gray-500 mb-3 text-center">Lets talk more?</p>
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    {parsed.questions.map((question, idx) => {
-                      const cleanQuestion = stripHtml(question);
-                      return (
-                        <button
-                          key={idx}
-                          onClick={() => handleQuestionClick(cleanQuestion)}
-                          className="rounded-full px-4 py-2 text-sm bg-white hover:bg-gray-100 text-gray-700 transition-all border border-gray-200"
-                        >
-                          {cleanQuestion}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>
@@ -386,7 +386,36 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
         {messages.length > 0 && (
           <div className="px-4 py-4">
             {messages.map((message, idx) => (
-              <div key={idx}>{renderMessage(message)}</div>
+              <React.Fragment key={idx}>
+                {renderMessage(message)}
+                {/* Render questions after assistant message */}
+                {message.role === 'assistant' && 
+                 message.parsedContent?.questions && 
+                 message.parsedContent.questions.length > 0 && 
+                 !message.isStreaming && (
+                  <div className="space-y-3 mt-6 mb-6">
+                    {message.parsedContent.questions.map((question, qIdx) => {
+                      const cleanQuestion = stripHtml(question);
+                      return (
+                        <button
+                          key={qIdx}
+                          onClick={() => handleQuestionClick(cleanQuestion)}
+                          className="w-full flex items-start space-x-3 p-4 rounded-3xl bg-white shadow-md shadow-gray-100/50 hover:shadow-lg transition-all duration-300 text-left group"
+                        >
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-text to-secondary-text flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                            </svg>
+                          </div>
+                          <p className="text-[16px] text-light-text leading-[1.6] font-light italic group-hover:text-secondary-text transition-colors">
+                            {cleanQuestion}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </React.Fragment>
             ))}
             <div ref={messagesEndRef} className="h-4" />
           </div>

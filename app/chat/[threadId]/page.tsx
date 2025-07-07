@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { SmartCardChat } from '@/components/features/SmartCardChat';
 import { ArrowLeft, Leaf } from 'lucide-react';
 
 export default function ChatPage({ params }: { params: Promise<{ threadId: string }> }) {
-  const router = useRouter();
+  // const router = useRouter();
   const { threadId } = use(params);
   const [initialMessage, setInitialMessage] = useState<string>('');
   const [currentThreadId, setCurrentThreadId] = useState<string>(threadId);
