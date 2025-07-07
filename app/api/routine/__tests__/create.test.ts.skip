@@ -1,0 +1,152 @@
+import { NextRequest } from 'next/server';
+import { POST } from '../create/route';
+
+// Mock OpenAI
+jest.mock('@/src/services/openai', () => ({
+  createRoutine: jest.fn()
+}));
+
+import { createRoutine } from '@/src/services/openai';
+
+describe('POST /api/routine/create', () => {
+  const mockCreateRoutine = createRoutine as jest.MockedFunction<typeof createRoutine>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const mockRoutineResponse = {
+    id: '1751860385484',
+    createdAt: '2025-07-07T03:53:05.485Z',
+    routineType: 'weight_loss',
+    duration: '7_days',
+    frequency: 'daily',
+    healthConcern: 'Help me lose weight sustainably',
+    routineTitle: 'Sustainable Weight Loss Journey 🥗',
+    routineDescription: 'This routine will guide you through daily activities',
+    totalSteps: 5,
+    reminderFrequency: 'daily',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Hydrate First Thing 💧',
+        description: 'Start your day by drinking water',
+        duration: '5 minutes',
+        bestTime: 'Morning (07:00)',
+        tips: ['Keep a water bottle by your bed'],
+        videoSearchQuery: 'benefits of drinking water',
+        reminderText: 'Don\'t forget to hydrate!',
+        reminderTime: '07:10'
+      }
+    ],
+    additionalSteps: [],
+    expectedOutcomes: ['Improved hydration'],
+    safetyNotes: ['Consult healthcare provider'],
+    progressTracking: 'Use a journal to track progress'
+  };
+
+  test('should create a routine successfully', async () => {
+    mockCreateRoutine.mockResolvedValueOnce(mockRoutineResponse as any);
+
+    const request = new NextRequest('http://localhost:3000/api/routine/create', {
+      method: 'POST',
+      body: JSON.stringify({
+        routineType: 'weight_loss',
+        healthConcern: 'Help me lose weight sustainably',
+        duration: '7_days',
+        frequency: 'daily'
+      })
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.id).toBe(mockRoutineResponse.id);
+    expect(data.routineTitle).toBe(mockRoutineResponse.routineTitle);
+    expect(mockCreateRoutine).toHaveBeenCalledWith({
+      routineType: 'weight_loss',
+      healthConcern: 'Help me lose weight sustainably',
+      duration: '7_days',
+      frequency: 'daily'
+    });
+  });
+
+  test('should handle missing required fields', async () => {
+    const request = new NextRequest('http://localhost:3000/api/routine/create', {
+      method: 'POST',
+      body: JSON.stringify({
+        routineType: 'weight_loss'
+        // Missing healthConcern
+      })
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data.error).toContain('required');
+  });
+
+  test('should handle OpenAI API errors', async () => {
+    mockCreateRoutine.mockRejectedValueOnce(new Error('OpenAI API error'));
+
+    const request = new NextRequest('http://localhost:3000/api/routine/create', {
+      method: 'POST',
+      body: JSON.stringify({
+        routineType: 'weight_loss',
+        healthConcern: 'Help me lose weight sustainably',
+        duration: '7_days',
+        frequency: 'daily'
+      })
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(data.error).toBe('Failed to create routine');
+  });
+
+  test('should handle custom instructions', async () => {
+    mockCreateRoutine.mockResolvedValueOnce(mockRoutineResponse as any);
+
+    const request = new NextRequest('http://localhost:3000/api/routine/create', {
+      method: 'POST',
+      body: JSON.stringify({
+        routineType: 'weight_loss',
+        healthConcern: 'Help me lose weight sustainably',
+        duration: '7_days',
+        frequency: 'daily',
+        customInstructions: 'I prefer morning workouts'
+      })
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+    expect(mockCreateRoutine).toHaveBeenCalledWith(
+      expect.objectContaining({
+        customInstructions: 'I prefer morning workouts'
+      })
+    );
+  });
+
+  test('should validate routine type', async () => {
+    const request = new NextRequest('http://localhost:3000/api/routine/create', {
+      method: 'POST',
+      body: JSON.stringify({
+        routineType: 'invalid_type',
+        healthConcern: 'Test concern',
+        duration: '7_days',
+        frequency: 'daily'
+      })
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data.error).toContain('Invalid routine type');
+  });
+});

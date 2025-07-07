@@ -1,10 +1,45 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Bell, Shield, Info, Moon, Sparkles, Heart } from 'lucide-react';
+import { ArrowLeft, Bell, Shield, Info, Moon, Sparkles, Heart, ChevronRight, Plus, Edit3, Package } from 'lucide-react';
+import { AboutSection } from '@/components/features/AboutSection';
+import { useRouter } from 'next/navigation';
 
 export default function SettingsPage() {
+  const [showAbout, setShowAbout] = useState(false);
+  const router = useRouter();
+
+  if (showAbout) {
+    return (
+      <div className="app-screen bg-gray-50">
+        {/* Status Bar Area */}
+        <div className="safe-area-top" />
+        
+        {/* Header */}
+        <div className="app-header bg-white border-b border-gray-200">
+          <div className="flex items-center justify-between px-4 h-14">
+            <button 
+              onClick={() => setShowAbout(false)}
+              className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-gray-100 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-700" />
+            </button>
+            <h1 className="text-lg font-semibold text-secondary-text">About</h1>
+            <div className="w-10" />
+          </div>
+        </div>
+        
+        {/* About Content */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="px-4 py-6">
+            <AboutSection />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="app-screen relative overflow-hidden">
       {/* Background Gradient */}
@@ -36,6 +71,70 @@ export default function SettingsPage() {
         {/* Settings Content */}
         <div className="flex-1 app-content px-4 py-6">
           <div className="space-y-4">
+            {/* Quick Actions */}
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold text-primary-text mb-3">Quick Actions</h2>
+              <div className="space-y-3">
+                {/* First Row */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      sessionStorage.setItem('initialMessage', 'Create a wellness routine for me');
+                      router.push('/chat/new');
+                    }}
+                    className="flex-1 rounded-2xl bg-gradient-to-br from-rose/10 to-burgundy/5 border border-rose/20 p-4 hover:shadow-md transition-all"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose to-burgundy flex items-center justify-center">
+                        <Plus className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <h3 className="font-medium text-primary-text text-sm">Create Routine</h3>
+                        <p className="text-xs text-primary-text/60">New wellness plan</p>
+                      </div>
+                    </div>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      sessionStorage.setItem('initialMessage', 'I want to start tracking my wellness journey');
+                      router.push('/chat/new');
+                    }}
+                    className="flex-1 rounded-2xl bg-gradient-to-br from-sage-light/10 to-sage/5 border border-sage/20 p-4 hover:shadow-md transition-all"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sage to-sage-dark flex items-center justify-center">
+                        <Edit3 className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <h3 className="font-medium text-primary-text text-sm">Create Journey</h3>
+                        <p className="text-xs text-primary-text/60">Track your story</p>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+
+                {/* Pantry - Full Width */}
+                <Link
+                  href="/pantry"
+                  className="w-full rounded-2xl bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 p-4 hover:shadow-md transition-all block"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                        <Package className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <h3 className="font-medium text-primary-text text-sm">My Pantry</h3>
+                        <p className="text-xs text-primary-text/60">Your supplements & remedies</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  </div>
+                </Link>
+              </div>
+            </div>
+
             {/* Wellness Profile */}
             <div className="rounded-2xl bg-white/80 backdrop-blur-sm border border-rose/10 p-4 shadow-sm">
               <div className="flex items-center justify-between">
@@ -100,7 +199,10 @@ export default function SettingsPage() {
             </div>
             
             {/* About */}
-            <div className="rounded-2xl bg-white/80 backdrop-blur-sm border border-dusty-rose/20 p-4 shadow-sm">
+            <button 
+              onClick={() => setShowAbout(true)}
+              className="w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-dusty-rose/20 p-4 shadow-sm hover:shadow-md transition-all text-left"
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-dusty-rose to-rose flex items-center justify-center">
@@ -108,11 +210,12 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <h3 className="font-medium text-primary-text">About Thrive</h3>
-                    <p className="text-sm text-primary-text/60">Version 1.0.0</p>
+                    <p className="text-sm text-primary-text/60">Learn about our philosophy</p>
                   </div>
                 </div>
+                <ChevronRight className="w-5 h-5 text-gray-400" />
               </div>
-            </div>
+            </button>
           </div>
           
           {/* Footer */}

@@ -1,0 +1,168 @@
+'use client';
+
+import React, { useState } from 'react';
+import Image from 'next/image';
+import { ChevronRight } from 'lucide-react';
+
+interface OnboardingSlide {
+  title: string;
+  subtitle: string;
+  description: string;
+  image: string;
+  imageAlt: string;
+}
+
+const slides: OnboardingSlide[] = [
+  {
+    title: "Your Wellness Companion",
+    subtitle: "Someone who truly listens",
+    description: "Share your symptoms, concerns, and wellness goals with a caring companion who keeps your secrets safe. Get personalized support for creating healing routines, tracking journals, and discovering natural remedies - all while your conversations stay completely private on your device.",
+    image: "/illustrations/companion.png",
+    imageAlt: "Wellness companion illustration"
+  },
+  {
+    title: "Track Your Healing Story",
+    subtitle: "Your journey, not your failures",
+    description: "Create personal wellness journals to understand your patterns. Daily check-ins help you see progress and celebrate small wins. No judgment, just insights into what helps you thrive.",
+    image: "/illustrations/journey_story_illustration.png",
+    imageAlt: "Journey tracking illustration"
+  },
+  {
+    title: "Gentle Daily Routines",
+    subtitle: "Life is hard enough",
+    description: "Receive gentle reminders without the pressure. We don't track completion or show missed days. This is your safe space for healing - do what you can, when you can.",
+    image: "/illustrations/routine.png",
+    imageAlt: "Routine illustration"
+  },
+  {
+    title: "Natural Wellness Wisdom",
+    subtitle: "Your body knows best",
+    description: "Discover herbs, supplements, and holistic practices that support your healing. We share wisdom, not sales pitches - helping you explore natural options that honor your body's intelligence.",
+    image: "/illustrations/recommend_supplements.png",
+    imageAlt: "Natural wellness recommendations illustration"
+  },
+  {
+    title: "Your Privacy, Protected",
+    subtitle: "Your story stays yours",
+    description: "All your personal wellness data is stored locally on your device. We never track, sell, or share your information. Your healing journey remains completely private and personal.",
+    image: "/illustrations/privacy.png",
+    imageAlt: "Privacy illustration"
+  }
+];
+
+interface OnboardingProps {
+  onComplete: () => void;
+}
+
+export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const handleNext = () => {
+    if (currentSlide < slides.length - 1) {
+      setCurrentSlide(currentSlide + 1);
+    } else {
+      onComplete();
+    }
+  };
+
+  const handleSkip = () => {
+    onComplete();
+  };
+
+  const slide = slides[currentSlide];
+  const isLastSlide = currentSlide === slides.length - 1;
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col relative overflow-hidden">
+      {/* Background Gradient - matching app theme */}
+      <div className="absolute inset-0 bg-gradient-to-br from-soft-blush/80 via-white to-soft-lavender/30" />
+      
+      {/* Decorative Elements with subtle animation */}
+      <div className="absolute top-20 -right-20 w-96 h-96 rounded-full bg-gradient-to-br from-rose/20 to-dusty-rose/20 blur-3xl animate-pulse-slow" />
+      <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-gradient-to-tr from-sage-light/40 to-sage/30 blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
+      
+      {/* Content */}
+      <div className="relative z-10 flex flex-col h-full">
+        {/* Header */}
+        <div className="flex justify-between items-center p-4">
+        <div className="flex space-x-2">
+          {slides.map((_, index) => (
+            <div
+              key={index}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                index === currentSlide 
+                  ? 'w-8 bg-gradient-to-r from-sage to-sage-dark' 
+                  : index < currentSlide
+                  ? 'w-4 bg-sage-light'
+                  : 'w-4 bg-gray-200'
+              }`}
+            />
+          ))}
+        </div>
+        {!isLastSlide && (
+          <button
+            onClick={handleSkip}
+            className="px-4 py-2 rounded-full text-sm text-gray-500 hover:text-gray-700 hover:bg-white/50 transition-all"
+          >
+            Skip
+          </button>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-20">
+        <div className="max-w-md w-full space-y-8">
+          {/* Image with themed background */}
+          <div className="relative w-full h-64 mb-8 group">
+            <div className={`absolute inset-0 rounded-3xl shadow-2xl transition-all duration-500 ${
+              currentSlide === 0 ? 'bg-gradient-to-br from-dusty-rose/20 to-sage-light/15 shadow-rose/20' :
+              currentSlide === 1 ? 'bg-gradient-to-br from-sage-light/30 to-sage/20 shadow-sage/20' :
+              currentSlide === 2 ? 'bg-gradient-to-br from-rose/20 to-dusty-rose/15 shadow-rose/20' :
+              currentSlide === 3 ? 'bg-gradient-to-br from-lavender/30 to-soft-lavender/20 shadow-lavender/20' :
+              'bg-gradient-to-br from-burgundy/20 to-dark-burgundy/15 shadow-burgundy/20'
+            }`} />
+            <div className="absolute inset-0 rounded-3xl backdrop-blur-sm" />
+            <Image
+              src={slide.image}
+              alt={slide.imageAlt}
+              fill
+              className="object-contain p-4 relative z-10"
+              priority
+            />
+          </div>
+
+          {/* Text Content */}
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-bold text-primary-text">
+              {slide.title}
+            </h2>
+            <p className={`text-lg font-medium ${
+              currentSlide === 0 ? 'text-rose' :
+              currentSlide === 1 ? 'text-sage-dark' :
+              currentSlide === 2 ? 'text-rose' :
+              currentSlide === 3 ? 'text-purple-600' :
+              'text-burgundy'
+            }`}>
+              {slide.subtitle}
+            </p>
+            <p className="text-secondary-text-thin leading-relaxed">
+              {slide.description}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Navigation */}
+      <div className="p-6">
+        <button
+          onClick={handleNext}
+          className="w-full py-4 rounded-2xl bg-gradient-to-r from-rose to-burgundy text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center"
+        >
+          {isLastSlide ? 'Get Started' : 'Continue'}
+          <ChevronRight className="w-5 h-5 ml-2" />
+        </button>
+      </div>
+      </div>
+    </div>
+  );
+};

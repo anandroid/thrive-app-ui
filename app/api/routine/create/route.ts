@@ -35,7 +35,57 @@ export async function POST(request: NextRequest) {
       wakeTime: userPreferences?.sleepSchedule?.wakeTime || '07:00'
     });
 
-    return NextResponse.json(routine);
+    // Transform the response to match WellnessRoutine type
+    const transformedRoutine = {
+      ...routine,
+      id: routine.id || Date.now().toString(),
+      name: routine.routineTitle || routine.name || 'Wellness Routine',
+      description: routine.routineDescription || routine.description || '',
+      type: routine.routineType || routineType || 'wellness_routine',
+      duration: typeof routine.duration === 'string' ? 
+        parseInt(routine.duration.replace('_days', '')) : 
+        routine.duration || 7,
+      frequency: routine.frequency || 'daily',
+      reminderTimes: routine.steps?.map((s: { reminderTime?: string }) => s.reminderTime).filter(Boolean) || [],
+      healthConcern: routine.healthConcern || healthConcern,
+      steps: (routine.steps || []).map((step: { 
+        title: string;
+        description: string;
+        duration: string | number;
+        stepNumber?: number;
+        bestTime?: string;
+        tips?: string[];
+        videoSearchQuery?: string;
+        reminderText?: string;
+        reminderTime?: string;
+      }, index: number) => ({
+        order: index + 1,
+        title: step.title,
+        description: step.description,
+        duration: typeof step.duration === 'string' ? 
+          parseInt(step.duration.replace(' minutes', '')) : 
+          step.duration || 5,
+        stepNumber: step.stepNumber || index + 1,
+        bestTime: step.bestTime,
+        tips: step.tips || [],
+        videoSearchQuery: step.videoSearchQuery,
+        reminderText: step.reminderText,
+        reminderTime: step.reminderTime
+      })),
+      expectedOutcomes: routine.expectedOutcomes || [],
+      safetyNotes: routine.safetyNotes || [],
+      createdAt: new Date(routine.createdAt || Date.now()),
+      updatedAt: new Date(routine.updatedAt || Date.now()),
+      isActive: true,
+      routineType: routine.routineType,
+      routineTitle: routine.routineTitle,
+      routineDescription: routine.routineDescription,
+      totalSteps: routine.totalSteps || routine.steps?.length || 0,
+      reminderFrequency: routine.reminderFrequency || 'daily',
+      additionalSteps: routine.additionalSteps
+    };
+
+    return NextResponse.json(transformedRoutine);
   } catch (error) {
     console.error('Error creating routine:', error);
     return NextResponse.json(

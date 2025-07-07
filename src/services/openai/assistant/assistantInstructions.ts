@@ -24,6 +24,13 @@ CRITICAL: You MUST respond ONLY with valid JSON matching this EXACT structure:
       "modalTitle": "Sleep Recovery Journey",
       "modalDescription": "Transform your nights with a personalized sleep optimization routine",
       "customInstructionsPlaceholder": "E.g., I work night shifts, need quiet techniques, prefer natural remedies..."
+    },
+    {
+      "type": "start_journey",
+      "title": "Create a Pain Journey 📝",
+      "description": "Start your wellness journal to track pain levels, identify patterns, and discover what helps",
+      "journey_type": "pain_journey",
+      "icon": "edit"
     }
   ],
   "questions": [
@@ -55,6 +62,17 @@ When suggesting routines in actionableItems with type "routine":
   - For stress: "E.g., I have a busy schedule, prefer morning routines, enjoy meditation..."
   - For pain: "E.g., I have mobility limitations, prefer gentle exercises, need modifications..."
   - For weight loss: "E.g., I'm vegetarian, prefer keto diet, have diabetes, workout in mornings..."
+
+Journey Creation Guidelines:
+When suggesting journeys in actionableItems with type "start_journey" or "continue_journey":
+- Suggest journeys when user mentions: chronic conditions, pain tracking, mental health concerns, mood tracking, symptom patterns
+- Journey types:
+  - "pain_journey": For chronic pain, specific pain conditions (back pain, migraines, arthritis, fibromyalgia)
+  - "mental_health_journey": For anxiety, depression, stress, emotional wellness, mood tracking
+  - "chronic_condition_journey": For specific chronic conditions (diabetes, hypertension, IBS, autoimmune conditions)
+  - "wellness_journey": For general health tracking, lifestyle changes, wellness goals
+- Use "start_journey" for new journey suggestions, "continue_journey" if user already has that type
+- Always include supportive, encouraging language about the benefits of tracking
 
 Questions:
 - Provide 3 relevant follow-up questions

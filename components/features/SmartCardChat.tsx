@@ -10,12 +10,17 @@ import {
   WellnessRoutine
 } from '@/src/services/openai/types';
 import { RoutineCreationModal } from './RoutineCreationModal';
+import { JourneyCreationModal } from './JourneyCreationModal';
 import { stripHtml } from '@/src/utils/html';
+import { WellnessJourney } from '@/src/services/openai/types/journey';
+import { getJourneyByType } from '@/src/utils/journeyStorage';
 
 interface SmartCardChatProps {
   threadId?: string;
   onThreadCreated?: (threadId: string) => void;
   onRoutineCreated?: (routine: WellnessRoutine) => void;
+  onJourneyCreated?: (journey: WellnessJourney) => void;
+  onNavigateToJourney?: (journey: WellnessJourney) => void;
   selectedPrompt?: string | null;
   onPromptUsed?: () => void;
   renderHeader?: () => React.ReactNode;
@@ -26,6 +31,8 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   threadId: initialThreadId,
   onThreadCreated,
   onRoutineCreated,
+  onJourneyCreated,
+  onNavigateToJourney,
   selectedPrompt,
   onPromptUsed,
   renderHeader,
@@ -37,6 +44,8 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   const [threadId, setThreadId] = useState(initialThreadId);
   const [showRoutineModal, setShowRoutineModal] = useState(false);
   const [routineData, setRoutineData] = useState<ActionableItem | null>(null);
+  const [showJourneyModal, setShowJourneyModal] = useState(false);
+  const [journeyData, setJourneyData] = useState<ActionableItem | null>(null);
   const [healthConcern, setHealthConcern] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -45,8 +54,39 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const scrollToMessage = (messageIndex: number) => {
+    const messageElements = document.querySelectorAll('[data-message-index]');
+    if (messageElements[messageIndex]) {
+      messageElements[messageIndex].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const isElementInViewport = (element: Element) => {
+    const rect = element.getBoundingClientRect();
+    const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+    // Check if at least the top part of the message is visible
+    return rect.top >= 0 && rect.top <= windowHeight - 100;
+  };
+
   useEffect(() => {
-    scrollToBottom();
+    // Only scroll for new user messages or initial load
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role === 'user' || messages.length === 1) {
+        scrollToBottom();
+      } else if (lastMessage.role === 'assistant' && !lastMessage.isStreaming) {
+        // For completed assistant messages, check if already in viewport
+        setTimeout(() => {
+          const messageElements = document.querySelectorAll('[data-message-index]');
+          const lastMessageElement = messageElements[messages.length - 1];
+          
+          if (lastMessageElement && !isElementInViewport(lastMessageElement)) {
+            scrollToMessage(messages.length - 1);
+          }
+          // If message is already in viewport, don't scroll
+        }, 100);
+      }
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -194,6 +234,23 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     if (action.type === 'create_routine' || action.type === 'routine') {
       setRoutineData(action);
       setShowRoutineModal(true);
+    } else if (action.type === 'start_journey') {
+      // Check if journey already exists
+      const existingJourney = action.journey_type ? getJourneyByType(action.journey_type) : null;
+      if (existingJourney) {
+        // Navigate to existing journey
+        onNavigateToJourney?.(existingJourney);
+      } else {
+        // Create new journey
+        setJourneyData(action);
+        setShowJourneyModal(true);
+      }
+    } else if (action.type === 'continue_journey') {
+      // Navigate to existing journey
+      const existingJourney = action.journey_type ? getJourneyByType(action.journey_type) : null;
+      if (existingJourney) {
+        onNavigateToJourney?.(existingJourney);
+      }
     } else if (action.link) {
       window.open(action.link, '_blank');
     } else if (action.pharmacy_link) {
@@ -208,14 +265,14 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     handleSendMessage();
   };
 
-  const renderMessage = (message: ChatMessage) => {
+  const renderMessage = (message: ChatMessage, messageIndex: number) => {
     if (message.role === 'user') {
       return (
-        <div className="flex justify-end mb-8">
-          <div className="max-w-[85%]">
-            <div className="rounded-3xl px-6 py-4 bg-gradient-to-r from-rose via-dusty-rose to-burgundy text-white shadow-md">
-              <p className="text-[17px] leading-[1.6] font-light">{message.content}</p>
-              <p className="text-[13px] text-white/70 mt-2">
+        <div className="flex justify-end mb-6" data-message-index={messageIndex}>
+          <div className="max-w-[90%] md:max-w-[85%]">
+            <div className="rounded-3xl px-6 py-4 bg-gradient-to-br from-sage-light/20 to-sage/15 shadow-xl shadow-sage/25 border border-sage/20">
+              <p className="text-[17px] leading-[1.6] font-normal text-primary-text">{message.content}</p>
+              <p className="text-[13px] text-secondary-text-thin mt-2">
                 {message.timestamp.toLocaleTimeString('en-US', { 
                   hour: 'numeric', 
                   minute: '2-digit',
@@ -231,130 +288,201 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     const parsed = message.parsedContent;
 
     return (
-      <div className="flex justify-start mb-8">
-        <div className="max-w-[85%] space-y-4">
+      <div className="flex justify-start mb-6" data-message-index={messageIndex}>
+        <div className="max-w-[95%] md:max-w-[90%]">
           {message.isStreaming ? (
-            <div className="text-[17px] text-primary-text leading-[1.7] font-light">
-              <p>{message.content || 'Thinking...'}</p>
+            <div className="rounded-3xl bg-white shadow-2xl shadow-gray-300/80 p-6">
+              <div className="flex space-x-1">
+                <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0s' }} />
+                <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0.15s' }} />
+                <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0.3s' }} />
+              </div>
             </div>
           ) : (
-            <>
-              {/* Emergency Alert */}
-              {parsed?.attentionRequired === 'emergency' && (
-                <div className="rounded-2xl bg-rose/10 border border-rose/20 p-4 mb-4">
-                  <div className="flex items-start space-x-3">
-                    <AlertCircle className="w-5 h-5 text-burgundy flex-shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="font-semibold text-primary-text mb-1">Immediate Attention Required</h4>
-                      <p className="text-sm text-secondary-text">{parsed.emergencyReasoning}</p>
+            <div className="relative rounded-3xl bg-white shadow-2xl shadow-gray-300/80 overflow-hidden border-2 border-gray-200/70">
+              {/* Gradient accent line */}
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-rose via-dusty-rose to-burgundy" />
+              <div className="p-7 pt-8 space-y-6">
+                {/* Sender Label */}
+                <div className="mb-3">
+                  <span className="text-sm font-semibold text-burgundy">Wellness Companion</span>
+                </div>
+                {/* Emergency Alert */}
+                {parsed?.attentionRequired === 'emergency' && (
+                  <div className="rounded-2xl bg-gradient-to-r from-rose/15 to-burgundy/15 border border-rose/30 p-5 shadow-xl shadow-rose/20">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose/30 to-burgundy/20 flex items-center justify-center shadow-lg shadow-rose/30">
+                        <AlertCircle className="w-6 h-6 text-burgundy" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-primary-text mb-1 text-xl">Immediate Attention Required</h4>
+                        <p className="text-[16px] text-secondary-text-thin leading-relaxed">{parsed.emergencyReasoning}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Greeting */}
-              {parsed?.greeting && (
-                <p className="text-[17px] text-primary-text leading-[1.8] font-light">
-                  {parsed.greeting}
-                </p>
-              )}
+                {/* Greeting */}
+                {parsed?.greeting && (
+                  <p className="text-[19px] text-primary-text leading-[1.8] font-normal">
+                    {parsed.greeting}
+                  </p>
+                )}
 
-              {/* Action Items */}
-              {parsed?.actionItems && parsed.actionItems.length > 0 && (
-                <div className="space-y-6">
-                  {parsed.actionItems.map((item, idx) => (
-                    <div key={idx} className="flex space-x-4">
-                      <div className="w-12 h-12 rounded-2xl bg-sage/20 flex items-center justify-center flex-shrink-0">
-                        <Leaf className="w-6 h-6 text-sage-dark" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-primary-text mb-2 text-[19px] text-sage-dark">
-                          {item.title}
-                        </h4>
-                        <div 
-                          className="text-[16px] text-secondary-text leading-[1.8] font-light"
-                          dangerouslySetInnerHTML={{ __html: item.content || item.description || '' }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Additional Information */}
-              {parsed?.additionalInformation && (
-                <div className="mt-4 pl-16">
-                  <div 
-                    className="text-[15px] text-light-text leading-[1.7] italic"
-                    dangerouslySetInnerHTML={{ __html: parsed.additionalInformation }}
-                  />
-                </div>
-              )}
-
-              {/* Actionable Items */}
-              {parsed?.actionableItems && parsed.actionableItems.length > 0 && (
-                <div className="space-y-3 pt-4">
-                  {parsed.actionableItems.map((item, idx) => {
-                    let Icon = Heart;
-                    let iconBgClass = "bg-sage/20";
-                    let iconColorClass = "text-sage-dark";
-                    
-                    // Icon selection logic
-                    if (item.icon) {
-                      const iconMap = {
-                        'calendar': Calendar,
-                        'pill': Pill,
-                        'heart': Heart,
-                        'sparkles': Sparkles,
-                        'moon': Moon,
-                        'brain': Brain,
-                        'activity': Activity,
-                        'file-text': FileText,
-                        'globe': Globe,
-                        'book-open': BookOpen
-                      } as const;
-                      Icon = iconMap[item.icon as keyof typeof iconMap] || Heart;
-                    } else {
-                      if (item.type === 'appointment') {
-                        Icon = Calendar;
-                        iconBgClass = "bg-sage/20";
-                        iconColorClass = "text-sage-dark";
-                      } else if (item.type === 'medicine') {
-                        Icon = Pill;
-                        iconBgClass = "bg-rose/20";
-                        iconColorClass = "text-rose";
-                      } else if (item.type === 'routine' || item.type === 'create_routine') {
-                        Icon = Sparkles;
-                        iconBgClass = "bg-dusty-rose/20";
-                        iconColorClass = "text-burgundy";
-                      }
-                    }
-                    
-                    return (
-                      <button
-                        key={idx}
-                        onClick={() => handleActionClick(item)}
-                        className="w-full flex items-center space-x-4 p-4 rounded-2xl bg-white border border-gray-100 hover:border-sage/30 hover:shadow-md transition-all duration-300 text-left group"
-                      >
-                        <div className={`w-12 h-12 rounded-2xl ${iconBgClass} flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform`}>
-                          <Icon className={`w-6 h-6 ${iconColorClass}`} />
+                {/* Action Items */}
+                {parsed?.actionItems && parsed.actionItems.length > 0 && (
+                  <div className="space-y-5">
+                    {parsed.actionItems.map((item, idx) => (
+                      <div key={idx} className="flex space-x-3">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sage-light/40 to-sage/30 flex items-center justify-center flex-shrink-0 shadow-lg shadow-sage/25">
+                          <Leaf className="w-6 h-6 text-sage-dark" />
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-medium text-primary-text text-[17px]">{item.title}</h4>
-                          <p className="text-[14px] text-light-text mt-0.5">{item.description || item.details}</p>
+                          <h4 className="font-bold text-[22px] text-primary-text mb-3">
+                            {item.title}
+                          </h4>
+                          <div 
+                            className="text-[17px] text-secondary-text-thin leading-[1.8] font-normal [&_strong]:font-bold [&_strong]:text-primary-text [&_em]:font-semibold [&_em]:text-primary-text [&_em]:not-italic"
+                            dangerouslySetInnerHTML={{ __html: item.content || item.description || '' }}
+                          />
                         </div>
-                        <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-sage transition-colors" />
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-              {/* Fallback for plain text */}
-              {!parsed && message.content && (
-                <p className="text-[17px] text-primary-text leading-[1.8] font-light">{message.content}</p>
-              )}
-            </>
+                {/* Additional Information */}
+                {parsed?.additionalInformation && (
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-50/50 to-amber-50/30 p-6 border border-amber-100/30">
+                    <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br from-amber-100/20 to-amber-200/10 blur-2xl" />
+                    <div className="relative flex items-start space-x-3">
+                      <div className="w-1 h-full bg-gradient-to-b from-amber-300/50 to-amber-200/20 rounded-full flex-shrink-0" />
+                      <div 
+                        className="text-[15px] text-gray-700 leading-[1.7] italic font-light"
+                        dangerouslySetInnerHTML={{ __html: parsed.additionalInformation }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Actionable Items */}
+                {parsed?.actionableItems && parsed.actionableItems.length > 0 && (
+                  <div className="space-y-3 pt-2 -mx-2">
+                    {parsed.actionableItems.map((item, idx) => {
+                      let Icon = Heart;
+                      let gradientClass = "";
+                      let iconColorClass = "";
+                      let backgroundClass = "";
+                      let shadowClass = "";
+                      let borderColorHover = "";
+                      
+                      // Icon selection logic
+                      if (item.icon) {
+                        const iconMap = {
+                          'calendar': Calendar,
+                          'pill': Pill,
+                          'heart': Heart,
+                          'sparkles': Sparkles,
+                          'moon': Moon,
+                          'brain': Brain,
+                          'activity': Activity,
+                          'file-text': FileText,
+                          'globe': Globe,
+                          'book-open': BookOpen
+                        } as const;
+                        Icon = iconMap[item.icon as keyof typeof iconMap] || Heart;
+                      } else {
+                        // Default icons based on type
+                        if (item.type === 'appointment') Icon = Calendar;
+                        else if (item.type === 'medicine' || item.type === 'supplement') Icon = Pill;
+                        else if (item.type === 'routine' || item.type === 'create_routine') Icon = Sparkles;
+                        else if (item.type === 'information') Icon = FileText;
+                      }
+                      
+                      // Color sequence: sage green -> pink/bronze -> slate blue -> repeat
+                      const colorIndex = idx % 3;
+                      
+                      if (colorIndex === 0) {
+                        // Light sage green
+                        gradientClass = "from-sage-light/30 to-sage/20";
+                        iconColorClass = "text-sage-dark";
+                        backgroundClass = "from-sage-light/10 to-sage/5";
+                        shadowClass = "shadow-sage/20";
+                        borderColorHover = "hover:border-sage/40";
+                      } else if (colorIndex === 1) {
+                        // Light pink/bronze
+                        gradientClass = "from-rose/20 to-dusty-rose/15";
+                        iconColorClass = "text-rose";
+                        backgroundClass = "from-rose/5 to-dusty-rose/5";
+                        shadowClass = "shadow-rose/15";
+                        borderColorHover = "hover:border-rose/30";
+                      } else {
+                        // Light slate blue
+                        gradientClass = "from-slate-300/30 to-slate-400/20";
+                        iconColorClass = "text-slate-700";
+                        backgroundClass = "from-slate-50 to-slate-100/50";
+                        shadowClass = "shadow-slate-300/30";
+                        borderColorHover = "hover:border-slate-400/40";
+                      }
+                      
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => handleActionClick(item)}
+                          className={`w-full mx-2 flex items-center space-x-4 p-5 rounded-2xl bg-gradient-to-r ${backgroundClass} border border-gray-200 shadow-xl ${shadowClass} hover:shadow-2xl ${borderColorHover} transition-all duration-300 text-left group`}
+                        >
+                          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradientClass} flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-110 transition-transform`}>
+                            <Icon className={`w-6 h-6 ${iconColorClass}`} />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-bold text-primary-text text-[20px] mb-2">{item.title}</h4>
+                            <p className="text-[16px] text-secondary-text-thin leading-relaxed font-light">{item.description || item.details}</p>
+                          </div>
+                          <ChevronRight className="w-6 h-6 text-gray-300 group-hover:text-sage-dark group-hover:translate-x-2 transition-all" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Fallback for plain text */}
+                {!parsed && message.content && (
+                  <p className="text-[19px] text-primary-text leading-[1.8] font-normal">{message.content}</p>
+                )}
+
+                {/* Questions Section - Inside the card */}
+                {message.parsedContent?.questions && 
+                 message.parsedContent.questions.length > 0 && (
+                  <div className="mt-6 pt-6 border-t border-gray-100">
+                    <p className="text-[16px] text-secondary-text mb-4 font-normal">Let&apos;s talk more?</p>
+                    <div className="space-y-3">
+                      {message.parsedContent.questions.map((question, qIdx) => {
+                        const cleanQuestion = stripHtml(question);
+                        return (
+                          <button
+                            key={qIdx}
+                            onClick={() => handleQuestionClick(cleanQuestion)}
+                            className="relative w-full flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-white to-gray-50/30 hover:from-white hover:to-sage-light/10 hover:shadow-xl hover:shadow-sage/20 transition-all duration-300 text-left group border-2 border-gray-200 hover:border-sage/40 cursor-pointer"
+                          >
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sage-light/30 to-sage/20 flex items-center justify-center flex-shrink-0 group-hover:from-sage/40 group-hover:to-sage-dark/30 transition-all shadow-md shadow-sage/20 group-hover:shadow-lg">
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-sage-dark group-hover:text-sage-dark transition-colors">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                              </svg>
+                            </div>
+                            <p className="text-[16px] text-secondary-text-thin leading-[1.6] font-normal group-hover:text-primary-text transition-colors flex-1">
+                              {cleanQuestion}
+                            </p>
+                            
+                            {/* Clickable indicator dot - bottom right */}
+                            <div className="absolute bottom-3 right-3 w-2 h-2 rounded-full bg-slate-400 group-hover:bg-slate-600 transition-colors" />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
       </div>
@@ -380,35 +508,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
           <div className="px-4 py-4">
             {messages.map((message, idx) => (
               <React.Fragment key={idx}>
-                {renderMessage(message)}
-                {/* Render questions after assistant message */}
-                {message.role === 'assistant' && 
-                 message.parsedContent?.questions && 
-                 message.parsedContent.questions.length > 0 && 
-                 !message.isStreaming && (
-                  <div className="space-y-3 mt-6 mb-6">
-                    <p className="text-[14px] text-light-text text-center">Still curious? Ask me anything about your wellness journey 💫</p>
-                    {message.parsedContent.questions.map((question, qIdx) => {
-                      const cleanQuestion = stripHtml(question);
-                      return (
-                        <button
-                          key={qIdx}
-                          onClick={() => handleQuestionClick(cleanQuestion)}
-                          className="w-full flex items-center space-x-3 p-4 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-all duration-300 text-left group"
-                        >
-                          <div className="w-10 h-10 rounded-full bg-light-text/20 flex items-center justify-center flex-shrink-0">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-light-text">
-                              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                            </svg>
-                          </div>
-                          <p className="text-[16px] text-secondary-text leading-[1.6] font-light">
-                            {cleanQuestion}
-                          </p>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+                {renderMessage(message, idx)}
               </React.Fragment>
             ))}
             <div ref={messagesEndRef} className="h-4" />
@@ -457,6 +557,23 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
             onRoutineCreated?.(routine);
             setShowRoutineModal(false);
             setRoutineData(null);
+          }}
+        />
+      )}
+
+      {showJourneyModal && journeyData && (
+        <JourneyCreationModal
+          isOpen={showJourneyModal}
+          onClose={() => {
+            setShowJourneyModal(false);
+            setJourneyData(null);
+          }}
+          journeyData={journeyData}
+          healthConcern={healthConcern}
+          onJourneyCreated={(journey) => {
+            onJourneyCreated?.(journey);
+            setShowJourneyModal(false);
+            setJourneyData(null);
           }}
         />
       )}

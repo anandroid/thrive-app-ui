@@ -3,8 +3,9 @@
 :root {
   /* Base Colors */
   --root-bg: #f7e1e5; /* soft blush pink */
-  --primary-text: #3a5163; /* slate blue */
-  --secondary-text: #4a5568; /* lighter slate */
+  --primary-text: #000000; /* black */
+  --secondary-text: #3a5163; /* slate blue (was primary) */
+  --secondary-text-thin: #4a5568; /* lighter slate (was secondary) */
   --light-text: #718096; /* subtle text/hints */
   
   /* Rose/Burgundy Family (Primary) */
@@ -33,6 +34,7 @@
   --color-foreground: var(--foreground);
   --color-primary-text: var(--primary-text);
   --color-secondary-text: var(--secondary-text);
+  --color-secondary-text-thin: var(--secondary-text-thin);
   --color-light-text: var(--light-text);
   --color-strong-rose: var(--strong-rose);
   --color-rose: var(--rose);
@@ -76,6 +78,16 @@ body {
 input, textarea, [contenteditable] {
   -webkit-user-select: text;
   user-select: text;
+}
+
+/* Hide scrollbar for horizontal scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
 }
 
 /* Gradient Utilities */
@@ -259,6 +271,49 @@ input, textarea, [contenteditable] {
 .ios-active:active {
   opacity: 0.7;
   transform: scale(0.98);
+}
+
+/* Wave animation for chat typing dots */
+@keyframes wave {
+  0%, 60%, 100% { transform: translateY(0); opacity: 1; }
+  30% { transform: translateY(-6px); }
+}
+
+.animate-wave {
+  animation: wave 1.2s infinite ease-in-out;
+  display: inline-block;
+}
+
+/* Slide in from right animation */
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-from-right {
+  animation: slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Pulse slow animation for decorative elements */
+@keyframes pulseSlow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 4s ease-in-out infinite;
 }
 
 /* Prose styling for rich content */

@@ -33,7 +33,7 @@ export interface ActionItem {
 }
 
 export interface ActionableItem {
-  type: 'appointment' | 'medicine' | 'routine' | 'create_routine' | 'prescription' | 'resource' | 'link' | string;
+  type: 'appointment' | 'medicine' | 'routine' | 'create_routine' | 'prescription' | 'resource' | 'link' | 'start_journey' | 'continue_journey' | string;
   title: string;
   description: string;
   details?: string;
@@ -47,7 +47,12 @@ export interface ActionableItem {
   modalTitle?: string;
   modalDescription?: string;
   customInstructionsPlaceholder?: string;
-  icon?: 'calendar' | 'pill' | 'heart' | 'sparkles' | 'moon' | 'brain' | 'activity' | 'file-text' | 'globe' | 'book-open' | string;
+  icon?: 'calendar' | 'pill' | 'heart' | 'sparkles' | 'moon' | 'brain' | 'activity' | 'file-text' | 'globe' | 'book-open' | 'edit' | string;
+  journeyType?: 'pain' | 'mental_health' | 'chronic_condition' | 'wellness_general';
+  journey_type?: string; // For compatibility with assistant responses
+  journeyId?: string;
+  journeyTitle?: string;
+  isExisting?: boolean;
   emoji?: string;
   action?: string;
 }
@@ -73,6 +78,8 @@ export interface WellnessRoutine {
   totalSteps?: number;
   reminderFrequency?: string;
   additionalSteps?: AdditionalStep[];
+  lastCompleted?: string;
+  completionStreak?: number;
   progressTracking?: string;
   adjustmentHistory?: AdjustmentHistoryItem[];
 }
