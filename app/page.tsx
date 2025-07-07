@@ -136,7 +136,7 @@ export default function HomePage() {
                     <button
                       key={index}
                       onClick={() => handlePromptClick(template.text)}
-                      className={`relative flex items-center space-x-3 p-4 rounded-2xl bg-white/60 backdrop-blur-sm hover:bg-white/80 native-transition text-left group shadow-md ${template.shadow} hover:shadow-lg overflow-hidden`}
+                      className={`relative flex items-center space-x-3 p-4 rounded-2xl bg-white hover:bg-white/90 native-transition text-left group shadow-md ${template.shadow} hover:shadow-lg overflow-hidden`}
                     >
                       {/* Card gradient background */}
                       <div className={`absolute inset-0 bg-gradient-to-r ${template.gradient} opacity-0 group-hover:opacity-100 transition-opacity`} />
