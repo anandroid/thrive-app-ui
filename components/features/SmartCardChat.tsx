@@ -2,8 +2,15 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, AlertCircle, Calendar, Pill, Heart, Sparkles, ChevronRight, Moon, Brain, Activity, FileText, Globe, BookOpen } from 'lucide-react';
-import { ChatMessage, ActionableItem, AssistantResponse, WellnessRoutine } from '@/src/services/openai/types';
+import {
+  ChatMessage,
+  ActionableItem,
+  AssistantResponse,
+  ASSISTANT_RESPONSE_KEYS,
+  WellnessRoutine
+} from '@/src/services/openai/types';
 import { RoutineCreationModal } from './RoutineCreationModal';
+import { stripHtml } from '@/src/utils/html';
 
 interface SmartCardChatProps {
   threadId?: string;
@@ -169,9 +176,15 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     }
   };
 
+  // Attempt to parse assistant JSON only if it actually contains structured fields
   const parseAssistantResponse = (content: string): AssistantResponse | undefined => {
     try {
-      return JSON.parse(content);
+      const parsed = JSON.parse(content);
+      // We consider it structured only if it includes at least one expected assistant-response key
+      if (parsed && typeof parsed === 'object' && ASSISTANT_RESPONSE_KEYS.some(key => key in parsed)) {
+        return parsed as AssistantResponse;
+      }
+      return undefined;
     } catch {
       return undefined;
     }
@@ -308,15 +321,18 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                     <div className="flex-grow h-px bg-gradient-to-r from-transparent via-rose/40 to-transparent" />
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {parsed.questions.map((question, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => handleQuestionClick(question)}
-                        className="rounded-full px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all"
-                      >
-                        {question}
-                      </button>
-                    ))}
+                    {parsed.questions.map((question, idx) => {
+                      const cleanQuestion = stripHtml(question);
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => handleQuestionClick(cleanQuestion)}
+                          className="rounded-full px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all"
+                        >
+                          {cleanQuestion}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}

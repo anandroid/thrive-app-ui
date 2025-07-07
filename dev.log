@@ -480,3 +480,4 @@
   syscall: 'open',
   path: '/Users/anand/IdeaProjects/thrive-app/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'
 }
+ ✓ Compiled in 73ms

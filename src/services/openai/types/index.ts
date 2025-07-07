@@ -15,6 +15,17 @@ export interface AssistantResponse {
   questions: string[];
 }
 
+// Runtime helper: list of keys in AssistantResponse used for quick presence checks
+export const ASSISTANT_RESPONSE_KEYS: (keyof AssistantResponse)[] = [
+  'greeting',
+  'attentionRequired',
+  'emergencyReasoning',
+  'actionItems',
+  'additionalInformation',
+  'actionableItems',
+  'questions',
+];
+
 export interface ActionItem {
   title: string;
   content: string;
