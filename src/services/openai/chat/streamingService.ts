@@ -3,20 +3,31 @@ import OpenAI from 'openai';
 export class StreamingChatService {
   private openai: OpenAI;
   private assistantId: string;
+  private chatIntent?: string | null;
 
-  constructor(apiKey: string, assistantId: string) {
+  constructor(apiKey: string, assistantId: string, chatIntent?: string | null) {
     this.openai = new OpenAI({ apiKey });
     this.assistantId = assistantId;
+    this.chatIntent = chatIntent;
   }
 
   async createThread() {
     return await this.openai.beta.threads.create();
   }
 
-  async sendMessage(threadId: string, message: string) {
+  async sendMessage(threadId: string, message: string, chatIntent?: string | null) {
+    // Augment message with intent context if in creation mode
+    let augmentedMessage = message;
+    if (chatIntent) {
+      const intentContext = chatIntent === 'create_journey' 
+        ? '\n\n[SYSTEM: User is in Journey Creation Mode. Focus only on creating a wellness journey. Ask 2-3 focused questions and show ONLY the journey creation actionableItem.]'
+        : '\n\n[SYSTEM: User is in Routine Creation Mode. Focus only on creating a wellness routine. Ask about schedule/preferences and show ONLY the routine creation actionableItem.]';
+      augmentedMessage = message + intentContext;
+    }
+    
     return await this.openai.beta.threads.messages.create(threadId, {
       role: 'user',
-      content: message,
+      content: augmentedMessage,
     });
   }
 

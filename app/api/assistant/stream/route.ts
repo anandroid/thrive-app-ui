@@ -3,7 +3,7 @@ import { StreamingChatService } from '@/src/services/openai/chat/streamingServic
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, threadId } = await request.json();
+    const { message, threadId, chatIntent } = await request.json();
 
     if (!message) {
       return new Response(JSON.stringify({ error: 'Message is required' }), {
@@ -12,10 +12,11 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Initialize service
+    // Initialize service with optional chat intent
     const streamingService = new StreamingChatService(
       process.env.OPENAI_API_KEY!,
-      process.env.OPENAI_ASSISTANT_ID!
+      process.env.OPENAI_ASSISTANT_ID!,
+      chatIntent
     );
 
     let currentThreadId = threadId;
@@ -26,8 +27,8 @@ export async function POST(request: NextRequest) {
       currentThreadId = thread.id;
     }
 
-    // Send the message
-    await streamingService.sendMessage(currentThreadId, message);
+    // Send the message with intent context
+    await streamingService.sendMessage(currentThreadId, message, chatIntent);
 
     // Create streaming response
     const stream = streamingService.createStreamingResponse(currentThreadId);

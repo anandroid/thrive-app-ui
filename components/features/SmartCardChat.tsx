@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, AlertCircle, Calendar, Pill, Heart, Sparkles, ChevronRight, Moon, Brain, Activity, FileText, Globe, BookOpen, Leaf } from 'lucide-react';
+import { AlertCircle, Calendar, Pill, Heart, Sparkles, ChevronRight, Moon, Brain, Activity, FileText, Globe, BookOpen, Leaf } from 'lucide-react';
 import {
   ChatMessage,
   ActionableItem,
@@ -14,9 +14,11 @@ import { JourneyCreationModal } from './JourneyCreationModal';
 import { stripHtml } from '@/src/utils/html';
 import { WellnessJourney } from '@/src/services/openai/types/journey';
 import { getJourneyByType } from '@/src/utils/journeyStorage';
+import { ChatEditor } from '@/components/ui/ChatEditor';
 
 interface SmartCardChatProps {
   threadId?: string;
+  chatIntent?: string | null;
   onThreadCreated?: (threadId: string) => void;
   onRoutineCreated?: (routine: WellnessRoutine) => void;
   onJourneyCreated?: (journey: WellnessJourney) => void;
@@ -29,6 +31,7 @@ interface SmartCardChatProps {
 
 export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   threadId: initialThreadId,
+  chatIntent,
   onThreadCreated,
   onRoutineCreated,
   onJourneyCreated,
@@ -127,7 +130,8 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: userMessage.content,
-          threadId
+          threadId,
+          chatIntent
         }),
         signal: abortControllerRef.current.signal
       });
@@ -517,32 +521,13 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       </div>
 
       {/* Input Area - Fixed at Bottom */}
-      <div className="border-t border-gray-100 bg-white safe-area-bottom flex-shrink-0">
-        <div className="p-4">
-          <div className="flex items-center space-x-3">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-              placeholder="Ask about your wellness journey..."
-              className="flex-1 h-12 rounded-full px-5 bg-gray-50 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:bg-white focus:ring-2 focus:ring-rose/20 transition-all text-base"
-              disabled={isLoading}
-            />
-            <button
-              onClick={handleSendMessage}
-              disabled={!input.trim() || isLoading}
-              className="w-12 h-12 rounded-full bg-gradient-to-r from-rose to-burgundy text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed native-transition ios-active shadow-md"
-            >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Send className="w-5 h-5" />
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
+      <ChatEditor
+        value={input}
+        onChange={setInput}
+        onSubmit={handleSendMessage}
+        isLoading={isLoading}
+        className="flex-shrink-0"
+      />
 
       {showRoutineModal && routineData && (
         <RoutineCreationModal

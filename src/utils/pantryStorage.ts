@@ -49,7 +49,22 @@ export const getRecommendedSupplements = (): RecommendedSupplement[] => {
 
 export const saveRecommendedSupplement = (supplement: RecommendedSupplement): void => {
   const supplements = getRecommendedSupplements();
-  const updatedSupplements = [...supplements, supplement];
+  
+  // Check if supplement already exists by name
+  const existingIndex = supplements.findIndex(s => 
+    s.name.toLowerCase() === supplement.name.toLowerCase()
+  );
+  
+  let updatedSupplements;
+  if (existingIndex !== -1) {
+    // Replace existing supplement with same name
+    updatedSupplements = [...supplements];
+    updatedSupplements[existingIndex] = supplement;
+  } else {
+    // Add new supplement
+    updatedSupplements = [...supplements, supplement];
+  }
+  
   localStorage.setItem(RECOMMENDATIONS_STORAGE_KEY, JSON.stringify(updatedSupplements));
 };
 

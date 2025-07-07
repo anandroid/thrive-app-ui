@@ -1008,3 +1008,126 @@
   syscall: 'open',
   path: '/Users/anand/IdeaProjects/thrive-app/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'
 }
+ ✓ Compiled in 81ms
+ ✓ Compiled in 95ms
+ ✓ Compiled / in 34ms
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/anand/IdeaProjects/thrive-app/.next/server/app/page/server-reference-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/anand/IdeaProjects/thrive-app/.next/server/app/page/server-reference-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/anand/IdeaProjects/thrive-app/.next/static/development/_buildManifest.js.tmp.jwaxzeae1ek'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/anand/IdeaProjects/thrive-app/.next/static/development/_buildManifest.js.tmp.jwaxzeae1ek'
+}
+[Error: ENOENT: no such file or directory, open '/Users/anand/IdeaProjects/thrive-app/.next/server/app/page/server-reference-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/anand/IdeaProjects/thrive-app/.next/server/app/page/server-reference-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/anand/IdeaProjects/thrive-app/.next/static/development/_buildManifest.js.tmp.ys4f39pf98'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/anand/IdeaProjects/thrive-app/.next/static/development/_buildManifest.js.tmp.ys4f39pf98'
+}
+[Error: ENOENT: no such file or directory, open '/Users/anand/IdeaProjects/thrive-app/.next/static/development/_buildManifest.js.tmp.q5gje5zf3e'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/anand/IdeaProjects/thrive-app/.next/static/development/_buildManifest.js.tmp.q5gje5zf3e'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/anand/IdeaProjects/thrive-app/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/anand/IdeaProjects/thrive-app/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/anand/IdeaProjects/thrive-app/.next/server/app/_not-found/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/anand/IdeaProjects/thrive-app/.next/server/app/_not-found/page/app-build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/anand/IdeaProjects/thrive-app/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/anand/IdeaProjects/thrive-app/.next/server/pages/_app/build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/anand/IdeaProjects/thrive-app/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/anand/IdeaProjects/thrive-app/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/anand/IdeaProjects/thrive-app/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/anand/IdeaProjects/thrive-app/.next/server/pages/_app/build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/anand/IdeaProjects/thrive-app/.next/server/app/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/anand/IdeaProjects/thrive-app/.next/server/app/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/anand/IdeaProjects/thrive-app/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/anand/IdeaProjects/thrive-app/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/anand/IdeaProjects/thrive-app/.next/server/app/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/anand/IdeaProjects/thrive-app/.next/server/app/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/anand/IdeaProjects/thrive-app/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/anand/IdeaProjects/thrive-app/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/anand/IdeaProjects/thrive-app/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/anand/IdeaProjects/thrive-app/.next/server/pages/_app/build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/anand/IdeaProjects/thrive-app/.next/server/app/_not-found/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/anand/IdeaProjects/thrive-app/.next/server/app/_not-found/page/app-build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/anand/IdeaProjects/thrive-app/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/anand/IdeaProjects/thrive-app/.next/server/pages/_app/build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/anand/IdeaProjects/thrive-app/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/anand/IdeaProjects/thrive-app/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/anand/IdeaProjects/thrive-app/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/anand/IdeaProjects/thrive-app/.next/server/pages/_app/build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/anand/IdeaProjects/thrive-app/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/anand/IdeaProjects/thrive-app/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'
+}

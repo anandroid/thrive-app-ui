@@ -3,9 +3,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { 
-  ArrowLeft, Plus, X, Camera, Package, Edit2, Trash2, 
-  Search, Filter, Shield, Info, Sparkles, AlertCircle,
-  Pill, Leaf, Apple, Heart, Star
+  ArrowLeft, Plus, X, Camera, Package, 
+  Search, Shield, Sparkles,
+  Pill, Apple, Heart
 } from 'lucide-react';
 import Image from 'next/image';
 import { PantryItem, RecommendedSupplement } from '@/src/types/pantry';
@@ -55,11 +55,26 @@ export default function PantryPage() {
     // Generate new recommendations if none exist
     if (existingRecs.length === 0) {
       generateSupplementRecommendations().then(newRecs => {
+        // Clear any existing recommendations first to prevent duplicates
+        localStorage.setItem('thrive_recommended_supplements', '[]');
+        
+        // Save new recommendations
         newRecs.forEach(rec => saveRecommendedSupplement(rec));
-        setRecommendations(newRecs);
+        
+        // Filter out items already in pantry
+        const pantryItemNames = items.map(item => item.name.toLowerCase());
+        const filteredRecs = newRecs.filter(rec => 
+          !pantryItemNames.includes(rec.name.toLowerCase())
+        );
+        setRecommendations(filteredRecs);
       });
     } else {
-      setRecommendations(existingRecs);
+      // Filter out items already in pantry
+      const pantryItemNames = items.map(item => item.name.toLowerCase());
+      const filteredRecs = existingRecs.filter(rec => 
+        !pantryItemNames.includes(rec.name.toLowerCase())
+      );
+      setRecommendations(filteredRecs);
     }
   }, []);
 
@@ -100,7 +115,16 @@ export default function PantryPage() {
   const handleDeleteItem = (itemId: string) => {
     if (confirm('Are you sure you want to remove this item from your pantry?')) {
       deletePantryItem(itemId);
-      setPantryItems(pantryItems.filter(item => item.id !== itemId));
+      const updatedPantryItems = pantryItems.filter(item => item.id !== itemId);
+      setPantryItems(updatedPantryItems);
+      
+      // Refresh recommendations to show items that are no longer in pantry
+      const existingRecs = getRecommendedSupplements();
+      const pantryItemNames = updatedPantryItems.map(item => item.name.toLowerCase());
+      const filteredRecs = existingRecs.filter(rec => 
+        !pantryItemNames.includes(rec.name.toLowerCase())
+      );
+      setRecommendations(filteredRecs);
     }
   };
 
@@ -140,18 +164,20 @@ export default function PantryPage() {
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="px-4 py-6 space-y-6">
-          {/* Privacy Notice */}
-          <div className="rounded-2xl bg-gradient-to-br from-sage-light/10 to-sage/5 p-4 border border-sage/20">
-            <div className="flex items-start space-x-3">
-              <Shield className="w-5 h-5 text-sage-dark mt-0.5" />
-              <div>
-                <h3 className="font-medium text-primary-text">Your Privacy Matters</h3>
-                <p className="text-sm text-secondary-text-thin mt-1">
-                  All pantry items are stored locally on your device. We never upload or share your personal health information.
-                </p>
+          {/* Privacy Notice - Only show when no items */}
+          {pantryItems.length === 0 && (
+            <div className="rounded-2xl bg-gradient-to-br from-sage-light/10 to-sage/5 p-4 border border-sage/20">
+              <div className="flex items-start space-x-3">
+                <Shield className="w-5 h-5 text-sage-dark mt-0.5" />
+                <div>
+                  <h3 className="font-medium text-primary-text">Your Privacy Matters</h3>
+                  <p className="text-sm text-secondary-text-thin mt-1">
+                    All pantry items are stored locally on your device. We never upload or share your personal health information.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Search and Filter */}
           <div className="space-y-3">
@@ -361,6 +387,9 @@ export default function PantryPage() {
                         };
                         savePantryItem(newPantryItem);
                         setPantryItems([...pantryItems, newPantryItem]);
+                        
+                        // Remove this recommendation from the displayed list
+                        setRecommendations(recommendations.filter(r => r.id !== rec.id));
                       }}
                       className="mt-3 w-full py-2 rounded-xl bg-gradient-to-r from-rose/10 to-burgundy/10 text-burgundy font-medium text-sm hover:from-rose/20 hover:to-burgundy/20 transition-all"
                     >

@@ -1,6 +1,4 @@
 import { RecommendedSupplement } from '@/src/types/pantry';
-import { WellnessRoutine } from '@/src/services/openai/types';
-import { WellnessJourney } from '@/src/services/openai/types/journey';
 import { getRoutinesFromStorage } from '@/src/utils/routineStorage';
 import { getJourneysFromStorage } from '@/src/utils/journeyStorage';
 
