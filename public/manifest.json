@@ -1,0 +1,26 @@
+{
+  "name": "Thrive - Holistic Healing",
+  "short_name": "Thrive",
+  "description": "Your personalized AI-powered wellness journey",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#d9496a",
+  "orientation": "portrait",
+  "icons": [],
+  "categories": ["health", "wellness", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "New Chat",
+      "short_name": "Chat",
+      "description": "Start a new wellness conversation",
+      "url": "/chat/new"
+    },
+    {
+      "name": "Routines",
+      "short_name": "Routines",
+      "description": "View your wellness routines",
+      "url": "/routines"
+    }
+  ]
+}

@@ -1,26 +1,317 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Base Colors */
+  --root-bg: #f7e1e5; /* soft blush pink */
+  --primary-text: #3a5163; /* slate blue */
+  --secondary-text: #4a5568; /* lighter slate */
+  --light-text: #718096; /* subtle text/hints */
+  
+  /* Rose/Burgundy Family (Primary) */
+  --strong-rose: #e11d48;
+  --rose: #fb7185;
+  --dusty-rose: #daa0a9;
+  --burgundy: #914372; /* branch color */
+  --dark-burgundy: #6d335a;
+  
+  /* Soft Accents */
+  --soft-lavender: #dfbad8;
+  --soft-blush: #f7e1e5;
+  
+  /* Sage Green Family (Secondary) */
+  --sage-light: #a3bfa0;
+  --sage: #87a878;
+  --sage-dark: #6b8c5f;
+  
+  /* Default theme */
+  --background: var(--root-bg);
+  --foreground: var(--primary-text);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary-text: var(--primary-text);
+  --color-secondary-text: var(--secondary-text);
+  --color-light-text: var(--light-text);
+  --color-strong-rose: var(--strong-rose);
+  --color-rose: var(--rose);
+  --color-dusty-rose: var(--dusty-rose);
+  --color-burgundy: var(--burgundy);
+  --color-dark-burgundy: var(--dark-burgundy);
+  --color-soft-lavender: var(--soft-lavender);
+  --color-soft-blush: var(--soft-blush);
+  --color-sage-light: var(--sage-light);
+  --color-sage: var(--sage);
+  --color-sage-dark: var(--sage-dark);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+html {
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
-  background: var(--background);
+  background: #ffffff;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  height: 100%;
+  overflow: hidden;
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Enable text selection only where needed */
+input, textarea, [contenteditable] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Gradient Utilities */
+.gradient-primary {
+  background: linear-gradient(135deg, var(--strong-rose), var(--rose), var(--dusty-rose), var(--burgundy));
+}
+
+.gradient-primary-hover {
+  background: linear-gradient(135deg, var(--rose), var(--burgundy), var(--dark-burgundy));
+}
+
+.gradient-secondary {
+  background: linear-gradient(135deg, var(--sage-light), var(--sage), var(--sage-dark));
+}
+
+.gradient-background {
+  background: linear-gradient(135deg, var(--soft-blush), var(--soft-lavender), var(--dusty-rose));
+}
+
+/* Page backgrounds */
+.page-gradient {
+  background: #fafafa;
+  min-height: 100vh;
+}
+
+/* Subtle gradient accents */
+.gradient-text {
+  background: linear-gradient(135deg, var(--strong-rose), var(--burgundy));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-accent {
+  background: linear-gradient(135deg, var(--rose), var(--dusty-rose));
+}
+
+/* Subtle Border Utilities */
+.subtle-border {
+  border: 1px solid #f0f0f0;
+}
+
+.gradient-border-subtle {
+  position: relative;
+  background: white;
+}
+
+.gradient-border-subtle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--rose), var(--dusty-rose));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.3;
+}
+
+/* Card Shadows with Theme Colors */
+.card-shadow-rose {
+  box-shadow: 0 4px 6px -1px rgba(225, 29, 72, 0.1), 0 2px 4px -1px rgba(225, 29, 72, 0.06);
+}
+
+.card-shadow-sage {
+  box-shadow: 0 4px 6px -1px rgba(135, 168, 120, 0.1), 0 2px 4px -1px rgba(135, 168, 120, 0.06);
+}
+
+.card-shadow-lavender {
+  box-shadow: 0 4px 6px -1px rgba(223, 186, 216, 0.1), 0 2px 4px -1px rgba(223, 186, 216, 0.06);
+}
+
+/* Typography Utilities */
+.text-gradient-primary {
+  background: linear-gradient(135deg, var(--strong-rose), var(--burgundy));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-secondary {
+  background: linear-gradient(135deg, var(--sage), var(--sage-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Premium Glass Effects */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-effect-rose {
+  background: rgba(251, 113, 133, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(251, 113, 133, 0.2);
+}
+
+/* Premium Shadows */
+.shadow-elegant {
+  box-shadow: 0 10px 40px -10px rgba(145, 67, 114, 0.15);
+}
+
+.shadow-elegant-sm {
+  box-shadow: 0 4px 20px -4px rgba(145, 67, 114, 0.1);
+}
+
+/* Hide scrollbars for native feel */
+::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Native app utilities */
+.app-screen {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.app-header {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+  z-index: 50;
+}
+
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Native-like transitions */
+.native-transition {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Bottom sheet animation */
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+.slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-down {
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* iOS-style active states */
+.ios-active:active {
+  opacity: 0.7;
+  transform: scale(0.98);
+}
+
+/* Prose styling for rich content */
+.prose {
+  color: inherit;
+}
+
+.prose strong {
+  color: var(--burgundy);
+  font-weight: 600;
+}
+
+.prose em {
+  color: var(--rose);
+  font-style: italic;
+}
+
+.prose code {
+  background-color: rgba(145, 67, 114, 0.1);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  color: var(--burgundy);
+}
+
+.prose ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose li {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.prose p {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose p:first-child {
+  margin-top: 0;
+}
+
+.prose p:last-child {
+  margin-bottom: 0;
 }

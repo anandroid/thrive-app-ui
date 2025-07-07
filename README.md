@@ -1,36 +1,125 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Thrive - Holistic Healing AI App
+
+A premium Next.js mobile-first application for holistic healing, featuring AI-powered wellness routines and personalized health guidance.
+
+## Features
+
+### 🤖 AI Chat Interface
+- Real-time streaming responses with Server-Sent Events (SSE)
+- Smart card parsing for structured health content
+- Emergency alert handling with immediate attention indicators
+- Interactive action cards for appointments, medicines, and routines
+- Question suggestions with click-to-ask functionality
+- "Your Next Victory Awaits 🏆" motivational messaging
+
+### 💪 Wellness Routines
+- AI-generated personalized routines based on health concerns
+- Multiple routine types: sleep, stress management, pain relief, meditation, exercise
+- Smart reminder frequency (AI-determined based on condition severity)
+- Progress tracking with step completion
+- Video tutorial integration
+- Routine management (create, view, adjust, delete)
+- Beautiful gradient border cards with smooth animations
+
+### 🎨 Premium UI/UX
+- Beautiful color theme with rose/burgundy and sage green families
+- Gradient borders and hover effects
+- Mobile-first responsive design
+- Smooth animations and transitions
+- Custom scrollbar styling
+- Soft shadows with theme colors
+
+## Tech Stack
+
+- **Framework**: Next.js 14 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS with custom theme colors
+- **AI Integration**: OpenAI Assistant API
+- **Icons**: Lucide React
+- **State Management**: React hooks
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/thrive-app.git
+   cd thrive-app
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Set up environment variables:
+   Create a `.env.local` file with:
+   ```env
+   OPENAI_API_KEY=your_api_key_here
+   OPENAI_ASSISTANT_ID=your_assistant_id_here
+   ```
+
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Color Theme
+
+The app uses a carefully crafted color palette:
+
+- **Base Colors**:
+  - Root Background: `#f7e1e5` (soft blush pink)
+  - Primary Text: `#3a5163` (slate blue)
+  - Secondary Text: `#4a5568` (lighter slate)
+
+- **Rose/Burgundy Family** (Primary):
+  - Strong Rose: `#e11d48`
+  - Rose: `#fb7185`
+  - Dusty Rose: `#daa0a9`
+  - Burgundy: `#914372`
+
+- **Sage Green Family** (Secondary):
+  - Sage Light: `#a3bfa0`
+  - Sage: `#87a878`
+  - Sage Dark: `#6b8c5f`
+
+## API Endpoints
+
+- `POST /api/assistant/stream` - Stream AI chat responses
+- `POST /api/routine/create` - Create personalized wellness routines
+- `POST /api/routine/adjust` - Adjust existing routines based on feedback
+
+## Project Structure
+
+```
+thrive-app/
+├── app/
+│   ├── api/
+│   │   ├── assistant/stream/
+│   │   └── routine/
+│   │       ├── create/
+│   │       └── adjust/
+│   ├── routines/
+│   └── page.tsx
+├── components/
+│   └── features/
+│       ├── SmartCardChat.tsx
+│       └── RoutineCreationModal.tsx
+├── src/
+│   └── services/
+│       └── openai/
+└── public/
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Development Guidelines
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Use inline styles with Tailwind classes for flexibility
+- Reuse gradient utilities defined in globals.css
+- Follow the mobile-first responsive design approach
+- Maintain the premium feel with smooth animations and transitions
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## License
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is proprietary and confidential.
