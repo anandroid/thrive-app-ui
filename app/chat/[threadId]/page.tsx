@@ -10,6 +10,7 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
   const router = useRouter();
   const { threadId } = use(params);
   const [initialMessage, setInitialMessage] = useState<string>('');
+  const [currentThreadId, setCurrentThreadId] = useState<string>(threadId);
 
   useEffect(() => {
     // Get the initial message from sessionStorage
@@ -47,10 +48,12 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
       {/* Main Chat Container - Full Height */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <SmartCardChat
-          threadId={threadId === 'new' ? undefined : threadId}
+          threadId={currentThreadId === 'new' ? undefined : currentThreadId}
           onThreadCreated={(newThreadId) => {
-            // Update URL with the new thread ID
-            router.replace(`/chat/${newThreadId}`);
+            // Update the thread ID without navigating
+            setCurrentThreadId(newThreadId);
+            // Update URL without causing a re-render
+            window.history.replaceState({}, '', `/chat/${newThreadId}`);
           }}
           onRoutineCreated={(routine) => {
             console.log('Routine created:', routine);
