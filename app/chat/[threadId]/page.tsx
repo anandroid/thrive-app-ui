@@ -22,7 +22,7 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
   }, []);
 
   return (
-    <div className="app-screen bg-white">
+    <div className="app-screen bg-gray-50">
       {/* Status Bar Area */}
       <div className="safe-area-top" />
       

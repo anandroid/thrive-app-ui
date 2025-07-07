@@ -211,9 +211,9 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   const renderMessage = (message: ChatMessage) => {
     if (message.role === 'user') {
       return (
-        <div className="flex justify-end mb-4">
-          <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-gradient-to-r from-rose to-burgundy text-white shadow-md shadow-rose/20">
-            <p className="text-[15px] leading-relaxed">{message.content}</p>
+        <div className="flex justify-end mb-6">
+          <div className="max-w-[85%] rounded-2xl px-5 py-3.5 bg-gradient-to-r from-rose to-burgundy text-white shadow-sm">
+            <p className="text-[16px] leading-relaxed">{message.content}</p>
           </div>
         </div>
       );
@@ -222,112 +222,137 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     const parsed = message.parsedContent;
 
     return (
-      <div className="flex justify-start mb-4">
-        <div className="max-w-[80%] space-y-3">
-          {parsed?.attentionRequired === 'emergency' && (
-            <div className="rounded-2xl border-2 border-red-200 bg-red-50 p-4 mb-4">
-              <div className="flex items-start space-x-3">
-                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">Immediate Attention Required</h4>
-                  <p className="text-sm text-gray-600">{parsed.emergencyReasoning}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
+      <div className="flex justify-start mb-6">
+        <div className="max-w-[85%]">
           {message.isStreaming ? (
-            <div className="rounded-2xl bg-white border border-gray-100 px-4 py-3 shadow-sm">
+            <div className="rounded-2xl bg-white border border-gray-100 px-5 py-4 shadow-sm">
               <p className="text-[15px] text-gray-700 leading-relaxed">{message.content || 'Thinking...'}</p>
             </div>
           ) : (
-            <>
-              {parsed?.greeting && (
-                <div className="rounded-2xl bg-gray-50 px-4 py-3">
-                  <p className="text-[15px] text-gray-700 leading-relaxed">{parsed.greeting}</p>
-                </div>
-              )}
-
-              {parsed?.actionItems && parsed.actionItems.length > 0 && (
-                <div className="space-y-2">
-                  {parsed.actionItems.map((item, idx) => (
-                    <div key={idx} className="rounded-2xl bg-gradient-to-br from-rose/5 to-burgundy/5 p-4 border border-rose/10">
-                      <h4 className="font-semibold text-gray-900 mb-2 text-[16px]">
-                        {item.title}
-                      </h4>
-                      <div 
-                        className="text-[14px] text-gray-600 leading-relaxed prose prose-sm max-w-none"
-                        dangerouslySetInnerHTML={{ __html: item.content || item.description || '' }}
-                      />
+            <div className="rounded-2xl bg-white shadow-sm border border-gray-100 overflow-hidden">
+              <div className="p-5 space-y-4">
+                {/* Emergency Alert */}
+                {parsed?.attentionRequired === 'emergency' && (
+                  <div className="rounded-xl border-2 border-red-200 bg-red-50 p-4">
+                    <div className="flex items-start space-x-3">
+                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-1">Immediate Attention Required</h4>
+                        <p className="text-sm text-gray-600">{parsed.emergencyReasoning}</p>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              )}
-
-              {parsed?.actionableItems && parsed.actionableItems.length > 0 && (
-                <div className="space-y-3">
-                  {parsed.actionableItems.map((item, idx) => {
-                    let Icon = Heart;
-                    if (item.type === 'appointment') Icon = Calendar;
-                    else if (item.type === 'medicine') Icon = Pill;
-                    else if (item.type === 'prescription') Icon = FileText;
-                    else if (item.type === 'resource') Icon = BookOpen;
-                    else if (item.type === 'link') Icon = Globe;
-                    else if (item.type === 'routine' || item.type === 'create_routine') {
-                      // Choose icon based on routine type
-                      if (item.routineType === 'sleep_routine') Icon = Moon;
-                      else if (item.routineType === 'stress_management') Icon = Brain;
-                      else if (item.routineType === 'exercise') Icon = Activity;
-                      else Icon = Sparkles;
-                    }
-                    
-                    return (
-                      <button
-                        key={idx}
-                        onClick={() => handleActionClick(item)}
-                        className="w-full rounded-xl border border-gray-200 p-4 bg-white hover:shadow-md transition-all text-left group overflow-hidden relative"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-rose/5 to-burgundy/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <div className="relative flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose to-burgundy flex items-center justify-center shadow-sm">
-                              <Icon className="w-5 h-5 text-white" />
-                            </div>
-                            <div>
-                              <h4 className="font-semibold text-primary-text">{item.title}</h4>
-                              <p className="text-xs text-primary-text/60">{item.description || item.details}</p>
-                            </div>
-                          </div>
-                          <ChevronRight className="w-5 h-5 text-rose group-hover:translate-x-1 transition-transform" />
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-
-              {!parsed && message.content && (
-                <div className="rounded-2xl bg-gray-50 px-4 py-3">
-                  <p className="text-[15px] text-gray-700 leading-relaxed">{message.content}</p>
-                </div>
-              )}
-
-              {parsed?.questions && parsed.questions.length > 0 && (
-                <div className="mt-3">
-                  {/* Divider with centered label */}
-                  <div className="flex items-center mb-2">
-                    <div className="flex-grow h-px bg-gradient-to-r from-transparent via-rose/40 to-transparent" />
-                    <span className="mx-3 text-xs text-gray-500 whitespace-nowrap">Lets talk more?</span>
-                    <div className="flex-grow h-px bg-gradient-to-r from-transparent via-rose/40 to-transparent" />
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                )}
+
+                {/* Greeting */}
+                {parsed?.greeting && (
+                  <p className="text-[16px] text-gray-800 leading-relaxed">{parsed.greeting}</p>
+                )}
+
+                {/* Action Items */}
+                {parsed?.actionItems && parsed.actionItems.length > 0 && (
+                  <div className="space-y-3">
+                    {parsed.actionItems.map((item, idx) => (
+                      <div key={idx} className="rounded-xl bg-gray-50 p-4">
+                        <h4 className="font-semibold text-gray-900 mb-2 text-[17px]">
+                          {item.title}
+                        </h4>
+                        <div 
+                          className="text-[15px] text-gray-600 leading-relaxed prose prose-sm max-w-none"
+                          dangerouslySetInnerHTML={{ __html: item.content || item.description || '' }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Additional Information */}
+                {parsed?.additionalInformation && (
+                  <div 
+                    className="text-[15px] text-gray-600 leading-relaxed prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: parsed.additionalInformation }}
+                  />
+                )}
+
+                {/* Actionable Items */}
+                {parsed?.actionableItems && parsed.actionableItems.length > 0 && (
+                  <div className="space-y-3 pt-2">
+                    {parsed.actionableItems.map((item, idx) => {
+                      let Icon = Heart;
+                      
+                      // Use icon from response if provided
+                      if (item.icon) {
+                        const iconMap: Record<string, any> = {
+                          'calendar': Calendar,
+                          'pill': Pill,
+                          'heart': Heart,
+                          'sparkles': Sparkles,
+                          'moon': Moon,
+                          'brain': Brain,
+                          'activity': Activity,
+                          'file-text': FileText,
+                          'globe': Globe,
+                          'book-open': BookOpen
+                        };
+                        Icon = iconMap[item.icon] || Heart;
+                      } else {
+                        // Fallback to type-based icon selection
+                        if (item.type === 'appointment') Icon = Calendar;
+                        else if (item.type === 'medicine') Icon = Pill;
+                        else if (item.type === 'prescription') Icon = FileText;
+                        else if (item.type === 'resource') Icon = BookOpen;
+                        else if (item.type === 'link') Icon = Globe;
+                        else if (item.type === 'routine' || item.type === 'create_routine') {
+                          if (item.routineType === 'sleep_routine') Icon = Moon;
+                          else if (item.routineType === 'stress_management') Icon = Brain;
+                          else if (item.routineType === 'exercise') Icon = Activity;
+                          else Icon = Sparkles;
+                        }
+                      }
+                      
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => handleActionClick(item)}
+                          className="w-full rounded-xl border border-gray-200 p-4 bg-white hover:shadow-md transition-all text-left group overflow-hidden relative"
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-rose/5 to-burgundy/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <div className="relative flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center shadow-sm">
+                                <Icon className="w-6 h-6 text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-gray-900 text-[16px]">{item.title}</h4>
+                                <p className="text-sm text-gray-500 mt-0.5">{item.description || item.details}</p>
+                              </div>
+                            </div>
+                            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-rose group-hover:translate-x-1 transition-all" />
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Fallback for plain text */}
+                {!parsed && message.content && (
+                  <p className="text-[16px] text-gray-800 leading-relaxed">{message.content}</p>
+                )}
+              </div>
+
+              {/* Questions Section */}
+              {parsed?.questions && parsed.questions.length > 0 && (
+                <div className="border-t border-gray-100 px-5 py-4 bg-gray-50">
+                  <p className="text-sm text-gray-500 mb-3 text-center">Lets talk more?</p>
+                  <div className="flex flex-wrap gap-2 justify-center">
                     {parsed.questions.map((question, idx) => {
                       const cleanQuestion = stripHtml(question);
                       return (
                         <button
                           key={idx}
                           onClick={() => handleQuestionClick(cleanQuestion)}
-                          className="rounded-full px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all"
+                          className="rounded-full px-4 py-2 text-sm bg-white hover:bg-gray-100 text-gray-700 transition-all border border-gray-200"
                         >
                           {cleanQuestion}
                         </button>
@@ -336,7 +361,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                   </div>
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
       </div>

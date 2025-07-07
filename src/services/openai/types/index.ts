@@ -47,7 +47,8 @@ export interface ActionableItem {
   modalTitle?: string;
   modalDescription?: string;
   customInstructionsPlaceholder?: string;
-  icon?: string;
+  icon?: 'calendar' | 'pill' | 'heart' | 'sparkles' | 'moon' | 'brain' | 'activity' | 'file-text' | 'globe' | 'book-open' | string;
+  emoji?: string;
   action?: string;
 }
 

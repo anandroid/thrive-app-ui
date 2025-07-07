@@ -172,7 +172,7 @@ export default function HomePage() {
               <button
                 onClick={handleSendMessage}
                 disabled={!input.trim()}
-                className="w-12 h-12 rounded-full bg-gradient-to-r from-rose to-burgundy text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed native-transition ios-active shadow-xl shadow-rose/40"
+                className="w-12 h-12 rounded-full bg-gradient-to-r from-rose to-burgundy text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed native-transition ios-active shadow-2xl shadow-rose/50 ring-2 ring-burgundy/50 ring-offset-2 ring-offset-white"
               >
                 <Send className="w-5 h-5" />
               </button>
