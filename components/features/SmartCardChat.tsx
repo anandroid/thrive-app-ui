@@ -15,6 +15,7 @@ import { stripHtml } from '@/src/utils/html';
 import { WellnessJourney } from '@/src/services/openai/types/journey';
 import { getJourneyByType } from '@/src/utils/journeyStorage';
 import { ChatEditor } from '@/components/ui/ChatEditor';
+import { createChatThread, addMessageToThread, getChatThread } from '@/src/utils/chatStorage';
 
 interface SmartCardChatProps {
   threadId?: string;
@@ -52,6 +53,24 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   const [healthConcern, setHealthConcern] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const [chatThreadId, setChatThreadId] = useState<string | null>(null);
+
+  // Load existing messages if threadId is provided
+  useEffect(() => {
+    if (initialThreadId && initialThreadId !== 'new') {
+      const thread = getChatThread(initialThreadId);
+      if (thread) {
+        setChatThreadId(thread.id);
+        // Convert stored messages to the format expected by the component
+        const loadedMessages: ChatMessage[] = thread.messages.map(msg => ({
+          role: msg.role,
+          content: msg.content,
+          timestamp: new Date(msg.timestamp)
+        }));
+        setMessages(loadedMessages);
+      }
+    }
+  }, [initialThreadId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -114,6 +133,18 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       setMessages(prev => [...prev, userMessage]);
       setInput('');
       
+      // Save user message to chat history
+      if (!chatThreadId && !threadId) {
+        const newThread = createChatThread();
+        setChatThreadId(newThread.id);
+        addMessageToThread(newThread.id, { role: 'user', content: userMessage.content });
+      } else {
+        const currentThreadId = chatThreadId || threadId;
+        if (currentThreadId) {
+          addMessageToThread(currentThreadId, { role: 'user', content: userMessage.content });
+        }
+      }
+      
       // Add a slight delay for better UX
       setTimeout(() => {
         const promptMessage: ChatMessage = {
@@ -122,6 +153,12 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
           timestamp: new Date()
         };
         setMessages(prev => [...prev, promptMessage]);
+        
+        // Save assistant message to chat history
+        const currentThreadId = chatThreadId || threadId;
+        if (currentThreadId) {
+          addMessageToThread(currentThreadId, { role: 'assistant', content: promptMessage.content });
+        }
       }, 500);
       
       return; // Don't make the API call yet
@@ -140,6 +177,20 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     setInput('');
     setIsLoading(true);
 
+    // Save user message to chat history
+    if (!chatThreadId && !threadId) {
+      // Create new thread if needed
+      const newThread = createChatThread();
+      setChatThreadId(newThread.id);
+      addMessageToThread(newThread.id, { role: 'user', content: userMessage.content });
+    } else {
+      // Add to existing thread
+      const currentThreadId = chatThreadId || threadId;
+      if (currentThreadId) {
+        addMessageToThread(currentThreadId, { role: 'user', content: userMessage.content });
+      }
+    }
+
     const assistantMessage: ChatMessage = {
       role: 'assistant',
       content: '',
@@ -155,7 +206,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: userMessage.content,
-          threadId,
+          threadId: chatThreadId || threadId,
           chatIntent
         }),
         signal: abortControllerRef.current.signal
@@ -192,6 +243,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
               if (data.type === 'thread_created' && data.threadId && !newThreadId) {
                 newThreadId = data.threadId;
                 setThreadId(data.threadId);
+                setChatThreadId(data.threadId);
                 onThreadCreated?.(data.threadId);
               }
 
@@ -219,6 +271,12 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                   }
                   return updated;
                 });
+                
+                // Save assistant message to chat history
+                const currentThreadId = chatThreadId || newThreadId || threadId;
+                if (currentThreadId) {
+                  addMessageToThread(currentThreadId, { role: 'assistant', content: fullContent });
+                }
               }
 
               if (data.type === 'error') {

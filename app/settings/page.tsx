@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Bell, Shield, Info, Moon, Heart, ChevronRight, Plus, Leaf } from 'lucide-react';
+import { ArrowLeft, Bell, Shield, Info, Moon, Heart, ChevronRight, Plus, Leaf, MessageSquare } from 'lucide-react';
 import { AboutSection } from '@/components/features/AboutSection';
 import { useRouter } from 'next/navigation';
 
@@ -118,6 +118,33 @@ export default function SettingsPage() {
                       <div className="text-left">
                         <h3 className="font-medium text-primary-text text-sm">My Pantry</h3>
                         <p className="text-xs text-primary-text/60">Your supplements & remedies</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
+                  </div>
+                </Link>
+
+                {/* Chat History - Full Width with Enhanced Design */}
+                <Link
+                  href="/chat-history"
+                  className="w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-sage/20 p-4 hover:shadow-lg transition-all block relative overflow-hidden shadow-sm group"
+                >
+                  {/* Gradient overlay on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-sage-light/0 via-sage/5 to-sage-dark/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  
+                  {/* Decorative elements */}
+                  <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-gradient-to-br from-sage/20 to-sage-dark/15 blur-3xl opacity-60" />
+                  <div className="absolute -bottom-16 -left-16 w-32 h-32 rounded-full bg-gradient-to-tr from-sage-dark/15 to-sage/10 blur-2xl opacity-50" />
+                  
+                  <div className="flex items-center justify-between relative">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sage to-sage-dark flex items-center justify-center shadow-lg relative group-hover:shadow-xl transition-all">
+                        <div className="absolute inset-0 bg-gradient-to-t from-sage-dark/20 to-transparent rounded-full" />
+                        <MessageSquare className="w-5 h-5 text-white relative z-10" />
+                      </div>
+                      <div className="text-left">
+                        <h3 className="font-medium text-primary-text text-sm">Chat History</h3>
+                        <p className="text-xs text-primary-text/60">View past conversations</p>
                       </div>
                     </div>
                     <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
