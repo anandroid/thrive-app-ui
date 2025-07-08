@@ -5,6 +5,7 @@ import { AlertCircle, Calendar, Pill, Heart, Sparkles, ChevronRight, Moon, Brain
 import {
   ChatMessage,
   ActionableItem,
+  ActionItem,
   AssistantResponse,
   ASSISTANT_RESPONSE_KEYS,
   WellnessRoutine,
@@ -350,30 +351,30 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       const partial: PartialAssistantResponse = {};
       
       // Extract greeting if complete
-      const greetingMatch = content.match(/"greeting"\s*:\s*"([^"]*)"/s);
+      const greetingMatch = content.match(/"greeting"\s*:\s*"([^"]*)"(?:\s*,|\s*})/);
       if (greetingMatch && greetingMatch[1]) {
         partial.greeting = greetingMatch[1];
       }
       
       // Extract attentionRequired if complete
-      const attentionMatch = content.match(/"attentionRequired"\s*:\s*"([^"]*)"/s);
+      const attentionMatch = content.match(/"attentionRequired"\s*:\s*"([^"]*)"/);
       if (attentionMatch) {
-        partial.attentionRequired = attentionMatch[1] as 'emergency' | 'warning' | 'normal';
+        partial.attentionRequired = attentionMatch[1] as 'emergency' | null;
       }
       
       // Extract emergencyReasoning if complete
-      const emergencyMatch = content.match(/"emergencyReasoning"\s*:\s*"([^"]*)"/s);
+      const emergencyMatch = content.match(/"emergencyReasoning"\s*:\s*"([^"]*)"/);
       if (emergencyMatch) {
         partial.emergencyReasoning = emergencyMatch[1];
       }
       
       // Extract complete action items or individual completed items
-      const actionItemsMatch = content.match(/"actionItems"\s*:\s*\[(.*?)(?:\]|$)/s);
+      const actionItemsMatch = content.match(/"actionItems"\s*:\s*\[([\s\S]*?)(?:\]|$)/);
       if (actionItemsMatch) {
         try {
           // First try to parse complete array
           if (content.includes('"actionItems"') && content.includes(']', content.indexOf('"actionItems"'))) {
-            const completeMatch = content.match(/"actionItems"\s*:\s*\[(.*?)\]/s);
+            const completeMatch = content.match(/"actionItems"\s*:\s*\[([\s\S]*?)\]/);
             if (completeMatch) {
               const items = JSON.parse('[' + completeMatch[1] + ']');
               if (Array.isArray(items) && items.length > 0) {
@@ -382,8 +383,8 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
             }
           } else {
             // Try to extract individual completed items
-            const partialItems: ActionableItem[] = [];
-            const itemMatches = actionItemsMatch[1].matchAll(/\{[^}]*\}/g);
+            const partialItems: ActionItem[] = [];
+            const itemMatches = actionItemsMatch[1].matchAll(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g);
             for (const match of itemMatches) {
               try {
                 const item = JSON.parse(match[0]);
@@ -400,12 +401,12 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       }
       
       // Extract complete actionable items or individual completed items
-      const actionableMatch = content.match(/"actionableItems"\s*:\s*\[(.*?)(?:\]|$)/s);
+      const actionableMatch = content.match(/"actionableItems"\s*:\s*\[([\s\S]*?)(?:\]|$)/);
       if (actionableMatch) {
         try {
           // First try to parse complete array
           if (content.includes('"actionableItems"') && content.includes(']', content.indexOf('"actionableItems"'))) {
-            const completeMatch = content.match(/"actionableItems"\s*:\s*\[(.*?)\]/s);
+            const completeMatch = content.match(/"actionableItems"\s*:\s*\[([\s\S]*?)\]/);
             if (completeMatch) {
               const items = JSON.parse('[' + completeMatch[1] + ']');
               if (Array.isArray(items) && items.length > 0) {
@@ -414,8 +415,8 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
             }
           } else {
             // Try to extract individual completed items
-            const partialItems: any[] = [];
-            const itemMatches = actionableMatch[1].matchAll(/\{[^}]*\}/g);
+            const partialItems: ActionableItem[] = [];
+            const itemMatches = actionableMatch[1].matchAll(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g);
             for (const match of itemMatches) {
               try {
                 const item = JSON.parse(match[0]);
@@ -432,13 +433,13 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       }
       
       // Extract additionalInformation if complete
-      const infoMatch = content.match(/"additionalInformation"\s*:\s*"([^"]*)"/s);
+      const infoMatch = content.match(/"additionalInformation"\s*:\s*"([^"]*)"/);
       if (infoMatch) {
         partial.additionalInformation = infoMatch[1];
       }
       
       // Extract complete questions array
-      const questionsMatch = content.match(/"questions"\s*:\s*\[(.*?)\]/s);
+      const questionsMatch = content.match(/"questions"\s*:\s*\[([\s\S]*?)\]/);
       if (questionsMatch) {
         try {
           const questionsContent = '[' + questionsMatch[1] + ']';
@@ -670,7 +671,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                 
                 {/* Typing indicator - show at the bottom of content if still streaming */}
                 {message.isStreaming && (
-                  <div className="mt-4">
+                  <div className="mt-4" data-testid="typing-indicator">
                     <div className="flex space-x-1">
                       <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0s' }} />
                       <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0.15s' }} />
@@ -714,7 +715,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
             </div>
           ) : (
             /* Show only typing indicator if streaming with no content yet */
-            <div className="rounded-3xl bg-white shadow-2xl shadow-gray-300/80 p-6">
+            <div className="rounded-3xl bg-white shadow-2xl shadow-gray-300/80 p-6" data-testid="typing-indicator-only">
               <div className="flex space-x-1">
                 <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0s' }} />
                 <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0.15s' }} />

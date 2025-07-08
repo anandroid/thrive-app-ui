@@ -293,7 +293,7 @@ export default function ThrivingsPage() {
         }, 3000);
       }, 100);
     }
-  }, [activeStep]);
+  }, [activeStep, selectedThriving]);
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">

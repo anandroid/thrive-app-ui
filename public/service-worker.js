@@ -12,8 +12,8 @@ const STATIC_FILES = [
   '/',
   '/offline.html',
   '/manifest.json',
-  '/icon-192x192.png',
-  '/icon-512x512.png',
+  // '/icon-192x192.png', // TODO: Add icon files
+  // '/icon-512x512.png', // TODO: Add icon files
   '/illustrations/companion.png',
   '/illustrations/journey_story_illustration.png',
   '/illustrations/routine.png',
@@ -218,8 +218,8 @@ self.addEventListener('push', (event) => {
   const data = event.data.json();
   const options = {
     body: data.body,
-    icon: '/icon-192x192.png',
-    badge: '/icon-72x72.png',
+    icon: '/illustrations/companion.png', // Using companion as temporary icon
+    badge: '/illustrations/companion.png', // TODO: Add proper badge icon
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
