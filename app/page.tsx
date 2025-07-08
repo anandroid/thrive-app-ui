@@ -172,7 +172,7 @@ export default function HomePage() {
       )}
       
       {/* Main app content */}
-      <div className={`app-screen relative overflow-hidden ${showSlideAnimation ? 'animate-scale-in' : ''} ${showOnboarding && !isTransitioning ? 'hidden' : ''}`}>
+      <div className={`fixed inset-0 flex flex-col ${showSlideAnimation ? 'animate-scale-in' : ''} ${showOnboarding && !isTransitioning ? 'hidden' : ''}`}>
       {/* Background Gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-soft-blush/80 via-white to-soft-lavender/30" />
       
@@ -183,10 +183,10 @@ export default function HomePage() {
       {/* Content */}
       <div className="relative z-10 flex flex-col h-full">
         {/* Status Bar Area */}
-        <div className="safe-area-top" />
+        <div className="safe-area-top flex-shrink-0" />
         
-        {/* Header */}
-        <div className="app-header backdrop-blur-xl bg-white/80 border-b-0 shadow-lg shadow-gray-200/50">
+        {/* Header - Fixed */}
+        <div className="app-header backdrop-blur-xl bg-white/80 border-b-0 shadow-lg shadow-gray-200/50 flex-shrink-0">
           <div className="flex items-center justify-between px-4 h-14">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center shadow-xl shadow-rose/50">
@@ -213,8 +213,8 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 overflow-y-auto">
+        {/* Main Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto min-h-0 pb-safe">
           <div className="px-4 py-6">
             {/* Thrivings Section - Only show if thrivings exist */}
             {thrivings.length > 0 && (
@@ -411,13 +411,16 @@ export default function HomePage() {
         </div>
 
         {/* Input Area - Fixed at Bottom */}
-        <ChatEditor
-          value={input}
-          onChange={setInput}
-          onSubmit={handleSendMessage}
-          className="border-t border-gray-200 bg-white/95 backdrop-blur-xl shadow-[0_-10px_30px_-5px_rgba(0,0,0,0.1)]"
-        />
+        <div className="flex-shrink-0">
+          <ChatEditor
+            value={input}
+            onChange={setInput}
+            onSubmit={handleSendMessage}
+            className="border-t border-gray-200 bg-white/95 backdrop-blur-xl shadow-[0_-10px_30px_-5px_rgba(0,0,0,0.1)]"
+          />
+        </div>
       </div>
     </div>
+    </>
   );
 }

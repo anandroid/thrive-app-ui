@@ -11,6 +11,7 @@ interface ChatEditorProps {
   isLoading?: boolean;
   disabled?: boolean;
   className?: string;
+  autoFocus?: boolean;
 }
 
 export function ChatEditor({
@@ -20,10 +21,12 @@ export function ChatEditor({
   placeholder = "Ask about your wellness journey...",
   isLoading = false,
   disabled = false,
-  className = ""
+  className = "",
+  autoFocus = false
 }: ChatEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isFocused, setIsFocused] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Auto-resize textarea based on content and focus state
   useEffect(() => {
@@ -41,6 +44,28 @@ export function ChatEditor({
     }
   }, [value, isFocused]);
 
+  // Handle focus to ensure input is visible when keyboard appears
+  useEffect(() => {
+    if (isFocused && containerRef.current) {
+      // Small delay to allow keyboard to start appearing
+      setTimeout(() => {
+        containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        // Also ensure the textarea itself is in view
+        textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }, 300);
+    }
+  }, [isFocused]);
+
+  // Auto-focus when requested
+  useEffect(() => {
+    if (autoFocus && textareaRef.current) {
+      // Small delay to ensure component is mounted and visible
+      setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 100);
+    }
+  }, [autoFocus]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // Submit on Enter, but allow Shift+Enter for new lines
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -52,7 +77,7 @@ export function ChatEditor({
   };
 
   return (
-    <div className={`border-t border-gray-100 bg-white safe-area-bottom ${className}`}>
+    <div ref={containerRef} className={`chat-input-container border-t border-gray-100 bg-white safe-area-bottom ${className}`}>
       <div className="px-4 pb-4 pt-2">
         <div className="flex items-start gap-3 bg-gray-50 rounded-2xl p-3 transition-all focus-within:bg-white focus-within:ring-2 focus-within:ring-rose/20">
           <textarea

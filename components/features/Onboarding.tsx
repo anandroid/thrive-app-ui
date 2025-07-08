@@ -192,7 +192,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         {!isLastSlide && (
           <button
             onClick={handleSkip}
-            className="px-4 py-2 rounded-full text-sm text-gray-500 hover:text-gray-700 hover:bg-white/50 transition-all"
+            className="px-4 py-2 rounded-full text-sm text-gray-500 hover:text-gray-700 hover:bg-white/50 transition-all touch-feedback touch-manipulation"
           >
             Skip
           </button>

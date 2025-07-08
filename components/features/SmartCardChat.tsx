@@ -594,8 +594,8 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       {/* Header */}
       {renderHeader?.()}
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto min-h-0">
+      {/* Messages Area - Scrollable with proper flex */}
+      <div className="flex-1 overflow-y-auto min-h-0 pb-safe">
         {/* Prompt Templates (only show when no messages) */}
         {messages.length === 0 && renderPromptTemplates && (
           <div className="h-full flex flex-col">
@@ -616,14 +616,17 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
         )}
       </div>
 
-      {/* Input Area - Fixed at Bottom */}
-      <ChatEditor
-        value={input}
-        onChange={setInput}
-        onSubmit={handleSendMessage}
-        isLoading={isLoading}
-        className="flex-shrink-0"
-      />
+      {/* Input Area - Fixed at Bottom with safe area */}
+      <div className="flex-shrink-0">
+        <ChatEditor
+          value={input}
+          onChange={setInput}
+          onSubmit={handleSendMessage}
+          isLoading={isLoading}
+          className="flex-shrink-0"
+          autoFocus={!!selectedPrompt}
+        />
+      </div>
 
       {showRoutineModal && routineData && (
         <RoutineCreationModal

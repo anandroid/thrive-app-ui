@@ -154,7 +154,7 @@ export default function PantryPage() {
           <h1 className="text-lg font-semibold text-primary-text">My Pantry</h1>
           <button
             onClick={() => setShowAddModal(true)}
-            className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-r from-rose to-burgundy text-white"
+            className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-r from-rose to-burgundy text-white touch-feedback touch-manipulation"
           >
             <Plus className="w-5 h-5" />
           </button>
@@ -250,7 +250,7 @@ export default function PantryPage() {
                   </p>
                   <button
                     onClick={() => setShowAddModal(true)}
-                    className="px-6 py-3 rounded-2xl bg-gradient-to-r from-rose to-burgundy text-white font-medium shadow-lg hover:shadow-xl transition-all"
+                    className="px-6 py-3 rounded-2xl bg-gradient-to-r from-rose to-burgundy text-white font-medium shadow-lg hover:shadow-xl transition-all touch-feedback touch-manipulation"
                   >
                     Add Your First Item
                   </button>
@@ -410,18 +410,21 @@ export default function PantryPage() {
             className="absolute inset-0 bg-black/50"
             onClick={() => setShowAddModal(false)}
           />
-          <div className="relative w-full max-w-lg bg-white rounded-t-3xl p-6 safe-area-bottom animate-slide-up">
-            <div className="flex items-center justify-between mb-6">
+          <div className="relative w-full max-w-lg bg-white rounded-t-3xl animate-slide-up max-h-[90vh] flex flex-col">
+            {/* Modal Header - Fixed */}
+            <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
               <h2 className="text-xl font-semibold text-primary-text">Add to Pantry</h2>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100"
+                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 touch-feedback touch-manipulation"
               >
                 <X className="w-5 h-5 text-gray-600" />
               </button>
             </div>
 
-            <div className="space-y-4">
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto px-6 pb-6 overscroll-none">
+              <div className="space-y-4 pt-4">
               {/* Image Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -430,7 +433,7 @@ export default function PantryPage() {
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-24 h-24 rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:border-rose transition-all"
+                    className="w-24 h-24 rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:border-rose transition-all touch-feedback touch-manipulation"
                   >
                     {imagePreview ? (
                       <div className="relative w-full h-full">
@@ -497,7 +500,7 @@ export default function PantryPage() {
                             setNewItem({ ...newItem, tags: [...currentTags, tag] });
                           }
                         }}
-                        className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-all touch-feedback touch-manipulation ${
                           newItem.tags?.includes(tag)
                             ? 'bg-rose text-white'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -562,11 +565,15 @@ export default function PantryPage() {
                 />
               </div>
 
-              {/* Add Button */}
+              </div>
+            </div>
+
+            {/* Add Button - Fixed at Bottom */}
+            <div className="p-6 pt-4 border-t border-gray-100 bg-white safe-area-bottom">
               <button
                 onClick={handleAddItem}
                 disabled={!newItem.name?.trim()}
-                className="w-full py-3 rounded-2xl bg-gradient-to-r from-rose to-burgundy text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-rose to-burgundy text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed touch-feedback touch-manipulation"
               >
                 Add to Pantry
               </button>

@@ -30,12 +30,12 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
   }, []);
 
   return (
-    <div className="app-screen bg-gray-50">
+    <div className="fixed inset-0 flex flex-col bg-gray-50">
       {/* Status Bar Area */}
       <div className="safe-area-top" />
       
       {/* Header */}
-      <div className="app-header backdrop-blur-xl bg-white/90 border-b border-gray-200">
+      <div className="app-header backdrop-blur-xl bg-white/90 border-b border-gray-200 flex-shrink-0">
         <div className="flex items-center justify-between px-4 h-14">
           <Link 
             href="/"
@@ -55,7 +55,7 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
       
       {/* Creation Mode Badge */}
       {chatIntent === 'create_thriving' && (
-        <div className="flex justify-center py-2">
+        <div className="flex justify-center py-2 flex-shrink-0">
           <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-rose to-burgundy text-white px-4 py-1.5 rounded-full text-sm shadow-lg">
             <span>🌿</span>
             <span className="font-medium">Thriving Creation Mode</span>
@@ -63,8 +63,8 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
         </div>
       )}
       
-      {/* Main Chat Container - Full Height */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Main Chat Container - Flex to fill remaining height */}
+      <div className="flex-1 flex flex-col overflow-hidden min-h-0">
         <SmartCardChat
           threadId={currentThreadId === 'new' ? undefined : currentThreadId}
           chatIntent={chatIntent}

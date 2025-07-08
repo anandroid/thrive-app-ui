@@ -94,6 +94,20 @@
   overscroll-behavior: contain;
 }
 
+/* Modal animations */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
 /* Page transition animations */
 @keyframes slide-in-right {
   from {
@@ -148,6 +162,15 @@
   }
 }
 
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes scale-in {
   from {
     transform: scale(0.95);
@@ -178,6 +201,10 @@
 
 .animate-fade-in {
   animation: fade-in 0.3s ease-out;
+}
+
+.animate-fade-out {
+  animation: fade-out 0.3s ease-in forwards;
 }
 
 .animate-scale-in {

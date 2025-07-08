@@ -197,6 +197,38 @@ input, textarea, [contenteditable] {
   box-shadow: 0 10px 40px -10px rgba(145, 67, 114, 0.15);
 }
 
+/* Mobile Keyboard Handling */
+@supports (height: 100dvh) {
+  .app-screen {
+    height: 100dvh;
+  }
+}
+
+/* Ensure chat editor stays visible when keyboard appears */
+.chat-input-container {
+  position: sticky;
+  bottom: 0;
+  z-index: 50;
+}
+
+/* Prevent iOS bounce scrolling that can hide input */
+.overscroll-none {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Adjust layout when virtual keyboard is visible */
+@media (max-height: 500px) {
+  .app-header {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .h-14 {
+    height: 3rem;
+  }
+}
+
 .shadow-elegant-sm {
   box-shadow: 0 4px 20px -4px rgba(145, 67, 114, 0.1);
 }

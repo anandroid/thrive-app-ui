@@ -1,5 +1,32 @@
 # Thrive App - Mobile-First Development Guidelines
 
+## Recent Mobile UX Improvements (2025-07-08)
+
+### ✅ Fixed Issues
+1. **Vertical Scrolling on Illustrations** - Onboarding now properly scrolls on small devices
+2. **Swipe Gestures** - Added left/right swipe navigation on onboarding screens
+3. **Touch Feedback** - All interactive elements now have proper touch feedback animations
+4. **Page Transitions** - Smooth fade/scale transitions between onboarding and main app
+5. **PWA Preloading** - Critical assets are now preloaded during onboarding for better performance
+
+### 🎯 New Features Added
+- **Touch Feedback System** (`/styles/touch-feedback.css`)
+  - Active state animations for all buttons
+  - Haptic feedback support (when available)
+  - Native-like press effects
+  - Ripple animations (optional)
+  
+- **Custom Touch Components**
+  - `useTouchFeedback` hook for haptic feedback
+  - `TouchButton` component with built-in touch optimizations
+  - Utility functions for touch class management
+
+- **Improved Onboarding Experience**
+  - Swipe between slides (with visual hint)
+  - Proper scroll handling for long content
+  - Asset preloading during onboarding
+  - Smooth transition to main app (no blanking)
+
 ## 🎯 Core Principle: Mobile-First Always
 
 This app is designed as a **mobile-first** application. All development must start with mobile design and progressively enhance for larger screens.
