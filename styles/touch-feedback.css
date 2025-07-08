@@ -11,11 +11,38 @@
 
 /* Active state for buttons and clickable elements */
 .touch-feedback {
-  @apply transition-all duration-150 ease-out;
+  @apply transition-all duration-150 ease-out cursor-pointer;
 }
 
 .touch-feedback:active {
   @apply scale-[0.97] opacity-90;
+}
+
+/* Subtle feedback for smaller elements */
+.touch-feedback-subtle {
+  @apply transition-all duration-100 ease-out cursor-pointer;
+}
+
+.touch-feedback-subtle:active {
+  @apply scale-[0.98] opacity-80;
+}
+
+/* Icon button feedback */
+.touch-feedback-icon {
+  @apply transition-all duration-100 ease-out cursor-pointer;
+}
+
+.touch-feedback-icon:active {
+  @apply scale-[0.92] opacity-70;
+}
+
+/* List item feedback */
+.touch-feedback-list {
+  @apply transition-all duration-150 ease-out cursor-pointer;
+}
+
+.touch-feedback-list:active {
+  @apply bg-gray-50 scale-[0.99];
 }
 
 /* Ripple effect for material-like feedback */
@@ -209,6 +236,22 @@
 
 .animate-scale-in {
   animation: scale-in 0.3s ease-out;
+}
+
+/* Slide down animation for notifications */
+@keyframes slide-down {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-down {
+  animation: slide-down 0.3s ease-out;
 }
 
 /* Loading skeleton animation */

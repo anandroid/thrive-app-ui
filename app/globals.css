@@ -209,6 +209,15 @@ input, textarea, [contenteditable] {
   position: sticky;
   bottom: 0;
   z-index: 50;
+  /* Add extra padding when keyboard is likely visible */
+  padding-bottom: env(keyboard-inset-height, 0);
+}
+
+/* iOS specific keyboard handling */
+@supports (padding: max(0px)) {
+  .chat-input-container {
+    padding-bottom: max(env(safe-area-inset-bottom), 1.5rem);
+  }
 }
 
 /* Prevent iOS bounce scrolling that can hide input */

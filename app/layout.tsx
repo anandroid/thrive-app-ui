@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ServiceWorkerProvider } from "@/src/providers/ServiceWorkerProvider";
+import { OfflineIndicator } from "@/components/ui/OfflineIndicator";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,7 +43,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen overscroll-none`}
       >
-        {children}
+        <ServiceWorkerProvider>
+          <OfflineIndicator />
+          {children}
+        </ServiceWorkerProvider>
       </body>
     </html>
   );

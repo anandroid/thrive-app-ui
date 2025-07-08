@@ -30,7 +30,7 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
   }, []);
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-gray-50">
+    <div className="fixed inset-0 flex flex-col bg-gray-50 overscroll-none">
       {/* Status Bar Area */}
       <div className="safe-area-top" />
       

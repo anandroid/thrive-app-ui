@@ -172,7 +172,7 @@ export default function HomePage() {
       )}
       
       {/* Main app content */}
-      <div className={`fixed inset-0 flex flex-col ${showSlideAnimation ? 'animate-scale-in' : ''} ${showOnboarding && !isTransitioning ? 'hidden' : ''}`}>
+      <div className={`fixed inset-0 flex flex-col overscroll-none ${showSlideAnimation ? 'animate-scale-in' : ''} ${showOnboarding && !isTransitioning ? 'hidden' : ''}`}>
       {/* Background Gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-soft-blush/80 via-white to-soft-lavender/30" />
       

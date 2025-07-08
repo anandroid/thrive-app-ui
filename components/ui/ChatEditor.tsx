@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { Send } from 'lucide-react';
+import { useScrollToInput } from '@/hooks/useKeyboardHeight';
 
 interface ChatEditorProps {
   value: string;
@@ -27,6 +28,7 @@ export function ChatEditor({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isFocused, setIsFocused] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollToInput = useScrollToInput();
 
   // Auto-resize textarea based on content and focus state
   useEffect(() => {
@@ -46,15 +48,10 @@ export function ChatEditor({
 
   // Handle focus to ensure input is visible when keyboard appears
   useEffect(() => {
-    if (isFocused && containerRef.current) {
-      // Small delay to allow keyboard to start appearing
-      setTimeout(() => {
-        containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-        // Also ensure the textarea itself is in view
-        textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-      }, 300);
+    if (isFocused && textareaRef.current) {
+      scrollToInput(textareaRef.current);
     }
-  }, [isFocused]);
+  }, [isFocused, scrollToInput]);
 
   // Auto-focus when requested
   useEffect(() => {
@@ -78,7 +75,7 @@ export function ChatEditor({
 
   return (
     <div ref={containerRef} className={`chat-input-container border-t border-gray-100 bg-white safe-area-bottom ${className}`}>
-      <div className="px-4 pb-4 pt-2">
+      <div className="px-4 pb-6 pt-3">
         <div className="flex items-start gap-3 bg-gray-50 rounded-2xl p-3 transition-all focus-within:bg-white focus-within:ring-2 focus-within:ring-rose/20">
           <textarea
             ref={textareaRef}
@@ -96,7 +93,7 @@ export function ChatEditor({
           <button
             onClick={onSubmit}
             disabled={!value.trim() || isLoading || disabled}
-            className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-rose to-burgundy text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed native-transition ios-active shadow-md hover:shadow-lg transition-shadow"
+            className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-rose to-burgundy text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed native-transition ios-active shadow-md hover:shadow-lg transition-shadow touch-feedback touch-manipulation"
           >
             {isLoading ? (
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thrive - Offline</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #f7e1e5 0%, #ffffff 50%, #dfbad8 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #3a5163;
+    }
+    
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 24px;
+      padding: 40px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(145, 67, 114, 0.15);
+    }
+    
+    .icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      background: linear-gradient(135deg, #fb7185 0%, #914372 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .icon svg {
+      width: 48px;
+      height: 48px;
+      color: white;
+    }
+    
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #914372 0%, #fb7185 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    p {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #4a5568;
+      margin-bottom: 32px;
+    }
+    
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: rgba(163, 191, 160, 0.2);
+      border-radius: 12px;
+      color: #6b8c5f;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #87a878;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.5;
+        transform: scale(0.8);
+      }
+    }
+    
+    .features {
+      margin-top: 32px;
+      padding-top: 32px;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .features h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #3a5163;
+    }
+    
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      text-align: left;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: rgba(247, 225, 229, 0.3);
+      border-radius: 12px;
+    }
+    
+    .feature-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(251, 113, 133, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .feature-icon svg {
+      width: 18px;
+      height: 18px;
+      color: #fb7185;
+    }
+    
+    .feature-text {
+      font-size: 14px;
+      color: #4a5568;
+    }
+    
+    .retry-button {
+      margin-top: 24px;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #fb7185 0%, #914372 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    
+    .retry-button:active {
+      transform: scale(0.97);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+      </svg>
+    </div>
+    
+    <h1>You're Offline</h1>
+    <p>No worries! Your data is safe and stored locally. You can still access most features while offline.</p>
+    
+    <div class="status">
+      <span class="status-dot"></span>
+      <span>Waiting for connection...</span>
+    </div>
+    
+    <div class="features">
+      <h2>Available Offline:</h2>
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <span class="feature-text">View your thrivings and routines</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+          <span class="feature-text">Write in your journal</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+              <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+          </div>
+          <span class="feature-text">Browse your pantry items</span>
+        </div>
+      </div>
+    </div>
+    
+    <button class="retry-button" onclick="window.location.reload()">
+      Try Again
+    </button>
+  </div>
+  
+  <script>
+    // Check for connection periodically
+    setInterval(() => {
+      if (navigator.onLine) {
+        window.location.reload();
+      }
+    }, 5000);
+    
+    // Listen for online event
+    window.addEventListener('online', () => {
+      window.location.reload();
+    });
+  </script>
+</body>
+</html>

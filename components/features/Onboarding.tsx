@@ -16,35 +16,35 @@ const slides: OnboardingSlide[] = [
   {
     title: "Your Wellness Companion",
     subtitle: "Someone who truly listens",
-    description: "Share your symptoms, concerns, and wellness goals with a caring companion who keeps your secrets safe. Get personalized support for creating healing thrivings (routine and journaling), and discovering natural remedies - all while your conversations stay completely private on your device.",
+    description: "Share your wellness journey with a caring AI companion. Get personalized support for routines, journaling, and natural remedies - all while keeping your data private on your device.",
     image: "/illustrations/companion.png",
     imageAlt: "Wellness companion illustration"
   },
   {
     title: "Track Your Healing Story",
     subtitle: "Your journey, not your failures",
-    description: "Create personal wellness journals to understand your patterns. Daily check-ins help you see progress and celebrate small wins. No judgment, just insights into what helps you thrive.",
+    description: "Track your wellness patterns through personal journals. See your progress, celebrate small wins, and gain insights - all without judgment.",
     image: "/illustrations/journey_story_illustration.png",
     imageAlt: "Journey tracking illustration"
   },
   {
     title: "Gentle Daily Thrivings",
     subtitle: "Life is hard enough",
-    description: "Receive gentle reminders without the pressure. We don't track completion or show missed days. This is your safe space for healing - do what you can, when you can. Combine your wellness routines with reflective journaling.",
+    description: "Gentle reminders without pressure. No tracking missed days. Do what you can, when you can. Combine wellness routines with reflective journaling.",
     image: "/illustrations/routine.png",
     imageAlt: "Thrivings illustration"
   },
   {
     title: "Natural Wellness Wisdom",
     subtitle: "Your body knows best",
-    description: "Discover herbs, supplements, and holistic practices that support your healing. We share wisdom, not sales pitches - helping you explore natural options that honor your body's intelligence.",
+    description: "Discover herbs, supplements, and holistic practices. We share wisdom, not sales pitches - helping you explore natural options.",
     image: "/illustrations/recommend_supplements.png",
     imageAlt: "Natural wellness recommendations illustration"
   },
   {
     title: "Your Privacy, Protected",
     subtitle: "Your story stays yours",
-    description: "All your personal wellness data is stored locally on your device. We never track, sell, or share your information. Your healing journey remains completely private and personal.",
+    description: "Your wellness data stays on your device. We never track, sell, or share your information. Your journey remains completely private.",
     image: "/illustrations/privacy.png",
     imageAlt: "Privacy illustration"
   }
@@ -63,6 +63,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
   // Minimum swipe distance (in px)
   const minSwipeDistance = 50;
+
 
   // Preload images and PWA assets
   useEffect(() => {
@@ -159,22 +160,22 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex flex-col relative"
+      className="fixed inset-0 z-50 bg-white"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      {/* Background Gradient - matching app theme */}
-      <div className="absolute inset-0 bg-gradient-to-br from-soft-blush/80 via-white to-soft-lavender/30" />
+      {/* Background Layer */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-soft-blush/80 via-white to-soft-lavender/30" />
+        <div className="absolute top-20 -right-20 w-96 h-96 rounded-full bg-gradient-to-br from-rose/20 to-dusty-rose/20 blur-3xl animate-pulse-slow" />
+        <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-gradient-to-tr from-sage-light/40 to-sage/30 blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
+      </div>
       
-      {/* Decorative Elements with subtle animation */}
-      <div className="absolute top-20 -right-20 w-96 h-96 rounded-full bg-gradient-to-br from-rose/20 to-dusty-rose/20 blur-3xl animate-pulse-slow" />
-      <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-gradient-to-tr from-sage-light/40 to-sage/30 blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
-      
-      {/* Content */}
-      <div className="relative z-10 flex flex-col h-full overflow-hidden">
+      {/* Main Content Container */}
+      <div className="relative z-10 h-full flex flex-col">
         {/* Header */}
-        <div className="flex justify-between items-center p-4">
+        <div className="flex-shrink-0 flex justify-between items-center p-4">
         <div className="flex space-x-2">
           {slides.map((_, index) => (
             <div
@@ -202,17 +203,21 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       {/* Scrollable Content */}
       <div 
         ref={containerRef}
-        className="flex-1 overflow-y-auto overflow-x-hidden px-6 pt-8 pb-32"
+        className="flex-1 overflow-y-auto"
+        style={{ 
+          WebkitOverflowScrolling: 'touch',
+          height: '100%'
+        }}
       >
-        <div className="max-w-md mx-auto w-full space-y-8 min-h-full flex flex-col justify-center">
+        <div className="max-w-md mx-auto w-full px-6 py-4">
           {/* Image with themed background */}
-          <div className="relative w-full h-64 mb-8 group">
+          <div className="relative w-full h-48 sm:h-56 md:h-64 mb-4 group">
             <div className={`absolute inset-0 rounded-3xl shadow-2xl transition-all duration-500 ${
-              currentSlide === 0 ? 'bg-gradient-to-br from-dusty-rose/20 to-sage-light/15 shadow-rose/20' :
-              currentSlide === 1 ? 'bg-gradient-to-br from-sage-light/30 to-sage/20 shadow-sage/20' :
-              currentSlide === 2 ? 'bg-gradient-to-br from-rose/20 to-dusty-rose/15 shadow-rose/20' :
-              currentSlide === 3 ? 'bg-gradient-to-br from-lavender/30 to-soft-lavender/20 shadow-lavender/20' :
-              'bg-gradient-to-br from-burgundy/20 to-dark-burgundy/15 shadow-burgundy/20'
+              currentSlide === 0 ? 'bg-gradient-to-br from-sage-light/40 to-sage/30 shadow-sage/30' :
+              currentSlide === 1 ? 'bg-gradient-to-br from-lavender/40 to-purple-500/30 shadow-purple/30' :
+              currentSlide === 2 ? 'bg-gradient-to-br from-blue-200/40 to-blue-400/30 shadow-blue/30' :
+              currentSlide === 3 ? 'bg-gradient-to-br from-amber-200/40 to-orange-300/30 shadow-orange/30' :
+              'bg-gradient-to-br from-slate-300/40 to-gray-400/30 shadow-gray/30'
             }`} />
             <div className="absolute inset-0 rounded-3xl backdrop-blur-sm" />
             <Image
@@ -225,11 +230,11 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           </div>
 
           {/* Text Content */}
-          <div className="text-center space-y-4">
-            <h2 className="text-3xl font-bold text-primary-text">
+          <div className="text-center space-y-3">
+            <h2 className="text-2xl sm:text-3xl font-bold text-primary-text">
               {slide.title}
             </h2>
-            <p className={`text-lg font-medium ${
+            <p className={`text-base sm:text-lg font-medium ${
               currentSlide === 0 ? 'text-rose' :
               currentSlide === 1 ? 'text-sage-dark' :
               currentSlide === 2 ? 'text-rose' :
@@ -238,7 +243,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             }`}>
               {slide.subtitle}
             </p>
-            <p className="text-secondary-text-thin leading-relaxed">
+            <p className="text-sm sm:text-base text-secondary-text-thin leading-relaxed">
               {slide.description}
             </p>
           </div>
@@ -246,20 +251,16 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       </div>
 
       {/* Bottom Navigation - Fixed */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white to-white/95 backdrop-blur-lg">
+      <div className="flex-shrink-0 p-4 sm:p-6 bg-white/95 backdrop-blur-lg safe-area-bottom border-t border-gray-100">
         <button
           onClick={handleNext}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-rose to-burgundy text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center active:scale-[0.98] touch-manipulation"
+          className="w-full py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-rose to-burgundy text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center active:scale-[0.98] touch-manipulation"
           style={{ WebkitTapHighlightColor: 'transparent' }}
         >
           {isLastSlide ? 'Get Started' : 'Continue'}
           <ChevronRight className="w-5 h-5 ml-2" />
         </button>
         
-        {/* Swipe Indicator */}
-        <div className="mt-4 text-center text-xs text-gray-400 animate-pulse">
-          {currentSlide < slides.length - 1 && 'Swipe left to continue'}
-        </div>
       </div>
       </div>
     </div>
