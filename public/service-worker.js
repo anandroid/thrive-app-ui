@@ -39,7 +39,14 @@ self.addEventListener('install', (event) => {
       // Cache static files
       caches.open(STATIC_CACHE).then((cache) => {
         console.log('[Service Worker] Caching static assets');
-        return cache.addAll(STATIC_FILES);
+        // Add files one by one with error handling
+        return Promise.all(
+          STATIC_FILES.map(file => 
+            cache.add(file).catch(err => {
+              console.warn(`[Service Worker] Failed to cache ${file}:`, err);
+            })
+          )
+        );
       }),
       // Prefetch common routes
       caches.open(DYNAMIC_CACHE).then((cache) => {

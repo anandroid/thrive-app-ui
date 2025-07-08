@@ -17,7 +17,7 @@ import { stripHtml } from '@/src/utils/html';
 import { WellnessJourney } from '@/src/services/openai/types/journey';
 import { getJourneyByType } from '@/src/utils/journeyStorage';
 import { ChatEditor } from '@/components/ui/ChatEditor';
-import { createChatThread, addMessageToThread, getChatThread } from '@/src/utils/chatStorage';
+import { createChatThread, addMessageToThread, getChatThread, deleteChatThread } from '@/src/utils/chatStorage';
 
 interface SmartCardChatProps {
   threadId?: string;
@@ -56,6 +56,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const [chatThreadId, setChatThreadId] = useState<string | null>(null);
+  const hasScrolledToStreamRef = useRef<Set<number>>(new Set());
 
   // Load existing messages if threadId is provided
   useEffect(() => {
@@ -96,20 +97,30 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     // Only scroll for new user messages or initial load
     if (messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
+      const messageIndex = messages.length - 1;
+      
       if (lastMessage.role === 'user' || messages.length === 1) {
         scrollToBottom();
-      } else if (lastMessage.role === 'assistant' && !lastMessage.isStreaming) {
-        // For completed assistant messages, check if already in viewport
-        setTimeout(() => {
-          const messageElements = document.querySelectorAll('[data-message-index]');
-          const lastMessageElement = messageElements[messages.length - 1];
-          
-          if (lastMessageElement && !isElementInViewport(lastMessageElement)) {
-            scrollToMessage(messages.length - 1);
-          }
-          // If message is already in viewport, don't scroll
-        }, 100);
+        // Clear scroll tracking for this position when user sends new message
+        hasScrolledToStreamRef.current.delete(messageIndex);
+      } else if (lastMessage.role === 'assistant' && lastMessage.isStreaming) {
+        // For streaming messages, only scroll when first content appears and we haven't scrolled yet
+        const hasContent = lastMessage.parsedContent && Object.keys(lastMessage.parsedContent).length > 0;
+        const hasNotScrolledYet = !hasScrolledToStreamRef.current.has(messageIndex);
+        
+        if (hasContent && hasNotScrolledYet) {
+          hasScrolledToStreamRef.current.add(messageIndex);
+          setTimeout(() => {
+            const messageElements = document.querySelectorAll('[data-message-index]');
+            const lastMessageElement = messageElements[messageIndex];
+            
+            if (lastMessageElement && !isElementInViewport(lastMessageElement)) {
+              scrollToMessage(messageIndex);
+            }
+          }, 100);
+        }
       }
+      // Don't scroll for completed assistant messages or after first content appears
     }
   }, [messages]);
 
@@ -120,32 +131,28 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     }
   }, [selectedPrompt, onPromptUsed]); // Remove input from dependencies to avoid infinite loop
 
-  const handleSendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSendMessage = async (messageOverride?: string) => {
+    const messageToSend = messageOverride || input;
+    if (!messageToSend.trim() || isLoading) return;
 
-    const trimmedInput = input.trim().toLowerCase();
+    const trimmedInput = messageToSend.trim().toLowerCase();
     
     // Check if user sent the default thriving creation text AND we're in thriving mode
     if (trimmedInput === 'create a wellness thriving for me' && chatIntent === 'create_thriving') {
       const userMessage: ChatMessage = {
         role: 'user',
-        content: input,
+        content: messageToSend,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, userMessage]);
       setInput('');
       
       // Save user message to chat history
+      const currentThreadId = chatThreadId || threadId || createChatThread().id;
       if (!chatThreadId && !threadId) {
-        const newThread = createChatThread();
-        setChatThreadId(newThread.id);
-        addMessageToThread(newThread.id, { role: 'user', content: userMessage.content });
-      } else {
-        const currentThreadId = chatThreadId || threadId;
-        if (currentThreadId) {
-          addMessageToThread(currentThreadId, { role: 'user', content: userMessage.content });
-        }
+        setChatThreadId(currentThreadId);
       }
+      addMessageToThread(currentThreadId, { role: 'user', content: userMessage.content });
       
       // Add a slight delay for better UX
       setTimeout(() => {
@@ -168,30 +175,23 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
 
     const userMessage: ChatMessage = {
       role: 'user',
-      content: input,
+      content: messageToSend,
       timestamp: new Date()
     };
 
     // Store the health concern for routine creation
-    setHealthConcern(input);
+    setHealthConcern(messageToSend);
 
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
     // Save user message to chat history
+    const currentThreadId = chatThreadId || threadId || createChatThread().id;
     if (!chatThreadId && !threadId) {
-      // Create new thread if needed
-      const newThread = createChatThread();
-      setChatThreadId(newThread.id);
-      addMessageToThread(newThread.id, { role: 'user', content: userMessage.content });
-    } else {
-      // Add to existing thread
-      const currentThreadId = chatThreadId || threadId;
-      if (currentThreadId) {
-        addMessageToThread(currentThreadId, { role: 'user', content: userMessage.content });
-      }
+      setChatThreadId(currentThreadId);
     }
+    addMessageToThread(currentThreadId, { role: 'user', content: userMessage.content });
 
     const assistantMessage: ChatMessage = {
       role: 'assistant',
@@ -248,6 +248,29 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                 setThreadId(data.threadId);
                 setChatThreadId(data.threadId);
                 onThreadCreated?.(data.threadId);
+                
+                // If we had a temporary local thread, we should update to use the API thread ID
+                if (chatThreadId && chatThreadId !== data.threadId) {
+                  // Update the thread ID in localStorage to match the API thread ID
+                  const localThread = getChatThread(chatThreadId);
+                  if (localThread) {
+                    // Transfer messages to the new thread ID
+                    localThread.messages.forEach(msg => {
+                      addMessageToThread(data.threadId, msg);
+                    });
+                    // Delete the old temporary thread
+                    deleteChatThread(chatThreadId);
+                  } else {
+                    // If no local thread exists, create one with the API thread ID
+                    // This handles the case where we're using the API thread ID from the start
+                    const existingMessages = messages.filter(m => m.content);
+                    existingMessages.forEach(msg => {
+                      if (msg.role === 'user' || msg.role === 'assistant') {
+                        addMessageToThread(data.threadId, { role: msg.role, content: msg.content });
+                      }
+                    });
+                  }
+                }
               }
 
               if (data.type === 'delta' && data.content) {
@@ -281,7 +304,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                 });
                 
                 // Save assistant message to chat history
-                const currentThreadId = chatThreadId || newThreadId || threadId;
+                const currentThreadId = newThreadId || chatThreadId || threadId;
                 if (currentThreadId) {
                   addMessageToThread(currentThreadId, { role: 'assistant', content: fullContent });
                 }
@@ -486,7 +509,8 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
 
   const handleQuestionClick = (question: string) => {
     setInput(question);
-    handleSendMessage();
+    // Pass the question directly to avoid state update delay
+    handleSendMessage(question);
   };
 
   const renderMessage = (message: ChatMessage, messageIndex: number) => {

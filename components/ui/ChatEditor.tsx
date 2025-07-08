@@ -6,7 +6,7 @@ import { Send } from 'lucide-react';
 interface ChatEditorProps {
   value: string;
   onChange: (value: string) => void;
-  onSubmit: () => void;
+  onSubmit: (messageOverride?: string) => void;
   placeholder?: string;
   isLoading?: boolean;
   disabled?: boolean;
@@ -123,7 +123,7 @@ export function ChatEditor({
             style={{ overflow: 'hidden' }}
           />
           <button
-            onClick={onSubmit}
+            onClick={() => onSubmit()}
             disabled={!value.trim() || isLoading || disabled}
             className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-rose to-burgundy text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed native-transition ios-active shadow-md hover:shadow-lg transition-shadow touch-feedback touch-manipulation"
           >

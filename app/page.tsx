@@ -92,30 +92,34 @@ const formatReminderTime = (time: string) => {
 export default function HomePage() {
   const router = useRouter();
   const [input, setInput] = useState('');
-  const [thrivings, setThrivings] = useState<Thriving[]>([]);
-  const [journeys, setJourneys] = useState<WellnessJourney[]>([]);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  // Initialize with localStorage values to prevent flicker
+  const [thrivings] = useState<Thriving[]>(() => {
+    if (typeof window !== 'undefined') {
+      migrateRoutinesToThrivings();
+      return getThrivingsFromStorage();
+    }
+    return [];
+  });
+  const [journeys] = useState<WellnessJourney[]>(() => {
+    if (typeof window !== 'undefined') {
+      return getJourneysFromStorage();
+    }
+    return [];
+  });
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return !localStorage.getItem('hasSeenOnboarding');
+    }
+    return false;
+  });
   const [showMenuSparkle, setShowMenuSparkle] = useState(false);
   const [showSlideAnimation, setShowSlideAnimation] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    // Check if user has seen onboarding
-    const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
-    if (!hasSeenOnboarding) {
-      setShowOnboarding(true);
-    }
-
-    // Migrate old routines if needed
-    migrateRoutinesToThrivings();
-    
-    // Load thrivings from localStorage using utility function
-    const savedThrivings = getThrivingsFromStorage();
-    setThrivings(savedThrivings);
-    
-    // Load journeys from localStorage
-    const savedJourneys = getJourneysFromStorage();
-    setJourneys(savedJourneys);
+    // Mark as hydrated after component mounts
+    setIsHydrated(true);
     
     // Check if should show menu sparkle
     const hasUsedChat = localStorage.getItem('hasUsedChat');
@@ -213,7 +217,7 @@ export default function HomePage() {
         <div className="flex-1 overflow-y-auto min-h-0 pb-safe" style={{
           paddingBottom: 'env(keyboard-inset-height, 0)'
         }}>
-          <div className="px-4 py-6">
+          <div className={`px-4 py-6 transition-opacity duration-300 ${isHydrated ? 'opacity-100' : 'opacity-0'}`}>
             {/* Thrivings Section - Only show if thrivings exist */}
             {thrivings.length > 0 && (
               <div className="mb-8">

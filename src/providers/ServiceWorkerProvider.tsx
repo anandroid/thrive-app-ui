@@ -20,11 +20,14 @@ export function useServiceWorker() {
 }
 
 export function ServiceWorkerProvider({ children }: { children: React.ReactNode }) {
-  const [isOffline, setIsOffline] = useState(!isOnline());
+  // Initialize as false to avoid hydration mismatch
+  const [isOffline, setIsOffline] = useState(false);
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
 
   useEffect(() => {
+    // Check online status after mount
+    setIsOffline(!isOnline());
     // Register service worker
     registerServiceWorker().then((reg) => {
       if (reg) {

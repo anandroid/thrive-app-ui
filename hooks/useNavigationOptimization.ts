@@ -49,42 +49,6 @@ export function useNavigationOptimization() {
     }
   }, [router]);
 
-  // Preload critical assets
-  useEffect(() => {
-    // Preload OpenAI SDK if not already loaded
-    const preloadOpenAI = () => {
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'script';
-      link.href = '/_next/static/chunks/openai.js'; // Adjust path as needed
-      document.head.appendChild(link);
-    };
-
-    // Preload critical fonts
-    const preloadFonts = () => {
-      const fonts = [
-        '/fonts/geist-sans.woff2',
-        '/fonts/geist-mono.woff2'
-      ];
-
-      fonts.forEach(fontPath => {
-        const link = document.createElement('link');
-        link.rel = 'preload';
-        link.as = 'font';
-        link.type = 'font/woff2';
-        link.href = fontPath;
-        link.crossOrigin = 'anonymous';
-        document.head.appendChild(link);
-      });
-    };
-
-    preloadFonts();
-    
-    // Delay OpenAI preload slightly
-    const timeoutId = setTimeout(preloadOpenAI, 1000);
-
-    return () => clearTimeout(timeoutId);
-  }, []);
 
   // Enable instant page transitions
   useEffect(() => {

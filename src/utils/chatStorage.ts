@@ -40,13 +40,24 @@ export const createChatThread = (title?: string): ChatThread => {
   return thread;
 };
 
-// Add a message to a thread
+// Add a message to a thread (creates thread if it doesn't exist)
 export const addMessageToThread = (threadId: string, message: Omit<ChatMessage, 'id' | 'timestamp'>): ChatMessage => {
   const threads = getChatThreads();
-  const threadIndex = threads.findIndex(t => t.id === threadId);
+  let threadIndex = threads.findIndex(t => t.id === threadId);
   
   if (threadIndex === -1) {
-    throw new Error('Thread not found');
+    // Create the thread with the API thread ID
+    const newThread: ChatThread = {
+      id: threadId,
+      title: 'New Conversation',
+      messages: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isActive: true
+    };
+    threads.unshift(newThread);
+    threadIndex = 0;
+    saveChatThreads(threads);
   }
   
   const newMessage: ChatMessage = {
