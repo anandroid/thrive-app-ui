@@ -2,7 +2,6 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { Send } from 'lucide-react';
-import { useScrollToInput } from '@/hooks/useKeyboardHeight';
 
 interface ChatEditorProps {
   value: string;
@@ -28,7 +27,6 @@ export function ChatEditor({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isFocused, setIsFocused] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const scrollToInput = useScrollToInput();
 
   // Auto-resize textarea based on content and focus state
   useEffect(() => {
@@ -48,10 +46,44 @@ export function ChatEditor({
 
   // Handle focus to ensure input is visible when keyboard appears
   useEffect(() => {
-    if (isFocused && textareaRef.current) {
-      scrollToInput(textareaRef.current);
+    if (isFocused) {
+      // Add class to body to indicate keyboard is visible
+      document.body.classList.add('keyboard-visible');
+      
+      // For iOS, use visual viewport if available
+      if ('visualViewport' in window) {
+        const handleViewportChange = () => {
+          const viewport = window.visualViewport;
+          if (viewport && containerRef.current) {
+            // Adjust the container position based on keyboard height
+            const keyboardHeight = window.innerHeight - viewport.height;
+            if (keyboardHeight > 0) {
+              containerRef.current.style.transform = `translateY(-${keyboardHeight}px)`;
+            } else {
+              containerRef.current.style.transform = '';
+            }
+          }
+        };
+        
+        window.visualViewport?.addEventListener('resize', handleViewportChange);
+        window.visualViewport?.addEventListener('scroll', handleViewportChange);
+        
+        // Initial adjustment
+        handleViewportChange();
+        
+        return () => {
+          window.visualViewport?.removeEventListener('resize', handleViewportChange);
+          window.visualViewport?.removeEventListener('scroll', handleViewportChange);
+        };
+      }
+    } else {
+      // Remove class when keyboard is hidden
+      document.body.classList.remove('keyboard-visible');
+      if (containerRef.current) {
+        containerRef.current.style.transform = '';
+      }
     }
-  }, [isFocused, scrollToInput]);
+  }, [isFocused]);
 
   // Auto-focus when requested
   useEffect(() => {
