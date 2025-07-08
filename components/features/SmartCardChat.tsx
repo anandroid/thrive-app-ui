@@ -7,7 +7,8 @@ import {
   ActionableItem,
   AssistantResponse,
   ASSISTANT_RESPONSE_KEYS,
-  WellnessRoutine
+  WellnessRoutine,
+  PartialAssistantResponse
 } from '@/src/services/openai/types';
 import { RoutineCreationModal } from './RoutineCreationModal';
 import { JourneyCreationModal } from './JourneyCreationModal';
@@ -195,7 +196,8 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       role: 'assistant',
       content: '',
       timestamp: new Date(),
-      isStreaming: true
+      isStreaming: true,
+      parsedContent: {} as PartialAssistantResponse
     };
     setMessages(prev => [...prev, assistantMessage]);
 
@@ -254,6 +256,11 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                   const lastMessage = updated[updated.length - 1];
                   if (lastMessage.role === 'assistant') {
                     lastMessage.content = fullContent;
+                    // Try to parse partial content for progressive rendering
+                    const partialParsed = parsePartialAssistantResponse(fullContent);
+                    if (partialParsed) {
+                      lastMessage.parsedContent = partialParsed;
+                    }
                   }
                   return updated;
                 });
@@ -330,6 +337,122 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     }
   };
 
+  // Parse partial JSON for progressive rendering
+  const parsePartialAssistantResponse = (content: string): PartialAssistantResponse | undefined => {
+    try {
+      // Try to parse complete JSON first
+      const parsed = JSON.parse(content);
+      if (parsed && typeof parsed === 'object') {
+        return parsed as PartialAssistantResponse;
+      }
+    } catch {
+      // If complete parse fails, try to extract completed fields
+      const partial: PartialAssistantResponse = {};
+      
+      // Extract greeting if complete
+      const greetingMatch = content.match(/"greeting"\s*:\s*"([^"]*)"/s);
+      if (greetingMatch && greetingMatch[1]) {
+        partial.greeting = greetingMatch[1];
+      }
+      
+      // Extract attentionRequired if complete
+      const attentionMatch = content.match(/"attentionRequired"\s*:\s*"([^"]*)"/s);
+      if (attentionMatch) {
+        partial.attentionRequired = attentionMatch[1] as 'emergency' | 'warning' | 'normal';
+      }
+      
+      // Extract emergencyReasoning if complete
+      const emergencyMatch = content.match(/"emergencyReasoning"\s*:\s*"([^"]*)"/s);
+      if (emergencyMatch) {
+        partial.emergencyReasoning = emergencyMatch[1];
+      }
+      
+      // Extract complete action items or individual completed items
+      const actionItemsMatch = content.match(/"actionItems"\s*:\s*\[(.*?)(?:\]|$)/s);
+      if (actionItemsMatch) {
+        try {
+          // First try to parse complete array
+          if (content.includes('"actionItems"') && content.includes(']', content.indexOf('"actionItems"'))) {
+            const completeMatch = content.match(/"actionItems"\s*:\s*\[(.*?)\]/s);
+            if (completeMatch) {
+              const items = JSON.parse('[' + completeMatch[1] + ']');
+              if (Array.isArray(items) && items.length > 0) {
+                partial.actionItems = items;
+              }
+            }
+          } else {
+            // Try to extract individual completed items
+            const partialItems: ActionableItem[] = [];
+            const itemMatches = actionItemsMatch[1].matchAll(/\{[^}]*\}/g);
+            for (const match of itemMatches) {
+              try {
+                const item = JSON.parse(match[0]);
+                if (item.title && item.content) {
+                  partialItems.push(item);
+                }
+              } catch {}
+            }
+            if (partialItems.length > 0) {
+              partial.actionItems = partialItems;
+            }
+          }
+        } catch {}
+      }
+      
+      // Extract complete actionable items or individual completed items
+      const actionableMatch = content.match(/"actionableItems"\s*:\s*\[(.*?)(?:\]|$)/s);
+      if (actionableMatch) {
+        try {
+          // First try to parse complete array
+          if (content.includes('"actionableItems"') && content.includes(']', content.indexOf('"actionableItems"'))) {
+            const completeMatch = content.match(/"actionableItems"\s*:\s*\[(.*?)\]/s);
+            if (completeMatch) {
+              const items = JSON.parse('[' + completeMatch[1] + ']');
+              if (Array.isArray(items) && items.length > 0) {
+                partial.actionableItems = items;
+              }
+            }
+          } else {
+            // Try to extract individual completed items
+            const partialItems: any[] = [];
+            const itemMatches = actionableMatch[1].matchAll(/\{[^}]*\}/g);
+            for (const match of itemMatches) {
+              try {
+                const item = JSON.parse(match[0]);
+                if (item.title && item.type) {
+                  partialItems.push(item);
+                }
+              } catch {}
+            }
+            if (partialItems.length > 0) {
+              partial.actionableItems = partialItems;
+            }
+          }
+        } catch {}
+      }
+      
+      // Extract additionalInformation if complete
+      const infoMatch = content.match(/"additionalInformation"\s*:\s*"([^"]*)"/s);
+      if (infoMatch) {
+        partial.additionalInformation = infoMatch[1];
+      }
+      
+      // Extract complete questions array
+      const questionsMatch = content.match(/"questions"\s*:\s*\[(.*?)\]/s);
+      if (questionsMatch) {
+        try {
+          const questionsContent = '[' + questionsMatch[1] + ']';
+          const questions = JSON.parse(questionsContent);
+          if (Array.isArray(questions) && questions.length > 0) {
+            partial.questions = questions;
+          }
+        } catch {}
+      }
+      
+      return Object.keys(partial).length > 0 ? partial : undefined;
+    }
+  };
+
   const handleActionClick = (action: ActionableItem) => {
     if (action.type === 'create_routine' || action.type === 'routine') {
       setRoutineData(action);
@@ -387,18 +510,13 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
 
     const parsed = message.parsedContent;
 
+    // Check if we have any content to render progressively
+    const hasPartialContent = message.isStreaming && parsed && Object.keys(parsed).length > 0;
+    
     return (
       <div className="flex justify-start mb-6" data-message-index={messageIndex}>
         <div className="max-w-[95%] md:max-w-[90%]">
-          {message.isStreaming ? (
-            <div className="rounded-3xl bg-white shadow-2xl shadow-gray-300/80 p-6">
-              <div className="flex space-x-1">
-                <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0s' }} />
-                <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0.15s' }} />
-                <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0.3s' }} />
-              </div>
-            </div>
-          ) : (
+          {(hasPartialContent || !message.isStreaming) ? (
             <div className="relative rounded-3xl bg-white shadow-2xl shadow-gray-300/80 overflow-hidden border-2 border-gray-200/70">
               {/* Gradient accent line */}
               <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-rose via-dusty-rose to-burgundy" />
@@ -545,9 +663,20 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                   </div>
                 )}
 
-                {/* Fallback for plain text */}
-                {!parsed && message.content && (
+                {/* Fallback for plain text - only show if not streaming or no parsed content */}
+                {!parsed && message.content && !message.isStreaming && (
                   <p className="text-[19px] text-primary-text leading-[1.8] font-normal">{message.content}</p>
+                )}
+                
+                {/* Typing indicator - show at the bottom of content if still streaming */}
+                {message.isStreaming && (
+                  <div className="mt-4">
+                    <div className="flex space-x-1">
+                      <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0s' }} />
+                      <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0.15s' }} />
+                      <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0.3s' }} />
+                    </div>
+                  </div>
                 )}
 
                 {/* Questions Section - Inside the card */}
@@ -581,6 +710,15 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+          ) : (
+            /* Show only typing indicator if streaming with no content yet */
+            <div className="rounded-3xl bg-white shadow-2xl shadow-gray-300/80 p-6">
+              <div className="flex space-x-1">
+                <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0s' }} />
+                <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0.15s' }} />
+                <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0.3s' }} />
               </div>
             </div>
           )}

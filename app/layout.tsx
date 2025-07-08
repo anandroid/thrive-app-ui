@@ -28,6 +28,8 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   themeColor: "#ffffff",
+  // Prevents 300ms delay on older browsers
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

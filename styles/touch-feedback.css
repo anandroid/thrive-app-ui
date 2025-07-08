@@ -2,22 +2,29 @@
 
 /* Base touch manipulation class for all interactive elements */
 .touch-manipulation {
+  /* Eliminates 300ms delay on mobile browsers */
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
+  /* Optimize for 60fps animations */
+  will-change: transform, opacity;
 }
 
-/* Active state for buttons and clickable elements - Native-like feel */
+/* Active state for buttons and clickable elements - Material Design inspired */
 .touch-feedback {
-  @apply transition-all duration-200 cursor-pointer;
-  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  @apply cursor-pointer;
+  /* Use transform for better performance */
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .touch-feedback:active {
-  @apply scale-[0.96] opacity-90;
-  transition-duration: 100ms;
+  @apply scale-[0.97];
+  /* Faster press response as per Material Design */
+  transition: transform 100ms cubic-bezier(0.4, 0, 0.6, 1),
+              opacity 100ms cubic-bezier(0.4, 0, 0.6, 1);
 }
 
 /* Subtle feedback for smaller elements - Smooth */
@@ -31,15 +38,16 @@
   transition-duration: 80ms;
 }
 
-/* Icon button feedback - Native-like */
+/* Icon button feedback - iOS-inspired with spring physics */
 .touch-feedback-icon {
-  @apply transition-all duration-180 cursor-pointer;
-  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  @apply cursor-pointer;
+  transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .touch-feedback-icon:active {
-  @apply scale-[0.92] opacity-75;
-  transition-duration: 90ms;
+  @apply scale-[0.85];
+  /* Quick response on press */
+  transition: transform 80ms cubic-bezier(0.4, 0, 1, 1);
 }
 
 /* List item feedback - Smooth press */
@@ -59,7 +67,7 @@
   overflow: hidden;
 }
 
-.touch-ripple::before {
+.touch-ripple::after {
   content: '';
   position: absolute;
   top: 50%;
@@ -67,14 +75,19 @@
   width: 0;
   height: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
+  background: currentColor;
+  opacity: 0;
   transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
+  pointer-events: none;
 }
 
-.touch-ripple:active::before {
-  width: 300px;
-  height: 300px;
+.touch-ripple:active::after {
+  width: 100%;
+  padding-bottom: 100%;
+  opacity: 0.12;
+  transition: width 0.3s ease-out, 
+              padding-bottom 0.3s ease-out,
+              opacity 0.1s ease-out;
 }
 
 /* Press and hold feedback */
@@ -106,30 +119,33 @@
   animation: swipe-hint 2s ease-in-out infinite;
 }
 
-/* Native-like button press - iOS style */
+/* Native-like button press - Modern approach */
 .native-press {
-  @apply transition-all duration-150;
+  @apply cursor-pointer;
   transform: translateY(0) scale(1);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+              0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .native-press:active {
-  transform: translateY(1px) scale(0.98);
-  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
-  transition-duration: 80ms;
+  transform: translateY(2px) scale(0.98);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.08);
+  transition-duration: 50ms;
 }
 
 /* iOS-style spring animation for premium feel */
 .touch-feedback-spring {
-  @apply transition-transform duration-300 cursor-pointer;
-  transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  @apply cursor-pointer;
+  /* Spring physics with bounce */
+  transition: transform 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 .touch-feedback-spring:active {
-  @apply scale-[0.95];
-  transition-duration: 100ms;
-  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  @apply scale-[0.93];
+  /* Immediate response */
+  transition: transform 60ms cubic-bezier(0.4, 0, 1, 1);
 }
 
 /* Smooth scroll behavior */

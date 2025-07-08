@@ -70,7 +70,8 @@ body {
   line-height: 1.6;
   height: 100%;
   overflow: hidden;
-  touch-action: pan-y;
+  /* Eliminates 300ms delay on all touch interactions */
+  touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
 }

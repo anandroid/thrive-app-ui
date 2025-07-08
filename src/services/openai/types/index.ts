@@ -15,6 +15,9 @@ export interface AssistantResponse {
   questions: string[];
 }
 
+// Partial type for progressive rendering during streaming
+export type PartialAssistantResponse = Partial<AssistantResponse>;
+
 // Runtime helper: list of keys in AssistantResponse used for quick presence checks
 export const ASSISTANT_RESPONSE_KEYS: (keyof AssistantResponse)[] = [
   'greeting',
@@ -117,6 +120,6 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  parsedContent?: AssistantResponse;
+  parsedContent?: AssistantResponse | PartialAssistantResponse;
   isStreaming?: boolean;
 }

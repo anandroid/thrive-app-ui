@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Bell, Shield, Info, Moon, Heart, ChevronRight, Plus, Leaf, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Info, Moon, ChevronRight, Plus, Leaf, MessageSquare } from 'lucide-react';
 import { AboutSection } from '@/components/features/AboutSection';
 import { useRouter } from 'next/navigation';
 import { getTouchClasses } from '@/hooks/useTouchFeedback';

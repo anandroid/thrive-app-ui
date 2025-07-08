@@ -81,8 +81,8 @@ export const AboutSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Philosophy Card */}
-      <div className="rounded-3xl bg-gradient-to-br from-sage-light/10 to-sage/5 p-8 border border-sage/20">
+      {/* Philosophy Card - Hidden for now */}
+      {/* <div className="rounded-3xl bg-gradient-to-br from-sage-light/10 to-sage/5 p-8 border border-sage/20">
         <h3 className="text-xl font-semibold text-primary-text mb-4">Our Philosophy</h3>
         <blockquote className="text-lg text-secondary-text italic">
           &ldquo;Life is hard enough - your wellness app should be a source of comfort, not another thing to &apos;fail&apos; at.&rdquo;
@@ -91,10 +91,10 @@ export const AboutSection: React.FC = () => {
           We don&apos;t track completion rates or judge missed days. Every small step matters, 
           and we&apos;re here to support you wherever you are in your journey.
         </p>
-      </div>
+      </div> */}
 
-      {/* Holistic Approach Card */}
-      <div className="rounded-3xl bg-gradient-to-br from-lavender/10 to-soft-lavender/5 p-8 border border-lavender/20">
+      {/* Holistic Approach Card - Hidden for now */}
+      {/* <div className="rounded-3xl bg-gradient-to-br from-lavender/10 to-soft-lavender/5 p-8 border border-lavender/20">
         <h3 className="text-xl font-semibold text-primary-text mb-4">Whole-Person Wellness</h3>
         <p className="text-secondary-text mb-4">
           We believe healing happens when mind, body, and spirit work together. Your wellness journey is unique, and we honor all approaches - from ancient wisdom to modern science.
@@ -102,7 +102,7 @@ export const AboutSection: React.FC = () => {
         <p className="text-secondary-text-thin italic">
           While we respect all healing paths, we encourage you to explore beyond just symptom management. True wellness comes from understanding and nurturing your whole self.
         </p>
-      </div>
+      </div> */}
 
       {/* Features Grid */}
       <div className="grid gap-6 md:grid-cols-2">
