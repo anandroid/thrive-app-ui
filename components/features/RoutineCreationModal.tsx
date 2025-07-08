@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Sparkles, Moon, Sun, Info } from 'lucide-react';
 import { ActionableItem, WellnessRoutine } from '@/src/services/openai/types';
+import { LoadingButton } from '@/components/ui/LoadingButton';
 
 interface RoutineModalData {
   title?: string;
@@ -290,23 +291,26 @@ export const RoutineCreationModal: React.FC<RoutineCreationModalProps> = ({
               >
                 Cancel
               </button>
-              <button
+              <LoadingButton
                 onClick={handleCreate}
+                isLoading={isCreating}
                 disabled={isCreating}
-                className="px-6 py-3 rounded-full bg-primary-text text-white hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                className="px-6 py-3 rounded-full bg-primary-text text-white hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[200px]"
+                loadingMessages={[
+                  'Creating...',
+                  'Analyzing needs...',
+                  'Personalizing...',
+                  'Adding wisdom...',
+                  'Optimizing schedule...',
+                  'Almost ready...'
+                ]}
+                messageInterval={2500}
               >
-                {isCreating ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                    Creating...
-                  </>
-                ) : (
-                  <>
-                    Create Routine
-                    <Sparkles className="w-4 h-4 ml-2" />
-                  </>
-                )}
-              </button>
+                <>
+                  Create Routine
+                  <Sparkles className="w-4 h-4 ml-2 inline" />
+                </>
+              </LoadingButton>
             </div>
           </>
         );

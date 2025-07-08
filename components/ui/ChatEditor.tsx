@@ -44,44 +44,12 @@ export function ChatEditor({
     }
   }, [value, isFocused]);
 
-  // Handle focus to ensure input is visible when keyboard appears
+  // Simple focus tracking for styling
   useEffect(() => {
     if (isFocused) {
-      // Add class to body to indicate keyboard is visible
       document.body.classList.add('keyboard-visible');
-      
-      // For iOS, use visual viewport if available
-      if ('visualViewport' in window) {
-        const handleViewportChange = () => {
-          const viewport = window.visualViewport;
-          if (viewport && containerRef.current) {
-            // Adjust the container position based on keyboard height
-            const keyboardHeight = window.innerHeight - viewport.height;
-            if (keyboardHeight > 0) {
-              containerRef.current.style.transform = `translateY(-${keyboardHeight}px)`;
-            } else {
-              containerRef.current.style.transform = '';
-            }
-          }
-        };
-        
-        window.visualViewport?.addEventListener('resize', handleViewportChange);
-        window.visualViewport?.addEventListener('scroll', handleViewportChange);
-        
-        // Initial adjustment
-        handleViewportChange();
-        
-        return () => {
-          window.visualViewport?.removeEventListener('resize', handleViewportChange);
-          window.visualViewport?.removeEventListener('scroll', handleViewportChange);
-        };
-      }
     } else {
-      // Remove class when keyboard is hidden
       document.body.classList.remove('keyboard-visible');
-      if (containerRef.current) {
-        containerRef.current.style.transform = '';
-      }
     }
   }, [isFocused]);
 
@@ -106,8 +74,8 @@ export function ChatEditor({
   };
 
   return (
-    <div ref={containerRef} className={`chat-input-container border-t border-gray-100 bg-white safe-area-bottom ${className}`}>
-      <div className="px-4 pb-6 pt-3">
+    <div ref={containerRef} className={`chat-input-wrapper ${className}`}>
+      <div className="px-4 py-3">
         <div className="flex items-start gap-3 bg-gray-50 rounded-2xl p-3 transition-all focus-within:bg-white focus-within:ring-2 focus-within:ring-rose/20">
           <textarea
             ref={textareaRef}

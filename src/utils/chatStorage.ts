@@ -106,18 +106,66 @@ export const deleteChatThread = (threadId: string): void => {
   saveChatThreads(filteredThreads);
 };
 
+// Extract preview text from assistant message
+const extractAssistantPreview = (content: string): string => {
+  try {
+    // Try to parse as JSON
+    const parsed = JSON.parse(content);
+    
+    // Extract greeting first if available
+    if (parsed.greeting) {
+      return parsed.greeting;
+    }
+    
+    // Extract first action item if available
+    if (parsed.actionItems && parsed.actionItems.length > 0) {
+      const firstItem = parsed.actionItems[0];
+      const title = firstItem.title || '';
+      const content = firstItem.content || firstItem.description || '';
+      return title ? `${title}: ${content}`.substring(0, 150) : content.substring(0, 150);
+    }
+    
+    // Extract additional information if available
+    if (parsed.additionalInformation) {
+      // Remove HTML tags
+      return parsed.additionalInformation.replace(/<[^>]*>/g, '').substring(0, 150);
+    }
+    
+    // Fallback to raw content
+    return content.substring(0, 150);
+  } catch {
+    // If not JSON, check if it starts with common patterns
+    if (content.includes('I\'d love to help') || content.includes('I can help')) {
+      return content.substring(0, 150);
+    }
+    
+    // Remove any HTML tags and return preview
+    return content.replace(/<[^>]*>/g, '').substring(0, 150);
+  }
+};
+
 // Get chat history items for display
 export const getChatHistory = (): ChatHistoryItem[] => {
   const threads = getChatThreads();
   
   return threads.map(thread => {
     const lastMessage = thread.messages[thread.messages.length - 1];
+    let lastMessagePreview = 'No messages yet';
+    
+    if (lastMessage) {
+      if (lastMessage.role === 'user') {
+        lastMessagePreview = lastMessage.content;
+      } else {
+        // For assistant messages, extract meaningful preview
+        lastMessagePreview = extractAssistantPreview(lastMessage.content);
+      }
+    }
     
     return {
       id: thread.id,
       threadId: thread.id,
       title: thread.title,
-      lastMessage: lastMessage ? lastMessage.content : 'No messages yet',
+      lastMessage: lastMessagePreview,
       messageCount: thread.messages.length,
       createdAt: thread.createdAt,
       updatedAt: thread.updatedAt
@@ -172,18 +220,40 @@ export const searchChatHistory = (query: string): ChatHistoryItem[] => {
       if (thread.title.toLowerCase().includes(lowerQuery)) return true;
       
       // Search in messages
-      return thread.messages.some(message => 
-        message.content.toLowerCase().includes(lowerQuery)
-      );
+      return thread.messages.some(message => {
+        // For user messages, search directly
+        if (message.role === 'user') {
+          return message.content.toLowerCase().includes(lowerQuery);
+        }
+        
+        // For assistant messages, search in parsed content
+        try {
+          const parsed = JSON.parse(message.content);
+          const searchableText = JSON.stringify(parsed).toLowerCase();
+          return searchableText.includes(lowerQuery);
+        } catch {
+          return message.content.toLowerCase().includes(lowerQuery);
+        }
+      });
     })
     .map(thread => {
       const lastMessage = thread.messages[thread.messages.length - 1];
+      let lastMessagePreview = 'No messages yet';
+      
+      if (lastMessage) {
+        if (lastMessage.role === 'user') {
+          lastMessagePreview = lastMessage.content;
+        } else {
+          // For assistant messages, extract meaningful preview
+          lastMessagePreview = extractAssistantPreview(lastMessage.content);
+        }
+      }
       
       return {
         id: thread.id,
         threadId: thread.id,
         title: thread.title,
-        lastMessage: lastMessage ? lastMessage.content : 'No messages yet',
+        lastMessage: lastMessagePreview,
         messageCount: thread.messages.length,
         createdAt: thread.createdAt,
         updatedAt: thread.updatedAt

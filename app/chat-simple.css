@@ -1,0 +1,49 @@
+/* Simple chat layout that works with mobile keyboards */
+
+/* Use flexbox for the entire chat */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: -webkit-fill-available;
+  max-height: 100vh;
+  background: #f9fafb;
+}
+
+/* Header stays at top */
+.chat-header {
+  flex-shrink: 0;
+}
+
+/* Messages area takes remaining space */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 1rem;
+}
+
+/* Input stays at bottom */
+.chat-input {
+  flex-shrink: 0;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  padding: 0.75rem 1rem 0.75rem;
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+/* iOS specific: when keyboard is shown, iOS will shrink the viewport */
+/* The flexbox layout will automatically adjust */
+
+/* Prevent weird iOS bouncing */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* For Android, which handles things differently */
+@media screen and (max-height: 500px) {
+  .chat-messages {
+    /* Reduce padding when keyboard is likely visible */
+    padding-bottom: 0.5rem;
+  }
+}

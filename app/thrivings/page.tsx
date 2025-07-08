@@ -5,12 +5,13 @@ import Link from 'next/link';
 import { 
   Clock, 
   Bell, Edit2, Trash2,
-  Plus, Target, Settings, ArrowLeft,
-  ChevronDown, ChevronUp, Lightbulb, Package, Play, CheckCircle2, BookOpen
+  Plus, Target, Settings,
+  ChevronDown, ChevronUp, Lightbulb, Package, Play, CheckCircle2, BookOpen, Heart
 } from 'lucide-react';
 import { Thriving } from '@/src/types/thriving';
 import { getThrivingsFromStorage, updateThrivingInStorage, deleteThrivingFromStorage } from '@/src/utils/thrivingStorage';
 import { CelebrationShower } from '@/components/ui/CelebrationShower';
+import { PageLayout } from '@/components/layout/PageLayout';
 
 export default function ThrivingsPage() {
   const [thrivings, setThrivings] = useState<Thriving[]>([]);
@@ -37,10 +38,14 @@ export default function ThrivingsPage() {
     const thrivingId = urlParams.get('id');
     const stepIndex = urlParams.get('step');
     
-    // Scroll to top if no step parameter (default navigation)
-    if (stepIndex === null) {
+    // Only scroll to top when navigating from external pages (not from home page cards)
+    // Check if we came from home page with specific step
+    const fromHome = sessionStorage.getItem('navigateFromHome');
+    if (!stepIndex && !fromHome) {
       window.scrollTo(0, 0);
     }
+    // Clear the flag after checking
+    sessionStorage.removeItem('navigateFromHome');
     
     if (thrivingId && savedThrivings.length > 0) {
       const thriving = savedThrivings.find(t => t.id === thrivingId);
@@ -275,9 +280,13 @@ export default function ThrivingsPage() {
     return stepsWithTimes.length > 0 ? (completedSteps / stepsWithTimes.length) * 100 : 0;
   };
 
-  // Scroll to active step when it changes
+  // Scroll to active step only when coming from external navigation
   useEffect(() => {
-    if (selectedThriving && stepRefs.current[activeStep] && activeStep >= 0) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const stepParam = urlParams.get('step');
+    
+    // Only scroll if we have a step parameter from URL (from home page navigation)
+    if (stepParam !== null && selectedThriving && stepRefs.current[activeStep] && activeStep >= 0) {
       setTimeout(() => {
         stepRefs.current[activeStep]?.scrollIntoView({
           behavior: 'smooth',
@@ -291,35 +300,54 @@ export default function ThrivingsPage() {
         setTimeout(() => {
           setHighlightedStep(null);
         }, 3000);
+        
+        // Clear the URL parameter after scrolling
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete('step');
+        window.history.replaceState({}, '', newUrl.toString());
       }, 100);
     }
   }, [activeStep, selectedThriving]);
 
-  return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-100 flex-shrink-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Link href="/" className="p-2 rounded-lg hover:bg-gray-50 transition-all">
-                <ArrowLeft className="w-5 h-5 text-gray-600" />
-              </Link>
-              <h1 className="text-2xl font-bold gradient-text">Thrive</h1>
-            </div>
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Home
-              </Link>
-              <Link href="/thrivings" className="text-gray-900 font-medium">
-                Thrivings
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
+  const actionBar = selectedThriving ? (
+    <div className="rounded-2xl bg-gradient-to-br from-burgundy/10 to-burgundy/5 backdrop-blur-sm p-4 border border-burgundy/10">
+      <div className="flex gap-3">
+        <button
+          onClick={() => handleCompleteThriving(selectedThriving.id)}
+          className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 text-sm touch-feedback touch-manipulation"
+        >
+          <CheckCircle2 className="w-4 h-4" />
+          <span>Complete</span>
+        </button>
+        
+        <button
+          onClick={() => handleDeleteThriving(selectedThriving.id)}
+          className="flex-1 px-4 py-2.5 rounded-xl bg-white/80 backdrop-blur-sm text-gray-700 font-medium border border-gray-200 hover:bg-white/90 transition-all flex items-center justify-center gap-2 text-sm touch-feedback touch-manipulation"
+        >
+          <Trash2 className="w-4 h-4" />
+          <span>Delete</span>
+        </button>
+      </div>
+    </div>
+  ) : null;
 
-      <div className="flex-1 overflow-y-auto">
+  return (
+    <PageLayout
+      header={{
+        showBackButton: true,
+        backHref: '/',
+        centerElement: (
+          <div className="flex items-center space-x-2">
+            <h1 className="text-xl font-bold text-gray-800">Thrivings</h1>
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-sage-light/30 to-sage/20 flex items-center justify-center">
+              <Heart className="w-4 h-4 text-sage-dark fill-sage-light/30" />
+            </div>
+          </div>
+        )
+      }}
+      actionBar={actionBar}
+    >
+
         <div className="max-w-7xl mx-auto p-4 lg:p-8">
           {/* Page Title */}
           <div className="mb-8">
@@ -450,6 +478,24 @@ export default function ThrivingsPage() {
                               // Find the index of this step in the steps array
                               const stepIndex = thriving.steps.findIndex(s => s.id === nextStep.id);
                               setActiveStep(stepIndex);
+                              
+                              // Manually scroll to the step
+                              setTimeout(() => {
+                                if (stepRefs.current[stepIndex]) {
+                                  stepRefs.current[stepIndex]?.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'center',
+                                  });
+                                  
+                                  // Highlight the step temporarily
+                                  setHighlightedStep(stepIndex);
+                                  
+                                  // Remove highlight after 3 seconds
+                                  setTimeout(() => {
+                                    setHighlightedStep(null);
+                                  }, 3000);
+                                }
+                              }, 100);
                             }}
                           >
                             <div className="flex items-center justify-between mb-1">
@@ -699,26 +745,6 @@ export default function ThrivingsPage() {
                       </div>
                     )}
 
-                    {/* Action Buttons */}
-                    <div className="rounded-2xl bg-gradient-to-br from-burgundy/10 to-burgundy/5 backdrop-blur-sm p-4 border border-burgundy/10">
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => handleCompleteThriving(selectedThriving.id)}
-                          className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 text-sm"
-                        >
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span>Complete</span>
-                        </button>
-                        
-                        <button
-                          onClick={() => handleDeleteThriving(selectedThriving.id)}
-                          className="flex-1 px-4 py-2.5 rounded-xl bg-white/80 backdrop-blur-sm text-gray-700 font-medium border border-gray-200 hover:bg-white/90 transition-all flex items-center justify-center gap-2 text-sm"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          <span>Delete</span>
-                        </button>
-                      </div>
-                    </div>
                   </div>
 
                   {/* Info Section */}
@@ -799,7 +825,6 @@ export default function ThrivingsPage() {
             </>
           )}
         </div>
-      </div>
       
       {/* Celebration Animation */}
       {showCelebration && (
@@ -808,6 +833,6 @@ export default function ThrivingsPage() {
           duration={3000}
         />
       )}
-    </div>
+    </PageLayout>
   );
 }

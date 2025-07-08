@@ -613,17 +613,23 @@ export default function RoutinesPage() {
                         </div>
                         
                         {isRecommendationsCollapsed ? (
-                          <div className="flex flex-wrap gap-2">
-                            {selectedRoutine.additionalSteps.map((step, index) => (
-                              <span
-                                key={step.id}
-                                className="inline-flex items-center text-sm text-gray-600"
-                              >
-                                <span className="font-medium">{step.title}</span>
-                                {index < (selectedRoutine.additionalSteps?.length ?? 0) - 1 && (
-                                  <span className="mx-2 text-gray-400">•</span>
+                          <div className="space-y-3">
+                            {selectedRoutine.additionalSteps.map((step) => (
+                              <div key={step.id} className="border-l-4 border-rose/20 pl-4">
+                                <h5 className="font-medium text-gray-900 text-sm mb-1">{step.title}</h5>
+                                {step.description && (
+                                  <p className="text-xs text-gray-600 mb-2">{step.description}</p>
                                 )}
-                              </span>
+                                {step.tips && step.tips.length > 0 && (
+                                  <div className="flex flex-wrap gap-2">
+                                    {step.tips.map((tip, idx) => (
+                                      <span key={idx} className="text-xs text-gray-500 italic">
+                                        • {tip}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
                             ))}
                           </div>
                         ) : (
@@ -710,7 +716,10 @@ export default function RoutinesPage() {
                         )}
                       </div>
                     )}
+                  </div>
 
+                  {/* Info Section */}
+                  <div className="space-y-4">
                     {/* Action Buttons */}
                     <div className="rounded-2xl bg-gradient-to-br from-burgundy/10 to-burgundy/5 backdrop-blur-sm p-4 border border-burgundy/10">
                       <div className="flex gap-3">
@@ -731,10 +740,6 @@ export default function RoutinesPage() {
                         </button>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Info Section */}
-                  <div className="space-y-4">
                     {/* Routine Adjustment */}
                     <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
                       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">

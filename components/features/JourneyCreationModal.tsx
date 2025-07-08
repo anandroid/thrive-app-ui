@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { X, Edit3, AlertCircle, Target, BookOpen } from 'lucide-react';
 import { ActionableItem } from '@/src/services/openai/types';
 import { WellnessJourney, JourneyType } from '@/src/services/openai/types/journey';
+import { LoadingButton } from '@/components/ui/LoadingButton';
 
 interface JourneyCreationModalProps {
   isOpen: boolean;
@@ -218,20 +219,23 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
 
         {/* Footer */}
         <div className="border-t border-gray-100 p-6 space-y-3">
-          <button
+          <LoadingButton
             onClick={handleCreateJourney}
+            isLoading={isCreating}
             disabled={isCreating}
             className="w-full py-4 rounded-2xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all"
+            loadingMessages={[
+              'Creating Journal...',
+              'Setting up your wellness space...',
+              'Preparing tracking tools...',
+              'Adding insights features...',
+              'Personalizing experience...',
+              'Almost ready...'
+            ]}
+            messageInterval={2500}
           >
-            {isCreating ? (
-              <div className="flex items-center justify-center space-x-2">
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Creating Journey...</span>
-              </div>
-            ) : (
-              'Create My Journal'
-            )}
-          </button>
+            Create My Journal
+          </LoadingButton>
           
           <button
             onClick={onClose}

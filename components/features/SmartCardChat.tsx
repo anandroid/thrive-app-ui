@@ -18,6 +18,7 @@ import { WellnessJourney } from '@/src/services/openai/types/journey';
 import { getJourneyByType } from '@/src/utils/journeyStorage';
 import { ChatEditor } from '@/components/ui/ChatEditor';
 import { createChatThread, addMessageToThread, getChatThread, deleteChatThread } from '@/src/utils/chatStorage';
+import { useChatKeyboardFix } from '@/hooks/useChatKeyboardFix';
 
 interface SmartCardChatProps {
   threadId?: string;
@@ -57,6 +58,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   const abortControllerRef = useRef<AbortController | null>(null);
   const [chatThreadId, setChatThreadId] = useState<string | null>(null);
   const hasScrolledToStreamRef = useRef<Set<number>>(new Set());
+  const { isKeyboardVisible, keyboardHeight } = useChatKeyboardFix();
 
   // Load existing messages if threadId is provided
   useEffect(() => {
@@ -65,11 +67,29 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       if (thread) {
         setChatThreadId(thread.id);
         // Convert stored messages to the format expected by the component
-        const loadedMessages: ChatMessage[] = thread.messages.map(msg => ({
-          role: msg.role,
-          content: msg.content,
-          timestamp: new Date(msg.timestamp)
-        }));
+        const loadedMessages: ChatMessage[] = thread.messages.map(msg => {
+          const message: ChatMessage = {
+            role: msg.role,
+            content: msg.content,
+            timestamp: new Date(msg.timestamp)
+          };
+          
+          // If it's an assistant message, try to parse the content
+          if (msg.role === 'assistant') {
+            try {
+              const parsed = JSON.parse(msg.content);
+              // Check if it has the structure of an assistant response
+              if (parsed && typeof parsed === 'object' && 
+                  ('greeting' in parsed || 'actionItems' in parsed || 'actionableItems' in parsed)) {
+                message.parsedContent = parsed;
+              }
+            } catch {
+              // Not JSON or parsing failed, leave as plain text
+            }
+          }
+          
+          return message;
+        });
         setMessages(loadedMessages);
       }
     }
@@ -519,8 +539,8 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
         <div className="flex justify-end mb-6" data-message-index={messageIndex}>
           <div className="max-w-[90%] md:max-w-[85%]">
             <div className="rounded-3xl px-6 py-4 bg-gradient-to-br from-sage-light/20 to-sage/15 shadow-xl shadow-sage/25 border border-sage/20">
-              <p className="text-[17px] leading-[1.6] font-normal text-primary-text">{message.content}</p>
-              <p className="text-[13px] text-secondary-text-thin mt-2">
+              <p className="text-[15px] leading-[1.6] font-normal text-primary-text">{message.content}</p>
+              <p className="text-[13px] text-gray-500 mt-2">
                 {message.timestamp.toLocaleTimeString('en-US', { 
                   hour: 'numeric', 
                   minute: '2-digit',
@@ -540,26 +560,26 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     
     return (
       <div className="flex justify-start mb-6" data-message-index={messageIndex}>
-        <div className="max-w-[95%] md:max-w-[90%]">
+        <div className="max-w-[98%] md:max-w-[95%] lg:max-w-[85%]">
           {(hasPartialContent || !message.isStreaming) ? (
             <div className="relative rounded-3xl bg-white shadow-2xl shadow-gray-300/80 overflow-hidden border-2 border-gray-200/70">
               {/* Gradient accent line */}
               <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-rose via-dusty-rose to-burgundy" />
-              <div className="p-7 pt-8 space-y-6">
+              <div className="p-5 pt-6 space-y-5">
                 {/* Sender Label */}
                 <div className="mb-3">
                   <span className="text-sm font-semibold text-burgundy">Wellness Companion</span>
                 </div>
                 {/* Emergency Alert */}
                 {parsed?.attentionRequired === 'emergency' && (
-                  <div className="rounded-2xl bg-gradient-to-r from-rose/15 to-burgundy/15 border border-rose/30 p-5 shadow-xl shadow-rose/20">
+                  <div className="rounded-2xl bg-gradient-to-r from-rose/15 to-burgundy/15 border border-rose/30 p-4 shadow-xl shadow-rose/20">
                     <div className="flex items-start space-x-3">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose/30 to-burgundy/20 flex items-center justify-center shadow-lg shadow-rose/30">
-                        <AlertCircle className="w-6 h-6 text-burgundy" />
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose/30 to-burgundy/20 flex items-center justify-center shadow-lg shadow-rose/30">
+                        <AlertCircle className="w-5 h-5 text-burgundy" />
                       </div>
                       <div>
-                        <h4 className="font-bold text-primary-text mb-1 text-xl">Immediate Attention Required</h4>
-                        <p className="text-[16px] text-secondary-text-thin leading-relaxed">{parsed.emergencyReasoning}</p>
+                        <h4 className="font-bold text-primary-text mb-1 text-lg">Immediate Attention Required</h4>
+                        <p className="text-[15px] text-secondary-text leading-relaxed">{parsed.emergencyReasoning}</p>
                       </div>
                     </div>
                   </div>
@@ -567,25 +587,25 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
 
                 {/* Greeting */}
                 {parsed?.greeting && (
-                  <p className="text-[19px] text-primary-text leading-[1.8] font-normal">
+                  <p className="text-[16px] text-primary-text leading-[1.7]">
                     {parsed.greeting}
                   </p>
                 )}
 
                 {/* Action Items */}
                 {parsed?.actionItems && parsed.actionItems.length > 0 && (
-                  <div className="space-y-5">
+                  <div className="space-y-4">
                     {parsed.actionItems.map((item, idx) => (
                       <div key={idx} className="flex space-x-3">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sage-light/40 to-sage/30 flex items-center justify-center flex-shrink-0 shadow-lg shadow-sage/25">
-                          <Leaf className="w-6 h-6 text-sage-dark" />
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sage-light/40 to-sage/30 flex items-center justify-center flex-shrink-0 shadow-lg shadow-sage/25">
+                          <Leaf className="w-5 h-5 text-sage-dark" />
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-bold text-[22px] text-primary-text mb-3">
+                          <h4 className="font-bold text-[18px] text-primary-text mb-2">
                             {item.title}
                           </h4>
                           <div 
-                            className="text-[17px] text-secondary-text-thin leading-[1.8] font-normal [&_strong]:font-bold [&_strong]:text-primary-text [&_em]:font-semibold [&_em]:text-primary-text [&_em]:not-italic"
+                            className="text-[15px] text-primary-text leading-[1.7] [&_strong]:font-bold [&_strong]:text-primary-text [&_em]:font-semibold [&_em]:text-primary-text [&_em]:not-italic"
                             dangerouslySetInnerHTML={{ __html: item.content || item.description || '' }}
                           />
                         </div>
@@ -601,7 +621,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                     <div className="relative flex items-start space-x-3">
                       <div className="w-1 h-full bg-gradient-to-b from-amber-300/50 to-amber-200/20 rounded-full flex-shrink-0" />
                       <div 
-                        className="text-[15px] text-gray-700 leading-[1.7] italic font-light"
+                        className="text-[14px] text-secondary-text leading-[1.6] italic"
                         dangerouslySetInnerHTML={{ __html: parsed.additionalInformation }}
                       />
                     </div>
@@ -678,8 +698,8 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                             <Icon className={`w-6 h-6 ${iconColorClass}`} />
                           </div>
                           <div className="flex-1">
-                            <h4 className="font-bold text-primary-text text-[20px] mb-2">{item.title}</h4>
-                            <p className="text-[16px] text-secondary-text-thin leading-relaxed font-light">{item.description || item.details}</p>
+                            <h4 className="font-bold text-primary-text text-[17px] mb-1">{item.title}</h4>
+                            <p className="text-[14px] text-secondary-text-thin leading-relaxed">{item.description || item.details}</p>
                           </div>
                           <ChevronRight className="w-6 h-6 text-gray-300 group-hover:text-sage-dark group-hover:translate-x-2 transition-all" />
                         </button>
@@ -690,7 +710,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
 
                 {/* Fallback for plain text - only show if not streaming or no parsed content */}
                 {!parsed && message.content && !message.isStreaming && (
-                  <p className="text-[19px] text-primary-text leading-[1.8] font-normal">{message.content}</p>
+                  <p className="text-[16px] text-primary-text leading-[1.7] font-normal">{message.content}</p>
                 )}
                 
                 {/* Typing indicator - show at the bottom of content if still streaming */}
@@ -708,7 +728,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                 {message.parsedContent?.questions && 
                  message.parsedContent.questions.length > 0 && (
                   <div className="mt-6 pt-6 border-t border-gray-100">
-                    <p className="text-[16px] text-secondary-text mb-4 font-normal">Let&apos;s talk more?</p>
+                    <p className="text-[14px] text-secondary-text-thin mb-3">Let&apos;s talk more?</p>
                     <div className="space-y-3">
                       {message.parsedContent.questions.map((question, qIdx) => {
                         const cleanQuestion = stripHtml(question);
@@ -723,7 +743,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                               </svg>
                             </div>
-                            <p className="text-[16px] text-secondary-text-thin leading-[1.6] font-normal group-hover:text-primary-text transition-colors flex-1">
+                            <p className="text-[14px] text-secondary-text-thin leading-[1.5] group-hover:text-primary-text transition-colors flex-1">
                               {cleanQuestion}
                             </p>
                             
@@ -753,15 +773,20 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative">
       {/* Header */}
       {renderHeader?.()}
 
-      {/* Messages Area - Scrollable with proper flex */}
-      <div className="flex-1 overflow-y-auto min-h-0 pb-safe">
+      {/* Messages Area - Scrollable */}
+      <div 
+        className="chat-messages-container"
+        style={{
+          paddingBottom: isKeyboardVisible ? `${keyboardHeight + 20}px` : '20px'
+        }}
+      >
         {/* Prompt Templates (only show when no messages) */}
         {messages.length === 0 && renderPromptTemplates && (
-          <div className="h-full flex flex-col">
+          <div className="min-h-full flex flex-col">
             {renderPromptTemplates(messages)}
           </div>
         )}
@@ -779,17 +804,14 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
         )}
       </div>
 
-      {/* Input Area - Fixed at Bottom with safe area */}
-      <div className="flex-shrink-0">
-        <ChatEditor
-          value={input}
-          onChange={setInput}
-          onSubmit={handleSendMessage}
-          isLoading={isLoading}
-          className="flex-shrink-0"
-          autoFocus={!!selectedPrompt}
-        />
-      </div>
+      {/* Input Area - Absolutely positioned */}
+      <ChatEditor
+        value={input}
+        onChange={setInput}
+        onSubmit={handleSendMessage}
+        isLoading={isLoading}
+        autoFocus={!!selectedPrompt}
+      />
 
       {showRoutineModal && routineData && (
         <RoutineCreationModal

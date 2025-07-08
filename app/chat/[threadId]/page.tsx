@@ -29,10 +29,27 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
     }
   }, []);
 
+  useEffect(() => {
+    // Prevent body scroll on iOS
+    const originalPosition = document.body.style.position;
+    const originalTop = document.body.style.top;
+    const scrollY = window.scrollY;
+    
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    
+    return () => {
+      document.body.style.position = originalPosition;
+      document.body.style.top = originalTop;
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
+
   return (
-    <div className="fixed inset-0 flex flex-col bg-gray-50 overscroll-none">
+    <div className="chat-layout bg-gray-50">
       {/* Status Bar Area */}
-      <div className="safe-area-top" />
+      <div className="safe-area-top flex-shrink-0" />
       
       {/* Header */}
       <div className="app-header backdrop-blur-xl bg-white/90 border-b border-gray-200 flex-shrink-0">
@@ -55,7 +72,7 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
       
       {/* Creation Mode Badge */}
       {chatIntent === 'create_thriving' && (
-        <div className="flex justify-center py-2 flex-shrink-0">
+        <div className="flex justify-center py-2 flex-shrink-0 bg-white/80">
           <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-rose to-burgundy text-white px-4 py-1.5 rounded-full text-sm shadow-lg">
             <span>🌿</span>
             <span className="font-medium">Thriving Creation Mode</span>
@@ -63,10 +80,8 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
         </div>
       )}
       
-      {/* Main Chat Container - Flex to fill remaining height */}
-      <div className="flex-1 flex flex-col overflow-hidden min-h-0" style={{
-        paddingBottom: 'env(keyboard-inset-height, 0)'
-      }}>
+      {/* Main Chat Container - Uses remaining height */}
+      <div className="flex-1 overflow-hidden">
         <SmartCardChat
           threadId={currentThreadId === 'new' ? undefined : currentThreadId}
           chatIntent={chatIntent}

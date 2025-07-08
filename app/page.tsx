@@ -225,6 +225,10 @@ export default function HomePage() {
                   <h2 className="text-2xl font-bold text-primary-text">Your Thrivings</h2>
                   <Link 
                     href="/thrivings"
+                    onClick={() => {
+                      // Set flag to indicate we're navigating from home page
+                      sessionStorage.setItem('navigateFromHome', 'true');
+                    }}
                     className="flex items-center space-x-1 text-sm font-medium text-secondary-text hover:text-primary-text transition-colors"
                   >
                     <span>See all</span>

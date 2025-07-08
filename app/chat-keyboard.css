@@ -1,0 +1,72 @@
+/* Chat keyboard handling styles */
+
+/* Base layout for chat screen */
+.chat-layout {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  /* iOS safe height - this is crucial for keyboard handling */
+  height: -webkit-fill-available;
+  height: 100dvh; /* Dynamic viewport height that adjusts with keyboard */
+  overflow: hidden;
+}
+
+/* Messages container */
+.chat-messages-container {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  /* Base padding for messages */
+  padding-bottom: 20px;
+}
+
+/* Input container - NOT fixed on iOS */
+.chat-input-wrapper {
+  position: relative;
+  flex-shrink: 0;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  /* Safe area for iOS */
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Only use fixed positioning on non-iOS or when keyboard is not visible */
+@supports not (-webkit-touch-callout: none) {
+  /* Non-iOS browsers */
+  .chat-input-wrapper {
+    position: sticky;
+    bottom: 0;
+  }
+}
+
+/* Android Chrome specific fixes */
+@supports (height: 100dvh) {
+  .chat-layout {
+    height: 100dvh;
+  }
+}
+
+/* iOS Safari keyboard handling */
+@supports (-webkit-touch-callout: none) {
+  /* When input is focused on iOS */
+  .chat-input-wrapper:focus-within {
+    position: relative;
+  }
+  
+  /* Adjust scroll padding when keyboard is likely visible */
+  .keyboard-visible .chat-messages-container {
+    /* This will be dynamically adjusted via JS */
+    transition: padding-bottom 0.3s ease-out;
+  }
+}
+
+/* Prevent overscroll on chat screens */
+.chat-no-bounce {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  -webkit-overflow-scrolling: auto;
+}

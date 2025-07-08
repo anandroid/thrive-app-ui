@@ -346,3 +346,47 @@ This ensures:
 - Clean dependency resolution
 
 **Important**: Never skip the build step after making changes!
+
+## 🔄 Loading Button Component
+
+### Overview
+A reusable loading button component (`/components/ui/LoadingButton.tsx`) that provides dynamic loading messages and smooth animations during async operations.
+
+### Features
+- **Rotating spinner animation** - Smooth CSS animation that rotates continuously
+- **Dynamic loading messages** - Cycles through different messages after 2 seconds
+- **Customizable messages** - Pass your own array of loading messages
+- **Consistent button size** - Prevents layout shifts during loading
+- **Mobile-optimized** - Minimum 44px touch targets, text truncation for small screens
+
+### Usage Example
+```jsx
+import { LoadingButton } from '@/components/ui/LoadingButton';
+
+<LoadingButton
+  onClick={handleCreate}
+  isLoading={isCreating}
+  className="px-6 py-3 rounded-full bg-primary-text text-white"
+  loadingMessages={[
+    'Creating...',
+    'Analyzing your needs...',
+    'Personalizing routine...',
+    'Adding wellness wisdom...',
+    'Almost ready...'
+  ]}
+  messageInterval={2500} // Change message every 2.5 seconds
+>
+  Create Routine
+</LoadingButton>
+```
+
+### Implementation Details
+- Messages start cycling after 2 seconds to avoid flashing for quick operations
+- Text is truncated with max-width to prevent button expansion
+- Spinner uses `animate-spin` CSS class defined in globals.css
+- Button maintains disabled state during loading
+- Supports custom spinner colors via `spinnerClassName`
+
+### Used In
+- **RoutineCreationModal** - Creating wellness routines with personalized messages
+- **JourneyCreationModal** - Creating thriving journals with context-aware messages

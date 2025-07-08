@@ -1,13 +1,14 @@
 @import "tailwindcss";
 @import "../styles/touch-feedback.css";
+@import "./chat-keyboard.css";
 
 :root {
   /* Base Colors */
   --root-bg: #f7e1e5; /* soft blush pink */
   --primary-text: #000000; /* black */
-  --secondary-text: #3a5163; /* slate blue (was primary) */
-  --secondary-text-thin: #4a5568; /* lighter slate (was secondary) */
-  --light-text: #718096; /* subtle text/hints */
+  --secondary-text: #2d3748; /* darker slate for better readability */
+  --secondary-text-thin: #4a5568; /* darker gray (was too light at #3a5163) */
+  --light-text: #6b7280; /* medium gray for better contrast */
   
   /* Rose/Burgundy Family (Primary) */
   --strong-rose: #e11d48;
@@ -243,24 +244,31 @@ input, textarea, [contenteditable] {
   }
 }
 
-/* Ensure chat editor stays visible when keyboard appears */
+/* Chat input positioning for mobile keyboards */
 .chat-input-container {
-  position: sticky;
+  position: fixed;
   bottom: 0;
+  left: 0;
+  right: 0;
   z-index: 50;
   background: white;
-  /* Add extra padding when keyboard is likely visible */
-  padding-bottom: env(keyboard-inset-height, 0);
-  /* Ensure it stays above keyboard on iOS */
-  transform: translateZ(0);
-  transition: transform 0.3s ease-out;
-  will-change: transform;
+  border-top: 1px solid #e5e7eb;
+  /* Safe area for iOS */
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* iOS specific keyboard handling */
-@supports (padding: max(0px)) {
-  .chat-input-container {
-    padding-bottom: max(env(safe-area-inset-bottom), 1.5rem);
+/* Viewport height that accounts for mobile browser chrome */
+.h-screen-safe {
+  height: 100vh;
+  height: -webkit-fill-available;
+  height: 100dvh;
+  min-height: -webkit-fill-available;
+}
+
+/* Fixed positioning that respects viewport */
+@supports (height: 100dvh) {
+  .h-screen-safe {
+    height: 100dvh;
   }
 }
 
@@ -287,22 +295,20 @@ input, textarea, [contenteditable] {
   }
 }
 
-/* Additional keyboard handling for iOS Safari */
-@supports (-webkit-touch-callout: none) {
-  .chat-input-container:focus-within {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    /* Use constant for older iOS versions */
-    padding-bottom: constant(safe-area-inset-bottom);
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  
-  /* When keyboard is visible, add extra bottom margin to content */
-  .has-keyboard-visible {
-    padding-bottom: 50vh !important;
-  }
+/* Prevent overscroll and bounce on iOS */
+.overscroll-contain {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Chat messages container */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  /* Padding for last message visibility */
+  padding-bottom: 1rem;
 }
 
 .shadow-elegant-sm {
@@ -312,6 +318,17 @@ input, textarea, [contenteditable] {
 /* Hide scrollbars for native feel */
 ::-webkit-scrollbar {
   display: none;
+}
+
+/* Spinner animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 
 .scrollbar-hide {
@@ -360,6 +377,24 @@ input, textarea, [contenteditable] {
 /* Native-like transitions - Smoother, more deliberate */
 .native-transition {
   transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Action Bar Styles */
+.action-bar-container {
+  background: linear-gradient(to top, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.95) 50%, rgba(255, 255, 255, 0) 100%);
+  padding-top: 20px;
+  position: relative;
+  z-index: 10;
+}
+
+.action-bar-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.1) 20%, rgba(0, 0, 0, 0.1) 80%, transparent);
 }
 
 /* Bottom sheet animation */
