@@ -160,22 +160,20 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-white"
+      className="layout-wrapper illustration-layout"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
       {/* Background Layer */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-soft-blush/80 via-white to-soft-lavender/30" />
         <div className="absolute top-20 -right-20 w-96 h-96 rounded-full bg-gradient-to-br from-rose/20 to-dusty-rose/20 blur-3xl animate-pulse-slow" />
         <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-gradient-to-tr from-sage-light/40 to-sage/30 blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
       </div>
       
-      {/* Main Content Container */}
-      <div className="relative z-10 h-full flex flex-col">
-        {/* Header */}
-        <div className="flex-shrink-0 flex justify-between items-center p-4">
+      {/* Header with progress indicators */}
+      <div className="absolute top-0 left-0 right-0 z-20 p-4 safe-top">
         <div className="flex space-x-2">
           {slides.map((_, index) => (
             <div
@@ -203,11 +201,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       {/* Scrollable Content */}
       <div 
         ref={containerRef}
-        className="flex-1 overflow-y-auto"
-        style={{ 
-          WebkitOverflowScrolling: 'touch',
-          height: '100%'
-        }}
+        className="layout-content relative z-10"
       >
         <div className="max-w-md mx-auto w-full px-6 py-4">
           {/* Image with themed background */}
@@ -245,7 +239,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       </div>
 
       {/* Bottom Navigation - Fixed */}
-      <div className="flex-shrink-0 p-4 sm:p-6 bg-white/95 backdrop-blur-lg safe-area-bottom border-t border-gray-100">
+      <div className="layout-footer">
         <button
           onClick={handleNext}
           className="w-full py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-rose to-burgundy text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center active:scale-[0.98] touch-manipulation"
@@ -254,8 +248,6 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           {isLastSlide ? 'Get Started' : 'Continue'}
           <ChevronRight className="w-5 h-5 ml-2" />
         </button>
-        
-      </div>
       </div>
     </div>
   );

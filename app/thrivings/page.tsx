@@ -6,7 +6,7 @@ import {
   Clock, 
   Bell, Edit2, Trash2,
   Plus, Target, Settings,
-  ChevronDown, ChevronUp, Lightbulb, Package, Play, CheckCircle2, BookOpen, Heart
+  ChevronDown, ChevronUp, ChevronRight, Lightbulb, Package, Play, CheckCircle2, BookOpen, Heart
 } from 'lucide-react';
 import { Thriving } from '@/src/types/thriving';
 import { getThrivingsFromStorage, updateThrivingInStorage, deleteThrivingFromStorage } from '@/src/utils/thrivingStorage';
@@ -337,10 +337,6 @@ export default function ThrivingsPage() {
     >
 
         <div className="max-w-7xl mx-auto p-4 lg:p-8">
-          {/* Page Title */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Your Thrivings</h1>
-          </div>
 
           {/* Empty State */}
           {thrivings.length === 0 ? (
@@ -363,6 +359,13 @@ export default function ThrivingsPage() {
             <>
               {/* Thriving Cards - Horizontal Scroll */}
               <div className="relative mb-8">
+                {/* Swipe Indicator */}
+                {thrivings.length > 1 && (
+                  <div className="absolute top-2 right-2 z-20 flex items-center text-xs text-gray-500 bg-white/80 backdrop-blur-sm rounded-full px-2 py-1 shadow-sm animate-pulse">
+                    <span>swipe</span>
+                    <ChevronRight className="w-3 h-3 ml-0.5" />
+                  </div>
+                )}
                 {/* Scroll Indicators - Dots at bottom */}
                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
                   {[...thrivings, { id: 'add-new' }].map((item, index) => (

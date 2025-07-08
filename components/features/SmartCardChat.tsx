@@ -771,14 +771,14 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   };
 
   return (
-    <div className="chat-wrapper">
+    <div className="layout-wrapper chat-layout">
       {/* Header - stays at top */}
-      <div className="chat-header-section">
+      <div className="layout-header">
         {renderHeader?.()}
       </div>
 
       {/* Messages - scrollable middle section */}
-      <div className="chat-messages-section">
+      <div className="layout-content">
         {/* Prompt Templates (only show when no messages) */}
         {messages.length === 0 && renderPromptTemplates && (
           <div className="h-full flex flex-col">
@@ -788,19 +788,19 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
         
         {/* Messages */}
         {messages.length > 0 && (
-          <div className="px-4 py-4">
+          <div className="content-padding py-4">
             {messages.map((message, idx) => (
               <React.Fragment key={idx}>
                 {renderMessage(message, idx)}
               </React.Fragment>
             ))}
-            <div ref={messagesEndRef} className="h-20" />
+            <div ref={messagesEndRef} className="h-4" />
           </div>
         )}
       </div>
 
       {/* Input - stays at bottom */}
-      <div className="chat-input-section safe-bottom">
+      <div className="layout-input">
         <ChatEditor
           value={input}
           onChange={setInput}

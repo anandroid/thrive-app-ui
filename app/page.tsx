@@ -164,10 +164,10 @@ export default function HomePage() {
       )}
       
       {/* Main app content - Always rendered but visibility controlled */}
-      <div className={`home-wrapper ${showSlideAnimation ? 'animate-scale-in' : ''} ${showOnboarding && !isTransitioning ? 'opacity-0 pointer-events-none' : ''}`}>
+      <div className={`layout-wrapper home-layout ${showSlideAnimation ? 'animate-scale-in' : ''} ${showOnboarding && !isTransitioning ? 'opacity-0 pointer-events-none' : ''}`}>
         {/* Header - stays at top */}
-        <div className="home-header-section">
-          <div className="flex items-center justify-between px-4 h-14">
+        <div className="layout-header">
+          <div className="flex items-center justify-between header-padding h-full">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center">
                 <Leaf className="w-6 h-6 text-white" />
@@ -194,11 +194,11 @@ export default function HomePage() {
         </div>
 
         {/* Main Content - Scrollable */}
-        <div className="home-content-section">
+        <div className="layout-content">
           <div className={`transition-opacity duration-300 ${isHydrated ? 'opacity-100' : 'opacity-0'}`}>
             {/* Thrivings Section - Only show if thrivings exist */}
             {thrivings.length > 0 && (
-              <div className="px-4 py-6 bg-gray-50">
+              <div className="content-padding py-6 bg-gray-50">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-2xl font-bold text-primary-text">Your Thrivings</h2>
                   <Link 
@@ -296,7 +296,7 @@ export default function HomePage() {
             )}
 
             {/* Prompt Templates */}
-            <div className="px-4 py-8 space-y-3 bg-gradient-to-br from-sage-light/10 to-sage/10 backdrop-blur-sm">
+            <div className="content-padding py-8 space-y-3 bg-gradient-to-br from-sage-light/10 to-sage/10 backdrop-blur-sm">
               <p className="text-lg text-secondary-text font-light text-center mb-8">
                 How can I help you thrive?
               </p>
@@ -328,7 +328,7 @@ export default function HomePage() {
         </div>
 
         {/* Input Area - Fixed at Bottom */}
-        <div className="home-input-section safe-bottom">
+        <div className="layout-input">
           <ChatEditor
             value={input}
             onChange={setInput}

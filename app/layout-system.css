@@ -1,0 +1,240 @@
+/* Modern Layout System with Dynamic Viewport Units */
+
+/* CSS Custom Properties for consistent sizing */
+:root {
+  /* Header height - using fixed values for consistency */
+  --header-height: 3.5rem; /* 56px */
+  --header-min-height: 3.5rem;
+  --header-max-height: 5rem;
+  
+  /* Input area height - using rem for better scaling */
+  --input-height: 5rem; /* 80px */
+  --input-min-height: 5rem;
+  --input-max-height: 7.5rem;
+  
+  /* Safe area handling */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  
+  /* Keyboard handling */
+  --keyboard-height: env(keyboard-inset-height, 0px);
+}
+
+/* Base layout wrapper - works for all full-screen layouts */
+.layout-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh; /* Use stable viewport height */
+  height: -webkit-fill-available; /* iOS Safari fix */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Prevent viewport resize on keyboard */
+@supports (height: 100dvh) {
+  .layout-wrapper {
+    height: 100vh; /* Keep using vh to prevent resize */
+  }
+}
+
+/* Fixed header that stays at top */
+.layout-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header-height);
+  padding-top: var(--safe-top);
+  z-index: 50;
+  background: white;
+}
+
+/* Add padding to wrapper to account for fixed header */
+.layout-wrapper {
+  padding-top: calc(var(--header-height) + var(--safe-top));
+}
+
+/* Scrollable content area */
+.layout-content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  position: relative;
+  /* Account for input area with extra padding */
+  padding-bottom: calc(var(--input-min-height) + 2rem);
+}
+
+/* Fixed bottom input/action area */
+.layout-input {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  min-height: var(--input-min-height);
+  max-height: var(--input-max-height);
+  padding-bottom: var(--safe-bottom);
+  background: white;
+  z-index: 40;
+  /* Will be pushed up by keyboard naturally */
+}
+
+/* When keyboard is visible, adjust padding */
+@supports (bottom: env(keyboard-inset-height)) {
+  .layout-input {
+    /* Use keyboard height if available */
+    bottom: env(keyboard-inset-height, 0px);
+  }
+}
+
+/* Fallback for browsers without keyboard-inset-height */
+@supports not (bottom: env(keyboard-inset-height)) {
+  .layout-input {
+    /* On iOS Safari, position:fixed elements move up with keyboard automatically */
+    position: fixed;
+  }
+}
+
+/* Chat-specific layout adjustments */
+.chat-layout {
+  --header-height: 3.5rem;
+  --input-height: 5rem;
+}
+
+.chat-layout .layout-content {
+  background: #f9fafb;
+}
+
+/* Home-specific layout adjustments */
+.home-layout {
+  --header-height: 3.5rem;
+  --input-height: 5rem;
+}
+
+.home-layout .layout-content {
+  background: #fefefe;
+}
+
+/* Onboarding/Illustration layout */
+.illustration-layout {
+  --header-height: 0; /* No header */
+  --footer-height: 8rem; /* Fixed height for button area */
+  padding-top: 0; /* Override wrapper padding */
+}
+
+.illustration-layout .layout-wrapper {
+  background: white;
+  padding-top: 0;
+}
+
+.illustration-layout .layout-content {
+  padding-bottom: calc(var(--footer-height) + var(--safe-bottom) + 1rem);
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--safe-top);
+}
+
+.illustration-layout .layout-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  min-height: var(--footer-height);
+  padding: 1rem;
+  padding-bottom: max(var(--safe-bottom), 1rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  background: white;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Standard page layout (non-fixed) */
+.page-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-layout .layout-header {
+  position: sticky;
+  top: 0;
+  height: auto;
+  min-height: var(--header-min-height);
+}
+
+.page-layout .layout-content {
+  flex: 1;
+  padding-bottom: var(--safe-bottom);
+}
+
+/* Responsive adjustments for very small devices */
+@media (max-height: 600px) {
+  :root {
+    --header-height: 3rem;
+    --input-height: 4rem;
+  }
+  
+  .illustration-layout {
+    --footer-height: 6rem;
+  }
+}
+
+/* Landscape mode adjustments */
+@media (orientation: landscape) and (max-height: 500px) {
+  :root {
+    --header-height: 2.5rem;
+    --input-height: 3.5rem;
+  }
+  
+  .illustration-layout {
+    --footer-height: 5rem;
+  }
+}
+
+/* Utility classes for content spacing */
+.content-padding {
+  padding: 1rem;
+  padding-left: max(1rem, var(--safe-left));
+  padding-right: max(1rem, var(--safe-right));
+}
+
+.header-padding {
+  padding-left: max(1rem, var(--safe-left));
+  padding-right: max(1rem, var(--safe-right));
+}
+
+/* Ensure body doesn't interfere */
+body:has(.layout-wrapper) {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+/* Visual debugging (remove in production) */
+.debug-layout {
+  --debug-color: rgba(255, 0, 0, 0.1);
+}
+
+.debug-layout .layout-header {
+  background-color: var(--debug-color);
+}
+
+.debug-layout .layout-content {
+  background-color: rgba(0, 255, 0, 0.1);
+}
+
+.debug-layout .layout-input,
+.debug-layout .layout-footer {
+  background-color: rgba(0, 0, 255, 0.1);
+}

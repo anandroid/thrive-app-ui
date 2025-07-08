@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @import "../styles/touch-feedback.css";
-@import "./chat-layout-simple.css";
-@import "./home-layout.css";
+@import "./layout-system.css";
 
 :root {
   /* Base Colors */
@@ -60,7 +59,6 @@
 
 html {
   height: 100%;
-  overflow: hidden;
 }
 
 body {
@@ -70,8 +68,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
   /* Eliminates 300ms delay on all touch interactions */
   touch-action: manipulation;
   -webkit-user-select: none;
@@ -273,6 +270,21 @@ input, textarea, [contenteditable] {
 /* Native-like transitions - Smoother, more deliberate */
 .native-transition {
   transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Legacy app screen support - uses page layout */
+.app-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding-top: env(safe-area-inset-top);
 }
 
 /* Action Bar Styles */

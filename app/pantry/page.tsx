@@ -142,7 +142,6 @@ export default function PantryPage() {
   return (
     <div className="app-screen bg-gray-50">
       {/* Header */}
-      <div className="safe-area-top" />
       <div className="app-header bg-white border-b border-gray-200">
         <div className="flex items-center justify-between px-4 h-14">
           <Link 

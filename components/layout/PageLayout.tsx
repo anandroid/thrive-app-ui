@@ -28,24 +28,21 @@ export function PageLayout({
   contentClassName = ''
 }: PageLayoutProps) {
   return (
-    <div className={`fixed inset-0 flex flex-col bg-gray-50 ${className}`}>
-      {/* Status Bar Area */}
-      <div className="safe-area-top flex-shrink-0" />
-      
+    <div className={`page-layout bg-gray-50 ${className}`}>
       {/* Header */}
       {header && (
-        <div className={`app-header backdrop-blur-xl bg-white/90 border-b border-gray-200 flex-shrink-0 ${headerClassName}`}>
-          <div className="flex items-center justify-between px-4 h-14">
+        <div className={`layout-header backdrop-blur-xl bg-white/90 border-b border-gray-200 ${headerClassName}`}>
+          <div className="flex items-center justify-between header-padding h-full">
             {/* Left Element */}
             {header.showBackButton ? (
               <Link 
                 href={header.backHref || '/'}
-                className="w-10 h-10 rounded-full flex items-center justify-center bg-white/80 hover:bg-white native-transition shadow-md touch-feedback touch-manipulation"
+                className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-xl flex items-center justify-center bg-white/60 hover:bg-white/90 native-transition shadow-lg hover:shadow-xl touch-feedback touch-manipulation"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-700" />
               </Link>
             ) : (
-              <div className="w-10" />
+              <div className="w-11" />
             )}
             
             {/* Center Element */}
@@ -58,7 +55,7 @@ export function PageLayout({
             </div>
             
             {/* Right Element */}
-            <div className="w-10 flex items-center justify-end">
+            <div className="w-11 flex items-center justify-end">
               {header.rightElement || null}
             </div>
           </div>
@@ -66,7 +63,7 @@ export function PageLayout({
       )}
       
       {/* Main Content - Scrollable */}
-      <div className={`flex-1 overflow-y-auto ${contentClassName}`}>
+      <div className={`layout-content ${contentClassName}`}>
         {children}
       </div>
       

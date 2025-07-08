@@ -1,83 +1,33 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Info, Moon, ChevronRight, Plus, Leaf, MessageSquare } from 'lucide-react';
-import { AboutSection } from '@/components/features/AboutSection';
+import { Info, Moon, ChevronRight, Plus, Leaf, MessageSquare } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getTouchClasses } from '@/hooks/useTouchFeedback';
-import { TouchButton } from '@/components/ui/TouchButton';
+import { PageLayout } from '@/components/layout/PageLayout';
 
 export default function SettingsPage() {
-  const [showAbout, setShowAbout] = useState(false);
   const router = useRouter();
 
-  if (showAbout) {
-    return (
-      <div className="app-screen bg-gray-50">
-        {/* Status Bar Area */}
-        <div className="safe-area-top" />
-        
-        {/* Header */}
-        <div className="app-header bg-white border-b border-gray-200">
-          <div className="flex items-center justify-between px-4 h-14">
-            <TouchButton 
-              onClick={() => setShowAbout(false)}
-              className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-gray-100"
-              variant="ghost"
-              size="sm"
-              haptic="light"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-700" />
-            </TouchButton>
-            <h1 className="text-lg font-semibold text-secondary-text">About</h1>
-            <div className="w-10" />
-          </div>
-        </div>
-        
-        {/* About Content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="px-4 py-6">
-            <AboutSection />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="app-screen relative overflow-hidden">
-      {/* Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-soft-blush via-white to-soft-lavender/20" />
-      
-      {/* Decorative Elements */}
-      <div className="absolute top-20 -right-20 w-96 h-96 rounded-full bg-gradient-to-br from-sage-light/10 to-sage/10 blur-3xl" />
-      <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-gradient-to-tr from-rose/10 to-burgundy/10 blur-3xl" />
-      
-      {/* Content */}
-      <div className="relative z-10 flex flex-col h-full">
-        {/* Status Bar Area */}
-        <div className="safe-area-top" />
+    <PageLayout
+      header={{
+        showBackButton: true,
+        backHref: "/",
+        title: "Settings"
+      }}
+    >
+      <div className="relative">
+        {/* Background Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-soft-blush via-white to-soft-lavender/20 -z-10" />
         
-        {/* Header */}
-        <div className="app-header backdrop-blur-xl bg-white/70 border-b-0">
-          <div className="flex items-center justify-between px-4 h-14">
-            <Link 
-              href="/"
-              className={getTouchClasses(
-                "w-10 h-10 rounded-full flex items-center justify-center bg-white/50 hover:bg-white/80 native-transition shadow-sm",
-                { feedback: true, nativePress: true }
-              )}
-            >
-              <ArrowLeft className="w-5 h-5 text-burgundy" />
-            </Link>
-            <h1 className="text-lg font-semibold text-primary-text">Settings</h1>
-            <div className="w-10" />
-          </div>
-        </div>
+        {/* Decorative Elements */}
+        <div className="absolute top-20 -right-20 w-96 h-96 rounded-full bg-gradient-to-br from-sage-light/10 to-sage/10 blur-3xl" />
+        <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-gradient-to-tr from-rose/10 to-burgundy/10 blur-3xl" />
         
         {/* Settings Content */}
-        <div className="flex-1 app-content px-4 py-6">
+        <div className="px-4 py-6">
           <div className="space-y-4">
             {/* Quick Actions */}
             <div className="mb-6">
@@ -196,7 +146,7 @@ export default function SettingsPage() {
             
             {/* About */}
             <button 
-              onClick={() => setShowAbout(true)}
+              onClick={() => router.push('/settings/about')}
               className={getTouchClasses(
                 "w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-dusty-rose/20 p-4 shadow-sm hover:shadow-md transition-all text-left",
                 { feedback: true }
@@ -219,7 +169,7 @@ export default function SettingsPage() {
           
           {/* Footer */}
           <div className="mt-12 text-center">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center shadow-xl shadow-rose/50">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center">
               <Leaf className="w-8 h-8 text-white" />
             </div>
             <p className="text-sm text-primary-text/60">
@@ -228,6 +178,6 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }

@@ -67,7 +67,7 @@ export default function ChatHistoryPage() {
   return (
     <div className="app-screen bg-gray-50">
       {/* Header */}
-      <div className="app-header backdrop-blur-xl bg-white/90 border-b border-gray-200">
+      <div className="app-header bg-white border-b border-gray-200">
         <div className="flex items-center justify-between px-4 h-14">
           <Link 
             href="/settings"
