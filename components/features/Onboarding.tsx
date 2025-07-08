@@ -234,13 +234,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             <h2 className="text-2xl sm:text-3xl font-bold text-primary-text">
               {slide.title}
             </h2>
-            <p className={`text-base sm:text-lg font-medium ${
-              currentSlide === 0 ? 'text-rose' :
-              currentSlide === 1 ? 'text-sage-dark' :
-              currentSlide === 2 ? 'text-rose' :
-              currentSlide === 3 ? 'text-purple-600' :
-              'text-burgundy'
-            }`}>
+            <p className="text-base sm:text-lg font-medium text-secondary-text">
               {slide.subtitle}
             </p>
             <p className="text-sm sm:text-base text-secondary-text-thin leading-relaxed">
