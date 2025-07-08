@@ -173,12 +173,8 @@ export default function HomePage() {
       
       {/* Main app content - Always rendered but visibility controlled */}
       <div className={`fixed inset-0 flex flex-col overscroll-none ${showSlideAnimation ? 'animate-scale-in' : ''} ${showOnboarding && !isTransitioning ? 'opacity-0 pointer-events-none' : ''}`}>
-      {/* Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-soft-blush/80 via-white to-soft-lavender/30" />
-      
-      {/* Decorative Elements */}
-      <div className="absolute top-20 -right-20 w-96 h-96 rounded-full bg-gradient-to-br from-rose/20 to-dusty-rose/20 blur-3xl" />
-      <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-gradient-to-tr from-sage-light/40 to-sage/30 blur-3xl" />
+      {/* Background - Soft burgundy base with blur */}
+      <div className="absolute inset-0 bg-burgundy/5 backdrop-blur-sm" />
       
       {/* Content */}
       <div className="relative z-10 flex flex-col h-full">
@@ -242,7 +238,7 @@ export default function HomePage() {
                     {thrivings.slice(0, 5).map((thriving, index) => (
                       <div
                         key={thriving.id}
-                        className="flex-none w-[280px] p-5 rounded-2xl bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-all group cursor-pointer touch-feedback touch-manipulation"
+                        className="flex-none w-[280px] p-5 rounded-2xl bg-white card-soft-glow transition-all group cursor-pointer touch-feedback touch-manipulation"
                         onClick={() => router.push(`/thrivings?id=${thriving.id}`)}
                       >
                         <div className="flex items-start justify-between mb-3">
@@ -346,7 +342,7 @@ export default function HomePage() {
                             sessionStorage.setItem('selectedJourneyId', journey.id);
                             router.push('/journeys');
                           }}
-                          className="flex-none w-[280px] p-5 rounded-2xl bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-all group text-left touch-feedback touch-manipulation"
+                          className="flex-none w-[280px] p-5 rounded-2xl bg-white card-soft-glow transition-all group text-left touch-feedback touch-manipulation"
                         >
                           <div className="flex items-start justify-between mb-3">
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lavender/30 to-purple-500/20 flex items-center justify-center shadow-sm">
@@ -397,7 +393,7 @@ export default function HomePage() {
                     <button
                       key={index}
                       onClick={() => handlePromptClick(template.text)}
-                      className="relative flex items-center space-x-4 p-5 rounded-3xl bg-white/90 backdrop-blur-sm hover:bg-white native-transition text-left group shadow-lg shadow-gray-200/40 hover:shadow-xl hover:scale-[1.01] overflow-hidden touch-feedback touch-manipulation"
+                      className="relative flex items-center space-x-4 p-5 rounded-3xl bg-white/90 backdrop-blur-sm hover:bg-white native-transition text-left group card-soft-glow hover:scale-[1.01] overflow-hidden touch-feedback touch-manipulation"
                     >
                       
                       <div className="flex items-center space-x-4 w-full">

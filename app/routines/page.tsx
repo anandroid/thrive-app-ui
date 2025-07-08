@@ -720,28 +720,30 @@ export default function RoutinesPage() {
 
                   {/* Info Section */}
                   <div className="space-y-4">
-                    {/* Action Buttons */}
-                    <div className="rounded-2xl bg-gradient-to-br from-burgundy/10 to-burgundy/5 backdrop-blur-sm p-4 border border-burgundy/10">
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => handleCompleteRoutine(selectedRoutine.id)}
-                          className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 text-sm"
-                        >
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span>Complete</span>
-                        </button>
-                        
-                        <button
-                          onClick={() => handleDeleteRoutine(selectedRoutine.id)}
-                          className="flex-1 px-4 py-2.5 rounded-xl bg-white/80 backdrop-blur-sm text-gray-700 font-medium border border-gray-200 hover:bg-white/90 transition-all flex items-center justify-center gap-2 text-sm"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          <span>Delete</span>
-                        </button>
-                      </div>
-                    </div>
-                    {/* Routine Adjustment */}
+                    {/* Combined Actions & Adjustment Card */}
                     <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
+                      {/* Action Buttons at top */}
+                      <div className="mb-6 pb-6 border-b border-gray-100">
+                        <div className="flex gap-3">
+                          <button
+                            onClick={() => handleCompleteRoutine(selectedRoutine.id)}
+                            className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 text-sm"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                            <span>Complete</span>
+                          </button>
+                          
+                          <button
+                            onClick={() => handleDeleteRoutine(selectedRoutine.id)}
+                            className="flex-1 px-4 py-2.5 rounded-xl bg-white/80 backdrop-blur-sm text-gray-700 font-medium border border-gray-200 hover:bg-white/90 transition-all flex items-center justify-center gap-2 text-sm"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            <span>Delete</span>
+                          </button>
+                        </div>
+                      </div>
+                      
+                      {/* Adjust Routine section */}
                       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                         <Settings className="w-5 h-5 mr-2 text-rose" />
                         Adjust Routine

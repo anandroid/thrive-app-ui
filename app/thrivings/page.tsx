@@ -169,16 +169,26 @@ export default function ThrivingsPage() {
   };
 
   // Format time to ensure proper AM/PM display
-  const formatReminderTime = (time: string) => {
+  const formatReminderTime = (time: string | undefined | null) => {
     if (!time) return '';
     
+    // Convert to string in case it's not
+    const timeStr = String(time);
+    
     // If time already includes AM/PM, return as is
-    if (time.toLowerCase().includes('am') || time.toLowerCase().includes('pm')) {
-      return time;
+    if (timeStr.toLowerCase().includes('am') || timeStr.toLowerCase().includes('pm')) {
+      return timeStr;
     }
     
     // Parse time and add AM/PM
-    const [hours, minutes] = time.split(':').map(Number);
+    const timeParts = timeStr.split(':');
+    if (timeParts.length !== 2) return timeStr; // Return as is if not in HH:MM format
+    
+    const hours = Number(timeParts[0]);
+    const minutes = Number(timeParts[1]);
+    
+    if (isNaN(hours) || isNaN(minutes)) return timeStr; // Return as is if not valid numbers
+    
     const period = hours >= 12 ? 'PM' : 'AM';
     const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
     return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
@@ -309,27 +319,6 @@ export default function ThrivingsPage() {
     }
   }, [activeStep, selectedThriving]);
 
-  const actionBar = selectedThriving ? (
-    <div className="rounded-2xl bg-gradient-to-br from-burgundy/10 to-burgundy/5 backdrop-blur-sm p-4 border border-burgundy/10">
-      <div className="flex gap-3">
-        <button
-          onClick={() => handleCompleteThriving(selectedThriving.id)}
-          className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 text-sm touch-feedback touch-manipulation"
-        >
-          <CheckCircle2 className="w-4 h-4" />
-          <span>Complete</span>
-        </button>
-        
-        <button
-          onClick={() => handleDeleteThriving(selectedThriving.id)}
-          className="flex-1 px-4 py-2.5 rounded-xl bg-white/80 backdrop-blur-sm text-gray-700 font-medium border border-gray-200 hover:bg-white/90 transition-all flex items-center justify-center gap-2 text-sm touch-feedback touch-manipulation"
-        >
-          <Trash2 className="w-4 h-4" />
-          <span>Delete</span>
-        </button>
-      </div>
-    </div>
-  ) : null;
 
   return (
     <PageLayout
@@ -345,7 +334,6 @@ export default function ThrivingsPage() {
           </div>
         )
       }}
-      actionBar={actionBar}
     >
 
         <div className="max-w-7xl mx-auto p-4 lg:p-8">
@@ -551,8 +539,8 @@ export default function ThrivingsPage() {
               {/* Selected Thriving Details */}
               {selectedThriving && (
                 <div className="grid lg:grid-cols-3 gap-6">
-                  {/* Steps Section */}
-                  <div className="lg:col-span-2 space-y-4">
+                    {/* Steps Section */}
+                    <div className="lg:col-span-2 space-y-4">
                     {/* Daily Reminders Section */}
                     <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
                       <div className="flex justify-between items-center mb-6">
@@ -749,6 +737,27 @@ export default function ThrivingsPage() {
 
                   {/* Info Section */}
                   <div className="space-y-4">
+                    {/* Complete and Delete Buttons */}
+                    <div className="rounded-2xl bg-gradient-to-br from-burgundy/10 to-burgundy/5 backdrop-blur-sm p-4 border border-burgundy/10">
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => handleCompleteThriving(selectedThriving.id)}
+                          className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 text-sm touch-feedback touch-manipulation"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>Complete</span>
+                        </button>
+                        
+                        <button
+                          onClick={() => handleDeleteThriving(selectedThriving.id)}
+                          className="flex-1 px-4 py-2.5 rounded-xl bg-white/80 backdrop-blur-sm text-gray-700 font-medium border border-gray-200 hover:bg-white/90 transition-all flex items-center justify-center gap-2 text-sm touch-feedback touch-manipulation"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    </div>
+                    
                     {/* Thriving Adjustment */}
                     <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
                       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">

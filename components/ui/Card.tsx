@@ -2,24 +2,32 @@ import { forwardRef } from 'react';
 import { cn } from '@/lib/utils/cn';
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'elevated';
+  variant?: 'default' | 'elevated' | 'gradient' | 'gradient-subtle' | 'soft-glow';
+  gradientColor?: 'peach' | 'sage' | 'lavender' | 'default';
 }
 
 const Card = forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant = 'default', ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn(
-        'rounded-lg bg-white',
-        {
-          'border border-warm-gray/10': variant === 'default',
-          'shadow-md': variant === 'elevated',
-        },
-        className
-      )}
-      {...props}
-    />
-  )
+  ({ className, variant = 'default', gradientColor = 'peach', ...props }, ref) => {
+    const gradientColorClass = gradientColor === 'default' ? '' : `-${gradientColor}`;
+    
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'rounded-lg bg-white',
+          {
+            'border border-warm-gray/10': variant === 'default',
+            'shadow-md': variant === 'elevated',
+            [`card-gradient-border card-gradient-border${gradientColorClass}`]: variant === 'gradient',
+            [`card-gradient-border card-gradient-border${gradientColorClass} card-gradient-border-subtle`]: variant === 'gradient-subtle',
+            'card-soft-glow': variant === 'soft-glow',
+          },
+          className
+        )}
+        {...props}
+      />
+    );
+  }
 );
 
 Card.displayName = 'Card';

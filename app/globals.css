@@ -63,7 +63,7 @@ html {
 }
 
 body {
-  background: #ffffff;
+  background: #fefefe;
   color: var(--foreground);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -523,4 +523,88 @@ input, textarea, [contenteditable] {
 
 .prose p:last-child {
   margin-bottom: 0;
+}
+
+/* Card Gradient Border System */
+.card-gradient-border {
+  position: relative;
+  background: white;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.card-gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, 
+    var(--rose) 0%, 
+    var(--dusty-rose) 25%, 
+    var(--soft-blush) 50%, 
+    var(--soft-lavender) 75%, 
+    var(--rose) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Variant: Peachy Bronze for white cards */
+.card-gradient-border-peach::before {
+  background: linear-gradient(135deg, 
+    #FFD4B5 0%, 
+    #FFE8DC 25%, 
+    #FFDAB9 50%, 
+    #FFB5BA 75%, 
+    #FFD4B5 100%);
+}
+
+/* Variant: Sage Green */
+.card-gradient-border-sage::before {
+  background: linear-gradient(135deg, 
+    var(--sage-light) 0%, 
+    var(--sage) 50%, 
+    var(--sage-dark) 100%);
+}
+
+/* Variant: Lavender */
+.card-gradient-border-lavender::before {
+  background: linear-gradient(135deg, 
+    var(--soft-lavender) 0%, 
+    var(--dusty-rose) 50%, 
+    var(--soft-blush) 100%);
+}
+
+/* Subtle variant with lower opacity */
+.card-gradient-border-subtle::before {
+  opacity: 0.5;
+}
+
+/* Animated gradient border */
+.card-gradient-border-animated::before {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Alternative approach using box-shadow for softer effect */
+.card-soft-glow {
+  box-shadow: 
+    0 1px 2px rgba(255, 212, 181, 0.3),
+    0 2px 4px rgba(200, 200, 200, 0.15);
+  transition: all 0.3s ease;
+}
+
+.card-soft-glow:hover {
+  box-shadow: 
+    0 1px 3px rgba(255, 212, 181, 0.4),
+    0 3px 6px rgba(180, 180, 180, 0.2);
+  transform: translateY(-0.5px);
 }
