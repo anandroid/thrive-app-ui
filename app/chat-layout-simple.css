@@ -1,0 +1,61 @@
+/* Simple chat layout that actually works */
+
+/* Chat container - full viewport height */
+.chat-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  background: #f9fafb;
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* Header - stays at top */
+.chat-header-section {
+  flex-shrink: 0;
+  background: white;
+  z-index: 10;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Messages - scrollable middle section */
+.chat-messages-section {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+  overscroll-behavior: contain;
+}
+
+/* Input - stays at bottom */
+.chat-input-section {
+  flex-shrink: 0;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  min-height: fit-content;
+}
+
+/* iOS keyboard handling */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Ensure the viewport adjusts when keyboard appears */
+@supports (height: 100dvh) {
+  .chat-wrapper {
+    height: 100dvh;
+  }
+}
+
+/* Remove any scroll on body when chat is open */
+body:has(.chat-wrapper) {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}

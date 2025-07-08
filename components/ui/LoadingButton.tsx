@@ -37,12 +37,10 @@ export const LoadingButton: React.FC<LoadingButtonProps> = ({
   showSpinner = true,
   spinnerClassName = '',
 }) => {
-  const [, setMessageIndex] = useState(0);
   const [currentMessage, setCurrentMessage] = useState(loadingMessages[0]);
 
   useEffect(() => {
     if (!isLoading) {
-      setMessageIndex(0);
       setCurrentMessage(loadingMessages[0]);
       return;
     }
@@ -52,12 +50,10 @@ export const LoadingButton: React.FC<LoadingButtonProps> = ({
 
     // Start cycling through messages after 2 seconds
     const timer = setTimeout(() => {
+      let index = 0;
       const interval = setInterval(() => {
-        setMessageIndex((prev) => {
-          const nextIndex = (prev + 1) % loadingMessages.length;
-          setCurrentMessage(loadingMessages[nextIndex]);
-          return nextIndex;
-        });
+        index = (index + 1) % loadingMessages.length;
+        setCurrentMessage(loadingMessages[index]);
       }, messageInterval);
 
       return () => clearInterval(interval);

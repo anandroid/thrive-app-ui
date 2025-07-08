@@ -29,60 +29,8 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
     }
   }, []);
 
-  useEffect(() => {
-    // Prevent body scroll on iOS
-    const originalPosition = document.body.style.position;
-    const originalTop = document.body.style.top;
-    const scrollY = window.scrollY;
-    
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
-    
-    return () => {
-      document.body.style.position = originalPosition;
-      document.body.style.top = originalTop;
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
-
   return (
-    <div className="chat-layout bg-gray-50">
-      {/* Status Bar Area */}
-      <div className="safe-area-top flex-shrink-0" />
-      
-      {/* Header */}
-      <div className="app-header backdrop-blur-xl bg-white/90 border-b border-gray-200 flex-shrink-0">
-        <div className="flex items-center justify-between px-4 h-14">
-          <Link 
-            href="/"
-            className="w-10 h-10 rounded-full flex items-center justify-center bg-white/80 hover:bg-white native-transition shadow-md"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-700" />
-          </Link>
-          <div className="flex items-center space-x-2">
-            <h1 className="text-xl font-bold text-gray-800">Companion</h1>
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose/20 to-dusty-rose/30 flex items-center justify-center">
-              <Heart className="w-4 h-4 text-rose fill-rose/30" />
-            </div>
-          </div>
-          <div className="w-11" />
-        </div>
-      </div>
-      
-      {/* Creation Mode Badge */}
-      {chatIntent === 'create_thriving' && (
-        <div className="flex justify-center py-2 flex-shrink-0 bg-white/80">
-          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-rose to-burgundy text-white px-4 py-1.5 rounded-full text-sm shadow-lg">
-            <span>🌿</span>
-            <span className="font-medium">Thriving Creation Mode</span>
-          </div>
-        </div>
-      )}
-      
-      {/* Main Chat Container - Uses remaining height */}
-      <div className="flex-1 overflow-hidden">
-        <SmartCardChat
+    <SmartCardChat
           threadId={currentThreadId === 'new' ? undefined : currentThreadId}
           chatIntent={chatIntent}
           onThreadCreated={(newThreadId) => {
@@ -181,8 +129,34 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
             router.push('/journeys');
           }}
           selectedPrompt={initialMessage}
+          renderHeader={() => (
+            <>
+              <div className="safe-area-top" />
+              <div className="flex items-center justify-between px-4 h-14 bg-white border-b border-gray-200">
+                <Link 
+                  href="/"
+                  className="w-10 h-10 rounded-full flex items-center justify-center bg-white/80 hover:bg-white native-transition shadow-md touch-feedback touch-manipulation"
+                >
+                  <ArrowLeft className="w-5 h-5 text-gray-700" />
+                </Link>
+                <div className="flex items-center space-x-2">
+                  <h1 className="text-xl font-bold text-gray-800">Companion</h1>
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose/20 to-dusty-rose/30 flex items-center justify-center">
+                    <Heart className="w-4 h-4 text-rose fill-rose/30" />
+                  </div>
+                </div>
+                <div className="w-11" />
+              </div>
+              {chatIntent === 'create_thriving' && (
+                <div className="flex justify-center py-2 bg-white/80">
+                  <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-rose to-burgundy text-white px-4 py-1.5 rounded-full text-sm shadow-lg">
+                    <span>🌿</span>
+                    <span className="font-medium">Thriving Creation Mode</span>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         />
-      </div>
-    </div>
   );
 }

@@ -18,7 +18,6 @@ import { WellnessJourney } from '@/src/services/openai/types/journey';
 import { getJourneyByType } from '@/src/utils/journeyStorage';
 import { ChatEditor } from '@/components/ui/ChatEditor';
 import { createChatThread, addMessageToThread, getChatThread, deleteChatThread } from '@/src/utils/chatStorage';
-import { useChatKeyboardFix } from '@/hooks/useChatKeyboardFix';
 
 interface SmartCardChatProps {
   threadId?: string;
@@ -58,7 +57,6 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   const abortControllerRef = useRef<AbortController | null>(null);
   const [chatThreadId, setChatThreadId] = useState<string | null>(null);
   const hasScrolledToStreamRef = useRef<Set<number>>(new Set());
-  const { isKeyboardVisible, keyboardHeight } = useChatKeyboardFix();
 
   // Load existing messages if threadId is provided
   useEffect(() => {
@@ -773,20 +771,17 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full relative">
-      {/* Header */}
-      {renderHeader?.()}
+    <div className="chat-wrapper">
+      {/* Header - stays at top */}
+      <div className="chat-header-section">
+        {renderHeader?.()}
+      </div>
 
-      {/* Messages Area - Scrollable */}
-      <div 
-        className="chat-messages-container"
-        style={{
-          paddingBottom: isKeyboardVisible ? `${keyboardHeight + 20}px` : '20px'
-        }}
-      >
+      {/* Messages - scrollable middle section */}
+      <div className="chat-messages-section">
         {/* Prompt Templates (only show when no messages) */}
         {messages.length === 0 && renderPromptTemplates && (
-          <div className="min-h-full flex flex-col">
+          <div className="h-full flex flex-col">
             {renderPromptTemplates(messages)}
           </div>
         )}
@@ -799,19 +794,21 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                 {renderMessage(message, idx)}
               </React.Fragment>
             ))}
-            <div ref={messagesEndRef} className="h-4" />
+            <div ref={messagesEndRef} className="h-20" />
           </div>
         )}
       </div>
 
-      {/* Input Area - Absolutely positioned */}
-      <ChatEditor
-        value={input}
-        onChange={setInput}
-        onSubmit={handleSendMessage}
-        isLoading={isLoading}
-        autoFocus={!!selectedPrompt}
-      />
+      {/* Input - stays at bottom */}
+      <div className="chat-input-section safe-bottom">
+        <ChatEditor
+          value={input}
+          onChange={setInput}
+          onSubmit={handleSendMessage}
+          isLoading={isLoading}
+          autoFocus={!!selectedPrompt}
+        />
+      </div>
 
       {showRoutineModal && routineData && (
         <RoutineCreationModal

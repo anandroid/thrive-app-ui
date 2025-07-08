@@ -172,17 +172,9 @@ export default function HomePage() {
       )}
       
       {/* Main app content - Always rendered but visibility controlled */}
-      <div className={`fixed inset-0 flex flex-col overscroll-none ${showSlideAnimation ? 'animate-scale-in' : ''} ${showOnboarding && !isTransitioning ? 'opacity-0 pointer-events-none' : ''}`}>
-      {/* Background - Soft burgundy base with blur */}
-      <div className="absolute inset-0 bg-burgundy/5 backdrop-blur-sm" />
-      
-      {/* Content */}
-      <div className="relative z-10 flex flex-col h-full">
-        {/* Status Bar Area */}
-        <div className="safe-area-top flex-shrink-0" />
-        
-        {/* Header - Fixed */}
-        <div className="app-header backdrop-blur-xl bg-white/80 border-b-0 shadow-lg shadow-gray-200/50 flex-shrink-0">
+      <div className={`home-wrapper ${showSlideAnimation ? 'animate-scale-in' : ''} ${showOnboarding && !isTransitioning ? 'opacity-0 pointer-events-none' : ''}`}>
+        {/* Header - stays at top */}
+        <div className="home-header-section safe-top">
           <div className="flex items-center justify-between px-4 h-14">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center shadow-xl shadow-rose/50">
@@ -210,10 +202,8 @@ export default function HomePage() {
         </div>
 
         {/* Main Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto min-h-0 pb-safe" style={{
-          paddingBottom: 'env(keyboard-inset-height, 0)'
-        }}>
-          <div className={`px-4 py-6 transition-opacity duration-300 ${isHydrated ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="home-content-section">
+          <div className={`px-4 py-6 pb-8 transition-opacity duration-300 ${isHydrated ? 'opacity-100' : 'opacity-0'}`}>
             {/* Thrivings Section - Only show if thrivings exist */}
             {thrivings.length > 0 && (
               <div className="mb-8">
@@ -413,16 +403,14 @@ export default function HomePage() {
         </div>
 
         {/* Input Area - Fixed at Bottom */}
-        <div className="flex-shrink-0">
+        <div className="home-input-section safe-bottom">
           <ChatEditor
             value={input}
             onChange={setInput}
             onSubmit={handleSendMessage}
-            className="border-t border-gray-200 bg-white/95 backdrop-blur-xl shadow-[0_-10px_30px_-5px_rgba(0,0,0,0.1)]"
           />
         </div>
       </div>
-    </div>
     </>
   );
 }

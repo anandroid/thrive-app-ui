@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "../styles/touch-feedback.css";
-@import "./chat-keyboard.css";
+@import "./chat-layout-simple.css";
+@import "./home-layout.css";
 
 :root {
   /* Base Colors */
@@ -237,80 +238,6 @@ input, textarea, [contenteditable] {
   box-shadow: 0 10px 40px -10px rgba(145, 67, 114, 0.15);
 }
 
-/* Mobile Keyboard Handling */
-@supports (height: 100dvh) {
-  .app-screen {
-    height: 100dvh;
-  }
-}
-
-/* Chat input positioning for mobile keyboards */
-.chat-input-container {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 50;
-  background: white;
-  border-top: 1px solid #e5e7eb;
-  /* Safe area for iOS */
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-/* Viewport height that accounts for mobile browser chrome */
-.h-screen-safe {
-  height: 100vh;
-  height: -webkit-fill-available;
-  height: 100dvh;
-  min-height: -webkit-fill-available;
-}
-
-/* Fixed positioning that respects viewport */
-@supports (height: 100dvh) {
-  .h-screen-safe {
-    height: 100dvh;
-  }
-}
-
-/* Prevent iOS bounce scrolling that can hide input */
-.overscroll-none {
-  overscroll-behavior: none;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Adjust layout when virtual keyboard is visible */
-@media (max-height: 500px) {
-  .app-header {
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-  }
-  
-  .h-14 {
-    height: 3rem;
-  }
-  
-  /* Reduce content padding when keyboard is visible */
-  .pb-safe {
-    padding-bottom: 0.5rem;
-  }
-}
-
-/* Prevent overscroll and bounce on iOS */
-.overscroll-contain {
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Chat messages container */
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  /* Padding for last message visibility */
-  padding-bottom: 1rem;
-}
-
 .shadow-elegant-sm {
   box-shadow: 0 4px 20px -4px rgba(145, 67, 114, 0.1);
 }
@@ -337,41 +264,10 @@ input, textarea, [contenteditable] {
 }
 
 /* Native app utilities */
-.app-screen {
-  height: 100vh;
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.app-header {
-  flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
-  z-index: 50;
-}
-
-.app-content {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+/* Prevent overscroll and bounce on iOS */
+.overscroll-contain {
   overscroll-behavior: contain;
-}
-
-.safe-area-top {
-  padding-top: env(safe-area-inset-top);
-}
-
-.safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-/* Dynamic padding for scrollable content when keyboard is visible */
-.pb-safe {
-  padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Native-like transitions - Smoother, more deliberate */

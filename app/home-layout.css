@@ -1,0 +1,68 @@
+/* Simple home layout */
+
+/* Home container - full viewport height */
+.home-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  background: #fefefe;
+}
+
+/* Home header - stays at top */
+.home-header-section {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+  z-index: 50;
+}
+
+/* Home content - scrollable middle section */
+.home-content-section {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+  overscroll-behavior: contain;
+  background: rgba(145, 67, 114, 0.02);
+}
+
+/* Home input - stays at bottom */
+.home-input-section {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid #e5e7eb;
+  box-shadow: 0 -10px 30px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Safe area handling */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Ensure viewport adjusts with keyboard */
+@supports (height: 100dvh) {
+  .home-wrapper {
+    height: 100dvh;
+  }
+}
+
+/* Remove body scroll when home is displayed */
+body:has(.home-wrapper) {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
