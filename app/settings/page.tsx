@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { ArrowLeft, Bell, Shield, Info, Moon, Heart, ChevronRight, Plus, Leaf, MessageSquare } from 'lucide-react';
 import { AboutSection } from '@/components/features/AboutSection';
 import { useRouter } from 'next/navigation';
+import { getTouchClasses } from '@/hooks/useTouchFeedback';
+import { TouchButton } from '@/components/ui/TouchButton';
 
 export default function SettingsPage() {
   const [showAbout, setShowAbout] = useState(false);
@@ -19,12 +21,15 @@ export default function SettingsPage() {
         {/* Header */}
         <div className="app-header bg-white border-b border-gray-200">
           <div className="flex items-center justify-between px-4 h-14">
-            <button 
+            <TouchButton 
               onClick={() => setShowAbout(false)}
-              className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-gray-100 transition-colors"
+              className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-gray-100"
+              variant="ghost"
+              size="sm"
+              haptic="light"
             >
               <ArrowLeft className="w-5 h-5 text-gray-700" />
-            </button>
+            </TouchButton>
             <h1 className="text-lg font-semibold text-secondary-text">About</h1>
             <div className="w-10" />
           </div>
@@ -59,7 +64,10 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between px-4 h-14">
             <Link 
               href="/"
-              className="w-10 h-10 rounded-full flex items-center justify-center bg-white/50 hover:bg-white/80 native-transition shadow-sm"
+              className={getTouchClasses(
+                "w-10 h-10 rounded-full flex items-center justify-center bg-white/50 hover:bg-white/80 native-transition shadow-sm",
+                { feedback: true, nativePress: true }
+              )}
             >
               <ArrowLeft className="w-5 h-5 text-burgundy" />
             </Link>
@@ -82,7 +90,10 @@ export default function SettingsPage() {
                       sessionStorage.setItem('initialMessage', 'Create a wellness thriving for me');
                       router.push('/chat/new?intent=create_thriving');
                     }}
-                    className="flex-1 rounded-2xl bg-gradient-to-br from-rose/10 to-burgundy/5 border border-rose/20 p-4 hover:shadow-md transition-all"
+                    className={getTouchClasses(
+                      "flex-1 rounded-2xl bg-gradient-to-br from-rose/10 to-burgundy/5 border border-rose/20 p-4 hover:shadow-md transition-all",
+                      { feedback: true, ripple: true }
+                    )}
                   >
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose to-burgundy flex items-center justify-center flex-shrink-0">
@@ -100,7 +111,10 @@ export default function SettingsPage() {
                 {/* Pantry - Full Width with Enhanced Design */}
                 <Link
                   href="/pantry"
-                  className="w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-dusty-rose/20 p-4 hover:shadow-lg transition-all block relative overflow-hidden shadow-sm group"
+                  className={getTouchClasses(
+                    "w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-dusty-rose/20 p-4 hover:shadow-lg transition-all block relative overflow-hidden shadow-sm group",
+                    { feedback: true }
+                  )}
                 >
                   {/* Gradient overlay on hover */}
                   <div className="absolute inset-0 bg-gradient-to-br from-dusty-rose/0 via-dusty-rose/5 to-rose/10 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -127,7 +141,10 @@ export default function SettingsPage() {
                 {/* Chat History - Full Width with Enhanced Design */}
                 <Link
                   href="/chat-history"
-                  className="w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-sage/20 p-4 hover:shadow-lg transition-all block relative overflow-hidden shadow-sm group"
+                  className={getTouchClasses(
+                    "w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-sage/20 p-4 hover:shadow-lg transition-all block relative overflow-hidden shadow-sm group",
+                    { feedback: true }
+                  )}
                 >
                   {/* Gradient overlay on hover */}
                   <div className="absolute inset-0 bg-gradient-to-br from-sage-light/0 via-sage/5 to-sage-dark/10 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -154,7 +171,10 @@ export default function SettingsPage() {
             </div>
 
             {/* Wellness Profile */}
-            <div className="rounded-2xl bg-white/80 backdrop-blur-sm border border-rose/10 p-4 shadow-sm">
+            <div className={getTouchClasses(
+              "rounded-2xl bg-white/80 backdrop-blur-sm border border-rose/10 p-4 shadow-sm",
+              { feedback: true }
+            )}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose to-burgundy flex items-center justify-center">
@@ -169,7 +189,10 @@ export default function SettingsPage() {
             </div>
             
             {/* Notifications */}
-            <div className="rounded-2xl bg-white/80 backdrop-blur-sm border border-sage/10 p-4 shadow-sm">
+            <div className={getTouchClasses(
+              "rounded-2xl bg-white/80 backdrop-blur-sm border border-sage/10 p-4 shadow-sm",
+              { feedback: true }
+            )}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sage to-sage-dark flex items-center justify-center">
@@ -180,14 +203,20 @@ export default function SettingsPage() {
                     <p className="text-sm text-primary-text/60">Routine reminders</p>
                   </div>
                 </div>
-                <div className="w-12 h-7 bg-gradient-to-r from-rose to-burgundy rounded-full p-1">
+                <button className={getTouchClasses(
+                  "w-12 h-7 bg-gradient-to-r from-rose to-burgundy rounded-full p-1",
+                  { feedback: true, nativePress: true }
+                )}>
                   <div className="w-5 h-5 bg-white rounded-full translate-x-5 transition-transform" />
-                </div>
+                </button>
               </div>
             </div>
             
             {/* Privacy */}
-            <div className="rounded-2xl bg-white/80 backdrop-blur-sm border border-burgundy/10 p-4 shadow-sm">
+            <div className={getTouchClasses(
+              "rounded-2xl bg-white/80 backdrop-blur-sm border border-burgundy/10 p-4 shadow-sm",
+              { feedback: true }
+            )}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-burgundy to-dark-burgundy flex items-center justify-center">
@@ -202,7 +231,10 @@ export default function SettingsPage() {
             </div>
             
             {/* Dark Mode */}
-            <div className="rounded-2xl bg-white/80 backdrop-blur-sm border border-soft-lavender/20 p-4 shadow-sm">
+            <div className={getTouchClasses(
+              "rounded-2xl bg-white/80 backdrop-blur-sm border border-soft-lavender/20 p-4 shadow-sm",
+              { feedback: true }
+            )}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-soft-lavender to-burgundy flex items-center justify-center">
@@ -219,7 +251,10 @@ export default function SettingsPage() {
             {/* About */}
             <button 
               onClick={() => setShowAbout(true)}
-              className="w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-dusty-rose/20 p-4 shadow-sm hover:shadow-md transition-all text-left"
+              className={getTouchClasses(
+                "w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-dusty-rose/20 p-4 shadow-sm hover:shadow-md transition-all text-left",
+                { feedback: true }
+              )}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">

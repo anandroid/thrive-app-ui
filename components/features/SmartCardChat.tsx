@@ -529,7 +529,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                         <button
                           key={idx}
                           onClick={() => handleActionClick(item)}
-                          className={`w-full mx-2 flex items-center space-x-4 p-5 rounded-2xl bg-gradient-to-r ${backgroundClass} border border-gray-200 shadow-xl ${shadowClass} hover:shadow-2xl ${borderColorHover} transition-all duration-300 text-left group`}
+                          className={`w-full mx-2 flex items-center space-x-4 p-5 rounded-2xl bg-gradient-to-r ${backgroundClass} border border-gray-200 shadow-xl ${shadowClass} hover:shadow-2xl ${borderColorHover} transition-all duration-300 text-left group touch-feedback touch-manipulation`}
                         >
                           <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradientClass} flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-110 transition-transform`}>
                             <Icon className={`w-6 h-6 ${iconColorClass}`} />
@@ -562,7 +562,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                           <button
                             key={qIdx}
                             onClick={() => handleQuestionClick(cleanQuestion)}
-                            className="relative w-full flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-white to-gray-50/30 hover:from-white hover:to-sage-light/10 hover:shadow-xl hover:shadow-sage/20 transition-all duration-300 text-left group border-2 border-gray-200 hover:border-sage/40 cursor-pointer"
+                            className="relative w-full flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-white to-gray-50/30 hover:from-white hover:to-sage-light/10 hover:shadow-xl hover:shadow-sage/20 transition-all duration-300 text-left group border-2 border-gray-200 hover:border-sage/40 cursor-pointer touch-feedback-subtle touch-manipulation"
                           >
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sage-light/30 to-sage/20 flex items-center justify-center flex-shrink-0 group-hover:from-sage/40 group-hover:to-sage-dark/30 transition-all shadow-md shadow-sage/20 group-hover:shadow-lg">
                               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-sage-dark group-hover:text-sage-dark transition-colors">

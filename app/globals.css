@@ -209,8 +209,11 @@ input, textarea, [contenteditable] {
   position: sticky;
   bottom: 0;
   z-index: 50;
+  background: white;
   /* Add extra padding when keyboard is likely visible */
   padding-bottom: env(keyboard-inset-height, 0);
+  /* Ensure it stays above keyboard on iOS */
+  transform: translateZ(0);
 }
 
 /* iOS specific keyboard handling */
@@ -235,6 +238,21 @@ input, textarea, [contenteditable] {
   
   .h-14 {
     height: 3rem;
+  }
+  
+  /* Reduce content padding when keyboard is visible */
+  .pb-safe {
+    padding-bottom: 0.5rem;
+  }
+}
+
+/* Additional keyboard handling for iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  .chat-input-container:focus-within {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
   }
 }
 
@@ -283,6 +301,11 @@ input, textarea, [contenteditable] {
 
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Dynamic padding for scrollable content when keyboard is visible */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 1rem);
 }
 
 /* Native-like transitions */

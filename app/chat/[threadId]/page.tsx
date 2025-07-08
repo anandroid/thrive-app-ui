@@ -64,7 +64,9 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
       )}
       
       {/* Main Chat Container - Flex to fill remaining height */}
-      <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+      <div className="flex-1 flex flex-col overflow-hidden min-h-0" style={{
+        paddingBottom: 'env(keyboard-inset-height, 0)'
+      }}>
         <SmartCardChat
           threadId={currentThreadId === 'new' ? undefined : currentThreadId}
           chatIntent={chatIntent}

@@ -214,7 +214,9 @@ export default function HomePage() {
         </div>
 
         {/* Main Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto min-h-0 pb-safe">
+        <div className="flex-1 overflow-y-auto min-h-0 pb-safe" style={{
+          paddingBottom: 'env(keyboard-inset-height, 0)'
+        }}>
           <div className="px-4 py-6">
             {/* Thrivings Section - Only show if thrivings exist */}
             {thrivings.length > 0 && (
