@@ -14,8 +14,8 @@ export async function POST(request: NextRequest) {
 
     // Initialize service with optional chat intent
     const streamingService = new StreamingChatService(
-      process.env.OPENAI_API_KEY!,
-      process.env.OPENAI_ASSISTANT_ID!,
+      process.env.THRIVE_OPENAI_API_KEY!,
+      process.env.THRIVE_OPENAI_ASSISTANT_ID!,
       chatIntent
     );
 

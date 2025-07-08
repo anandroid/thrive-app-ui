@@ -97,6 +97,7 @@ export default function HomePage() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showMenuSparkle, setShowMenuSparkle] = useState(false);
   const [showSlideAnimation, setShowSlideAnimation] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     // Check if user has seen onboarding
@@ -126,8 +127,14 @@ export default function HomePage() {
 
   const handleOnboardingComplete = () => {
     localStorage.setItem('hasSeenOnboarding', 'true');
-    setShowOnboarding(false);
-    setShowSlideAnimation(true);
+    setIsTransitioning(true);
+    
+    // Smooth transition
+    setTimeout(() => {
+      setShowOnboarding(false);
+      setShowSlideAnimation(true);
+      setIsTransitioning(false);
+    }, 300);
   };
 
   const handlePromptClick = (prompt: string) => {
@@ -151,12 +158,21 @@ export default function HomePage() {
     }
   };
 
-  if (showOnboarding) {
+  if (showOnboarding && !isTransitioning) {
     return <Onboarding onComplete={handleOnboardingComplete} />;
   }
 
   return (
-    <div className={`app-screen relative overflow-hidden ${showSlideAnimation ? 'animate-slide-in-from-right' : ''}`}>
+    <>
+      {/* Show onboarding with fade out during transition */}
+      {showOnboarding && isTransitioning && (
+        <div className="fixed inset-0 z-50 animate-fade-out">
+          <Onboarding onComplete={handleOnboardingComplete} />
+        </div>
+      )}
+      
+      {/* Main app content */}
+      <div className={`app-screen relative overflow-hidden ${showSlideAnimation ? 'animate-scale-in' : ''} ${showOnboarding && !isTransitioning ? 'hidden' : ''}`}>
       {/* Background Gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-soft-blush/80 via-white to-soft-lavender/30" />
       
@@ -184,7 +200,7 @@ export default function HomePage() {
                 localStorage.setItem('hasClickedMenu', 'true');
                 setShowMenuSparkle(false);
               }}
-              className="w-11 h-11 rounded-2xl flex items-center justify-center bg-white/60 hover:bg-white/90 native-transition shadow-lg hover:shadow-xl relative overflow-hidden"
+              className="w-11 h-11 rounded-2xl flex items-center justify-center bg-white/60 hover:bg-white/90 native-transition shadow-lg hover:shadow-xl relative overflow-hidden touch-feedback touch-manipulation"
             >
               <Menu className="w-5 h-5 text-burgundy" />
               {showMenuSparkle && (
@@ -220,7 +236,7 @@ export default function HomePage() {
                     {thrivings.slice(0, 5).map((thriving, index) => (
                       <div
                         key={thriving.id}
-                        className="flex-none w-[280px] p-5 rounded-2xl bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-all group cursor-pointer"
+                        className="flex-none w-[280px] p-5 rounded-2xl bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-all group cursor-pointer touch-feedback touch-manipulation"
                         onClick={() => router.push(`/thrivings?id=${thriving.id}`)}
                       >
                         <div className="flex items-start justify-between mb-3">
@@ -250,7 +266,7 @@ export default function HomePage() {
                           
                           return nextStep ? (
                             <div 
-                              className="rounded-xl bg-gradient-to-r from-sage-light/20 to-sage/10 border border-sage-light/30 p-3 mb-3 hover:from-sage-light/30 hover:to-sage/20 transition-all"
+                              className="rounded-xl bg-gradient-to-r from-sage-light/20 to-sage/10 border border-sage-light/30 p-3 mb-3 hover:from-sage-light/30 hover:to-sage/20 transition-all touch-feedback touch-manipulation"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 // Find the index of this step in the steps array
@@ -283,7 +299,7 @@ export default function HomePage() {
                             e.stopPropagation();
                             router.push(`/thrivings/${thriving.id}/journal`);
                           }}
-                          className="w-full mt-3 py-2 rounded-xl bg-gradient-to-r from-dusty-rose/20 to-rose/20 text-dusty-rose font-medium text-sm hover:from-dusty-rose/30 hover:to-rose/30 transition-all flex items-center justify-center space-x-2"
+                          className="w-full mt-3 py-2 rounded-xl bg-gradient-to-r from-dusty-rose/20 to-rose/20 text-dusty-rose font-medium text-sm hover:from-dusty-rose/30 hover:to-rose/30 transition-all flex items-center justify-center space-x-2 touch-feedback touch-manipulation"
                         >
                           <BookOpen className="w-4 h-4" />
                           <span>Open Journal</span>
@@ -324,7 +340,7 @@ export default function HomePage() {
                             sessionStorage.setItem('selectedJourneyId', journey.id);
                             router.push('/journeys');
                           }}
-                          className="flex-none w-[280px] p-5 rounded-2xl bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-all group text-left"
+                          className="flex-none w-[280px] p-5 rounded-2xl bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-all group text-left touch-feedback touch-manipulation"
                         >
                           <div className="flex items-start justify-between mb-3">
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lavender/30 to-purple-500/20 flex items-center justify-center shadow-sm">
@@ -375,7 +391,7 @@ export default function HomePage() {
                     <button
                       key={index}
                       onClick={() => handlePromptClick(template.text)}
-                      className="relative flex items-center space-x-4 p-6 rounded-3xl bg-white/90 backdrop-blur-sm hover:bg-white native-transition text-left group shadow-lg shadow-gray-200/40 hover:shadow-xl hover:scale-[1.01] overflow-hidden"
+                      className="relative flex items-center space-x-4 p-6 rounded-3xl bg-white/90 backdrop-blur-sm hover:bg-white native-transition text-left group shadow-lg shadow-gray-200/40 hover:shadow-xl hover:scale-[1.01] overflow-hidden touch-feedback touch-manipulation"
                     >
                       
                       <div className="flex items-center space-x-4 w-full">

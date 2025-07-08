@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
 
     // Initialize service
     const adjustmentService = new RoutineAdjustmentService(
-      process.env.OPENAI_API_KEY!
+      process.env.THRIVE_OPENAI_API_KEY!
     );
 
     // Adjust the routine

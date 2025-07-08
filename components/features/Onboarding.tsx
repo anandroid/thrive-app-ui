@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { ChevronRight } from 'lucide-react';
 
@@ -56,12 +56,97 @@ interface OnboardingProps {
 
 export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Minimum swipe distance (in px)
+  const minSwipeDistance = 50;
+
+  // Preload images and PWA assets
+  useEffect(() => {
+    // Preload all illustration images
+    slides.forEach((slide) => {
+      const img = new window.Image();
+      img.src = slide.image;
+    });
+
+    // Preload critical app routes
+    const routes = ['/chat', '/thrivings', '/journeys', '/settings'];
+    routes.forEach(route => {
+      fetch(route, { method: 'HEAD' }).catch(() => {});
+    });
+
+    // Request persistent storage for PWA
+    if ('storage' in navigator && 'persist' in navigator.storage) {
+      navigator.storage.persist();
+    }
+
+    // Cache critical assets
+    if ('caches' in window) {
+      caches.open('thrive-app-v1').then(cache => {
+        const assets = [
+          '/',
+          '/manifest.json',
+          '/icon-192x192.png',
+          '/icon-512x512.png',
+        ];
+        cache.addAll(assets).catch(() => {});
+      });
+    }
+  }, []);
 
   const handleNext = () => {
+    if (isTransitioning) return;
+    
+    setIsTransitioning(true);
+    setTimeout(() => setIsTransitioning(false), 300);
+    
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(currentSlide + 1);
+      // Scroll to top when changing slides
+      if (containerRef.current) {
+        containerRef.current.scrollTop = 0;
+      }
     } else {
       onComplete();
+    }
+  };
+
+  const handlePrevious = () => {
+    if (isTransitioning || currentSlide === 0) return;
+    
+    setIsTransitioning(true);
+    setTimeout(() => setIsTransitioning(false), 300);
+    
+    setCurrentSlide(currentSlide - 1);
+    if (containerRef.current) {
+      containerRef.current.scrollTop = 0;
+    }
+  };
+
+  // Touch handlers for swipe gestures
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      handleNext();
+    } else if (isRightSwipe) {
+      handlePrevious();
     }
   };
 
@@ -73,7 +158,12 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const isLastSlide = currentSlide === slides.length - 1;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col relative overflow-hidden">
+    <div 
+      className="fixed inset-0 z-50 flex flex-col relative"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       {/* Background Gradient - matching app theme */}
       <div className="absolute inset-0 bg-gradient-to-br from-soft-blush/80 via-white to-soft-lavender/30" />
       
@@ -82,7 +172,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-gradient-to-tr from-sage-light/40 to-sage/30 blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
       
       {/* Content */}
-      <div className="relative z-10 flex flex-col h-full">
+      <div className="relative z-10 flex flex-col h-full overflow-hidden">
         {/* Header */}
         <div className="flex justify-between items-center p-4">
         <div className="flex space-x-2">
@@ -109,9 +199,12 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         )}
       </div>
 
-      {/* Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-20">
-        <div className="max-w-md w-full space-y-8">
+      {/* Scrollable Content */}
+      <div 
+        ref={containerRef}
+        className="flex-1 overflow-y-auto overflow-x-hidden px-6 pt-8 pb-32"
+      >
+        <div className="max-w-md mx-auto w-full space-y-8 min-h-full flex flex-col justify-center">
           {/* Image with themed background */}
           <div className="relative w-full h-64 mb-8 group">
             <div className={`absolute inset-0 rounded-3xl shadow-2xl transition-all duration-500 ${
@@ -152,15 +245,21 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="p-6">
+      {/* Bottom Navigation - Fixed */}
+      <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white to-white/95 backdrop-blur-lg">
         <button
           onClick={handleNext}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-rose to-burgundy text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center"
+          className="w-full py-4 rounded-2xl bg-gradient-to-r from-rose to-burgundy text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center active:scale-[0.98] touch-manipulation"
+          style={{ WebkitTapHighlightColor: 'transparent' }}
         >
           {isLastSlide ? 'Get Started' : 'Continue'}
           <ChevronRight className="w-5 h-5 ml-2" />
         </button>
+        
+        {/* Swipe Indicator */}
+        <div className="mt-4 text-center text-xs text-gray-400 animate-pulse">
+          {currentSlide < slides.length - 1 && 'Swipe left to continue'}
+        </div>
       </div>
       </div>
     </div>

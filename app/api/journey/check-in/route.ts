@@ -4,7 +4,7 @@ import { JOURNEY_CHECK_IN_PROMPT } from '@/src/services/openai/prompts/journey';
 
 export async function POST(request: NextRequest) {
   const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY!,
+    apiKey: process.env.THRIVE_OPENAI_API_KEY!,
   });
   try {
     const { 
