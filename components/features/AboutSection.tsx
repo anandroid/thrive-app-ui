@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { Heart, Shield, Sparkles, BookOpen, Package } from 'lucide-react';
 
 const features = [
@@ -35,7 +35,7 @@ const features = [
     iconBg: 'from-rose/20 to-burgundy/15',
     title: 'Natural Wellness Support',
     description: 'Herbs, supplements, and holistic practices - shared as wisdom, not sales.',
-    image: '/illustrations/recommend_supplements.png'
+    image: '/illustrations/recommended_supplements.png'
   },
   {
     icon: Shield,
@@ -71,8 +71,11 @@ export const AboutSection: React.FC = () => {
             </p>
           </div>
           <div className="relative w-full md:w-48 h-48 flex-shrink-0 mt-6 md:mt-0">
-            <Image
+            <OptimizedImage
               src="/illustrations/companion.png"
+              width={192}
+              height={192}
+              priority
               alt="Your wellness companion - two caring birds"
               fill
               className="object-contain"
@@ -129,7 +132,7 @@ export const AboutSection: React.FC = () => {
               
               {/* Feature Image */}
               <div className="mt-4 relative h-40 rounded-xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
-                <Image
+                <OptimizedImage
                   src={feature.image}
                   alt={feature.title}
                   fill

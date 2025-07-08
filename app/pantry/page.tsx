@@ -7,7 +7,7 @@ import {
   Search, Shield, Sparkles,
   Pill, Apple, Heart
 } from 'lucide-react';
-import Image from 'next/image';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { PantryItem, RecommendedSupplement } from '@/src/types/pantry';
 import { 
   getPantryItems, savePantryItem, deletePantryItem, 
@@ -233,7 +233,7 @@ export default function PantryPage() {
               ) : (
                 <>
                   <div className="relative w-48 h-48 mx-auto mb-6">
-                    <Image
+                    <OptimizedImage
                       src="/illustrations/pantry.png"
                       alt="Your wellness pantry"
                       fill
@@ -276,7 +276,7 @@ export default function PantryPage() {
                     {/* Image or Icon */}
                     <div className={`relative h-32 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
                       {item.imageUrl ? (
-                        <Image
+                        <OptimizedImage
                           src={item.imageUrl}
                           alt={item.name}
                           fill
@@ -436,7 +436,7 @@ export default function PantryPage() {
                   >
                     {imagePreview ? (
                       <div className="relative w-full h-full">
-                        <Image
+                        <OptimizedImage
                           src={imagePreview}
                           alt="Preview"
                           fill

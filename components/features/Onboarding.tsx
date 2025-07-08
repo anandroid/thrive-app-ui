@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { ChevronRight } from 'lucide-react';
 
 interface OnboardingSlide {
@@ -38,7 +38,7 @@ const slides: OnboardingSlide[] = [
     title: "Natural Wellness Wisdom",
     subtitle: "Your body knows best",
     description: "Discover herbs, supplements, and holistic practices. We share wisdom, not sales pitches - helping you explore natural options.",
-    image: "/illustrations/recommend_supplements.png",
+    image: "/illustrations/recommended_supplements.png",
     imageAlt: "Natural wellness recommendations illustration"
   },
   {
@@ -214,12 +214,13 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               'bg-gradient-to-br from-slate-300/40 to-gray-400/30 shadow-gray/30'
             }`} />
             <div className="absolute inset-0 rounded-3xl backdrop-blur-sm" />
-            <Image
+            <OptimizedImage
               src={slide.image}
               alt={slide.imageAlt}
               fill
               className="object-contain p-4 relative z-10"
-              priority
+              priority={currentSlide === 0} // Only prioritize first slide
+              sizes="(max-width: 768px) 80vw, 400px"
             />
           </div>
 

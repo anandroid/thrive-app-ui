@@ -17,7 +17,7 @@ const STATIC_FILES = [
   '/illustrations/companion.png',
   '/illustrations/journey_story_illustration.png',
   '/illustrations/routine.png',
-  '/illustrations/recommend_supplements.png',
+  '/illustrations/recommended_supplements.png',
   '/illustrations/privacy.png',
   '/illustrations/pantry.png'
 ];

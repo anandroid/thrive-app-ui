@@ -30,35 +30,29 @@
   right: 0;
   bottom: 0;
   width: 100vw;
-  height: 100vh; /* Use stable viewport height */
-  height: -webkit-fill-available; /* iOS Safari fix */
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height - adjusts with keyboard */
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
-/* Prevent viewport resize on keyboard */
-@supports (height: 100dvh) {
+/* Fallback for older browsers */
+@supports not (height: 100dvh) {
   .layout-wrapper {
-    height: 100vh; /* Keep using vh to prevent resize */
+    height: 100vh;
+    height: -webkit-fill-available;
   }
 }
 
 /* Fixed header that stays at top */
 .layout-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  position: relative;
+  flex-shrink: 0;
   height: var(--header-height);
   padding-top: var(--safe-top);
   z-index: 50;
   background: white;
-}
-
-/* Add padding to wrapper to account for fixed header */
-.layout-wrapper {
-  padding-top: calc(var(--header-height) + var(--safe-top));
 }
 
 /* Scrollable content area */
@@ -68,38 +62,19 @@
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   position: relative;
-  /* Account for input area with extra padding */
-  padding-bottom: calc(var(--input-min-height) + 2rem);
+  min-height: 0; /* Important for flexbox */
 }
 
 /* Fixed bottom input/action area */
 .layout-input {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  position: relative;
+  flex-shrink: 0;
   min-height: var(--input-min-height);
   max-height: var(--input-max-height);
   padding-bottom: var(--safe-bottom);
   background: white;
   z-index: 40;
-  /* Will be pushed up by keyboard naturally */
-}
-
-/* When keyboard is visible, adjust padding */
-@supports (bottom: env(keyboard-inset-height)) {
-  .layout-input {
-    /* Use keyboard height if available */
-    bottom: env(keyboard-inset-height, 0px);
-  }
-}
-
-/* Fallback for browsers without keyboard-inset-height */
-@supports not (bottom: env(keyboard-inset-height)) {
-  .layout-input {
-    /* On iOS Safari, position:fixed elements move up with keyboard automatically */
-    position: fixed;
-  }
+  margin-top: auto; /* Push to bottom */
 }
 
 /* Chat-specific layout adjustments */
@@ -126,26 +101,22 @@
 .illustration-layout {
   --header-height: 0; /* No header */
   --footer-height: 8rem; /* Fixed height for button area */
-  padding-top: 0; /* Override wrapper padding */
 }
 
 .illustration-layout .layout-wrapper {
   background: white;
-  padding-top: 0;
 }
 
 .illustration-layout .layout-content {
-  padding-bottom: calc(var(--footer-height) + var(--safe-bottom) + 1rem);
   display: flex;
   flex-direction: column;
   padding-top: var(--safe-top);
+  padding-bottom: 1rem;
 }
 
 .illustration-layout .layout-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  position: relative;
+  flex-shrink: 0;
   min-height: var(--footer-height);
   padding: 1rem;
   padding-bottom: max(var(--safe-bottom), 1rem);
@@ -156,11 +127,13 @@
   background: white;
   border-top: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+  margin-top: auto;
 }
 
 /* Standard page layout (non-fixed) */
 .page-layout {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
