@@ -170,65 +170,11 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* Wellness Profile */}
-            <div className={getTouchClasses(
-              "rounded-2xl bg-white/80 backdrop-blur-sm border border-rose/10 p-4 shadow-sm",
-              { feedback: true }
-            )}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose to-burgundy flex items-center justify-center">
-                    <Heart className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-primary-text">Wellness Profile</h3>
-                    <p className="text-sm text-primary-text/60">Manage your health goals</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Wellness Profile - Hidden for now */}
             
-            {/* Notifications */}
-            <div className={getTouchClasses(
-              "rounded-2xl bg-white/80 backdrop-blur-sm border border-sage/10 p-4 shadow-sm",
-              { feedback: true }
-            )}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sage to-sage-dark flex items-center justify-center">
-                    <Bell className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-primary-text">Notifications</h3>
-                    <p className="text-sm text-primary-text/60">Routine reminders</p>
-                  </div>
-                </div>
-                <button className={getTouchClasses(
-                  "w-12 h-7 bg-gradient-to-r from-rose to-burgundy rounded-full p-1",
-                  { feedback: true, nativePress: true }
-                )}>
-                  <div className="w-5 h-5 bg-white rounded-full translate-x-5 transition-transform" />
-                </button>
-              </div>
-            </div>
+            {/* Notifications - Hidden for now */}
             
-            {/* Privacy */}
-            <div className={getTouchClasses(
-              "rounded-2xl bg-white/80 backdrop-blur-sm border border-burgundy/10 p-4 shadow-sm",
-              { feedback: true }
-            )}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-burgundy to-dark-burgundy flex items-center justify-center">
-                    <Shield className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-primary-text">Privacy & Security</h3>
-                    <p className="text-sm text-primary-text/60">Manage your data</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Privacy & Security - Hidden for now */}
             
             {/* Dark Mode */}
             <div className={getTouchClasses(

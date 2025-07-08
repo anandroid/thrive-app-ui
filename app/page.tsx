@@ -25,22 +25,22 @@ const promptTemplates = [
   {
     icon: Brain,
     text: "I need help managing anxiety",
-    iconGradient: "from-burgundy/90 to-dark-burgundy"
+    iconGradient: "from-lavender/90 to-purple-600"
   },
   {
     icon: Activity,
     text: "Help me reduce chronic pain",
-    iconGradient: "from-dusty-rose/90 to-rose"
+    iconGradient: "from-dusty-rose/90 to-dark-burgundy"
   },
   {
     icon: Moon,
     text: "I can't sleep well at night",
-    iconGradient: "from-burgundy/90 to-dusty-rose"
+    iconGradient: "from-indigo-400/90 to-blue-600"
   },
   {
     icon: Heart,
     text: "Help me with my symptoms",
-    iconGradient: "from-rose/90 to-burgundy"
+    iconGradient: "from-sage-light/90 to-sage"
   }
 ];
 
@@ -389,14 +389,14 @@ export default function HomePage() {
                     <button
                       key={index}
                       onClick={() => handlePromptClick(template.text)}
-                      className="relative flex items-center space-x-4 p-6 rounded-3xl bg-white/90 backdrop-blur-sm hover:bg-white native-transition text-left group shadow-lg shadow-gray-200/40 hover:shadow-xl hover:scale-[1.01] overflow-hidden touch-feedback touch-manipulation"
+                      className="relative flex items-center space-x-4 p-5 rounded-3xl bg-white/90 backdrop-blur-sm hover:bg-white native-transition text-left group shadow-lg shadow-gray-200/40 hover:shadow-xl hover:scale-[1.01] overflow-hidden touch-feedback touch-manipulation"
                     >
                       
                       <div className="flex items-center space-x-4 w-full">
-                        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${template.iconGradient} flex items-center justify-center flex-shrink-0 shadow-lg`}>
-                          <Icon className="w-7 h-7 text-white" />
+                        <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${template.iconGradient} flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                          <Icon className="w-6 h-6 text-white" />
                         </div>
-                        <span className="text-gray-800 text-[17px] font-medium flex-1">
+                        <span className="text-gray-800 text-[15px] font-medium flex-1">
                           {template.text}
                         </span>
                       </div>
