@@ -9,40 +9,48 @@
   user-select: none;
 }
 
-/* Active state for buttons and clickable elements */
+/* Active state for buttons and clickable elements - Native-like feel */
 .touch-feedback {
-  @apply transition-all duration-150 ease-out cursor-pointer;
+  @apply transition-all duration-200 cursor-pointer;
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .touch-feedback:active {
-  @apply scale-[0.97] opacity-90;
+  @apply scale-[0.96] opacity-90;
+  transition-duration: 100ms;
 }
 
-/* Subtle feedback for smaller elements */
+/* Subtle feedback for smaller elements - Smooth */
 .touch-feedback-subtle {
-  @apply transition-all duration-100 ease-out cursor-pointer;
+  @apply transition-all duration-150 cursor-pointer;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .touch-feedback-subtle:active {
-  @apply scale-[0.98] opacity-80;
+  @apply scale-[0.98] opacity-85;
+  transition-duration: 80ms;
 }
 
-/* Icon button feedback */
+/* Icon button feedback - Native-like */
 .touch-feedback-icon {
-  @apply transition-all duration-100 ease-out cursor-pointer;
+  @apply transition-all duration-180 cursor-pointer;
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .touch-feedback-icon:active {
-  @apply scale-[0.92] opacity-70;
+  @apply scale-[0.92] opacity-75;
+  transition-duration: 90ms;
 }
 
-/* List item feedback */
+/* List item feedback - Smooth press */
 .touch-feedback-list {
-  @apply transition-all duration-150 ease-out cursor-pointer;
+  @apply transition-all duration-200 cursor-pointer;
+  transition-timing-function: ease-out;
 }
 
 .touch-feedback-list:active {
-  @apply bg-gray-50 scale-[0.99];
+  @apply bg-gray-50 scale-[0.995];
+  transition-duration: 100ms;
 }
 
 /* Ripple effect for material-like feedback */
@@ -98,16 +106,30 @@
   animation: swipe-hint 2s ease-in-out infinite;
 }
 
-/* Native-like button press */
+/* Native-like button press - iOS style */
 .native-press {
-  @apply transition-all duration-100;
-  transform: translateY(0);
+  @apply transition-all duration-150;
+  transform: translateY(0) scale(1);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .native-press:active {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.98);
   box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  transition-duration: 80ms;
+}
+
+/* iOS-style spring animation for premium feel */
+.touch-feedback-spring {
+  @apply transition-transform duration-300 cursor-pointer;
+  transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.touch-feedback-spring:active {
+  @apply scale-[0.95];
+  transition-duration: 100ms;
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* Smooth scroll behavior */
@@ -291,17 +313,17 @@
   animation: pull-rotate 1s linear infinite;
 }
 
-/* Haptic feedback simulation with CSS */
+/* Haptic feedback simulation with CSS - More natural feel */
 .haptic-light {
-  animation: haptic-light 0.1s ease-out;
+  animation: haptic-light 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .haptic-medium {
-  animation: haptic-medium 0.15s ease-out;
+  animation: haptic-medium 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .haptic-heavy {
-  animation: haptic-heavy 0.2s ease-out;
+  animation: haptic-heavy 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 @keyframes haptic-light {

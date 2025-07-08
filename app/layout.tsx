@@ -4,6 +4,7 @@ import "./globals.css";
 import { ServiceWorkerProvider } from "@/src/providers/ServiceWorkerProvider";
 import { OfflineIndicator } from "@/components/ui/OfflineIndicator";
 import { TouchFeedbackProvider } from "@/src/providers/TouchFeedbackProvider";
+import { NavigationProvider } from "@/src/providers/NavigationProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,10 +46,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen overscroll-none`}
       >
         <ServiceWorkerProvider>
-          <TouchFeedbackProvider>
-            <OfflineIndicator />
-            {children}
-          </TouchFeedbackProvider>
+          <NavigationProvider>
+            <TouchFeedbackProvider>
+              <OfflineIndicator />
+              {children}
+            </TouchFeedbackProvider>
+          </NavigationProvider>
         </ServiceWorkerProvider>
       </body>
     </html>

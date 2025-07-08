@@ -158,21 +158,17 @@ export default function HomePage() {
     }
   };
 
-  if (showOnboarding && !isTransitioning) {
-    return <Onboarding onComplete={handleOnboardingComplete} />;
-  }
-
   return (
     <>
-      {/* Show onboarding with fade out during transition */}
-      {showOnboarding && isTransitioning && (
-        <div className="fixed inset-0 z-50 animate-fade-out">
+      {/* Show onboarding overlay when needed */}
+      {showOnboarding && (
+        <div className={`fixed inset-0 z-50 ${isTransitioning ? 'animate-fade-out' : ''}`}>
           <Onboarding onComplete={handleOnboardingComplete} />
         </div>
       )}
       
-      {/* Main app content */}
-      <div className={`fixed inset-0 flex flex-col overscroll-none ${showSlideAnimation ? 'animate-scale-in' : ''} ${showOnboarding && !isTransitioning ? 'hidden' : ''}`}>
+      {/* Main app content - Always rendered but visibility controlled */}
+      <div className={`fixed inset-0 flex flex-col overscroll-none ${showSlideAnimation ? 'animate-scale-in' : ''} ${showOnboarding && !isTransitioning ? 'opacity-0 pointer-events-none' : ''}`}>
       {/* Background Gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-soft-blush/80 via-white to-soft-lavender/30" />
       

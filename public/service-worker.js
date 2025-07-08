@@ -22,14 +22,39 @@ const STATIC_FILES = [
   '/illustrations/pantry.png'
 ];
 
+// Routes to prefetch for faster navigation
+const PREFETCH_ROUTES = [
+  '/thrivings',
+  '/journeys',
+  '/pantry',
+  '/settings',
+  '/chat-history'
+];
+
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
   console.log('[Service Worker] Installing...');
   event.waitUntil(
-    caches.open(STATIC_CACHE).then((cache) => {
-      console.log('[Service Worker] Caching static assets');
-      return cache.addAll(STATIC_FILES);
-    })
+    Promise.all([
+      // Cache static files
+      caches.open(STATIC_CACHE).then((cache) => {
+        console.log('[Service Worker] Caching static assets');
+        return cache.addAll(STATIC_FILES);
+      }),
+      // Prefetch common routes
+      caches.open(DYNAMIC_CACHE).then((cache) => {
+        console.log('[Service Worker] Prefetching routes');
+        return Promise.all(
+          PREFETCH_ROUTES.map(route => 
+            fetch(route).then(response => {
+              if (response.status === 200) {
+                return cache.put(route, response);
+              }
+            }).catch(() => {})
+          )
+        );
+      })
+    ])
   );
   // Force new service worker to activate
   self.skipWaiting();
@@ -39,16 +64,21 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   console.log('[Service Worker] Activating...');
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter((cacheName) => cacheName.startsWith('thrive-') && cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE && cacheName !== IMAGE_CACHE)
-          .map((cacheName) => {
-            console.log('[Service Worker] Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          })
-      );
-    })
+    Promise.all([
+      // Enable navigation preloading for faster page loads
+      self.registration.navigationPreload?.enable(),
+      // Clean up old caches
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames
+            .filter((cacheName) => cacheName.startsWith('thrive-') && cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE && cacheName !== IMAGE_CACHE)
+            .map((cacheName) => {
+              console.log('[Service Worker] Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            })
+        );
+      })
+    ])
   );
   // Take control of all pages immediately
   self.clients.claim();
@@ -113,39 +143,57 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle all other requests - cache first for performance
+  // Handle navigation requests with preloading
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      (async () => {
+        try {
+          // Use preloaded response if available
+          const preloadResponse = await event.preloadResponse;
+          if (preloadResponse) {
+            // Cache the preloaded response
+            const cache = await caches.open(DYNAMIC_CACHE);
+            cache.put(request, preloadResponse.clone());
+            return preloadResponse;
+          }
+
+          // Try network first for navigation
+          const networkResponse = await fetch(request);
+          if (networkResponse.status === 200) {
+            const cache = await caches.open(DYNAMIC_CACHE);
+            cache.put(request, networkResponse.clone());
+          }
+          return networkResponse;
+        } catch (error) {
+          // Fall back to cache
+          const cachedResponse = await caches.match(request);
+          return cachedResponse || caches.match('/offline.html');
+        }
+      })()
+    );
+    return;
+  }
+
+  // Handle all other requests - stale-while-revalidate strategy
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        // Return cached version and update cache in background
-        event.waitUntil(
-          fetch(request).then((response) => {
-            if (response.status === 200) {
-              const responseToCache = response.clone();
-              caches.open(DYNAMIC_CACHE).then((cache) => {
-                cache.put(request, responseToCache);
-              });
-            }
-          }).catch(() => {})
-        );
-        return cachedResponse;
-      }
-
-      // No cache match, fetch from network
-      return fetch(request).then((response) => {
-        if (response.status === 200) {
-          const responseToCache = response.clone();
+      const fetchPromise = fetch(request).then((networkResponse) => {
+        if (networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
           caches.open(DYNAMIC_CACHE).then((cache) => {
             cache.put(request, responseToCache);
           });
         }
-        return response;
-      }).catch(() => {
-        // If both cache and network fail, show offline page
-        if (request.destination === 'document') {
-          return caches.match('/offline.html');
-        }
+        return networkResponse;
       });
+
+      // Return cached response immediately, or wait for network
+      return cachedResponse || fetchPromise;
+    }).catch(() => {
+      // If both cache and network fail, show offline page
+      if (request.destination === 'document') {
+        return caches.match('/offline.html');
+      }
     })
   );
 });

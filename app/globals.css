@@ -185,6 +185,44 @@ input, textarea, [contenteditable] {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+/* Page transition optimizations */
+@media (prefers-reduced-motion: no-preference) {
+  /* Enable hardware acceleration for smoother transitions */
+  * {
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+  }
+  
+  /* Smooth page transitions */
+  .page-transition-enter {
+    animation: page-enter 150ms ease-out;
+  }
+  
+  .page-transition-exit {
+    animation: page-exit 100ms ease-in;
+  }
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes page-exit {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 .glass-effect-rose {
   background: rgba(251, 113, 133, 0.1);
   backdrop-filter: blur(10px);
@@ -318,9 +356,9 @@ input, textarea, [contenteditable] {
   padding-bottom: max(env(safe-area-inset-bottom), 1rem);
 }
 
-/* Native-like transitions */
+/* Native-like transitions - Smoother, more deliberate */
 .native-transition {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* Bottom sheet animation */
@@ -342,10 +380,15 @@ input, textarea, [contenteditable] {
   animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* iOS-style active states */
+/* iOS-style active states - More deliberate animation */
+.ios-active {
+  transition: all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
 .ios-active:active {
-  opacity: 0.7;
-  transform: scale(0.98);
+  opacity: 0.85;
+  transform: scale(0.97);
+  transition-duration: 100ms;
 }
 
 /* Wave animation for chat typing dots */
