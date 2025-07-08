@@ -3,18 +3,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { 
-  Clock, AlertCircle, 
+  Clock, 
   Bell, Edit2, Trash2,
-  Plus, Shield, Target, Settings, ArrowLeft,
-  ChevronDown, ChevronUp, Lightbulb, Package, Play, CheckCircle2
+  Plus, Target, Settings, ArrowLeft,
+  ChevronDown, ChevronUp, Lightbulb, Package, Play, CheckCircle2, BookOpen
 } from 'lucide-react';
-import { WellnessRoutine } from '@/src/services/openai/types';
-import { getRoutinesFromStorage, updateRoutineInStorage, deleteRoutineFromStorage } from '@/src/utils/routineStorage';
+import { Thriving } from '@/src/types/thriving';
+import { getThrivingsFromStorage, updateThrivingInStorage, deleteThrivingFromStorage } from '@/src/utils/thrivingStorage';
 import { CelebrationShower } from '@/components/ui/CelebrationShower';
 
-export default function RoutinesPage() {
-  const [routines, setRoutines] = useState<WellnessRoutine[]>([]);
-  const [selectedRoutine, setSelectedRoutine] = useState<WellnessRoutine | null>(null);
+export default function ThrivingsPage() {
+  const [thrivings, setThrivings] = useState<Thriving[]>([]);
+  const [selectedThriving, setSelectedThriving] = useState<Thriving | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [expandedTips, setExpandedTips] = useState<Set<number>>(new Set());
   const [isRecommendationsCollapsed, setIsRecommendationsCollapsed] = useState(false);
@@ -23,32 +23,38 @@ export default function RoutinesPage() {
   const [showAdjustmentEditor, setShowAdjustmentEditor] = useState(false);
   const [adjustmentText, setAdjustmentText] = useState('');
   const [isAdjusting, setIsAdjusting] = useState(false);
+  const [highlightedStep, setHighlightedStep] = useState<number | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    // Load routines from localStorage
-    const savedRoutines = getRoutinesFromStorage();
-    setRoutines(savedRoutines);
+    // Load thrivings from localStorage
+    const savedThrivings = getThrivingsFromStorage();
+    setThrivings(savedThrivings);
     
-    // Check if there's a specific routine to show from query params
+    // Check if there's a specific thriving to show from query params
     const urlParams = new URLSearchParams(window.location.search);
-    const routineId = urlParams.get('id');
+    const thrivingId = urlParams.get('id');
     const stepIndex = urlParams.get('step');
     
-    if (routineId && savedRoutines.length > 0) {
-      const routine = savedRoutines.find(r => r.id === routineId);
-      if (routine) {
-        setSelectedRoutine(routine);
+    // Scroll to top if no step parameter (default navigation)
+    if (stepIndex === null) {
+      window.scrollTo(0, 0);
+    }
+    
+    if (thrivingId && savedThrivings.length > 0) {
+      const thriving = savedThrivings.find(t => t.id === thrivingId);
+      if (thriving) {
+        setSelectedThriving(thriving);
         // Set active step if provided
         if (stepIndex !== null) {
           setActiveStep(parseInt(stepIndex));
         }
       } else {
-        setSelectedRoutine(savedRoutines[0]);
+        setSelectedThriving(savedThrivings[0]);
       }
-    } else if (savedRoutines.length > 0) {
-      setSelectedRoutine(savedRoutines[0]);
+    } else if (savedThrivings.length > 0) {
+      setSelectedThriving(savedThrivings[0]);
     }
     
     // Load recommendations collapsed state from localStorage
@@ -76,82 +82,82 @@ export default function RoutinesPage() {
     localStorage.setItem('recommendationsCollapsed', newState.toString());
   };
 
-  const handleRoutineToggle = (routineId: string) => {
-    const routine = routines.find(r => r.id === routineId);
-    if (routine) {
-      const updatedRoutine = { ...routine, isActive: !routine.isActive };
-      updateRoutineInStorage(updatedRoutine);
-      setRoutines(prev => prev.map(r => 
-        r.id === routineId ? updatedRoutine : r
+  const handleThrivingToggle = (thrivingId: string) => {
+    const thriving = thrivings.find(r => r.id === thrivingId);
+    if (thriving) {
+      const updatedThriving = { ...thriving, isActive: !thriving.isActive };
+      updateThrivingInStorage(thrivingId, { isActive: !thriving.isActive });
+      setThrivings(prev => prev.map(r => 
+        r.id === thrivingId ? updatedThriving : r
       ));
     }
   };
 
-  const handleDeleteRoutine = (routineId: string) => {
-    if (confirm('Are you sure you want to delete this routine?')) {
-      deleteRoutineFromStorage(routineId);
-      const remainingRoutines = routines.filter(r => r.id !== routineId);
-      setRoutines(remainingRoutines);
+  const handleDeleteThriving = (thrivingId: string) => {
+    if (confirm('Are you sure you want to delete this thriving?')) {
+      deleteThrivingFromStorage(thrivingId);
+      const remainingThrivings = thrivings.filter(r => r.id !== thrivingId);
+      setThrivings(remainingThrivings);
       
-      if (selectedRoutine?.id === routineId) {
-        setSelectedRoutine(remainingRoutines[0] || null);
+      if (selectedThriving?.id === thrivingId) {
+        setSelectedThriving(remainingThrivings[0] || null);
       }
     }
   };
 
-  const handleCompleteRoutine = (routineId: string) => {
-    const routine = routines.find(r => r.id === routineId);
-    if (routine) {
+  const handleCompleteThriving = (thrivingId: string) => {
+    const thriving = thrivings.find(r => r.id === thrivingId);
+    if (thriving) {
       // Show celebration animation
       setShowCelebration(true);
       
-      // After celebration, remove the routine
+      // After celebration, remove the thriving
       setTimeout(() => {
-        deleteRoutineFromStorage(routineId);
-        const remainingRoutines = routines.filter(r => r.id !== routineId);
-        setRoutines(remainingRoutines);
+        deleteThrivingFromStorage(thrivingId);
+        const remainingThrivings = thrivings.filter(r => r.id !== thrivingId);
+        setThrivings(remainingThrivings);
         
-        // Select next routine if available
-        if (selectedRoutine?.id === routineId) {
-          setSelectedRoutine(remainingRoutines[0] || null);
+        // Select next thriving if available
+        if (selectedThriving?.id === thrivingId) {
+          setSelectedThriving(remainingThrivings[0] || null);
         }
       }, 3500); // Wait for celebration to finish
     }
   };
 
-  const handleAdjustRoutine = async () => {
-    if (!selectedRoutine || !adjustmentText.trim()) return;
+  const handleAdjustThriving = async () => {
+    if (!selectedThriving || !adjustmentText.trim()) return;
     
     setIsAdjusting(true);
     try {
-      const response = await fetch('/api/routine/adjust', {
+      const response = await fetch('/api/thriving/adjust', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          currentRoutine: selectedRoutine,
+          currentThriving: selectedThriving,
           userFeedback: adjustmentText,
         }),
       });
       
-      if (!response.ok) throw new Error('Failed to adjust routine');
+      if (!response.ok) throw new Error('Failed to adjust thriving');
       
-      const adjustedRoutine = await response.json();
+      const adjustedThriving = await response.json();
       
-      // Update the routine in storage
-      updateRoutineInStorage(adjustedRoutine);
+      // Update the thriving in storage
+      updateThrivingInStorage(adjustedThriving.id, adjustedThriving);
       
       // Update local state
-      setRoutines(prev => prev.map(r => 
-        r.id === adjustedRoutine.id ? adjustedRoutine : r
+      setThrivings(prev => prev.map(r => 
+        r.id === adjustedThriving.id ? adjustedThriving : r
       ));
-      setSelectedRoutine(adjustedRoutine);
+      setSelectedThriving(adjustedThriving);
       
       // Reset editor
       setShowAdjustmentEditor(false);
       setAdjustmentText('');
     } catch (error) {
-      console.error('Error adjusting routine:', error);
-      alert('Failed to adjust routine. Please try again.');
+      console.error('Error adjusting thriving:', error);
+      alert('Failed to adjust thriving. Please try again.');
     } finally {
       setIsAdjusting(false);
     }
@@ -196,17 +202,17 @@ export default function RoutinesPage() {
     const isRightSwipe = distance < -minSwipeDistance;
 
     if (isLeftSwipe || isRightSwipe) {
-      const currentIndex = routines.findIndex(r => r.id === selectedRoutine?.id);
+      const currentIndex = thrivings.findIndex(r => r.id === selectedThriving?.id);
       let nextIndex = currentIndex;
       
-      if (isLeftSwipe && currentIndex < routines.length - 1) {
+      if (isLeftSwipe && currentIndex < thrivings.length - 1) {
         nextIndex = currentIndex + 1;
       } else if (isRightSwipe && currentIndex > 0) {
         nextIndex = currentIndex - 1;
       }
       
       if (nextIndex !== currentIndex) {
-        setSelectedRoutine(routines[nextIndex]);
+        setSelectedThriving(thrivings[nextIndex]);
         if (scrollContainerRef.current) {
           const cardWidth = 320 + 16;
           scrollContainerRef.current.scrollTo({
@@ -219,15 +225,15 @@ export default function RoutinesPage() {
   };
 
   // Get the next upcoming step based on current time
-  const getNextUpcomingStep = (routine: WellnessRoutine) => {
+  const getNextUpcomingStep = (thriving: Thriving) => {
     const now = new Date();
     const currentTime = now.getHours() * 60 + now.getMinutes(); // Current time in minutes
 
     // Find steps with reminder times
-    const stepsWithTimes = routine.steps
-      .filter((step) => step.reminderTime)
+    const stepsWithTimes = thriving.steps
+      .filter((step) => step.time)
       .map((step) => {
-        const [hours, minutes] = step.reminderTime!.split(':').map(Number);
+        const [hours, minutes] = step.time!.split(':').map(Number);
         const stepTime = hours * 60 + minutes;
         return { ...step, stepTime };
       })
@@ -241,26 +247,27 @@ export default function RoutinesPage() {
   };
 
   // Get count of remaining reminders today
-  const getRemainingStepsToday = (routine: WellnessRoutine) => {
+  const getRemainingStepsToday = (thriving: Thriving) => {
     const now = new Date();
     const currentTime = now.getHours() * 60 + now.getMinutes();
 
-    return routine.steps.filter((step) => {
-      if (!step.reminderTime) return false;
-      const [hours, minutes] = step.reminderTime.split(':').map(Number);
+    return thriving.steps.filter((step) => {
+      if (!step.time) return false;
+      const [hours, minutes] = step.time.split(':').map(Number);
       const stepTime = hours * 60 + minutes;
       return stepTime > currentTime;
     }).length;
   };
 
   // Calculate progress percentage
-  const calculateProgress = (routine: WellnessRoutine) => {
+  const calculateProgress = (thriving: Thriving) => {
     const now = new Date();
     const currentTime = now.getHours() * 60 + now.getMinutes();
     
-    const stepsWithTimes = routine.steps.filter(step => step.reminderTime);
+    const stepsWithTimes = thriving.steps.filter(step => step.time);
     const completedSteps = stepsWithTimes.filter(step => {
-      const [hours, minutes] = step.reminderTime!.split(':').map(Number);
+      if (!step.time) return false;
+      const [hours, minutes] = step.time.split(':').map(Number);
       const stepTime = hours * 60 + minutes;
       return stepTime <= currentTime;
     }).length;
@@ -268,17 +275,25 @@ export default function RoutinesPage() {
     return stepsWithTimes.length > 0 ? (completedSteps / stepsWithTimes.length) * 100 : 0;
   };
 
-  // Scroll to active step
+  // Scroll to active step when it changes
   useEffect(() => {
-    if (selectedRoutine && stepRefs.current[activeStep]) {
+    if (selectedThriving && stepRefs.current[activeStep] && activeStep >= 0) {
       setTimeout(() => {
         stepRefs.current[activeStep]?.scrollIntoView({
           behavior: 'smooth',
           block: 'center',
         });
+        
+        // Highlight the step temporarily
+        setHighlightedStep(activeStep);
+        
+        // Remove highlight after 3 seconds
+        setTimeout(() => {
+          setHighlightedStep(null);
+        }, 3000);
       }, 100);
     }
-  }, [activeStep, selectedRoutine]);
+  }, [activeStep]);
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -296,8 +311,8 @@ export default function RoutinesPage() {
               <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
                 Home
               </Link>
-              <Link href="/routines" className="text-gray-900 font-medium">
-                Routines
+              <Link href="/thrivings" className="text-gray-900 font-medium">
+                Thrivings
               </Link>
             </nav>
           </div>
@@ -308,34 +323,33 @@ export default function RoutinesPage() {
         <div className="max-w-7xl mx-auto p-4 lg:p-8">
           {/* Page Title */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Wellness Routines</h1>
-            <p className="text-gray-600">Track your progress and stay consistent with your healing journey</p>
+            <h1 className="text-3xl font-bold text-gray-900">Your Thrivings</h1>
           </div>
 
           {/* Empty State */}
-          {routines.length === 0 ? (
+          {thrivings.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20">
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-sage-light/30 to-sage/20 flex items-center justify-center mb-4">
                 <Plus className="w-10 h-10 text-sage-dark" />
               </div>
-              <h2 className="text-xl font-semibold text-primary-text mb-2">No Routines Yet</h2>
+              <h2 className="text-xl font-semibold text-primary-text mb-2">No Thrivings Yet</h2>
               <p className="text-secondary-text-thin text-center max-w-xs mb-6">
-                Create personalized wellness routines to support your healing journey
+                Create personalized wellness thrivings to support your healing journey
               </p>
               <Link
                 href="/chat/new"
                 className="px-6 py-3 rounded-2xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium shadow-lg hover:shadow-xl transition-all"
               >
-                Create Your First Routine
+                Create Your First Thriving
               </Link>
             </div>
           ) : (
             <>
-              {/* Routine Cards - Horizontal Scroll */}
+              {/* Thriving Cards - Horizontal Scroll */}
               <div className="relative mb-8">
                 {/* Scroll Indicators - Dots at bottom */}
                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
-                  {[...routines, { id: 'add-new' }].map((item, index) => (
+                  {[...thrivings, { id: 'add-new' }].map((item, index) => (
                     <button
                       key={item.id}
                       onClick={() => {
@@ -349,7 +363,7 @@ export default function RoutinesPage() {
                         }
                       }}
                       className={`w-2 h-2 rounded-full transition-all ${
-                        item.id !== 'add-new' && selectedRoutine?.id === item.id
+                        item.id !== 'add-new' && selectedThriving?.id === item.id
                           ? 'bg-rose w-6' 
                           : 'bg-gray-300 hover:bg-gray-400'
                       }`}
@@ -369,17 +383,17 @@ export default function RoutinesPage() {
                     const cardWidth = 320 + 16; // card width + gap
                     const scrollPosition = container.scrollLeft;
                     const index = Math.round(scrollPosition / cardWidth);
-                    if (routines[index]) {
-                      setSelectedRoutine(routines[index]);
+                    if (thrivings[index]) {
+                      setSelectedThriving(thrivings[index]);
                     }
                   }}
                 >
-                  {routines.map((routine) => (
+                  {thrivings.map((thriving) => (
                     <div
-                      key={routine.id}
-                      onClick={() => setSelectedRoutine(routine)}
+                      key={thriving.id}
+                      onClick={() => setSelectedThriving(thriving)}
                       className={`flex-shrink-0 w-[calc(100vw-2rem)] max-w-sm rounded-2xl p-6 cursor-pointer transition-all snap-center ${
-                        selectedRoutine?.id === routine.id 
+                        selectedThriving?.id === thriving.id 
                           ? 'bg-white shadow-xl border-2 border-rose/20' 
                           : 'bg-white hover:shadow-lg border border-gray-200'
                       }`}
@@ -387,22 +401,22 @@ export default function RoutinesPage() {
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex-1">
                           <h3 className="text-xl font-semibold text-gray-900">
-                            {routine.name}
+                            {thriving.title}
                           </h3>
                         </div>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleRoutineToggle(routine.id);
+                            handleThrivingToggle(thriving.id);
                           }}
                           className={`px-4 py-2 rounded-full flex items-center gap-2 text-sm font-medium transition-all ${
-                            routine.isActive 
+                            thriving.isActive 
                               ? 'bg-rose/10 text-rose hover:bg-rose/20' 
                               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                           }`}
                         >
                           <Bell className="w-4 h-4" />
-                          {routine.isActive ? 'Pause' : 'Resume'}
+                          {thriving.isActive ? 'Pause' : 'Resume'}
                         </button>
                       </div>
 
@@ -411,34 +425,36 @@ export default function RoutinesPage() {
                         <div className="flex justify-between mb-1.5 text-xs">
                           <span className="text-gray-600">Today&apos;s Progress</span>
                           <span className="font-medium text-burgundy">
-                            {getRemainingStepsToday(routine)} more steps
+                            {getRemainingStepsToday(thriving)} more steps
                           </span>
                         </div>
                         <div className="bg-gray-100 rounded-full overflow-hidden h-2">
                           <div 
                             className="h-full bg-gradient-to-r from-sage to-sage-dark transition-all duration-500"
-                            style={{ width: `${calculateProgress(routine)}%` }}
+                            style={{ width: `${calculateProgress(thriving)}%` }}
                           />
                         </div>
                       </div>
 
                       {/* What's Next */}
                       {(() => {
-                        const nextStep = getNextUpcomingStep(routine);
-                        const remainingToday = getRemainingStepsToday(routine);
+                        const nextStep = getNextUpcomingStep(thriving);
+                        const remainingToday = getRemainingStepsToday(thriving);
                         
                         return nextStep ? (
                           <div 
                             className="rounded-xl bg-gradient-to-r from-sage-light/20 to-sage/10 border border-sage-light/30 p-3 mb-3 cursor-pointer hover:from-sage-light/30 hover:to-sage/20 transition-all"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setSelectedRoutine(routine);
-                              setActiveStep(nextStep.order - 1);
+                              setSelectedThriving(thriving);
+                              // Find the index of this step in the steps array
+                              const stepIndex = thriving.steps.findIndex(s => s.id === nextStep.id);
+                              setActiveStep(stepIndex);
                             }}
                           >
                             <div className="flex items-center justify-between mb-1">
                               <span className="text-xs font-medium text-sage-dark">
-                                Next: {nextStep.reminderTime ? formatReminderTime(nextStep.reminderTime) : 'Soon'}
+                                Next: {nextStep.time ? formatReminderTime(nextStep.time) : 'Soon'}
                               </span>
                               {remainingToday > 1 && (
                                 <span className="text-xs text-gray-600">
@@ -454,25 +470,40 @@ export default function RoutinesPage() {
                           </div>
                         );
                       })()}
+                      
+                      {/* Journal Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.location.href = `/thrivings/${thriving.id}/journal`;
+                        }}
+                        className="w-full mt-3 py-2 rounded-xl bg-gradient-to-r from-dusty-rose/20 to-rose/20 text-dusty-rose font-medium text-sm hover:from-dusty-rose/30 hover:to-rose/30 transition-all flex items-center justify-center space-x-2"
+                      >
+                        <BookOpen className="w-4 h-4" />
+                        <span>Open Journal</span>
+                      </button>
                     </div>
                   ))}
 
-                  {/* Add New Routine Card */}
-                  <Link 
-                    href="/chat/new" 
+                  {/* Add New Thriving Card */}
+                  <button
+                    onClick={() => {
+                      sessionStorage.setItem('initialMessage', 'Create a wellness thriving for me');
+                      window.location.href = '/chat/new?intent=create_thriving';
+                    }}
                     className="flex-shrink-0 w-[calc(100vw-2rem)] max-w-sm rounded-2xl border-2 border-dashed border-gray-300 p-6 flex flex-col items-center justify-center cursor-pointer hover:border-rose/50 hover:bg-gray-50 transition-all snap-center"
                   >
                     <Plus className="w-12 h-12 text-gray-400 mb-3" />
-                    <p className="text-gray-900 font-medium">Create New Routine</p>
+                    <p className="text-gray-900 font-medium">Create New Thriving</p>
                     <p className="text-sm text-gray-600 text-center mt-1">
-                      Add a personalized routine to your wellness journey
+                      Add a personalized thriving to your wellness journey
                     </p>
-                  </Link>
+                  </button>
                 </div>
               </div>
 
-              {/* Selected Routine Details */}
-              {selectedRoutine && (
+              {/* Selected Thriving Details */}
+              {selectedThriving && (
                 <div className="grid lg:grid-cols-3 gap-6">
                   {/* Steps Section */}
                   <div className="lg:col-span-2 space-y-4">
@@ -491,7 +522,7 @@ export default function RoutinesPage() {
                             <Edit2 className="w-4 h-4 text-gray-600" />
                           </button>
                           <button
-                            onClick={() => handleDeleteRoutine(selectedRoutine.id)}
+                            onClick={() => handleDeleteThriving(selectedThriving.id)}
                             className="p-2 rounded-lg hover:bg-gray-50 transition-all"
                           >
                             <Trash2 className="w-4 h-4 text-red-600" />
@@ -508,12 +539,16 @@ export default function RoutinesPage() {
                       */}
                       
                       <div className="space-y-4">
-                        {selectedRoutine.steps.map((step, index) => (
+                        {selectedThriving.steps.map((step, index) => (
                           <div 
-                            key={step.order} 
+                            key={index + 1} 
                             ref={el => {stepRefs.current[index] = el;}}
                             className="group">
-                            <div className="rounded-2xl bg-white border border-gray-100 hover:border-gray-200 shadow-sm hover:shadow-md transition-all overflow-hidden">
+                            <div className={`rounded-2xl bg-white shadow-sm hover:shadow-md transition-all duration-500 overflow-hidden ${
+                              highlightedStep === index 
+                                ? 'ring-2 ring-offset-2 ring-rose/50 border-2 border-transparent bg-gradient-to-r from-rose/5 to-burgundy/5 shadow-lg shadow-rose/20' 
+                                : 'border border-gray-100 hover:border-gray-200'
+                            }`}>
                               {/* Header with time and title */}
                               <div className="px-6 py-4 border-b border-gray-100">
                                 <div className="flex items-center justify-between mb-2">
@@ -521,7 +556,7 @@ export default function RoutinesPage() {
                                     <div className="flex items-center text-sage-dark">
                                       <Bell className="w-4 h-4 mr-1.5" />
                                       <span className="text-sm font-medium">
-                                        {step.reminderTime ? formatReminderTime(step.reminderTime) : `Step ${step.order}`}
+                                        {step.time ? formatReminderTime(step.time) : `Step ${index + 1}`}
                                       </span>
                                     </div>
                                     <span className="text-gray-300">•</span>
@@ -530,16 +565,13 @@ export default function RoutinesPage() {
                                       {step.duration} min
                                     </span>
                                   </div>
-                                  {step.will_video_tutorial_help !== false && (
+                                  {step.videoUrl && (
                                     <button
-                                      onClick={() => {
-                                        const searchQuery = step.videoSearchQuery || step.title;
-                                        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery + ' tutorial short')}`, '_blank');
-                                      }}
-                                      className="md:opacity-0 md:group-hover:opacity-100 transition-opacity inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium bg-gradient-to-r from-rose/10 to-dusty-rose/10 text-burgundy hover:from-rose/20 hover:to-dusty-rose/20"
+                                      onClick={() => window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(step.title + ' tutorial')}`, '_blank')}
+                                      className="opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium bg-gradient-to-r from-rose/10 to-dusty-rose/10 text-burgundy hover:from-rose/20 hover:to-dusty-rose/20"
                                     >
                                       <Play className="w-3.5 h-3.5 mr-1.5" />
-                                      Watch Tutorial
+                                      Watch
                                     </button>
                                   )}
                                 </div>
@@ -558,12 +590,12 @@ export default function RoutinesPage() {
                                 {step.tips && step.tips.length > 0 && (
                                   <>
                                     <button
-                                      onClick={() => toggleTips(step.order)}
+                                      onClick={() => toggleTips(index + 1)}
                                       className="mt-4 flex items-center text-sm text-sage-dark hover:text-sage transition-colors"
                                     >
                                       <Lightbulb className="w-4 h-4 mr-1.5" />
                                       Pro Tips
-                                      {expandedTips.has(step.order) ? (
+                                      {expandedTips.has(index + 1) ? (
                                         <ChevronUp className="w-4 h-4 ml-1" />
                                       ) : (
                                         <ChevronDown className="w-4 h-4 ml-1" />
@@ -571,7 +603,7 @@ export default function RoutinesPage() {
                                     </button>
                                     
                                     {/* Pro Tips Content - Collapsible */}
-                                    {expandedTips.has(step.order) && (
+                                    {expandedTips.has(index + 1) && (
                                       <div className="mt-3 p-4 rounded-lg bg-sage-light/10 border border-sage-light/30">
                                         <ul className="space-y-2">
                                           {step.tips.map((tip, idx) => (
@@ -593,7 +625,7 @@ export default function RoutinesPage() {
                     </div>
 
                     {/* Additional Recommendations Section */}
-                    {selectedRoutine.additionalSteps && selectedRoutine.additionalSteps.length > 0 && (
+                    {selectedThriving.additionalRecommendations && selectedThriving.additionalRecommendations.length > 0 && (
                       <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
                         <div className="flex items-center justify-between mb-6">
                           <div className="flex items-center">
@@ -614,13 +646,13 @@ export default function RoutinesPage() {
                         
                         {isRecommendationsCollapsed ? (
                           <div className="flex flex-wrap gap-2">
-                            {selectedRoutine.additionalSteps.map((step, index) => (
+                            {selectedThriving.additionalRecommendations.map((rec, index) => (
                               <span
-                                key={step.id}
+                                key={index}
                                 className="inline-flex items-center text-sm text-gray-600"
                               >
-                                <span className="font-medium">{step.title}</span>
-                                {index < (selectedRoutine.additionalSteps?.length ?? 0) - 1 && (
+                                <span className="font-medium">{rec}</span>
+                                {index < (selectedThriving.additionalRecommendations?.length ?? 0) - 1 && (
                                   <span className="mx-2 text-gray-400">•</span>
                                 )}
                               </span>
@@ -628,10 +660,10 @@ export default function RoutinesPage() {
                           </div>
                         ) : (
                           <div className="space-y-4">
-                            {selectedRoutine.additionalSteps.map((step) => {
+                            {selectedThriving.additionalRecommendations.map((rec, index) => {
                               // Icon mapping based on recommendation type
                               const getIcon = () => {
-                                const title = step.title.toLowerCase();
+                                const title = rec.toLowerCase();
                                 if (title.includes('humidifier') || title.includes('air')) return '💨';
                                 if (title.includes('exercise') || title.includes('equipment')) return '🏋️';
                                 if (title.includes('filter') || title.includes('clean')) return '🧹';
@@ -643,7 +675,7 @@ export default function RoutinesPage() {
 
                               return (
                                 <div
-                                  key={step.id}
+                                  key={index}
                                   className="group relative rounded-2xl bg-white border border-gray-100 hover:border-rose/30 hover:shadow-lg transition-all overflow-hidden"
                                 >
                                   <div className="p-5">
@@ -653,56 +685,12 @@ export default function RoutinesPage() {
                                         {getIcon()}
                                       </div>
                                       <div className="flex-1">
-                                        <h4 className="font-semibold text-gray-900 text-lg mb-2">{step.title}</h4>
-                                        <div className="flex items-center gap-2">
-                                          <span className={`inline-flex items-center text-xs font-medium px-3 py-1.5 rounded-full ${
-                                            step.frequency === 'one_time' ? 'bg-gradient-to-r from-blue-500/10 to-indigo-500/10 text-blue-700' :
-                                            step.frequency === 'weekly' ? 'bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-700' :
-                                            step.frequency === 'monthly' ? 'bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-700' :
-                                            'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700'
-                                          }`}>
-                                            {step.frequency === 'one_time' ? '✨ One-time' :
-                                             step.frequency === 'weekly' ? '🔄 Weekly' :
-                                             step.frequency === 'monthly' ? '📅 Monthly' :
-                                             '📌 As needed'}
-                                          </span>
-                                        </div>
+                                        <h4 className="font-semibold text-gray-900 text-lg mb-2">{rec}</h4>
                                       </div>
                                     </div>
                                     
-                                    {/* Description */}
-                                    <p className="text-gray-600 text-sm leading-relaxed mb-4">
-                                      {step.description}
-                                    </p>
-                                    
-                                    {/* Tips Section */}
-                                    {step.tips && step.tips.length > 0 && (
-                                      <div className="bg-gradient-to-r from-sage-light/20 to-sage/10 rounded-xl p-4">
-                                        <div className="flex items-center gap-2 mb-2">
-                                          <div className="w-6 h-6 rounded-full bg-sage/20 flex items-center justify-center">
-                                            <Lightbulb className="w-3.5 h-3.5 text-sage-dark" />
-                                          </div>
-                                          <p className="text-sm font-medium text-sage-dark">Tips:</p>
-                                        </div>
-                                        <ul className="space-y-1.5">
-                                          {step.tips.map((tip, idx) => (
-                                            <li key={idx} className="text-sm text-gray-700 flex items-start pl-8">
-                                              <span className="text-sage mr-2">•</span>
-                                              {tip}
-                                            </li>
-                                          ))}
-                                        </ul>
-                                      </div>
-                                    )}
                                   </div>
                                   
-                                  {/* Hover Action */}
-                                  <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-white via-white/95 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                    <button className="w-full py-2.5 rounded-xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium text-sm shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2">
-                                      <CheckCircle2 className="w-4 h-4" />
-                                      Mark as Complete
-                                    </button>
-                                  </div>
                                 </div>
                               );
                             })}
@@ -715,7 +703,7 @@ export default function RoutinesPage() {
                     <div className="rounded-2xl bg-gradient-to-br from-burgundy/10 to-burgundy/5 backdrop-blur-sm p-4 border border-burgundy/10">
                       <div className="flex gap-3">
                         <button
-                          onClick={() => handleCompleteRoutine(selectedRoutine.id)}
+                          onClick={() => handleCompleteThriving(selectedThriving.id)}
                           className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 text-sm"
                         >
                           <CheckCircle2 className="w-4 h-4" />
@@ -723,7 +711,7 @@ export default function RoutinesPage() {
                         </button>
                         
                         <button
-                          onClick={() => handleDeleteRoutine(selectedRoutine.id)}
+                          onClick={() => handleDeleteThriving(selectedThriving.id)}
                           className="flex-1 px-4 py-2.5 rounded-xl bg-white/80 backdrop-blur-sm text-gray-700 font-medium border border-gray-200 hover:bg-white/90 transition-all flex items-center justify-center gap-2 text-sm"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -735,23 +723,23 @@ export default function RoutinesPage() {
 
                   {/* Info Section */}
                   <div className="space-y-4">
-                    {/* Routine Adjustment */}
+                    {/* Thriving Adjustment */}
                     <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
                       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                         <Settings className="w-5 h-5 mr-2 text-rose" />
-                        Adjust Routine
+                        Adjust Thriving
                       </h3>
                       
                       {!showAdjustmentEditor ? (
                         <div>
                           <p className="text-sm text-gray-600 mb-4">
-                            Need to adjust this routine to better fit your schedule or preferences?
+                            Need to adjust this thriving to better fit your schedule or preferences?
                           </p>
                           <button
                             onClick={() => setShowAdjustmentEditor(true)}
                             className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-rose/10 to-dusty-rose/10 text-burgundy text-sm font-medium hover:from-rose/20 hover:to-dusty-rose/20 transition-all"
                           >
-                            Adjust Routine
+                            Adjust Thriving
                           </button>
                         </div>
                       ) : (
@@ -759,13 +747,13 @@ export default function RoutinesPage() {
                           <textarea
                             value={adjustmentText}
                             onChange={(e) => setAdjustmentText(e.target.value)}
-                            placeholder="Describe how you'd like to adjust this routine. For example: 'My work hours are 9 AM to 6 PM, so please adjust the routine timing accordingly...'"
+                            placeholder="Describe how you'd like to adjust this thriving. For example: 'My work hours are 9 AM to 6 PM, so please adjust the thriving timing accordingly...'"
                             className="w-full p-4 rounded-xl border border-gray-200 focus:border-rose/50 focus:ring-2 focus:ring-rose/20 text-sm resize-none"
                             rows={4}
                           />
                           <div className="flex gap-2">
                             <button
-                              onClick={handleAdjustRoutine}
+                              onClick={handleAdjustThriving}
                               disabled={!adjustmentText.trim() || isAdjusting}
                               className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose to-burgundy text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all flex items-center justify-center gap-2"
                             >
@@ -793,46 +781,17 @@ export default function RoutinesPage() {
                       )}
                     </div>
                     
-                    {/* Routine Description & Expected Outcomes */}
+                    {/* Thriving Description & Expected Outcomes */}
                     <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
                       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                         <Target className="w-5 h-5 mr-2 text-rose" />
-                        About This Routine
+                        About This Thriving
                       </h3>
                       
                       {/* Description */}
-                      <p className="text-gray-600 mb-6 leading-relaxed">
-                        {selectedRoutine.description}
+                      <p className="text-gray-600 leading-relaxed">
+                        {selectedThriving.description}
                       </p>
-                      
-                      {/* Expected Outcomes */}
-                      <div>
-                        <h4 className="text-sm font-semibold text-gray-900 mb-3">Expected Outcomes</h4>
-                        <ul className="space-y-2">
-                          {selectedRoutine.expectedOutcomes.map((outcome, idx) => (
-                            <li key={idx} className="flex items-start text-sm text-gray-600">
-                              <span className="w-1.5 h-1.5 rounded-full bg-sage mt-1.5 mr-2 flex-shrink-0" />
-                              {outcome}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-
-                    {/* Safety Notes */}
-                    <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                        <Shield className="w-5 h-5 mr-2 text-rose" />
-                        Safety Notes
-                      </h3>
-                      <ul className="space-y-2">
-                        {selectedRoutine.safetyNotes.map((note, idx) => (
-                          <li key={idx} className="flex items-start text-sm text-gray-600">
-                            <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 mr-2 flex-shrink-0" />
-                            {note}
-                          </li>
-                        ))}
-                      </ul>
                     </div>
                   </div>
                 </div>

@@ -93,14 +93,39 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   }, [messages]);
 
   useEffect(() => {
-    if (selectedPrompt && selectedPrompt !== input) {
+    if (selectedPrompt) {
       setInput(selectedPrompt);
       onPromptUsed?.();
     }
-  }, [selectedPrompt, input, onPromptUsed]);
+  }, [selectedPrompt, onPromptUsed]); // Remove input from dependencies to avoid infinite loop
 
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return;
+
+    const trimmedInput = input.trim().toLowerCase();
+    
+    // Check if user sent the default thriving creation text AND we're in thriving mode
+    if (trimmedInput === 'create a wellness thriving for me' && chatIntent === 'create_thriving') {
+      const userMessage: ChatMessage = {
+        role: 'user',
+        content: input,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, userMessage]);
+      setInput('');
+      
+      // Add a slight delay for better UX
+      setTimeout(() => {
+        const promptMessage: ChatMessage = {
+          role: 'assistant',
+          content: "I'd love to help you create a personalized wellness thriving! To craft the perfect plan for you, could you tell me:\n\n• What area of wellness would you like to focus on? (e.g., better sleep, stress management, pain relief, mental wellness, nutrition, exercise)\n• What specific challenges are you facing?\n• What's your daily schedule like?\n\nThe more details you share, the better I can tailor your thriving to fit your unique needs! 🌱",
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, promptMessage]);
+      }, 500);
+      
+      return; // Don't make the API call yet
+    }
 
     const userMessage: ChatMessage = {
       role: 'user',
@@ -194,6 +219,19 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                   }
                   return updated;
                 });
+              }
+
+              if (data.type === 'error') {
+                setMessages(prev => {
+                  const updated = [...prev];
+                  const lastMessage = updated[updated.length - 1];
+                  if (lastMessage.role === 'assistant') {
+                    lastMessage.content = data.error || 'I apologize, but I encountered an error processing your request. Please try again or rephrase your question.';
+                    lastMessage.isStreaming = false;
+                  }
+                  return updated;
+                });
+                break; // Exit the loop on error
               }
             } catch (e) {
               console.error('Error parsing SSE data:', e);

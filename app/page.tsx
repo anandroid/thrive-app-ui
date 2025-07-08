@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Menu, Sparkles, Weight, Pill, Brain, Activity, Heart, Moon, Leaf, ChevronRight, Edit3, Calendar } from 'lucide-react';
+import { Menu, Sparkles, Weight, Pill, Brain, Activity, Heart, Moon, Leaf, ChevronRight, Edit3, Calendar, BookOpen } from 'lucide-react';
 import Link from 'next/link';
-import { WellnessRoutine } from '@/src/services/openai/types';
-import { getRoutinesFromStorage } from '@/src/utils/routineStorage';
+import { Thriving } from '@/src/types/thriving';
+import { getThrivingsFromStorage, migrateRoutinesToThrivings } from '@/src/utils/thrivingStorage';
 import { WellnessJourney } from '@/src/services/openai/types/journey';
 import { getJourneysFromStorage } from '@/src/utils/journeyStorage';
 import { Onboarding } from '@/components/features/Onboarding';
@@ -39,20 +39,20 @@ const promptTemplates = [
   },
   {
     icon: Heart,
-    text: "Build my morning wellness routine",
+    text: "Help me with my symptoms",
     iconGradient: "from-rose/90 to-burgundy"
   }
 ];
 
 // Get the next upcoming step based on current time
-const getNextUpcomingStep = (routine: WellnessRoutine) => {
+const getNextUpcomingStep = (thriving: Thriving) => {
   const now = new Date();
   const currentTime = now.getHours() * 60 + now.getMinutes();
 
-  const stepsWithTimes = routine.steps
-    .filter((step) => step.reminderTime)
+  const stepsWithTimes = thriving.steps
+    .filter((step) => step.time)
     .map((step) => {
-      const [hours, minutes] = step.reminderTime!.split(':').map(Number);
+      const [hours, minutes] = step.time!.split(':').map(Number);
       const stepTime = hours * 60 + minutes;
       return { ...step, stepTime };
     })
@@ -63,13 +63,13 @@ const getNextUpcomingStep = (routine: WellnessRoutine) => {
 };
 
 // Get count of remaining reminders today
-const getRemainingStepsToday = (routine: WellnessRoutine) => {
+const getRemainingStepsToday = (thriving: Thriving) => {
   const now = new Date();
   const currentTime = now.getHours() * 60 + now.getMinutes();
 
-  return routine.steps.filter((step) => {
-    if (!step.reminderTime) return false;
-    const [hours, minutes] = step.reminderTime.split(':').map(Number);
+  return thriving.steps.filter((step) => {
+    if (!step.time) return false;
+    const [hours, minutes] = step.time.split(':').map(Number);
     const stepTime = hours * 60 + minutes;
     return stepTime > currentTime;
   }).length;
@@ -92,10 +92,11 @@ const formatReminderTime = (time: string) => {
 export default function HomePage() {
   const router = useRouter();
   const [input, setInput] = useState('');
-  const [routines, setRoutines] = useState<WellnessRoutine[]>([]);
+  const [thrivings, setThrivings] = useState<Thriving[]>([]);
   const [journeys, setJourneys] = useState<WellnessJourney[]>([]);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showMenuSparkle, setShowMenuSparkle] = useState(false);
+  const [showSlideAnimation, setShowSlideAnimation] = useState(false);
 
   useEffect(() => {
     // Check if user has seen onboarding
@@ -104,9 +105,12 @@ export default function HomePage() {
       setShowOnboarding(true);
     }
 
-    // Load routines from localStorage using utility function
-    const savedRoutines = getRoutinesFromStorage();
-    setRoutines(savedRoutines);
+    // Migrate old routines if needed
+    migrateRoutinesToThrivings();
+    
+    // Load thrivings from localStorage using utility function
+    const savedThrivings = getThrivingsFromStorage();
+    setThrivings(savedThrivings);
     
     // Load journeys from localStorage
     const savedJourneys = getJourneysFromStorage();
@@ -123,13 +127,20 @@ export default function HomePage() {
   const handleOnboardingComplete = () => {
     localStorage.setItem('hasSeenOnboarding', 'true');
     setShowOnboarding(false);
+    setShowSlideAnimation(true);
   };
 
   const handlePromptClick = (prompt: string) => {
     // Store the prompt and navigate to chat
     sessionStorage.setItem('initialMessage', prompt);
     localStorage.setItem('hasUsedChat', 'true');
-    router.push('/chat/new');
+    
+    // Pass thriving intent through URL for medication routine
+    if (prompt === "Create a routine for my medications") {
+      router.push('/chat/new?intent=create_thriving');
+    } else {
+      router.push('/chat/new');
+    }
   };
 
   const handleSendMessage = () => {
@@ -145,7 +156,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className={`app-screen relative overflow-hidden ${!showOnboarding ? 'animate-slide-in-from-right' : ''}`}>
+    <div className={`app-screen relative overflow-hidden ${showSlideAnimation ? 'animate-slide-in-from-right' : ''}`}>
       {/* Background Gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-soft-blush/80 via-white to-soft-lavender/30" />
       
@@ -189,13 +200,13 @@ export default function HomePage() {
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto">
           <div className="px-4 py-6">
-            {/* Routines Section - Only show if routines exist */}
-            {routines.length > 0 && (
+            {/* Thrivings Section - Only show if thrivings exist */}
+            {thrivings.length > 0 && (
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-2xl font-bold text-primary-text">Your Routines</h2>
+                  <h2 className="text-2xl font-bold text-primary-text">Your Thrivings</h2>
                   <Link 
-                    href="/routines"
+                    href="/thrivings"
                     className="flex items-center space-x-1 text-sm font-medium text-secondary-text hover:text-primary-text transition-colors"
                   >
                     <span>See all</span>
@@ -206,38 +217,50 @@ export default function HomePage() {
                 {/* Horizontal Scroll Container */}
                 <div className="-mx-4 px-4 overflow-x-auto scrollbar-hide">
                   <div className="flex space-x-3 pb-2">
-                    {routines.slice(0, 5).map((routine) => (
+                    {thrivings.slice(0, 5).map((thriving, index) => (
                       <div
-                        key={routine.id}
+                        key={thriving.id}
                         className="flex-none w-[280px] p-5 rounded-2xl bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-all group cursor-pointer"
-                        onClick={() => router.push(`/routines?id=${routine.id}`)}
+                        onClick={() => router.push(`/thrivings?id=${thriving.id}`)}
                       >
                         <div className="flex items-start justify-between mb-3">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sage-light/30 to-sage/20 flex items-center justify-center shadow-sm">
-                            <Sparkles className="w-5 h-5 text-sage-dark" />
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm ${
+                            index % 4 === 0 ? 'bg-gradient-to-br from-sage-light/30 to-sage/20' :
+                            index % 4 === 1 ? 'bg-gradient-to-br from-rose/20 to-burgundy/15' :
+                            index % 4 === 2 ? 'bg-gradient-to-br from-lavender/25 to-dusty-rose/20' :
+                            'bg-gradient-to-br from-dusty-rose/20 to-rose/15'
+                          }`}>
+                            <Sparkles className={`w-5 h-5 ${
+                              index % 4 === 0 ? 'text-sage-dark' :
+                              index % 4 === 1 ? 'text-burgundy' :
+                              index % 4 === 2 ? 'text-purple-600' :
+                              'text-rose'
+                            }`} />
                           </div>
                           <span className="text-xs font-medium text-burgundy">
-                            {getRemainingStepsToday(routine)} more steps
+                            {getRemainingStepsToday(thriving)} more steps
                           </span>
                         </div>
-                        <h3 className="font-semibold text-primary-text text-lg mb-3">{routine.name}</h3>
+                        <h3 className="font-semibold text-primary-text text-lg mb-3">{thriving.title}</h3>
                         
                         {/* What's Next Section */}
                         {(() => {
-                          const nextStep = getNextUpcomingStep(routine);
-                          const remainingToday = getRemainingStepsToday(routine);
+                          const nextStep = getNextUpcomingStep(thriving);
+                          const remainingToday = getRemainingStepsToday(thriving);
                           
                           return nextStep ? (
                             <div 
                               className="rounded-xl bg-gradient-to-r from-sage-light/20 to-sage/10 border border-sage-light/30 p-3 mb-3 hover:from-sage-light/30 hover:to-sage/20 transition-all"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                router.push(`/routines?id=${routine.id}&step=${nextStep.order - 1}`);
+                                // Find the index of this step in the steps array
+                                const stepIndex = thriving.steps.findIndex(s => s.id === nextStep.id);
+                                router.push(`/thrivings?id=${thriving.id}&step=${stepIndex}`);
                               }}
                             >
                               <div className="flex items-center justify-between mb-1">
                                 <span className="text-xs font-medium text-sage-dark">
-                                  Next: {nextStep.reminderTime ? formatReminderTime(nextStep.reminderTime) : 'Soon'}
+                                  Next: {nextStep.time ? formatReminderTime(nextStep.time) : 'Soon'}
                                 </span>
                                 {remainingToday > 1 && (
                                   <span className="text-xs text-gray-600">
@@ -253,6 +276,18 @@ export default function HomePage() {
                             </div>
                           );
                         })()}
+                        
+                        {/* Journal Button */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/thrivings/${thriving.id}/journal`);
+                          }}
+                          className="w-full mt-3 py-2 rounded-xl bg-gradient-to-r from-dusty-rose/20 to-rose/20 text-dusty-rose font-medium text-sm hover:from-dusty-rose/30 hover:to-rose/30 transition-all flex items-center justify-center space-x-2"
+                        >
+                          <BookOpen className="w-4 h-4" />
+                          <span>Open Journal</span>
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -260,7 +295,7 @@ export default function HomePage() {
               </div>
             )}
 
-            {/* Journeys Section - Only show if journeys exist */}
+            {/* Legacy Journeys Section - Only show if old journeys exist */}
             {journeys.length > 0 && (
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-4">
@@ -364,7 +399,7 @@ export default function HomePage() {
           value={input}
           onChange={setInput}
           onSubmit={handleSendMessage}
-          className="border-t border-gray-200 bg-white/95 backdrop-blur-xl shadow-xl"
+          className="border-t border-gray-200 bg-white/95 backdrop-blur-xl shadow-[0_-10px_30px_-5px_rgba(0,0,0,0.1)]"
         />
       </div>
     </div>

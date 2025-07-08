@@ -72,15 +72,18 @@ Please modify the routine according to the user's request. Keep the same structu
 - Additional steps if user mentions new equipment or preferences
 - Any other relevant adjustments
 
+Maintain all existing fields including will_video_tutorial_help for each step.
+
 Important: 
 - For each routine step, ensure the reminderTime is updated to match any changes in bestTime or user's schedule preferences.
 - Keep the separation between routine steps (daily with reminders) and additional steps (one-time or as-needed).
 - If adding new additional steps based on user request, use unique IDs.
+- Preserve the will_video_tutorial_help field for each step. Only modify it if the user's request specifically changes the nature of the activity (e.g., from physical exercise to taking medication).
 
 Return the complete adjusted routine in the same JSON format.`;
   }
 
   private getSystemPrompt(): string {
-    return 'You are a wellness routine expert. Adjust existing routines based on user requirements while maintaining the routine structure and safety. When adjusting schedules, always update both bestTime descriptions and reminderTime (in 24-hour HH:MM format) to match. Keep the separation between routine steps and additional steps. Always return valid JSON matching the original routine structure.';
+    return 'You are a wellness routine expert. Adjust existing routines based on user requirements while maintaining the routine structure and safety. When adjusting schedules, always update both bestTime descriptions and reminderTime (in 24-hour HH:MM format) to match. Keep the separation between routine steps and additional steps. Preserve all fields including will_video_tutorial_help unless the nature of the activity changes. Always return valid JSON matching the original routine structure.';
   }
 }

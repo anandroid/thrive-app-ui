@@ -16,7 +16,7 @@ const slides: OnboardingSlide[] = [
   {
     title: "Your Wellness Companion",
     subtitle: "Someone who truly listens",
-    description: "Share your symptoms, concerns, and wellness goals with a caring companion who keeps your secrets safe. Get personalized support for creating healing routines, tracking journals, and discovering natural remedies - all while your conversations stay completely private on your device.",
+    description: "Share your symptoms, concerns, and wellness goals with a caring companion who keeps your secrets safe. Get personalized support for creating healing thrivings (routine and journaling), and discovering natural remedies - all while your conversations stay completely private on your device.",
     image: "/illustrations/companion.png",
     imageAlt: "Wellness companion illustration"
   },
@@ -28,11 +28,11 @@ const slides: OnboardingSlide[] = [
     imageAlt: "Journey tracking illustration"
   },
   {
-    title: "Gentle Daily Routines",
+    title: "Gentle Daily Thrivings",
     subtitle: "Life is hard enough",
-    description: "Receive gentle reminders without the pressure. We don't track completion or show missed days. This is your safe space for healing - do what you can, when you can.",
+    description: "Receive gentle reminders without the pressure. We don't track completion or show missed days. This is your safe space for healing - do what you can, when you can. Combine your wellness routines with reflective journaling.",
     image: "/illustrations/routine.png",
-    imageAlt: "Routine illustration"
+    imageAlt: "Thrivings illustration"
   },
   {
     title: "Natural Wellness Wisdom",

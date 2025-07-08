@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Bell, Shield, Info, Moon, Sparkles, Heart, ChevronRight, Plus, Edit3 } from 'lucide-react';
+import { ArrowLeft, Bell, Shield, Info, Moon, Heart, ChevronRight, Plus, Leaf } from 'lucide-react';
 import { AboutSection } from '@/components/features/AboutSection';
 import { useRouter } from 'next/navigation';
 
@@ -79,9 +79,8 @@ export default function SettingsPage() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => {
-                      sessionStorage.setItem('chatIntent', 'create_routine');
-                      sessionStorage.setItem('initialMessage', 'Create a wellness routine for me');
-                      router.push('/chat/new');
+                      sessionStorage.setItem('initialMessage', 'Create a wellness thriving for me');
+                      router.push('/chat/new?intent=create_thriving');
                     }}
                     className="flex-1 rounded-2xl bg-gradient-to-br from-rose/10 to-burgundy/5 border border-rose/20 p-4 hover:shadow-md transition-all"
                   >
@@ -90,30 +89,12 @@ export default function SettingsPage() {
                         <Plus className="w-5 h-5 text-white" />
                       </div>
                       <div className="text-left">
-                        <h3 className="font-medium text-primary-text text-sm">Create Routine</h3>
+                        <h3 className="font-medium text-primary-text text-sm">Create Thriving</h3>
                         <p className="text-xs text-primary-text/60">New wellness plan</p>
                       </div>
                     </div>
                   </button>
                   
-                  <button
-                    onClick={() => {
-                      sessionStorage.setItem('chatIntent', 'create_journey');
-                      sessionStorage.setItem('initialMessage', 'I want to start tracking my wellness journey');
-                      router.push('/chat/new');
-                    }}
-                    className="flex-1 rounded-2xl bg-gradient-to-br from-sage-light/10 to-sage/5 border border-sage/20 p-4 hover:shadow-md transition-all"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sage to-sage-dark flex items-center justify-center flex-shrink-0">
-                        <Edit3 className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="text-left">
-                        <h3 className="font-medium text-primary-text text-sm">Create Journey</h3>
-                        <p className="text-xs text-primary-text/60">Track your story</p>
-                      </div>
-                    </div>
-                  </button>
                 </div>
 
                 {/* Pantry - Full Width with Enhanced Design */}
@@ -230,11 +211,11 @@ export default function SettingsPage() {
           
           {/* Footer */}
           <div className="mt-12 text-center">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-rose/20 to-burgundy/20 flex items-center justify-center">
-              <Sparkles className="w-8 h-8 text-gradient-primary" />
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center shadow-xl shadow-rose/50">
+              <Leaf className="w-8 h-8 text-white" />
             </div>
             <p className="text-sm text-primary-text/60">
-              Made with love for your wellness journey
+              Made with love for you to thrive
             </p>
           </div>
         </div>

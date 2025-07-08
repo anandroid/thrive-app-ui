@@ -53,8 +53,8 @@ export function ChatEditor({
 
   return (
     <div className={`border-t border-gray-100 bg-white safe-area-bottom ${className}`}>
-      <div className="p-4">
-        <div className="flex items-end gap-3 bg-gray-50 rounded-2xl p-3 transition-all focus-within:bg-white focus-within:ring-2 focus-within:ring-rose/20">
+      <div className="px-4 pb-4 pt-2">
+        <div className="flex items-start gap-3 bg-gray-50 rounded-2xl p-3 transition-all focus-within:bg-white focus-within:ring-2 focus-within:ring-rose/20">
           <textarea
             ref={textareaRef}
             value={value}
@@ -65,7 +65,7 @@ export function ChatEditor({
             placeholder={placeholder}
             disabled={isLoading || disabled}
             rows={1}
-            className="flex-1 resize-none bg-transparent text-gray-900 placeholder:text-gray-500 focus:outline-none text-base leading-relaxed min-h-[32px] max-h-[64px] transition-all"
+            className="flex-1 resize-none bg-transparent text-gray-900 placeholder:text-gray-500 focus:outline-none text-base leading-relaxed min-h-[32px] max-h-[64px] transition-all pt-0"
             style={{ overflow: 'hidden' }}
           />
           <button

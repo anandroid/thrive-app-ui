@@ -277,9 +277,7 @@ export const RoutineCreationModal: React.FC<RoutineCreationModalProps> = ({
                     Smart Reminders
                   </h4>
                   <p className="text-xs text-gray-600">
-                    I&apos;ll determine the best reminder frequency based on your health needs. 
-                    For acute conditions, you&apos;ll get hourly reminders. For general wellness, 
-                    daily reminders work best.
+                    I&apos;ll determine the best reminder frequency based on your health needs and your schedule.
                   </p>
                 </div>
               </div>

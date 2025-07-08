@@ -96,6 +96,7 @@ export interface RoutineStep {
   videoSearchQuery?: string;
   reminderText?: string;
   reminderTime?: string;
+  will_video_tutorial_help?: boolean;
 }
 
 export interface AdditionalStep {

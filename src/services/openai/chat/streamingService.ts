@@ -21,7 +21,7 @@ export class StreamingChatService {
     if (chatIntent) {
       const intentContext = chatIntent === 'create_journey' 
         ? '\n\n[SYSTEM: User is in Journey Creation Mode. Focus only on creating a wellness journey. Ask 2-3 focused questions and show ONLY the journey creation actionableItem.]'
-        : '\n\n[SYSTEM: User is in Routine Creation Mode. Focus only on creating a wellness routine. Ask about schedule/preferences and show ONLY the routine creation actionableItem.]';
+        : '\n\n[SYSTEM: User is in Thriving Creation Mode. Focus only on creating a wellness thriving. Ask about schedule/preferences and show ONLY the thriving creation actionableItem.]';
       augmentedMessage = message + intentContext;
     }
     
