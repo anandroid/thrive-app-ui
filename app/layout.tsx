@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
 };
 
-export const viewport: Viewport = {
+export const viewport: Viewport & { interactiveWidget?: string } = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -30,6 +30,8 @@ export const viewport: Viewport = {
   themeColor: "#ffffff",
   // Prevents 300ms delay on older browsers
   viewportFit: "cover",
+  // Prevents keyboard from pushing header out of viewport
+  interactiveWidget: "resizes-content",
 };
 
 export default function RootLayout({

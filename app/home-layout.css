@@ -7,57 +7,68 @@
   left: 0;
   right: 0;
   bottom: 0;
-  display: flex;
-  flex-direction: column;
   height: 100vh;
-  height: 100dvh;
-  background: #fefefe;
+  /* Use regular vh instead of dvh to prevent keyboard resize */
+  background: #ffffff;
+  overflow: hidden;
 }
 
-/* Home header - stays at top */
+/* Home header - fixed at top */
 .home-header-section {
-  flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
   z-index: 50;
+  /* Account for safe area */
+  padding-top: env(safe-area-inset-top);
 }
 
-/* Home content - scrollable middle section */
+/* Home content - scrollable with header offset */
 .home-content-section {
-  flex: 1 1 auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  min-height: 0;
   overscroll-behavior: contain;
-  background: rgba(145, 67, 114, 0.02);
+  /* Add padding for header */
+  padding-top: calc(56px + env(safe-area-inset-top));
+  /* Add padding for input */
+  padding-bottom: 80px;
 }
 
-/* Home input - stays at bottom */
+/* Home input - fixed at bottom */
 .home-input-section {
-  flex-shrink: 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid #e5e7eb;
   box-shadow: 0 -10px 30px -5px rgba(0, 0, 0, 0.1);
+  /* Will be pushed up by keyboard naturally */
+  z-index: 40;
 }
 
 /* Safe area handling */
 .safe-top {
-  padding-top: env(safe-area-inset-top);
+  /* Already handled in header fixed positioning */
 }
 
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Ensure viewport adjusts with keyboard */
-@supports (height: 100dvh) {
-  .home-wrapper {
-    height: 100dvh;
-  }
+/* Keep viewport stable when keyboard appears */
+.home-wrapper {
+  /* Always use 100vh to prevent resize with keyboard */
+  height: 100vh;
 }
 
 /* Remove body scroll when home is displayed */
@@ -65,4 +76,13 @@ body:has(.home-wrapper) {
   overflow: hidden;
   position: fixed;
   width: 100%;
+  height: 100%;
+}
+
+/* Adjust content padding when header has safe area */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .home-content-section {
+    /* 56px header + safe area */
+    padding-top: calc(56px + env(safe-area-inset-top));
+  }
 }

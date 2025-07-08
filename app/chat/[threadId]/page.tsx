@@ -131,8 +131,7 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
           selectedPrompt={initialMessage}
           renderHeader={() => (
             <>
-              <div className="safe-area-top" />
-              <div className="flex items-center justify-between px-4 h-14 bg-white border-b border-gray-200">
+              <div className="flex items-center justify-between px-4 h-14 bg-white">
                 <Link 
                   href="/"
                   className="w-10 h-10 rounded-full flex items-center justify-center bg-white/80 hover:bg-white native-transition shadow-md touch-feedback touch-manipulation"

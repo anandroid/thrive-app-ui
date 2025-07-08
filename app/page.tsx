@@ -2,12 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Menu, Sparkles, Weight, Pill, Brain, Activity, Heart, Moon, Leaf, ChevronRight, Edit3, Calendar, BookOpen } from 'lucide-react';
+import { Menu, Sparkles, Weight, Pill, Brain, Activity, Heart, Moon, Leaf, ChevronRight, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import { Thriving } from '@/src/types/thriving';
 import { getThrivingsFromStorage, migrateRoutinesToThrivings } from '@/src/utils/thrivingStorage';
-import { WellnessJourney } from '@/src/services/openai/types/journey';
-import { getJourneysFromStorage } from '@/src/utils/journeyStorage';
 import { Onboarding } from '@/components/features/Onboarding';
 import { ChatEditor } from '@/components/ui/ChatEditor';
 
@@ -25,7 +23,7 @@ const promptTemplates = [
   {
     icon: Brain,
     text: "I need help managing anxiety",
-    iconGradient: "from-lavender/90 to-purple-600"
+    iconGradient: "from-[#FFDAB9] to-[#FFB5BA]"
   },
   {
     icon: Activity,
@@ -35,7 +33,7 @@ const promptTemplates = [
   {
     icon: Moon,
     text: "I can't sleep well at night",
-    iconGradient: "from-indigo-400/90 to-blue-600"
+    iconGradient: "from-slate-400 to-blue-500"
   },
   {
     icon: Heart,
@@ -97,12 +95,6 @@ export default function HomePage() {
     if (typeof window !== 'undefined') {
       migrateRoutinesToThrivings();
       return getThrivingsFromStorage();
-    }
-    return [];
-  });
-  const [journeys] = useState<WellnessJourney[]>(() => {
-    if (typeof window !== 'undefined') {
-      return getJourneysFromStorage();
     }
     return [];
   });
@@ -174,10 +166,10 @@ export default function HomePage() {
       {/* Main app content - Always rendered but visibility controlled */}
       <div className={`home-wrapper ${showSlideAnimation ? 'animate-scale-in' : ''} ${showOnboarding && !isTransitioning ? 'opacity-0 pointer-events-none' : ''}`}>
         {/* Header - stays at top */}
-        <div className="home-header-section safe-top">
+        <div className="home-header-section">
           <div className="flex items-center justify-between px-4 h-14">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center shadow-xl shadow-rose/50">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center">
                 <Leaf className="w-6 h-6 text-white" />
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-burgundy to-rose bg-clip-text text-transparent">Thrive</h1>
@@ -203,10 +195,10 @@ export default function HomePage() {
 
         {/* Main Content - Scrollable */}
         <div className="home-content-section">
-          <div className={`px-4 py-6 pb-8 transition-opacity duration-300 ${isHydrated ? 'opacity-100' : 'opacity-0'}`}>
+          <div className={`transition-opacity duration-300 ${isHydrated ? 'opacity-100' : 'opacity-0'}`}>
             {/* Thrivings Section - Only show if thrivings exist */}
             {thrivings.length > 0 && (
-              <div className="mb-8">
+              <div className="px-4 py-6 bg-gray-50">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-2xl font-bold text-primary-text">Your Thrivings</h2>
                   <Link 
@@ -228,7 +220,7 @@ export default function HomePage() {
                     {thrivings.slice(0, 5).map((thriving, index) => (
                       <div
                         key={thriving.id}
-                        className="flex-none w-[280px] p-5 rounded-2xl bg-white card-soft-glow transition-all group cursor-pointer touch-feedback touch-manipulation"
+                        className="flex-none w-[280px] p-5 rounded-2xl bg-white shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all group cursor-pointer touch-feedback touch-manipulation"
                         onClick={() => router.push(`/thrivings?id=${thriving.id}`)}
                       >
                         <div className="flex items-start justify-between mb-3">
@@ -303,75 +295,8 @@ export default function HomePage() {
               </div>
             )}
 
-            {/* Legacy Journeys Section - Only show if old journeys exist */}
-            {journeys.length > 0 && (
-              <div className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h2 className="text-2xl font-bold text-primary-text">Your Journeys</h2>
-                    <p className="text-xs text-secondary-text-thin">Daily wellness journals</p>
-                  </div>
-                  <Link 
-                    href="/journeys"
-                    className="flex items-center space-x-1 text-sm font-medium text-secondary-text hover:text-primary-text transition-colors"
-                  >
-                    <span>See all</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </Link>
-                </div>
-                
-                {/* Horizontal Scroll Container */}
-                <div className="-mx-4 px-4 overflow-x-auto scrollbar-hide">
-                  <div className="flex space-x-3 pb-2">
-                    {journeys.slice(0, 5).map((journey) => {
-                      const lastEntry = journey.entries[journey.entries.length - 1];
-                      return (
-                        <button
-                          key={journey.id}
-                          onClick={() => {
-                            sessionStorage.setItem('selectedJourneyId', journey.id);
-                            router.push('/journeys');
-                          }}
-                          className="flex-none w-[280px] p-5 rounded-2xl bg-white card-soft-glow transition-all group text-left touch-feedback touch-manipulation"
-                        >
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lavender/30 to-purple-500/20 flex items-center justify-center shadow-sm">
-                              <Edit3 className="w-5 h-5 text-purple-600" />
-                            </div>
-                            <span className="text-xs font-medium text-secondary-text-thin">
-                              {journey.entries.length} entries
-                            </span>
-                          </div>
-                          <h3 className="font-semibold text-primary-text text-lg mb-2">{journey.title}</h3>
-                          <p className="text-sm text-secondary-text-thin line-clamp-2 mb-3">
-                            {journey.description}
-                          </p>
-                          {lastEntry && (
-                            <div className="flex items-center justify-between text-xs text-light-text">
-                              <span className="flex items-center space-x-1">
-                                <Calendar className="w-3 h-3" />
-                                <span>Last: {new Date(lastEntry.timestamp).toLocaleDateString()}</span>
-                              </span>
-                              <span className="text-lg">
-                                {lastEntry.mood === 'great' && '😊'}
-                                {lastEntry.mood === 'good' && '🙂'}
-                                {lastEntry.mood === 'okay' && '😐'}
-                                {lastEntry.mood === 'not_great' && '😔'}
-                                {lastEntry.mood === 'struggling' && '😢'}
-                              </span>
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
-
-
             {/* Prompt Templates */}
-            <div className="space-y-3">
+            <div className="px-4 py-8 space-y-3 bg-gradient-to-br from-sage-light/10 to-sage/10 backdrop-blur-sm">
               <p className="text-lg text-secondary-text font-light text-center mb-8">
                 How can I help you thrive?
               </p>

@@ -7,50 +7,61 @@
   left: 0;
   right: 0;
   bottom: 0;
-  display: flex;
-  flex-direction: column;
-  background: #f9fafb;
   height: 100vh;
-  height: 100dvh;
+  /* Use regular vh to prevent keyboard resize */
+  background: #f9fafb;
+  overflow: hidden;
 }
 
-/* Header - stays at top */
+/* Header - fixed at top */
 .chat-header-section {
-  flex-shrink: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   background: white;
-  z-index: 10;
+  z-index: 50;
   border-bottom: 1px solid #e5e7eb;
 }
 
-/* Messages - scrollable middle section */
+/* Messages - scrollable with header/input offsets */
 .chat-messages-section {
-  flex: 1 1 auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  min-height: 0;
   overscroll-behavior: contain;
+  /* Padding for fixed header - adjust based on actual header height */
+  padding-top: calc(56px + env(safe-area-inset-top));
+  /* Padding for fixed input */
+  padding-bottom: 80px;
 }
 
-/* Input - stays at bottom */
+/* Input - fixed at bottom */
 .chat-input-section {
-  flex-shrink: 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   background: white;
   border-top: 1px solid #e5e7eb;
   min-height: fit-content;
+  /* Will be pushed up by keyboard naturally */
+  z-index: 40;
 }
 
-/* iOS keyboard handling */
-@supports (padding-bottom: env(safe-area-inset-bottom)) {
-  .safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
+/* Safe area handling */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Ensure the viewport adjusts when keyboard appears */
-@supports (height: 100dvh) {
-  .chat-wrapper {
-    height: 100dvh;
-  }
+/* Keep viewport stable when keyboard appears */
+.chat-wrapper {
+  /* Always use 100vh to prevent resize with keyboard */
+  height: 100vh;
 }
 
 /* Remove any scroll on body when chat is open */
@@ -58,4 +69,27 @@ body:has(.chat-wrapper) {
   overflow: hidden;
   position: fixed;
   width: 100%;
+  height: 100%;
+}
+
+/* Dynamic header height handling */
+.chat-header-section {
+  /* Measure the actual height */
+  height: fit-content;
+}
+
+/* Messages section with dynamic top padding */
+.chat-messages-section {
+  /* Start below the fixed header */
+  padding-top: var(--header-height, 56px);
+}
+
+/* Measure and apply header height */
+.chat-wrapper {
+  --header-height: calc(56px + env(safe-area-inset-top));
+}
+
+/* When header has extra content (badge), increase padding */
+.chat-header-section:has(> :nth-child(2)) + .chat-messages-section {
+  padding-top: calc(96px + env(safe-area-inset-top));
 }
