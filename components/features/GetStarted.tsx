@@ -27,7 +27,7 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
         </div>
       )}
       
-      <div className={`layout-wrapper welcome-layout ${!imageLoaded ? 'opacity-0' : 'animate-fade-in'}`}>
+      <div className={`layout-wrapper welcome-layout transition-opacity duration-300 ${!imageLoaded ? 'opacity-0' : 'opacity-100'}`}>
         {/* Background Layer */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-soft-blush/80 via-white to-soft-lavender/30" />
@@ -86,7 +86,7 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
           {/* Get Started Button */}
           <button
             onClick={handleGetStarted}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-rose to-burgundy text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center active:scale-[0.98] touch-manipulation"
+            className="w-full py-4 rounded-2xl bg-gradient-to-r from-sage-light/70 to-sage/70 text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center active:scale-[0.98] touch-manipulation"
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >
             Get Started
@@ -151,7 +151,7 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
 
             <button
               onClick={() => setShowTermsModal(false)}
-              className="w-full mt-6 py-3 rounded-2xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium shadow-lg hover:shadow-xl transition-all touch-feedback"
+              className="w-full mt-6 py-3 rounded-2xl bg-gradient-to-r from-sage-light/70 to-sage/70 text-white font-medium shadow-lg hover:shadow-xl transition-all active:scale-[0.98] touch-manipulation"
             >
               I Understand
             </button>

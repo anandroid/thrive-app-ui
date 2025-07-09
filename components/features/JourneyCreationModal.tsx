@@ -108,23 +108,25 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
         className="absolute inset-0 bg-black/50"
         onClick={onClose}
       />
-      <div className="relative max-w-lg w-full">
-        {/* Close button - outside modal content */}
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onClose();
-          }}
-          className="absolute -top-12 right-0 w-8 h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center hover:bg-white transition-all z-50 touch-feedback touch-manipulation cursor-pointer shadow-lg"
-          aria-label="Close modal"
-          type="button"
-        >
-          <X className="w-4 h-4 text-gray-700 pointer-events-none" />
-        </button>
+      <div className="relative max-w-lg w-full bg-white rounded-3xl shadow-2xl overflow-hidden">
+        {/* Fixed close button */}
+        <div className="absolute top-0 right-0 p-4 z-10">
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClose();
+            }}
+            className="w-8 h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center hover:bg-white transition-all shadow-lg touch-feedback touch-manipulation cursor-pointer"
+            aria-label="Close modal"
+            type="button"
+          >
+            <X className="w-4 h-4 text-gray-700" />
+          </button>
+        </div>
         
         {/* Modal content */}
-        <div className="bg-white rounded-3xl shadow-2xl max-h-[90vh] overflow-hidden">
+        <div className="max-h-[90vh] overflow-hidden flex flex-col">
           {/* Header */}
           <div className="relative p-6 pb-4 border-b border-gray-100">
             <div className="flex items-center space-x-3">
@@ -230,34 +232,34 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="border-t border-gray-100 p-6 space-y-3">
-          <LoadingButton
-            onClick={handleCreateJourney}
-            isLoading={isCreating}
-            disabled={isCreating}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all"
-            loadingMessages={[
-              'Creating Journal...',
-              'Setting up your wellness space...',
-              'Preparing tracking tools...',
-              'Adding insights features...',
-              'Personalizing experience...',
-              'Almost ready...'
-            ]}
-            messageInterval={2500}
-          >
-            Create My Journal
-          </LoadingButton>
-          
-          <button
-            onClick={onClose}
-            className="w-full py-3 rounded-2xl text-secondary-text hover:bg-gray-50 transition-colors"
-          >
-            Cancel
-          </button>
+          {/* Footer */}
+          <div className="border-t border-gray-100 p-6 space-y-3">
+            <LoadingButton
+              onClick={handleCreateJourney}
+              isLoading={isCreating}
+              disabled={isCreating}
+              className="w-full py-4 rounded-2xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all"
+              loadingMessages={[
+                'Creating Journal...',
+                'Setting up your wellness space...',
+                'Preparing tracking tools...',
+                'Adding insights features...',
+                'Personalizing experience...',
+                'Almost ready...'
+              ]}
+              messageInterval={2500}
+            >
+              Create My Journal
+            </LoadingButton>
+            
+            <button
+              onClick={onClose}
+              className="w-full py-3 rounded-2xl text-secondary-text hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
-      </div>
       </div>
     </div>
   );

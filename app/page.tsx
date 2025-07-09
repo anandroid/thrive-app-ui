@@ -26,7 +26,7 @@ const promptTemplates = [
   {
     icon: Brain,
     text: "I need help managing anxiety",
-    iconGradient: "from-[#FFDAB9] to-[#FFB5BA]"
+    iconGradient: "from-[#E08B5D] to-[#D4696F]"
   },
   {
     icon: Activity,
@@ -154,7 +154,7 @@ export default function HomePage() {
   // Show a loading screen until we know the initial state
   if (showGetStarted === null) {
     return (
-      <div className="fixed inset-0 bg-white flex items-center justify-center">
+      <div className="fixed inset-0 bg-gradient-to-br from-soft-blush/80 via-white to-soft-lavender/30 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose"></div>
       </div>
     );
@@ -164,7 +164,7 @@ export default function HomePage() {
     <>
       {/* Show get started overlay when needed */}
       {showGetStarted && (
-        <div className="fixed inset-0 z-50 animate-fade-in">
+        <div className="fixed inset-0 z-50">
           <GetStarted onComplete={handleGetStartedComplete} />
         </div>
       )}

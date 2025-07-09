@@ -30,7 +30,7 @@ export const ChatWelcome: React.FC<ChatWelcomeProps> = ({ visible }) => {
           alt="Your wellness companion"
           fill
           className="object-contain"
-          sizes="192px"
+          sizes="96px"
           priority
         />
       </div>
@@ -39,21 +39,15 @@ export const ChatWelcome: React.FC<ChatWelcomeProps> = ({ visible }) => {
       <div className="max-w-md mx-auto space-y-4">
         {!showMinimal ? (
           <>
-            <h2 className="text-2xl font-bold text-primary-text">
-              Welcome to Your Wellness Journey
-            </h2>
             <p className="text-secondary-text-thin leading-relaxed">
-              I&apos;m here to help you create personalized wellness routines and track your healing story. 
-              Share what&apos;s on your mind, and let&apos;s work together towards better health.
+              I create personalized wellness routines, holistic recommendations, and help track your healing journey. 
+              How do you want to thrive today?
             </p>
           </>
         ) : (
           <>
-            <h2 className="text-xl font-semibold text-primary-text">
-              How can I help you today?
-            </h2>
             <p className="text-secondary-text-thin text-sm">
-              Let&apos;s continue your wellness journey together.
+              Share more details for better solutions.
             </p>
           </>
         )}

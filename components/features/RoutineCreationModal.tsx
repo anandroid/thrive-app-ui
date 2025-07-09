@@ -324,26 +324,26 @@ export const RoutineCreationModal: React.FC<RoutineCreationModalProps> = ({
         onClick={onClose}
       />
       
-      <div className="relative w-full max-w-md">
-        {/* Close button - outside modal content */}
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onClose();
-          }}
-          className="absolute -top-12 right-0 w-8 h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center hover:bg-white transition-all z-50 touch-feedback touch-manipulation cursor-pointer shadow-lg"
-          aria-label="Close modal"
-          type="button"
-        >
-          <X className="w-4 h-4 text-gray-700 pointer-events-none" />
-        </button>
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
+        {/* Fixed header with close button */}
+        <div className="absolute top-0 right-0 p-4 z-10">
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClose();
+            }}
+            className="w-8 h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center hover:bg-white transition-all shadow-lg touch-feedback touch-manipulation cursor-pointer"
+            aria-label="Close modal"
+            type="button"
+          >
+            <X className="w-4 h-4 text-gray-700" />
+          </button>
+        </div>
         
         {/* Modal content */}
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-          <div className="max-h-[90vh] overflow-y-auto p-6">
-            {renderStepContent()}
-          </div>
+        <div className="max-h-[90vh] overflow-y-auto p-6">
+          {renderStepContent()}
         </div>
       </div>
     </div>
