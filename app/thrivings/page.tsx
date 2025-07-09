@@ -12,11 +12,11 @@ import { Thriving } from '@/src/types/thriving';
 import { getThrivingsFromStorage, updateThrivingInStorage, deleteThrivingFromStorage } from '@/src/utils/thrivingStorage';
 import { CelebrationShower } from '@/components/ui/CelebrationShower';
 import { PageLayout } from '@/components/layout/PageLayout';
+import { AdjustmentTutorial } from '@/components/features/AdjustmentTutorial';
 
 export default function ThrivingsPage() {
   const [thrivings, setThrivings] = useState<Thriving[]>([]);
   const [selectedThriving, setSelectedThriving] = useState<Thriving | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
   const [expandedTips, setExpandedTips] = useState<Set<number>>(new Set());
   const [isRecommendationsCollapsed, setIsRecommendationsCollapsed] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
@@ -25,8 +25,11 @@ export default function ThrivingsPage() {
   const [adjustmentText, setAdjustmentText] = useState('');
   const [isAdjusting, setIsAdjusting] = useState(false);
   const [highlightedStep, setHighlightedStep] = useState<number | null>(null);
+  const [showAdjustmentTutorial, setShowAdjustmentTutorial] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const adjustButtonRef = useRef<HTMLButtonElement | null>(null);
+  const hasShownTutorialInSession = useRef(false);
 
   useEffect(() => {
     // Load thrivings from localStorage
@@ -68,6 +71,28 @@ export default function ThrivingsPage() {
       setIsRecommendationsCollapsed(savedCollapsedState === 'true');
     }
   }, []);
+
+  // Show adjustment tutorial when appropriate
+  useEffect(() => {
+    if (selectedThriving && !showAdjustmentTutorial && !hasShownTutorialInSession.current) {
+      const tutorialCount = parseInt(localStorage.getItem('adjustmentTutorialCount') || '0');
+      
+      // Show tutorial if:
+      // 1. User has created a thriving (selectedThriving exists)
+      // 2. Tutorial has been shown less than 2 times
+      // 3. Not already shown in this session
+      if (tutorialCount < 2) {
+        // Show tutorial after a delay
+        const timer = setTimeout(() => {
+          setShowAdjustmentTutorial(true);
+          hasShownTutorialInSession.current = true;
+        }, 3000); // 3 second delay to let the page load
+        
+        return () => clearTimeout(timer);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedThriving]); // Intentionally exclude showAdjustmentTutorial to prevent re-runs
 
   const toggleTips = (stepOrder: number) => {
     setExpandedTips(prev => {
@@ -553,7 +578,26 @@ export default function ThrivingsPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => setIsEditing(!isEditing)}
+                            onClick={() => {
+                              // Scroll to adjust button and click it
+                              if (adjustButtonRef.current) {
+                                adjustButtonRef.current.scrollIntoView({ 
+                                  behavior: 'smooth', 
+                                  block: 'center' 
+                                });
+                                
+                                // Add visual indication
+                                adjustButtonRef.current.classList.add('animate-pulse');
+                                
+                                // Click after 2 seconds
+                                setTimeout(() => {
+                                  if (adjustButtonRef.current) {
+                                    adjustButtonRef.current.classList.remove('animate-pulse');
+                                    adjustButtonRef.current.click();
+                                  }
+                                }, 2000);
+                              }
+                            }}
                             className="p-2 rounded-lg hover:bg-gray-50 transition-all"
                           >
                             <Edit2 className="w-4 h-4 text-gray-600" />
@@ -774,6 +818,7 @@ export default function ThrivingsPage() {
                             Need to adjust this thriving to better fit your schedule or preferences?
                           </p>
                           <button
+                            ref={adjustButtonRef}
                             onClick={() => setShowAdjustmentEditor(true)}
                             className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-rose/10 to-dusty-rose/10 text-burgundy text-sm font-medium hover:from-rose/20 hover:to-dusty-rose/20 transition-all"
                           >
@@ -843,6 +888,38 @@ export default function ThrivingsPage() {
         <CelebrationShower 
           onComplete={() => setShowCelebration(false)}
           duration={3000}
+        />
+      )}
+      
+      {/* Adjustment Tutorial */}
+      {showAdjustmentTutorial && (
+        <AdjustmentTutorial
+          onClose={() => {
+            setShowAdjustmentTutorial(false);
+            const currentCount = parseInt(localStorage.getItem('adjustmentTutorialCount') || '0');
+            localStorage.setItem('adjustmentTutorialCount', String(currentCount + 1));
+          }}
+          onArrowClick={() => {
+            // Scroll to the adjust button and click it after 2 seconds
+            if (adjustButtonRef.current) {
+              // Scroll the button into view
+              adjustButtonRef.current.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+              });
+              
+              // Add a visual indication that the button will be clicked
+              adjustButtonRef.current.classList.add('animate-pulse');
+              
+              // Click the button after 2 seconds
+              setTimeout(() => {
+                if (adjustButtonRef.current) {
+                  adjustButtonRef.current.classList.remove('animate-pulse');
+                  adjustButtonRef.current.click();
+                }
+              }, 2000);
+            }
+          }}
         />
       )}
     </PageLayout>

@@ -80,13 +80,13 @@ export const ThrivingTutorial: React.FC<ThrivingTutorialProps> = ({ onClose, act
                 sizes="80px"
               />
             </div>
-            <p className="text-xs font-medium text-gray-700">Journeys</p>
+            <p className="text-xs font-medium text-gray-700">Journals</p>
           </div>
         </div>
         
         {/* Description */}
         <p className="text-sm text-secondary-text-thin leading-relaxed mb-4">
-          <strong>Thrivings</strong> are your personalized wellness plans. Create daily <strong>routines</strong> with gentle reminders, or start <strong>journeys</strong> to track your healing story over time.
+          <strong>Thrivings</strong> are your personalized wellness plans. Create daily <strong>routines</strong> with gentle reminders, or write <strong>journal</strong> to track your healing story over time.
         </p>
         
         {/* Show routine/journey name with clickable arrow */}
