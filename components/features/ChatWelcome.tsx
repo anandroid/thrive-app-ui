@@ -22,7 +22,7 @@ export const ChatWelcome: React.FC<ChatWelcomeProps> = ({ visible }) => {
   if (!visible) return null;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center animate-fade-in">
+    <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 mb-4 text-center animate-fade-in">
       {/* Companion Illustration */}
       <div className="relative w-24 h-24 mb-6">
         <OptimizedImage
@@ -30,7 +30,7 @@ export const ChatWelcome: React.FC<ChatWelcomeProps> = ({ visible }) => {
           alt="Your wellness companion"
           fill
           className="object-contain"
-          sizes="96px"
+          sizes="192px"
           priority
         />
       </div>
