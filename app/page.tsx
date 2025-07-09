@@ -101,20 +101,19 @@ export default function HomePage() {
     }
     return [];
   });
-  const [showGetStarted, setShowGetStarted] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return !localStorage.getItem('hasSeenGetStarted');
-    }
-    return false;
-  });
+  const [showGetStarted, setShowGetStarted] = useState<boolean | null>(null);
   const [showMenuSparkle, setShowMenuSparkle] = useState(false);
-  const [showSlideAnimation, setShowSlideAnimation] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [showMainContent, setShowMainContent] = useState(false);
 
   useEffect(() => {
-    // Mark as hydrated after component mounts
-    setIsHydrated(true);
+    // Initialize showGetStarted after mount to prevent hydration mismatch
+    const hasSeenGetStarted = localStorage.getItem('hasSeenGetStarted');
+    setShowGetStarted(!hasSeenGetStarted);
+    
+    // If user has already seen GetStarted, show main content immediately
+    if (hasSeenGetStarted) {
+      setShowMainContent(true);
+    }
     
     // Check if should show menu sparkle
     const hasUsedChat = localStorage.getItem('hasUsedChat');
@@ -125,15 +124,10 @@ export default function HomePage() {
   }, []);
 
   const handleGetStartedComplete = () => {
-    localStorage.setItem('hasSeenGetStarted', 'true');
-    setIsTransitioning(true);
-    
-    // Smooth transition
-    setTimeout(() => {
-      setShowGetStarted(false);
-      setShowSlideAnimation(true);
-      setIsTransitioning(false);
-    }, 300);
+    // The GetStarted component handles the fade-out animation
+    // We just need to update our state after it completes
+    setShowGetStarted(false);
+    setShowMainContent(true);
   };
 
   const handlePromptClick = (prompt: string) => {
@@ -157,17 +151,27 @@ export default function HomePage() {
     }
   };
 
+  // Show a loading screen until we know the initial state
+  if (showGetStarted === null) {
+    return (
+      <div className="fixed inset-0 bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose"></div>
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Show get started overlay when needed */}
       {showGetStarted && (
-        <div className={`fixed inset-0 z-50 ${isTransitioning ? 'animate-fade-out' : ''}`}>
+        <div className="fixed inset-0 z-50 animate-fade-in">
           <GetStarted onComplete={handleGetStartedComplete} />
         </div>
       )}
       
-      {/* Main app content - Always rendered but visibility controlled */}
-      <div className={`chat-container ${showSlideAnimation ? 'animate-scale-in' : ''} ${showGetStarted && !isTransitioning ? 'opacity-0 pointer-events-none' : ''}`}>
+      {/* Main app content - Only render when ready */}
+      {showMainContent && (
+        <div className="chat-container animate-fade-in">
         {/* Header - stays at top */}
         <div className="chat-header safe-top">
           <div className="flex items-center justify-between content-padding h-14">
@@ -198,7 +202,7 @@ export default function HomePage() {
 
         {/* Main Content - Scrollable */}
         <div className="chat-messages">
-          <div className={`chat-messages-content transition-opacity duration-300 ${isHydrated ? 'opacity-100' : 'opacity-0'}`}>
+          <div className="chat-messages-content">
             {/* Thrivings Section - Only show if thrivings exist */}
             {thrivings.length > 0 && (
               <div className="content-padding py-6 bg-gray-50">
@@ -344,6 +348,7 @@ export default function HomePage() {
           />
         </div>
       </div>
+      )}
     </>
   );
 }

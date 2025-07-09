@@ -15,6 +15,7 @@ interface OptimizedImageProps {
   quality?: number;
   placeholder?: 'blur' | 'empty';
   blurDataURL?: string;
+  onLoad?: () => void;
 }
 
 export function OptimizedImage({
@@ -28,7 +29,8 @@ export function OptimizedImage({
   sizes,
   quality = 75,
   placeholder,
-  blurDataURL
+  blurDataURL,
+  onLoad
 }: OptimizedImageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -107,7 +109,10 @@ export function OptimizedImage({
         placeholder={placeholder}
         blurDataURL={blurDataURL}
         className={className}
-        onLoadingComplete={() => setIsLoading(false)}
+        onLoadingComplete={() => {
+          setIsLoading(false);
+          onLoad?.();
+        }}
         onError={() => setError(true)}
         unoptimized={isSvg} // Don't try to optimize SVGs through Next.js
       />

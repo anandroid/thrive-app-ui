@@ -659,13 +659,16 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                   </div>
                 )}
 
-                {/* Actionable Items - Compact Design */}
+                {/* Actionable Items - Balanced Design */}
                 {parsed?.actionableItems && parsed.actionableItems.length > 0 && (
-                  <div className="space-y-2 pt-1">
+                  <div className="space-y-2.5 pt-2">
                     {parsed.actionableItems.map((item, idx) => {
                       let Icon = Heart;
                       let gradientClass = "";
                       let iconColorClass = "";
+                      let backgroundClass = "";
+                      let shadowClass = "";
+                      let borderColorHover = "";
                       
                       // Icon selection logic
                       if (item.icon) {
@@ -695,16 +698,25 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                       
                       if (colorIndex === 0) {
                         // Light sage green
-                        gradientClass = "from-sage-light/20 to-sage/10";
+                        gradientClass = "from-sage-light/30 to-sage/20";
                         iconColorClass = "text-sage-dark";
+                        backgroundClass = "from-sage-light/10 to-sage/5";
+                        shadowClass = "shadow-sage/15";
+                        borderColorHover = "hover:border-sage/30";
                       } else if (colorIndex === 1) {
                         // Light pink/bronze
-                        gradientClass = "from-rose/15 to-dusty-rose/10";
+                        gradientClass = "from-rose/20 to-dusty-rose/15";
                         iconColorClass = "text-rose";
+                        backgroundClass = "from-rose/5 to-dusty-rose/5";
+                        shadowClass = "shadow-rose/10";
+                        borderColorHover = "hover:border-rose/25";
                       } else {
                         // Light slate blue
-                        gradientClass = "from-slate-300/20 to-slate-400/10";
+                        gradientClass = "from-slate-300/30 to-slate-400/20";
                         iconColorClass = "text-slate-700";
+                        backgroundClass = "from-slate-50 to-slate-100/50";
+                        shadowClass = "shadow-slate-300/20";
+                        borderColorHover = "hover:border-slate-400/30";
                       }
                       
                       // Check if this is a thriving button and if it matches the tutorial
@@ -719,16 +731,20 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                           key={idx}
                           ref={shouldAttachRef ? tutorialTargetButtonRef : undefined}
                           onClick={() => handleActionClick(item)}
-                          className="w-full flex items-center space-x-3 p-3 rounded-xl bg-white hover:bg-gray-50 border border-gray-200 hover:border-gray-300 transition-all duration-200 text-left group touch-feedback touch-manipulation"
+                          className={`w-full p-3.5 rounded-xl bg-gradient-to-r ${backgroundClass} border border-gray-200/50 shadow-md ${shadowClass} hover:shadow-lg ${borderColorHover} transition-all duration-300 text-left group touch-feedback touch-manipulation relative`}
                         >
-                          <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${gradientClass} flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform`}>
-                            <Icon className={`w-5 h-5 ${iconColorClass}`} />
+                          <div className="flex items-start">
+                            <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${gradientClass} flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-110 transition-transform mr-3`}>
+                              <Icon className={`w-5 h-5 ${iconColorClass}`} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-0.5">
+                                <h4 className="font-semibold text-gray-900 text-[15px] flex-1">{item.title}</h4>
+                                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all flex-shrink-0 ml-2" />
+                              </div>
+                              <p className="text-[13px] text-gray-600 leading-relaxed">{item.description || item.details}</p>
+                            </div>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-gray-900 text-[15px] truncate">{item.title}</h4>
-                            <p className="text-[13px] text-gray-600 line-clamp-2 leading-snug">{item.description || item.details}</p>
-                          </div>
-                          <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all flex-shrink-0" />
                         </button>
                       );
                     })}

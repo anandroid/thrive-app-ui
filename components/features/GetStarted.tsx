@@ -10,20 +10,24 @@ interface GetStartedProps {
 
 export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
   const [showTermsModal, setShowTermsModal] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handleGetStarted = () => {
-    setIsTransitioning(true);
     localStorage.setItem('hasSeenGetStarted', 'true');
     localStorage.setItem('hasAcceptedTerms', 'true');
-    setTimeout(() => {
-      onComplete();
-    }, 300);
+    onComplete();
   };
 
   return (
     <>
-      <div className={`layout-wrapper welcome-layout ${isTransitioning ? 'animate-fade-out' : ''}`}>
+      {/* Loading overlay */}
+      {!imageLoaded && (
+        <div className="fixed inset-0 z-50 bg-white flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose"></div>
+        </div>
+      )}
+      
+      <div className={`layout-wrapper welcome-layout ${!imageLoaded ? 'opacity-0' : 'animate-fade-in'}`}>
         {/* Background Layer */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-soft-blush/80 via-white to-soft-lavender/30" />
@@ -44,6 +48,7 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
                 className="object-contain p-4 sm:p-5 md:p-6 relative z-10"
                 priority
                 sizes="(max-width: 768px) 80vw, 400px"
+                onLoad={() => setImageLoaded(true)}
               />
             </div>
 
