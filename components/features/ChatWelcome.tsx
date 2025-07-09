@@ -24,7 +24,7 @@ export const ChatWelcome: React.FC<ChatWelcomeProps> = ({ visible }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center animate-fade-in">
       {/* Companion Illustration */}
-      <div className="relative w-48 h-48 mb-6">
+      <div className="relative w-24 h-24 mb-6">
         <OptimizedImage
           src="/illustrations/companion.png"
           alt="Your wellness companion"

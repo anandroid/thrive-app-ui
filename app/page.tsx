@@ -103,17 +103,18 @@ export default function HomePage() {
   });
   const [showGetStarted, setShowGetStarted] = useState<boolean | null>(null);
   const [showMenuSparkle, setShowMenuSparkle] = useState(false);
-  const [showMainContent, setShowMainContent] = useState(false);
+  const [showMainContent, setShowMainContent] = useState(() => {
+    // If user has already seen GetStarted, show main content immediately
+    if (typeof window !== 'undefined') {
+      return !!localStorage.getItem('hasSeenGetStarted');
+    }
+    return false;
+  });
 
   useEffect(() => {
     // Initialize showGetStarted after mount to prevent hydration mismatch
     const hasSeenGetStarted = localStorage.getItem('hasSeenGetStarted');
     setShowGetStarted(!hasSeenGetStarted);
-    
-    // If user has already seen GetStarted, show main content immediately
-    if (hasSeenGetStarted) {
-      setShowMainContent(true);
-    }
     
     // Check if should show menu sparkle
     const hasUsedChat = localStorage.getItem('hasUsedChat');
@@ -151,8 +152,8 @@ export default function HomePage() {
     }
   };
 
-  // Show a loading screen until we know the initial state
-  if (showGetStarted === null) {
+  // Only show loading screen if we don't know the state AND haven't seen GetStarted
+  if (showGetStarted === null && !showMainContent) {
     return (
       <div className="fixed inset-0 bg-gradient-to-br from-soft-blush/80 via-white to-soft-lavender/30 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose"></div>
@@ -171,7 +172,7 @@ export default function HomePage() {
       
       {/* Main app content - Only render when ready */}
       {showMainContent && (
-        <div className="chat-container animate-fade-in">
+        <div className="chat-container">
         {/* Header - stays at top */}
         <div className="chat-header safe-top">
           <div className="flex items-center justify-between content-padding h-14">

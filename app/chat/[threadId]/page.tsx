@@ -93,14 +93,8 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
               saveThrivingToStorage(thriving);
               console.log('Thriving saved to localStorage successfully');
               
-              // Clear creation mode after successful creation by redirecting without intent
-              router.push(`/chat/${currentThreadId}`);
-              
-              // You could add a toast notification here for better UX
-              // toast.success('Thriving created successfully!');
-              
-              // Optionally redirect to thrivings page
-              // router.push('/thrivings');
+              // Redirect to the thriving page with the newly created thriving
+              router.push(`/thrivings?id=${thriving.id}`);
             } catch (error) {
               console.error('Failed to save thriving:', error);
               // toast.error('Failed to save thriving. Please try again.');
@@ -114,10 +108,9 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
               saveJourneyToStorage(journey);
               console.log('Journey saved to localStorage successfully');
               
-              // Clear creation mode after successful creation by redirecting without intent
-              router.push(`/chat/${currentThreadId}`);
-              
-              // Navigate to the journey chat
+              // For now, navigate to journeys page since journeys are handled separately
+              // TODO: Consider unifying journeys and routines under thrivings
+              sessionStorage.setItem('selectedJourneyId', journey.id);
               router.push('/journeys');
             } catch (error) {
               console.error('Failed to save journey:', error);

@@ -84,7 +84,7 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
   };
 
   const handleSaveEntry = () => {
-    if (!newEntry.content.trim() || !newEntry.mood) return;
+    if (!newEntry.mood) return;
 
     addJournalEntry(thrivingId, {
       date: new Date().toISOString(),
@@ -211,7 +211,7 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
               <textarea
                 value={newEntry.content}
                 onChange={(e) => setNewEntry({ ...newEntry, content: e.target.value })}
-                placeholder="Write about your day, how you're feeling, any observations..."
+                placeholder="Write about your day, how you're feeling, any observations... (optional)"
                 className="w-full h-32 p-3 rounded-xl border border-gray-200 focus:border-rose focus:ring-2 focus:ring-rose/20 resize-none"
               />
 
@@ -311,7 +311,7 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
               <div className="flex space-x-3">
                 <button
                   onClick={handleSaveEntry}
-                  disabled={!newEntry.content.trim() || !newEntry.mood}
+                  disabled={!newEntry.mood}
                   className="flex-1 py-3 rounded-xl bg-gradient-to-r from-rose/90 to-burgundy/90 text-white font-medium shadow-sm hover:from-rose hover:to-burgundy transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Save Entry

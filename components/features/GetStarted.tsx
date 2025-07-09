@@ -20,22 +20,22 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
 
   return (
     <>
-      {/* Loading overlay */}
-      {!imageLoaded && (
-        <div className="fixed inset-0 z-50 bg-white flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose"></div>
-        </div>
-      )}
-      
-      <div className={`layout-wrapper welcome-layout transition-opacity duration-300 ${!imageLoaded ? 'opacity-0' : 'opacity-100'}`}>
-        {/* Background Layer */}
+      <div className="layout-wrapper welcome-layout">
+        {/* Background Layer - Always visible */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-soft-blush/80 via-white to-soft-lavender/30" />
           <div className="absolute top-20 -right-20 w-96 h-96 rounded-full bg-gradient-to-br from-rose/20 to-dusty-rose/20 blur-3xl animate-pulse-slow" />
         </div>
 
+        {/* Loading spinner - shows while image loads */}
+        {!imageLoaded && (
+          <div className="absolute inset-0 z-40 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose"></div>
+          </div>
+        )}
+
         {/* Scrollable Content */}
-        <div className="layout-content relative z-10">
+        <div className={`layout-content relative z-10 transition-opacity duration-500 ${!imageLoaded ? 'opacity-0' : 'opacity-100'}`}>
           <div className="max-w-md mx-auto w-full px-6 py-4 sm:py-6 md:py-8 flex flex-col items-center justify-center gap-4">
             {/* Welcome Illustration */}
             <div className="relative w-full h-48 sm:h-56 md:h-64 mb-4 sm:mb-6 md:mb-8 group">
