@@ -291,10 +291,11 @@ export default function HomePage() {
                             e.stopPropagation();
                             router.push(`/thrivings/${thriving.id}/journal`);
                           }}
-                          className="w-full mt-3 py-2 rounded-xl bg-gradient-to-r from-dusty-rose/20 to-rose/20 text-dusty-rose font-medium text-sm hover:from-dusty-rose/30 hover:to-rose/30 transition-all flex items-center justify-center space-x-2 touch-feedback touch-manipulation"
+                          className="w-full mt-3 py-3 rounded-2xl bg-gradient-to-r from-dusty-rose/15 to-rose/15 border border-dusty-rose/20 text-dusty-rose font-medium text-sm hover:from-dusty-rose/25 hover:to-rose/25 hover:border-dusty-rose/30 hover:shadow-md transition-all flex items-center justify-center space-x-2 touch-feedback touch-manipulation group relative overflow-hidden"
                         >
-                          <BookOpen className="w-4 h-4" />
-                          <span>Open Journal</span>
+                          <div className="absolute inset-0 bg-gradient-to-r from-dusty-rose/0 via-dusty-rose/10 to-dusty-rose/0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <BookOpen className="w-4 h-4 relative z-10" />
+                          <span className="relative z-10">Open Journal</span>
                         </button>
                       </div>
                     ))}

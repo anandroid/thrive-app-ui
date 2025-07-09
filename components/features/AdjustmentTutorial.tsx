@@ -41,7 +41,7 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
         {/* Close button */}
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors touch-feedback touch-manipulation cursor-pointer"
         >
           <X className="w-4 h-4 text-gray-600" />
         </button>

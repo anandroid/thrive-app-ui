@@ -384,13 +384,6 @@ export default function ThrivingsPage() {
             <>
               {/* Thriving Cards - Horizontal Scroll */}
               <div className="relative mb-8">
-                {/* Swipe Indicator */}
-                {thrivings.length > 1 && (
-                  <div className="absolute top-2 right-2 z-20 flex items-center text-xs text-gray-500 bg-white/80 backdrop-blur-sm rounded-full px-2 py-1 shadow-sm animate-pulse">
-                    <span>swipe</span>
-                    <ChevronRight className="w-3 h-3 ml-0.5" />
-                  </div>
-                )}
                 {/* Scroll Indicators - Dots at bottom */}
                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
                   {[...thrivings, { id: 'add-new' }].map((item, index) => (
@@ -539,10 +532,11 @@ export default function ThrivingsPage() {
                           e.stopPropagation();
                           window.location.href = `/thrivings/${thriving.id}/journal`;
                         }}
-                        className="w-full mt-3 py-2 rounded-xl bg-gradient-to-r from-dusty-rose/20 to-rose/20 text-dusty-rose font-medium text-sm hover:from-dusty-rose/30 hover:to-rose/30 transition-all flex items-center justify-center space-x-2"
+                        className="w-full mt-3 py-3 rounded-2xl bg-gradient-to-r from-dusty-rose/15 to-rose/15 border border-dusty-rose/20 text-dusty-rose font-medium text-sm hover:from-dusty-rose/25 hover:to-rose/25 hover:border-dusty-rose/30 hover:shadow-md transition-all flex items-center justify-center space-x-2 touch-feedback touch-manipulation group relative overflow-hidden"
                       >
-                        <BookOpen className="w-4 h-4" />
-                        <span>Open Journal</span>
+                        <div className="absolute inset-0 bg-gradient-to-r from-dusty-rose/0 via-dusty-rose/10 to-dusty-rose/0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <BookOpen className="w-4 h-4 relative z-10" />
+                        <span className="relative z-10">Open Journal</span>
                       </button>
                     </div>
                   ))}
@@ -563,6 +557,14 @@ export default function ThrivingsPage() {
                   </button>
                 </div>
               </div>
+              
+              {/* Swipe Indicator - Below Cards */}
+              {thrivings.length > 1 && (
+                <div className="flex items-center justify-center text-xs text-gray-400 mb-6 animate-pulse">
+                  <span>swipe to see more</span>
+                  <ChevronRight className="w-3 h-3 ml-0.5" />
+                </div>
+              )}
 
               {/* Selected Thriving Details */}
               {selectedThriving && (

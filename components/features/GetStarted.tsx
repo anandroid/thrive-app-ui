@@ -93,7 +93,7 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
               <h2 className="text-2xl font-bold text-primary-text">Terms & Conditions</h2>
               <button
                 onClick={() => setShowTermsModal(false)}
-                className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors touch-feedback"
+                className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors touch-feedback touch-manipulation cursor-pointer"
               >
                 <span className="text-xl">&times;</span>
               </button>
