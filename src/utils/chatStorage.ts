@@ -8,6 +8,7 @@ export const getChatThreads = (): ChatThread[] => {
   if (typeof window === 'undefined') return [];
   
   try {
+    // Try to get from IndexedDB first (async operation needs to be handled)
     const threads = localStorage.getItem(CHAT_THREADS_KEY);
     return threads ? JSON.parse(threads) : [];
   } catch (error) {

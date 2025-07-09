@@ -103,27 +103,40 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden">
-        {/* Header */}
-        <div className="relative p-6 pb-4 border-b border-gray-100">
-          <button
-            onClick={onClose}
-            className="absolute right-4 top-4 w-10 h-10 rounded-xl flex items-center justify-center hover:bg-gray-100 transition-colors"
-          >
-            <X className="w-5 h-5 text-gray-700" />
-          </button>
-          
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sage-light to-sage flex items-center justify-center">
-              <Edit3 className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-primary-text">Create a Journey</h2>
-              <p className="text-sm text-secondary-text-thin">Your wellness journal</p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div 
+        className="absolute inset-0 bg-black/50"
+        onClick={onClose}
+      />
+      <div className="relative max-w-lg w-full">
+        {/* Close button - outside modal content */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onClose();
+          }}
+          className="absolute -top-12 right-0 w-8 h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center hover:bg-white transition-all z-50 touch-feedback touch-manipulation cursor-pointer shadow-lg"
+          aria-label="Close modal"
+          type="button"
+        >
+          <X className="w-4 h-4 text-gray-700 pointer-events-none" />
+        </button>
+        
+        {/* Modal content */}
+        <div className="bg-white rounded-3xl shadow-2xl max-h-[90vh] overflow-hidden">
+          {/* Header */}
+          <div className="relative p-6 pb-4 border-b border-gray-100">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sage-light to-sage flex items-center justify-center">
+                <Edit3 className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-primary-text">Create a Journey</h2>
+                <p className="text-sm text-secondary-text-thin">Your wellness journal</p>
+              </div>
             </div>
           </div>
-        </div>
 
         {/* Content */}
         <div className="overflow-y-auto max-h-[calc(90vh-200px)]">
@@ -244,6 +257,7 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
             Cancel
           </button>
         </div>
+      </div>
       </div>
     </div>
   );

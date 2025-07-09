@@ -19,6 +19,7 @@ import { getJourneyByType } from '@/src/utils/journeyStorage';
 import { ChatEditor } from '@/components/ui/ChatEditor';
 import { createChatThread, addMessageToThread, getChatThread, deleteChatThread } from '@/src/utils/chatStorage';
 import { useKeyboardAwareChat } from '@/hooks/useKeyboardAwareChat';
+import { ThrivingTutorial } from './ThrivingTutorial';
 
 interface SmartCardChatProps {
   threadId?: string;
@@ -58,6 +59,10 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   const [chatThreadId, setChatThreadId] = useState<string | null>(null);
   const hasScrolledToStreamRef = useRef<Set<number>>(new Set());
   const { messagesEndRef, chatContainerRef, scrollToBottom } = useKeyboardAwareChat();
+  const [showThrivingTutorial, setShowThrivingTutorial] = useState(false);
+  const [tutorialActionableText, setTutorialActionableText] = useState<string>('');
+  const hasShownTutorialInSession = useRef(false);
+  const tutorialTargetButtonRef = useRef<HTMLButtonElement | null>(null);
 
   // Load existing messages if threadId is provided
   useEffect(() => {
@@ -141,6 +146,32 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     }
   }, [messages, scrollToBottom]);
 
+  // Show thriving tutorial automatically on mobile or after delay
+  useEffect(() => {
+    if (messages.length > 0 && !showThrivingTutorial && !hasShownTutorialInSession.current) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role === 'assistant' && lastMessage.parsedContent?.actionableItems) {
+        const thrivingItem = lastMessage.parsedContent.actionableItems.find(
+          item => item.type === 'create_routine' || item.type === 'routine' || item.type === 'start_journey'
+        );
+        const tutorialCount = parseInt(localStorage.getItem('thrivingTutorialCount') || '0');
+        const hasCreatedThriving = localStorage.getItem('hasCreatedThriving') === 'true';
+        if (thrivingItem && tutorialCount < 2 && !hasCreatedThriving) {
+          // Show tutorial after a delay
+          const timer = setTimeout(() => {
+            // Get the title from the thriving item
+            const itemTitle = thrivingItem.title || thrivingItem.journeyTitle || thrivingItem.description || '';
+            setTutorialActionableText(itemTitle);
+            setShowThrivingTutorial(true);
+            hasShownTutorialInSession.current = true;
+          }, 2000);
+          return () => clearTimeout(timer);
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages]); // Intentionally exclude showThrivingTutorial to prevent re-runs
+
   useEffect(() => {
     if (selectedPrompt) {
       setInput(selectedPrompt);
@@ -151,6 +182,9 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   const handleSendMessage = async (messageOverride?: string) => {
     const messageToSend = messageOverride || input;
     if (!messageToSend.trim() || isLoading) return;
+
+    // Mark that user has sent a message
+    localStorage.setItem('hasEverSentMessage', 'true');
 
     const trimmedInput = messageToSend.trim().toLowerCase();
     
@@ -625,16 +659,13 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                   </div>
                 )}
 
-                {/* Actionable Items */}
+                {/* Actionable Items - Compact Design */}
                 {parsed?.actionableItems && parsed.actionableItems.length > 0 && (
-                  <div className="space-y-3 pt-2 -mx-2">
+                  <div className="space-y-2 pt-1">
                     {parsed.actionableItems.map((item, idx) => {
                       let Icon = Heart;
                       let gradientClass = "";
                       let iconColorClass = "";
-                      let backgroundClass = "";
-                      let shadowClass = "";
-                      let borderColorHover = "";
                       
                       // Icon selection logic
                       if (item.icon) {
@@ -664,41 +695,40 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                       
                       if (colorIndex === 0) {
                         // Light sage green
-                        gradientClass = "from-sage-light/30 to-sage/20";
+                        gradientClass = "from-sage-light/20 to-sage/10";
                         iconColorClass = "text-sage-dark";
-                        backgroundClass = "from-sage-light/10 to-sage/5";
-                        shadowClass = "shadow-sage/20";
-                        borderColorHover = "hover:border-sage/40";
                       } else if (colorIndex === 1) {
                         // Light pink/bronze
-                        gradientClass = "from-rose/20 to-dusty-rose/15";
+                        gradientClass = "from-rose/15 to-dusty-rose/10";
                         iconColorClass = "text-rose";
-                        backgroundClass = "from-rose/5 to-dusty-rose/5";
-                        shadowClass = "shadow-rose/15";
-                        borderColorHover = "hover:border-rose/30";
                       } else {
                         // Light slate blue
-                        gradientClass = "from-slate-300/30 to-slate-400/20";
+                        gradientClass = "from-slate-300/20 to-slate-400/10";
                         iconColorClass = "text-slate-700";
-                        backgroundClass = "from-slate-50 to-slate-100/50";
-                        shadowClass = "shadow-slate-300/30";
-                        borderColorHover = "hover:border-slate-400/40";
                       }
                       
+                      // Check if this is a thriving button and if it matches the tutorial
+                      const isThrivingButton = item.type === 'create_routine' || item.type === 'routine' || item.type === 'start_journey';
+                      const shouldAttachRef = isThrivingButton && 
+                        (item.title === tutorialActionableText || 
+                         item.journeyTitle === tutorialActionableText || 
+                         item.description === tutorialActionableText);
+
                       return (
                         <button
                           key={idx}
+                          ref={shouldAttachRef ? tutorialTargetButtonRef : undefined}
                           onClick={() => handleActionClick(item)}
-                          className={`w-full mx-2 flex items-center space-x-4 p-5 rounded-2xl bg-gradient-to-r ${backgroundClass} border border-gray-200 shadow-xl ${shadowClass} hover:shadow-2xl ${borderColorHover} transition-all duration-300 text-left group touch-feedback touch-manipulation`}
+                          className="w-full flex items-center space-x-3 p-3 rounded-xl bg-white hover:bg-gray-50 border border-gray-200 hover:border-gray-300 transition-all duration-200 text-left group touch-feedback touch-manipulation"
                         >
-                          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradientClass} flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-110 transition-transform`}>
-                            <Icon className={`w-6 h-6 ${iconColorClass}`} />
+                          <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${gradientClass} flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform`}>
+                            <Icon className={`w-5 h-5 ${iconColorClass}`} />
                           </div>
-                          <div className="flex-1">
-                            <h4 className="font-bold text-primary-text text-[17px] mb-1">{item.title}</h4>
-                            <p className="text-[14px] text-secondary-text-thin leading-relaxed">{item.description || item.details}</p>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-gray-900 text-[15px] truncate">{item.title}</h4>
+                            <p className="text-[13px] text-gray-600 line-clamp-2 leading-snug">{item.description || item.details}</p>
                           </div>
-                          <ChevronRight className="w-6 h-6 text-gray-300 group-hover:text-sage-dark group-hover:translate-x-2 transition-all" />
+                          <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all flex-shrink-0" />
                         </button>
                       );
                     })}
@@ -779,15 +809,18 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       {/* Messages - scrollable middle section that shrinks */}
       <div className="chat-messages smooth-scroll">
         <div className="chat-messages-content">
-          {/* Prompt Templates (only show when no messages) */}
-          {messages.length === 0 && renderPromptTemplates && (
-            <div className="min-h-full">
-              {renderPromptTemplates(messages)}
-            </div>
-          )}
-          
-          {/* Messages */}
-          {messages.length > 0 && (
+          {/* Welcome Screen OR Prompt Templates OR Messages */}
+          {messages.length === 0 ? (
+            <>
+              {/* Show prompt templates if provided */}
+              {renderPromptTemplates && (
+                <div className="min-h-full">
+                  {renderPromptTemplates(messages)}
+                </div>
+              )}
+            </>
+          ) : (
+            /* Messages */
             <>
               {messages.map((message, idx) => (
                 <React.Fragment key={idx}>
@@ -824,6 +857,8 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
             onRoutineCreated?.(routine);
             setShowRoutineModal(false);
             setRoutineData(null);
+            // Mark that user has created a thriving
+            localStorage.setItem('hasCreatedThriving', 'true');
           }}
         />
       )}
@@ -841,6 +876,40 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
             onJourneyCreated?.(journey);
             setShowJourneyModal(false);
             setJourneyData(null);
+            // Mark that user has created a thriving
+            localStorage.setItem('hasCreatedThriving', 'true');
+          }}
+        />
+      )}
+
+      {showThrivingTutorial && (
+        <ThrivingTutorial
+          actionableItemText={tutorialActionableText}
+          onClose={() => {
+            setShowThrivingTutorial(false);
+            const currentCount = parseInt(localStorage.getItem('thrivingTutorialCount') || '0');
+            localStorage.setItem('thrivingTutorialCount', String(currentCount + 1));
+          }}
+          onArrowClick={() => {
+            // Scroll to the button and click it after 2 seconds
+            if (tutorialTargetButtonRef.current) {
+              // Scroll the button into view
+              tutorialTargetButtonRef.current.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+              });
+              
+              // Add a visual indication that the button will be clicked
+              tutorialTargetButtonRef.current.classList.add('animate-pulse');
+              
+              // Click the button after 2 seconds
+              setTimeout(() => {
+                if (tutorialTargetButtonRef.current) {
+                  tutorialTargetButtonRef.current.classList.remove('animate-pulse');
+                  tutorialTargetButtonRef.current.click();
+                }
+              }, 2000);
+            }
           }}
         />
       )}

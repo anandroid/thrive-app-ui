@@ -324,16 +324,26 @@ export const RoutineCreationModal: React.FC<RoutineCreationModalProps> = ({
         onClick={onClose}
       />
       
-      <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <div className="bg-white rounded-3xl shadow-2xl p-6">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-all"
-          >
-            <X className="w-4 h-4 text-gray-600" />
-          </button>
-
-          {renderStepContent()}
+      <div className="relative w-full max-w-md">
+        {/* Close button - outside modal content */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onClose();
+          }}
+          className="absolute -top-12 right-0 w-8 h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center hover:bg-white transition-all z-50 touch-feedback touch-manipulation cursor-pointer shadow-lg"
+          aria-label="Close modal"
+          type="button"
+        >
+          <X className="w-4 h-4 text-gray-700 pointer-events-none" />
+        </button>
+        
+        {/* Modal content */}
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+          <div className="max-h-[90vh] overflow-y-auto p-6">
+            {renderStepContent()}
+          </div>
         </div>
       </div>
     </div>

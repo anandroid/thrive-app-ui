@@ -2,6 +2,19 @@
 
 ## Recent Mobile UX Improvements (2025-07-09)
 
+### ✅ Thriving Tutorial Overlay
+- **First-Time Tutorial** - When users first see a routine or journey suggestion in chat, an overlay tutorial appears
+- **Visual Guide** - Shows both routine and journey illustrations to explain what "thrivings" are
+- **Interactive Arrow** - Animated arrow points to the actionable item they should tap
+- **Auto-Show on Mobile** - Tutorial appears automatically after 2 seconds on mobile devices
+- **One-Time Display** - Shows only once per user, tracked in localStorage
+
+### ✅ Companion Welcome Screen
+- **Removed from Onboarding** - Companion illustration no longer appears in onboarding flow
+- **Added to Chat Empty State** - Companion image now appears when opening chat with no messages
+- **Smooth Transitions** - Welcome screen fades out smoothly when first message is sent or received
+- **Mobile Optimized** - Responsive design with proper spacing and touch-friendly layout
+
 ### ✅ Routine Progress Display Fix
 - **Fixed "0 more steps" Issue** - When all steps for today are completed, now shows "✓ All done for today!" instead of "0 more steps"
 - **Improved Next Step Display** - When no more steps today, shows "Tomorrow: [time]" for the next step

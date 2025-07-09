@@ -383,6 +383,49 @@ input, textarea, [contenteditable] {
   animation: pulseSlow 4s ease-in-out infinite;
 }
 
+/* Fade animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-fade-out {
+  animation: fadeOut 0.3s ease-in-out;
+}
+
+/* Scale animations */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Prose styling for rich content */
 .prose {
   color: inherit;
@@ -520,4 +563,60 @@ input, textarea, [contenteditable] {
     0 1px 3px rgba(255, 212, 181, 0.4),
     0 3px 6px rgba(180, 180, 180, 0.2);
   transform: translateY(-0.5px);
+}
+
+/* Illustration Layout for Onboarding and Welcome */
+.layout-wrapper {
+  position: fixed;
+  inset: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.illustration-layout,
+.welcome-layout {
+  display: flex;
+  flex-direction: column;
+  background: white;
+  height: 100%;
+}
+
+.illustration-layout .layout-header,
+.welcome-layout .layout-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  flex-shrink: 0;
+}
+
+.illustration-layout .layout-content,
+.welcome-layout .layout-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure content fits on smaller screens */
+@media (max-height: 700px) {
+  .welcome-layout .layout-content {
+    align-items: flex-start;
+    padding-top: 1rem;
+  }
+}
+
+.illustration-layout .layout-footer,
+.welcome-layout .layout-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  padding: 1rem;
+  background: linear-gradient(to top, white 0%, white 80%, rgba(255, 255, 255, 0.98) 100%);
+  flex-shrink: 0;
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
 }

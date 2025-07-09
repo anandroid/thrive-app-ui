@@ -81,11 +81,11 @@ export async function migrateFromLocalStorage() {
     }
 
     // Migrate chat threads
-    const threadsData = localStorage.getItem('chatThreads');
+    const threadsData = localStorage.getItem('thrive_chat_threads');
     if (threadsData) {
       const threads = JSON.parse(threadsData);
       await db.chatThreads.bulkPut(threads);
-      localStorage.removeItem('chatThreads');
+      localStorage.removeItem('thrive_chat_threads');
     }
 
     // Migrate wellness journeys

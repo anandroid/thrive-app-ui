@@ -3,6 +3,18 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
+// Inline keyframe style for spinner
+const spinnerStyle = `
+  @keyframes loadingSpinner {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
 interface LoadingButtonProps {
   isLoading: boolean;
   onClick?: () => void;
@@ -71,28 +83,31 @@ export const LoadingButton: React.FC<LoadingButtonProps> = ({
   };
 
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled || isLoading}
-      className={cn(
-        'relative overflow-hidden transition-all',
-        className,
-        isLoading && loadingClassName
-      )}
-    >
-      {isLoading ? (
-        <div className="flex items-center justify-center px-2">
-          {showSpinner && (
-            <div
-              className={cn(
-                'w-4 h-4 border-2 border-white border-t-transparent rounded-full flex-shrink-0',
-                spinnerClassName
-              )}
-              style={{
-                animation: 'spin 1s linear infinite'
-              }}
-            />
-          )}
+    <>
+      <style dangerouslySetInnerHTML={{ __html: spinnerStyle }} />
+      <button
+        onClick={onClick}
+        disabled={disabled || isLoading}
+        className={cn(
+          'relative overflow-hidden transition-all',
+          className,
+          isLoading && loadingClassName
+        )}
+      >
+        {isLoading ? (
+          <div className="flex items-center justify-center px-2">
+            {showSpinner && (
+              <div
+                className={cn(
+                  'w-4 h-4 border-2 border-white border-t-transparent rounded-full flex-shrink-0',
+                  spinnerClassName
+                )}
+                style={{
+                  animation: 'loadingSpinner 1s linear infinite',
+                  transformOrigin: 'center'
+                }}
+              />
+            )}
           <span 
             className={cn(
               'ml-2 leading-tight break-words text-center',
@@ -113,6 +128,7 @@ export const LoadingButton: React.FC<LoadingButtonProps> = ({
         children
       )}
     </button>
+    </>
   );
 };
 

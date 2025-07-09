@@ -228,14 +228,13 @@ export default function PantryPage() {
                 </>
               ) : (
                 <>
-                  <div className="relative w-48 h-48 mx-auto mb-6">
-                    <OptimizedImage
-                      src="/illustrations/pantry.png"
-                      alt="Your wellness pantry"
-                      fill
-                      className="object-contain"
-                    />
-                  </div>
+                  <OptimizedImage
+                    src="/illustrations/pantry.png"
+                    alt="Your wellness pantry"
+                    width={192}
+                    height={192}
+                    className="mx-auto mb-6"
+                  />
                   <h3 className="text-xl font-semibold text-primary-text mb-3">Your Wellness Pantry</h3>
                   <p className="text-secondary-text-thin max-w-md mx-auto mb-2">
                     Keep track of supplements, medicines, herbs, and remedies you have at home.

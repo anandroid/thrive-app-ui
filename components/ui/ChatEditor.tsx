@@ -3,6 +3,18 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Send } from 'lucide-react';
 
+// Inline keyframe style for spinner
+const spinnerStyle = `
+  @keyframes chatSpinner {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
 interface ChatEditorProps {
   value: string;
   onChange: (value: string) => void;
@@ -74,35 +86,44 @@ export function ChatEditor({
   };
 
   return (
-    <div ref={containerRef} className={`chat-input-wrapper ${className}`}>
-      <div className="px-4 py-3">
-        <div className="flex items-start gap-3 bg-gray-50 rounded-2xl p-3 transition-all focus-within:bg-white focus-within:ring-2 focus-within:ring-rose/20">
-          <textarea
-            ref={textareaRef}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            placeholder={placeholder}
-            disabled={isLoading || disabled}
-            rows={1}
-            className="flex-1 resize-none bg-transparent text-gray-900 placeholder:text-gray-500 focus:outline-none text-base leading-relaxed min-h-[32px] max-h-[64px] transition-all pt-0"
-            style={{ overflow: 'hidden' }}
-          />
-          <button
-            onClick={() => onSubmit()}
-            disabled={!value.trim() || isLoading || disabled}
-            className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-rose to-burgundy text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed native-transition ios-active shadow-md hover:shadow-lg transition-shadow touch-feedback touch-manipulation"
-          >
-            {isLoading ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Send className="w-5 h-5" />
-            )}
-          </button>
+    <>
+      <style dangerouslySetInnerHTML={{ __html: spinnerStyle }} />
+      <div ref={containerRef} className={`chat-input-wrapper ${className}`}>
+        <div className="px-4 py-3">
+          <div className="flex items-start gap-3 bg-gray-50 rounded-2xl p-3 transition-all focus-within:bg-white focus-within:ring-2 focus-within:ring-rose/20">
+            <textarea
+              ref={textareaRef}
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              placeholder={placeholder}
+              disabled={isLoading || disabled}
+              rows={1}
+              className="flex-1 resize-none bg-transparent text-gray-900 placeholder:text-gray-500 focus:outline-none text-base leading-relaxed min-h-[32px] max-h-[64px] transition-all pt-0"
+              style={{ overflow: 'hidden' }}
+            />
+            <button
+              onClick={() => onSubmit()}
+              disabled={!value.trim() || isLoading || disabled}
+              className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-rose to-burgundy text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed native-transition ios-active shadow-md hover:shadow-lg transition-shadow touch-feedback touch-manipulation"
+            >
+              {isLoading ? (
+                <div 
+                  className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                  style={{
+                    animation: 'chatSpinner 1s linear infinite',
+                    transformOrigin: 'center'
+                  }}
+                />
+              ) : (
+                <Send className="w-5 h-5" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

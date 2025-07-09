@@ -6,8 +6,11 @@ import { Menu, Sparkles, Weight, Pill, Brain, Activity, Heart, Moon, Leaf, Chevr
 import Link from 'next/link';
 import { Thriving } from '@/src/types/thriving';
 import { getThrivingsFromStorage, migrateRoutinesToThrivings } from '@/src/utils/thrivingStorage';
-import { Onboarding } from '@/components/features/Onboarding';
+import { GetStarted } from '@/components/features/GetStarted';
 import { ChatEditor } from '@/components/ui/ChatEditor';
+import { PrivacySection } from '@/components/features/PrivacySection';
+// import { PrivacySection2 } from '@/components/features/PrivacySection2';
+// import { PrivacySection3 } from '@/components/features/PrivacySection3';
 
 const promptTemplates = [
   {
@@ -98,9 +101,9 @@ export default function HomePage() {
     }
     return [];
   });
-  const [showOnboarding, setShowOnboarding] = useState(() => {
+  const [showGetStarted, setShowGetStarted] = useState(() => {
     if (typeof window !== 'undefined') {
-      return !localStorage.getItem('hasSeenOnboarding');
+      return !localStorage.getItem('hasSeenGetStarted');
     }
     return false;
   });
@@ -121,13 +124,13 @@ export default function HomePage() {
     }
   }, []);
 
-  const handleOnboardingComplete = () => {
-    localStorage.setItem('hasSeenOnboarding', 'true');
+  const handleGetStartedComplete = () => {
+    localStorage.setItem('hasSeenGetStarted', 'true');
     setIsTransitioning(true);
     
     // Smooth transition
     setTimeout(() => {
-      setShowOnboarding(false);
+      setShowGetStarted(false);
       setShowSlideAnimation(true);
       setIsTransitioning(false);
     }, 300);
@@ -156,15 +159,15 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Show onboarding overlay when needed */}
-      {showOnboarding && (
+      {/* Show get started overlay when needed */}
+      {showGetStarted && (
         <div className={`fixed inset-0 z-50 ${isTransitioning ? 'animate-fade-out' : ''}`}>
-          <Onboarding onComplete={handleOnboardingComplete} />
+          <GetStarted onComplete={handleGetStartedComplete} />
         </div>
       )}
       
       {/* Main app content - Always rendered but visibility controlled */}
-      <div className={`chat-container ${showSlideAnimation ? 'animate-scale-in' : ''} ${showOnboarding && !isTransitioning ? 'opacity-0 pointer-events-none' : ''}`}>
+      <div className={`chat-container ${showSlideAnimation ? 'animate-scale-in' : ''} ${showGetStarted && !isTransitioning ? 'opacity-0 pointer-events-none' : ''}`}>
         {/* Header - stays at top */}
         <div className="chat-header safe-top">
           <div className="flex items-center justify-between content-padding h-14">
@@ -295,8 +298,13 @@ export default function HomePage() {
               </div>
             )}
 
+            {/* Privacy Section - Only show if no thrivings */}
+            <PrivacySection visible={thrivings.length === 0} />
+
             {/* Prompt Templates */}
-            <div className="content-padding py-8 space-y-3 bg-gradient-to-br from-sage-light/10 to-sage/10 backdrop-blur-sm">
+            <div className={`content-padding py-8 space-y-3 bg-gradient-to-br from-sage-light/10 to-sage/10 backdrop-blur-sm ${
+              thrivings.length === 0 ? 'rounded-b-3xl' : 'rounded-3xl'
+            }`}>
               <p className="text-lg text-secondary-text font-light text-center mb-8">
                 How can I help you thrive?
               </p>

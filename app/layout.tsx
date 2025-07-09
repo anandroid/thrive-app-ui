@@ -5,6 +5,7 @@ import { ServiceWorkerProvider } from "@/src/providers/ServiceWorkerProvider";
 import { OfflineIndicator } from "@/components/ui/OfflineIndicator";
 import { TouchFeedbackProvider } from "@/src/providers/TouchFeedbackProvider";
 import { NavigationProvider } from "@/src/providers/NavigationProvider";
+import "@/src/utils/clearCorruptedData";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
