@@ -409,7 +409,10 @@ export default function RoutinesPage() {
                         <div className="flex justify-between mb-1.5 text-xs">
                           <span className="text-gray-600">Today&apos;s Progress</span>
                           <span className="font-medium text-burgundy">
-                            {getRemainingStepsToday(routine)} more steps
+                            {getRemainingStepsToday(routine) === 0 
+                              ? '✓ All done for today!' 
+                              : `${getRemainingStepsToday(routine)} more ${getRemainingStepsToday(routine) === 1 ? 'step' : 'steps'}`
+                            }
                           </span>
                         </div>
                         <div className="bg-gray-100 rounded-full overflow-hidden h-2">
@@ -436,11 +439,14 @@ export default function RoutinesPage() {
                           >
                             <div className="flex items-center justify-between mb-1">
                               <span className="text-xs font-medium text-sage-dark">
-                                Next: {nextStep.reminderTime ? formatReminderTime(nextStep.reminderTime) : 'Soon'}
+                                {remainingToday === 0 
+                                  ? `Tomorrow: ${nextStep.reminderTime ? formatReminderTime(nextStep.reminderTime) : 'First thing'}` 
+                                  : `Next: ${nextStep.reminderTime ? formatReminderTime(nextStep.reminderTime) : 'Soon'}`
+                                }
                               </span>
                               {remainingToday > 1 && (
                                 <span className="text-xs text-gray-600">
-                                  +{remainingToday - 1} more
+                                  +{remainingToday - 1} more today
                                 </span>
                               )}
                             </div>

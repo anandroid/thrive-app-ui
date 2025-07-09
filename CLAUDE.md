@@ -1,5 +1,13 @@
 # Thrive App - Mobile-First Development Guidelines
 
+## Recent Mobile UX Improvements (2025-07-09)
+
+### ✅ Routine Progress Display Fix
+- **Fixed "0 more steps" Issue** - When all steps for today are completed, now shows "✓ All done for today!" instead of "0 more steps"
+- **Improved Next Step Display** - When no more steps today, shows "Tomorrow: [time]" for the next step
+- **Better Pluralization** - Shows "1 more step" vs "2 more steps" correctly
+- **Enhanced User Feedback** - Clearer indication of daily progress completion
+
 ## Recent Mobile UX Improvements (2025-07-08)
 
 ### ✅ Fixed Issues

@@ -85,9 +85,12 @@ export const LoadingButton: React.FC<LoadingButtonProps> = ({
           {showSpinner && (
             <div
               className={cn(
-                'w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin flex-shrink-0',
+                'w-4 h-4 border-2 border-white border-t-transparent rounded-full flex-shrink-0',
                 spinnerClassName
               )}
+              style={{
+                animation: 'spin 1s linear infinite'
+              }}
             />
           )}
           <span 
