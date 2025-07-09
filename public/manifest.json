@@ -7,7 +7,14 @@
   "background_color": "#ffffff",
   "theme_color": "#d9496a",
   "orientation": "portrait",
-  "icons": [],
+  "icons": [
+    {
+      "src": "/leaf-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
   "categories": ["health", "wellness", "lifestyle"],
   "shortcuts": [
     {

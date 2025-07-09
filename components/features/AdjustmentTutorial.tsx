@@ -31,14 +31,11 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/60" />
       
-      {/* Tutorial content */}
+      {/* Tutorial content - centered on screen */}
       <div 
-        className={`absolute left-1/2 -translate-x-1/2 bg-white rounded-3xl shadow-2xl p-6 max-w-sm w-[90%] transition-all duration-300 ${
+        className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-3xl shadow-2xl p-6 max-w-sm w-[90%] transition-all duration-300 ${
           isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
         }`}
-        style={{
-          top: '15%',
-        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}

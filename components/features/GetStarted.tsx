@@ -10,7 +10,6 @@ interface GetStartedProps {
 
 export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
   const [showTermsModal, setShowTermsModal] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handleGetStarted = () => {
     localStorage.setItem('hasSeenGetStarted', 'true');
@@ -24,31 +23,22 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
         {/* Background Layer - Always visible */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-soft-blush/80 via-white to-soft-lavender/30" />
-          <div className="absolute top-20 -right-20 w-96 h-96 rounded-full bg-gradient-to-br from-rose/20 to-dusty-rose/20 blur-3xl animate-pulse-slow" />
+          <div className="absolute top-20 -right-20 w-96 h-96 rounded-full bg-gradient-to-br from-rose/20 to-dusty-rose/20 blur-3xl" />
         </div>
 
-        {/* Loading spinner - shows while image loads */}
-        {!imageLoaded && (
-          <div className="absolute inset-0 z-40 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose"></div>
-          </div>
-        )}
 
         {/* Scrollable Content */}
-        <div className={`layout-content relative z-10 transition-opacity duration-500 ${!imageLoaded ? 'opacity-0' : 'opacity-100'}`}>
+        <div className="layout-content relative z-10">
           <div className="max-w-md mx-auto w-full px-6 py-4 sm:py-6 md:py-8 flex flex-col items-center justify-center gap-4">
             {/* Welcome Illustration */}
-            <div className="relative w-full h-48 sm:h-56 md:h-64 mb-4 sm:mb-6 md:mb-8 group">
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-rose/20 to-burgundy/20 shadow-2xl shadow-rose/30" />
-              <div className="absolute inset-0 rounded-3xl backdrop-blur-sm" />
+            <div className="relative w-full h-48 sm:h-56 md:h-64 mb-4 sm:mb-6 md:mb-8">
               <OptimizedImage
                 src="/illustrations/welcome.png"
                 alt="Welcome to Thrive"
                 fill
-                className="object-contain p-4 sm:p-5 md:p-6 relative z-10"
+                className="object-contain p-4 sm:p-5 md:p-6"
                 priority
                 sizes="(max-width: 768px) 80vw, 400px"
-                onLoad={() => setImageLoaded(true)}
               />
             </div>
 
@@ -58,10 +48,10 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
                 Welcome to Thrive
               </h1>
               <p className="text-base sm:text-lg font-medium text-secondary-text">
-                Your personal wellness companion
+                Your natural wellness companion
               </p>
               <p className="text-sm sm:text-base text-secondary-text-thin leading-relaxed max-w-sm mx-auto px-2">
-                Track your healing journey, create gentle daily routines, and discover natural wellness wisdom - all while keeping your data completely private.
+                Blend timeless natural remedies with modern wellness tracking. Create personalized wellness routines, journal your healing journey, and seamlessly integrate any medications you take - all guided by holistic practices, completely private.
               </p>
             </div>
 

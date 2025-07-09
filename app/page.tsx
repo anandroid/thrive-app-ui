@@ -15,32 +15,32 @@ import { PrivacySection } from '@/components/features/PrivacySection';
 const promptTemplates = [
   {
     icon: Weight,
-    text: "Help me lose weight sustainably",
+    text: "I want to lose weight sustainably",
     iconGradient: "from-rose/90 to-burgundy"
   },
   {
     icon: Pill,
-    text: "Create a routine for my medications",
+    text: "I want to manage my medications better",
     iconGradient: "from-sage/90 to-sage-dark"
   },
   {
     icon: Brain,
-    text: "I need help managing anxiety",
+    text: "I want to feel calmer and less anxious",
     iconGradient: "from-[#E08B5D] to-[#D4696F]"
   },
   {
     icon: Activity,
-    text: "Help me reduce chronic pain",
+    text: "I want to reduce my chronic pain",
     iconGradient: "from-dusty-rose/90 to-dark-burgundy"
   },
   {
     icon: Moon,
-    text: "I can't sleep well at night",
+    text: "I want to sleep better at night",
     iconGradient: "from-slate-400 to-blue-500"
   },
   {
     icon: Heart,
-    text: "Help me with my symptoms",
+    text: "I want to improve my overall wellness",
     iconGradient: "from-sage-light/90 to-sage"
   }
 ];
