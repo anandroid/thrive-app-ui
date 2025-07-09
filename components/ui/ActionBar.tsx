@@ -45,7 +45,7 @@ export function ActionBar({
             <Link 
               href={backHref}
               onClick={handleBackClick}
-              className="action-bar-button"
+              className="action-bar-button touch-feedback touch-manipulation"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>

@@ -598,13 +598,13 @@ export default function ThrivingsPage() {
                                 }, 2000);
                               }
                             }}
-                            className="p-2 rounded-lg hover:bg-gray-50 transition-all"
+                            className="p-2 rounded-lg hover:bg-gray-50 transition-all touch-feedback touch-manipulation"
                           >
                             <Edit2 className="w-4 h-4 text-gray-600" />
                           </button>
                           <button
                             onClick={() => handleDeleteThriving(selectedThriving.id)}
-                            className="p-2 rounded-lg hover:bg-gray-50 transition-all"
+                            className="p-2 rounded-lg hover:bg-gray-50 transition-all touch-feedback touch-manipulation"
                           >
                             <Trash2 className="w-4 h-4 text-red-600" />
                           </button>
@@ -715,7 +715,7 @@ export default function ThrivingsPage() {
                           </div>
                           <button
                             onClick={toggleRecommendations}
-                            className="p-2 rounded-lg hover:bg-gray-50 transition-all"
+                            className="p-2 rounded-lg hover:bg-gray-50 transition-all touch-feedback touch-manipulation"
                           >
                             {isRecommendationsCollapsed ? (
                               <ChevronDown className="w-5 h-5 text-gray-600" />

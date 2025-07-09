@@ -149,7 +149,7 @@ export default function PantryPage() {
         rightElement={
           <button
             onClick={() => setShowAddModal(true)}
-            className="action-bar-button bg-gradient-to-r from-rose to-burgundy text-white"
+            className="action-bar-button bg-gradient-to-r from-rose to-burgundy text-white touch-feedback touch-manipulation"
           >
             <Plus className="w-5 h-5" />
           </button>
@@ -284,7 +284,7 @@ export default function PantryPage() {
                       {/* Delete button */}
                       <button
                         onClick={() => handleDeleteItem(item.id)}
-                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-all"
+                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-all touch-feedback touch-manipulation"
                       >
                         <X className="w-4 h-4 text-gray-600" />
                       </button>

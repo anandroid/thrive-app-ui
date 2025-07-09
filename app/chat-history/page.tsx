@@ -137,7 +137,7 @@ export default function ChatHistoryPage() {
                   </h3>
                   <button
                     onClick={(e) => handleDeleteChat(chat.threadId, e)}
-                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-red-50 transition-all"
+                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-red-50 transition-all touch-feedback touch-manipulation"
                   >
                     <Trash2 className="w-4 h-4 text-red-600" />
                   </button>
@@ -169,7 +169,7 @@ export default function ChatHistoryPage() {
       {chatHistory.length > 0 && (
         <Link
           href="/chat/new"
-          className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-sage to-sage-dark shadow-lg hover:shadow-xl transition-all flex items-center justify-center group"
+          className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-sage to-sage-dark shadow-lg hover:shadow-xl transition-all flex items-center justify-center group touch-feedback touch-manipulation"
         >
           <Plus className="w-6 h-6 text-white group-hover:rotate-90 transition-transform duration-300" />
         </Link>

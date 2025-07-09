@@ -128,7 +128,7 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
                 <div className="action-bar-left">
                   <Link 
                     href="/"
-                    className="action-bar-button"
+                    className="action-bar-button touch-feedback touch-manipulation"
                   >
                     <ArrowLeft className="w-5 h-5" />
                   </Link>

@@ -1,14 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Info, Moon, ChevronRight, Plus, Leaf, MessageSquare } from 'lucide-react';
+import { Info, Moon, ChevronRight, Plus, Leaf, MessageSquare, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getTouchClasses } from '@/hooks/useTouchFeedback';
 import { PageLayout } from '@/components/layout/PageLayout';
 
 export default function SettingsPage() {
   const router = useRouter();
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   return (
     <PageLayout
@@ -18,7 +19,7 @@ export default function SettingsPage() {
         title: "Settings"
       }}
     >
-      <div className="relative">
+      <div className="relative min-h-full">
         {/* Background Gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-soft-blush via-white to-soft-lavender/20 -z-10" />
         
@@ -27,7 +28,7 @@ export default function SettingsPage() {
         <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-gradient-to-tr from-rose/10 to-burgundy/10 blur-3xl" />
         
         {/* Settings Content */}
-        <div className="px-4 py-6">
+        <div className="px-4 py-6 pb-12">
           <div className="space-y-4">
             {/* Quick Actions */}
             <div className="mb-6">
@@ -175,9 +176,76 @@ export default function SettingsPage() {
             <p className="text-sm text-primary-text/60">
               Made with love for you to thrive
             </p>
+            
+            {/* Delete Data - Subtle Option */}
+            <button 
+              onClick={() => setShowDeleteConfirmation(true)}
+              className="mt-8 text-xs text-gray-400 hover:text-gray-600 transition-colors touch-feedback touch-manipulation"
+            >
+              Delete All Data
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirmation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-fade-in">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-scale-in">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+                <Trash2 className="w-8 h-8 text-red-600" />
+              </div>
+              <h2 className="text-xl font-bold text-primary-text mb-2">Delete All Data?</h2>
+              <p className="text-sm text-secondary-text">
+                This will permanently delete all your data including:
+              </p>
+              <ul className="text-sm text-secondary-text mt-3 space-y-1 text-left max-w-[250px] mx-auto">
+                <li>• All wellness routines and journals</li>
+                <li>• Your pantry items</li>
+                <li>• Chat history and conversations</li>
+                <li>• All personal settings</li>
+              </ul>
+              <p className="text-sm text-red-600 mt-4 font-medium">
+                This action cannot be undone!
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirmation(false)}
+                className="flex-1 py-3 rounded-2xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors touch-feedback touch-manipulation"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  // Clear all data
+                  localStorage.clear();
+                  sessionStorage.clear();
+                  
+                  // Clear IndexedDB if used
+                  if ('indexedDB' in window) {
+                    indexedDB.databases().then(databases => {
+                      databases.forEach(db => {
+                        if (db.name) {
+                          indexedDB.deleteDatabase(db.name);
+                        }
+                      });
+                    });
+                  }
+                  
+                  // Navigate to home page (will show welcome screen)
+                  window.location.href = '/';
+                }}
+                className="flex-1 py-3 rounded-2xl bg-red-600 text-white font-medium hover:bg-red-700 transition-colors active:scale-[0.98] touch-feedback touch-manipulation"
+              >
+                Delete Everything
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </PageLayout>
   );
 }
