@@ -763,17 +763,18 @@ export default function ThrivingsPage() {
                                 >
                                   <div className="p-5">
                                     {/* Header with Icon and Title */}
-                                    <div className="flex items-start gap-4 mb-3">
+                                    <div className="flex items-start gap-4">
                                       <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose/10 to-burgundy/10 flex items-center justify-center flex-shrink-0 text-2xl shadow-sm">
                                         {getIcon()}
                                       </div>
                                       <div className="flex-1">
-                                        <h4 className="font-semibold text-gray-900 text-lg mb-2">{rec}</h4>
+                                        <h4 className="font-semibold text-gray-900 text-lg">{rec}</h4>
+                                        <p className="text-sm text-gray-600 mt-2">
+                                          Consider adding this to your wellness routine for enhanced benefits.
+                                        </p>
                                       </div>
                                     </div>
-                                    
                                   </div>
-                                  
                                 </div>
                               );
                             })}
