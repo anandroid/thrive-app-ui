@@ -1,17 +1,18 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  Plus, X, Camera, Package, 
+  Plus, X, Package, 
   Search, Shield, Sparkles,
   Pill, Apple, Heart
 } from 'lucide-react';
 import { ActionBar } from '@/components/ui/ActionBar';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
+import { PantryAddModal } from '@/components/features/PantryAddModal';
 import { PantryItem, RecommendedSupplement } from '@/src/types/pantry';
 import { 
   getPantryItems, savePantryItem, deletePantryItem, 
-  imageToBase64, getRecommendedSupplements, saveRecommendedSupplement
+  getRecommendedSupplements, saveRecommendedSupplement
 } from '@/src/utils/pantryStorage';
 import { generateSupplementRecommendations } from '@/src/services/recommendations/supplementRecommendations';
 
@@ -37,13 +38,7 @@ export default function PantryPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string>('all');
-  const [newItem, setNewItem] = useState<Partial<PantryItem>>({
-    name: '',
-    notes: '',
-    tags: []
-  });
-  const [imagePreview, setImagePreview] = useState<string>('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // Removed old state variables as they're now handled by PantryAddModal
 
   useEffect(() => {
     const items = getPantryItems();
@@ -78,38 +73,17 @@ export default function PantryPage() {
     }
   }, []);
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      try {
-        const base64 = await imageToBase64(file);
-        setImagePreview(base64);
-        setNewItem({ ...newItem, imageUrl: base64 });
-      } catch (error) {
-        console.error('Error converting image:', error);
-      }
-    }
-  };
-
-  const handleAddItem = () => {
-    if (!newItem.name?.trim()) return;
-
-    const item: PantryItem = {
-      id: Date.now().toString(),
-      name: newItem.name.trim(),
-      imageUrl: newItem.imageUrl,
-      notes: newItem.notes,
-      tags: newItem.tags || [],
-      dateAdded: new Date().toISOString()
-    };
-
+  const handleAddItem = (item: PantryItem) => {
     savePantryItem(item);
     setPantryItems([...pantryItems, item]);
     
-    // Reset form
-    setNewItem({ name: '', notes: '', tags: [] });
-    setImagePreview('');
-    setShowAddModal(false);
+    // Refresh recommendations to filter out newly added item
+    const existingRecs = getRecommendedSupplements();
+    const updatedPantryItemNames = [...pantryItems, item].map(i => i.name.toLowerCase());
+    const filteredRecs = existingRecs.filter(rec => 
+      !updatedPantryItemNames.includes(rec.name.toLowerCase())
+    );
+    setRecommendations(filteredRecs);
   };
 
   const handleDeleteItem = (itemId: string) => {
@@ -398,183 +372,11 @@ export default function PantryPage() {
       </div>
 
       {/* Add Item Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center">
-          <div 
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setShowAddModal(false)}
-          />
-          <div className="relative w-full max-w-lg bg-white rounded-t-3xl animate-slide-up max-h-[90vh] flex flex-col">
-            {/* Modal Header - Fixed */}
-            <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
-              <h2 className="text-xl font-semibold text-primary-text">Add to Pantry</h2>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 touch-feedback touch-manipulation"
-              >
-                <X className="w-5 h-5 text-gray-600" />
-              </button>
-            </div>
-
-            {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto px-6 pb-6 overscroll-none">
-              <div className="space-y-4 pt-4">
-              {/* Image Upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Photo (optional)
-                </label>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-24 h-24 rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:border-rose transition-all touch-feedback touch-manipulation"
-                  >
-                    {imagePreview ? (
-                      <div className="relative w-full h-full">
-                        <OptimizedImage
-                          src={imagePreview}
-                          alt="Preview"
-                          fill
-                          className="object-cover rounded-xl"
-                        />
-                      </div>
-                    ) : (
-                      <>
-                        <Camera className="w-6 h-6 text-gray-400 mb-1" />
-                        <span className="text-xs text-gray-500">Add photo</span>
-                      </>
-                    )}
-                  </button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                  <p className="text-xs text-gray-500 flex-1">
-                    Take a photo or upload an image of your supplement, herb, or remedy
-                  </p>
-                </div>
-              </div>
-
-              {/* Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Name *
-                </label>
-                <input
-                  type="text"
-                  value={newItem.name || ''}
-                  onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-                  placeholder="e.g., Vitamin D3, Turmeric, Chamomile Tea"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose/30"
-                />
-              </div>
-
-              {/* Tags */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tags (optional)
-                </label>
-                <p className="text-xs text-gray-500 mb-3">
-                  Add tags to organize your items (e.g., supplement, vitamin, herb, sleep-aid)
-                </p>
-                <div className="space-y-2">
-                  {/* Suggested Tags */}
-                  <div className="flex flex-wrap gap-2">
-                    {['supplement', 'medicine', 'vitamin', 'herb', 'food', 'remedy', 'sleep-aid', 'pain-relief', 'immune-support'].map((tag) => (
-                      <button
-                        key={tag}
-                        onClick={() => {
-                          const currentTags = newItem.tags || [];
-                          if (currentTags.includes(tag)) {
-                            setNewItem({ ...newItem, tags: currentTags.filter(t => t !== tag) });
-                          } else {
-                            setNewItem({ ...newItem, tags: [...currentTags, tag] });
-                          }
-                        }}
-                        className={`px-3 py-1 rounded-full text-xs font-medium transition-all touch-feedback touch-manipulation ${
-                          newItem.tags?.includes(tag)
-                            ? 'bg-rose text-white'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        {tag}
-                      </button>
-                    ))}
-                  </div>
-                  
-                  {/* Custom Tag Input */}
-                  <input
-                    type="text"
-                    placeholder="Add custom tags (press Enter)"
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-rose/30"
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const input = e.currentTarget;
-                        const tag = input.value.trim().toLowerCase();
-                        if (tag && !newItem.tags?.includes(tag)) {
-                          setNewItem({ ...newItem, tags: [...(newItem.tags || []), tag] });
-                          input.value = '';
-                        }
-                      }
-                    }}
-                  />
-                  
-                  {/* Selected Tags Display */}
-                  {newItem.tags && newItem.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {newItem.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-rose/10 text-rose text-xs"
-                        >
-                          {tag}
-                          <button
-                            onClick={() => setNewItem({ ...newItem, tags: newItem.tags?.filter(t => t !== tag) })}
-                            className="hover:text-burgundy"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Notes */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Notes (optional)
-                </label>
-                <textarea
-                  value={newItem.notes || ''}
-                  onChange={(e) => setNewItem({ ...newItem, notes: e.target.value })}
-                  placeholder="e.g., 1000 IU daily, organic, helps with sleep"
-                  rows={3}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose/30 resize-none"
-                />
-              </div>
-
-              </div>
-            </div>
-
-            {/* Add Button - Fixed at Bottom */}
-            <div className="p-6 pt-4 border-t border-gray-100 bg-white safe-area-bottom">
-              <button
-                onClick={handleAddItem}
-                disabled={!newItem.name?.trim()}
-                className="w-full py-3 rounded-2xl bg-gradient-to-r from-rose to-burgundy text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed touch-feedback touch-manipulation"
-              >
-                Add to Pantry
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <PantryAddModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAddItem={handleAddItem}
+      />
     </div>
   );
 }

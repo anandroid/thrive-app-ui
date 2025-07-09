@@ -27,7 +27,7 @@ export function PageLayout({
   contentClassName = ''
 }: PageLayoutProps) {
   return (
-    <div className={`page-layout ${className}`}>
+    <div className={`page-layout bg-gray-50 ${className}`}>
       {/* Header */}
       {header && (
         <ActionBar

@@ -410,7 +410,7 @@ export default function ThrivingsPage() {
 
                 <div 
                   ref={scrollContainerRef}
-                  className="flex gap-4 overflow-x-auto pb-6 scrollbar-hide snap-x snap-mandatory"
+                  className="flex gap-4 overflow-x-auto pb-6 scrollbar-hide snap-x snap-mandatory -mx-4 px-4"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                   onTouchStart={onTouchStart}
                   onTouchMove={onTouchMove}
@@ -634,29 +634,18 @@ export default function ThrivingsPage() {
                             }`}>
                               {/* Header with time and title */}
                               <div className="px-6 py-4 border-b border-gray-100">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex items-center gap-3">
-                                    <div className="flex items-center text-sage-dark">
-                                      <Bell className="w-4 h-4 mr-1.5" />
-                                      <span className="text-sm font-medium">
-                                        {step.time ? formatReminderTime(step.time) : `Step ${index + 1}`}
-                                      </span>
-                                    </div>
-                                    <span className="text-gray-300">•</span>
-                                    <span className="text-sm text-gray-500 flex items-center">
-                                      <Clock className="w-4 h-4 mr-1.5" />
-                                      {step.duration} min
+                                <div className="flex items-center gap-3 mb-2">
+                                  <div className="flex items-center text-sage-dark">
+                                    <Bell className="w-4 h-4 mr-1.5" />
+                                    <span className="text-sm font-medium">
+                                      {step.time ? formatReminderTime(step.time) : `Step ${index + 1}`}
                                     </span>
                                   </div>
-                                  {step.videoUrl && (
-                                    <button
-                                      onClick={() => window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(step.title + ' tutorial')}`, '_blank')}
-                                      className="opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium bg-gradient-to-r from-rose/10 to-dusty-rose/10 text-burgundy hover:from-rose/20 hover:to-dusty-rose/20"
-                                    >
-                                      <Play className="w-3.5 h-3.5 mr-1.5" />
-                                      Watch
-                                    </button>
-                                  )}
+                                  <span className="text-gray-300">•</span>
+                                  <span className="text-sm text-gray-500 flex items-center">
+                                    <Clock className="w-4 h-4 mr-1.5" />
+                                    {step.duration} min
+                                  </span>
                                 </div>
                                 <h4 className="font-semibold text-gray-900 text-lg">
                                   {step.title}
@@ -669,36 +658,58 @@ export default function ThrivingsPage() {
                                   {step.description}
                                 </p>
                                 
-                                {/* Pro Tips button in content area */}
-                                {step.tips && step.tips.length > 0 && (
-                                  <>
-                                    <button
-                                      onClick={() => toggleTips(index + 1)}
-                                      className="mt-4 flex items-center text-sm text-sage-dark hover:text-sage transition-colors"
-                                    >
-                                      <Lightbulb className="w-4 h-4 mr-1.5" />
-                                      Pro Tips
-                                      {expandedTips.has(index + 1) ? (
-                                        <ChevronUp className="w-4 h-4 ml-1" />
-                                      ) : (
-                                        <ChevronDown className="w-4 h-4 ml-1" />
-                                      )}
-                                    </button>
-                                    
-                                    {/* Pro Tips Content - Collapsible */}
-                                    {expandedTips.has(index + 1) && (
-                                      <div className="mt-3 p-4 rounded-lg bg-sage-light/10 border border-sage-light/30">
-                                        <ul className="space-y-2">
-                                          {step.tips.map((tip, idx) => (
-                                            <li key={idx} className="text-sm text-gray-600 flex items-start">
-                                              <span className="w-1.5 h-1.5 rounded-full bg-sage mt-1.5 mr-2 flex-shrink-0" />
-                                              {tip}
-                                            </li>
-                                          ))}
-                                        </ul>
-                                      </div>
+                                {/* Action buttons area - only show if there are buttons to display */}
+                                {((step.tips && step.tips.length > 0) || step.videoUrl || step.will_video_tutorial_help) && (
+                                  <div className="mt-4 flex items-center justify-between">
+                                    {/* Pro Tips button */}
+                                    {step.tips && step.tips.length > 0 ? (
+                                      <button
+                                        onClick={() => toggleTips(index + 1)}
+                                        className="flex items-center text-sm text-sage-dark hover:text-sage transition-colors"
+                                      >
+                                        <Lightbulb className="w-4 h-4 mr-1.5" />
+                                        Pro Tips
+                                        {expandedTips.has(index + 1) ? (
+                                          <ChevronUp className="w-4 h-4 ml-1" />
+                                        ) : (
+                                          <ChevronDown className="w-4 h-4 ml-1" />
+                                        )}
+                                      </button>
+                                    ) : (
+                                      <div /> // Empty div to maintain flex layout
                                     )}
-                                  </>
+                                    
+                                    {/* Tutorial button - aligned to the right */}
+                                    {(step.videoUrl || step.will_video_tutorial_help) && (
+                                      <button
+                                        onClick={() => {
+                                          if (step.videoUrl && step.videoUrl.includes('youtube.com') || step.videoUrl?.includes('youtu.be')) {
+                                            window.open(step.videoUrl, '_blank');
+                                          } else {
+                                            window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(step.title + ' tutorial')}`, '_blank');
+                                          }
+                                        }}
+                                        className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-gradient-to-r from-rose/10 to-dusty-rose/10 text-burgundy hover:from-rose/20 hover:to-dusty-rose/20 transition-all border border-rose/20 shadow-sm hover:shadow-md"
+                                      >
+                                        <Play className="w-3 h-3 mr-1.5 fill-current" />
+                                        Tutorial
+                                      </button>
+                                    )}
+                                  </div>
+                                )}
+                                
+                                {/* Pro Tips Content - Collapsible */}
+                                {step.tips && step.tips.length > 0 && expandedTips.has(index + 1) && (
+                                  <div className="mt-3 p-4 rounded-lg bg-sage-light/10 border border-sage-light/30">
+                                    <ul className="space-y-2">
+                                      {step.tips.map((tip, idx) => (
+                                        <li key={idx} className="text-sm text-gray-600 flex items-start">
+                                          <span className="w-1.5 h-1.5 rounded-full bg-sage mt-1.5 mr-2 flex-shrink-0" />
+                                          {tip}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
                                 )}
                               </div>
                             </div>
@@ -729,30 +740,39 @@ export default function ThrivingsPage() {
                         
                         {isRecommendationsCollapsed ? (
                           <div className="flex flex-wrap gap-2">
-                            {selectedThriving.additionalRecommendations.map((rec, index) => (
-                              <span
-                                key={index}
-                                className="inline-flex items-center text-sm text-gray-600"
-                              >
-                                <span className="font-medium">{rec}</span>
-                                {index < (selectedThriving.additionalRecommendations?.length ?? 0) - 1 && (
-                                  <span className="mx-2 text-gray-400">•</span>
-                                )}
-                              </span>
-                            ))}
+                            {selectedThriving.additionalRecommendations.map((rec, index) => {
+                              const title = typeof rec === 'string' ? rec : rec.title;
+                              return (
+                                <span
+                                  key={index}
+                                  className="inline-flex items-center text-sm text-gray-600"
+                                >
+                                  <span className="font-medium">{title}</span>
+                                  {index < (selectedThriving.additionalRecommendations?.length ?? 0) - 1 && (
+                                    <span className="mx-2 text-gray-400">•</span>
+                                  )}
+                                </span>
+                              );
+                            })}
                           </div>
                         ) : (
                           <div className="space-y-4">
                             {selectedThriving.additionalRecommendations.map((rec, index) => {
+                              const isString = typeof rec === 'string';
+                              const title = isString ? rec : rec.title;
+                              const description = isString ? 'Consider adding this to your wellness routine for enhanced benefits.' : rec.description;
+                              const tips = isString ? [] : (rec.tips || []);
+                              const frequency = isString ? undefined : rec.frequency;
+                              
                               // Icon mapping based on recommendation type
                               const getIcon = () => {
-                                const title = rec.toLowerCase();
-                                if (title.includes('humidifier') || title.includes('air')) return '💨';
-                                if (title.includes('exercise') || title.includes('equipment')) return '🏋️';
-                                if (title.includes('filter') || title.includes('clean')) return '🧹';
-                                if (title.includes('supplement') || title.includes('vitamin')) return '💊';
-                                if (title.includes('sleep') || title.includes('bed')) return '🛏️';
-                                if (title.includes('water') || title.includes('hydrat')) return '💧';
+                                const titleLower = title.toLowerCase();
+                                if (titleLower.includes('humidifier') || titleLower.includes('air')) return '💨';
+                                if (titleLower.includes('exercise') || titleLower.includes('equipment')) return '🏋️';
+                                if (titleLower.includes('filter') || titleLower.includes('clean')) return '🧹';
+                                if (titleLower.includes('supplement') || titleLower.includes('vitamin')) return '💊';
+                                if (titleLower.includes('sleep') || titleLower.includes('bed')) return '🛏️';
+                                if (titleLower.includes('water') || titleLower.includes('hydrat')) return '💧';
                                 return '📦';
                               };
 
@@ -768,10 +788,44 @@ export default function ThrivingsPage() {
                                         {getIcon()}
                                       </div>
                                       <div className="flex-1">
-                                        <h4 className="font-semibold text-gray-900 text-lg">{rec}</h4>
-                                        <p className="text-sm text-gray-600 mt-2">
-                                          Consider adding this to your wellness routine for enhanced benefits.
-                                        </p>
+                                        <h4 className="font-semibold text-gray-900 text-lg">{title}</h4>
+                                        {frequency && (
+                                          <span className="inline-block mt-1 text-xs font-medium text-sage-dark bg-sage-light/20 px-2 py-1 rounded-full">
+                                            {frequency.replace('_', ' ')}
+                                          </span>
+                                        )}
+                                        {description && (
+                                          <p className="text-sm text-gray-600 mt-2">
+                                            {description}
+                                          </p>
+                                        )}
+                                        {tips.length > 0 && (
+                                          <div className="mt-3">
+                                            <p className="text-xs font-medium text-gray-700 mb-2">Tips:</p>
+                                            <ul className="space-y-1">
+                                              {tips.map((tip, tipIndex) => (
+                                                <li key={tipIndex} className="text-sm text-gray-600 flex items-start">
+                                                  <span className="text-rose mr-2">•</span>
+                                                  <span>{tip}</span>
+                                                </li>
+                                              ))}
+                                            </ul>
+                                          </div>
+                                        )}
+                                        {!isString && (rec.videoSearchQuery || rec.will_video_tutorial_help) && (
+                                          <div className="mt-4">
+                                            <button
+                                              onClick={() => {
+                                                const searchQuery = rec.videoSearchQuery || title + ' tutorial';
+                                                window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`, '_blank');
+                                              }}
+                                              className="inline-flex items-center rounded-full px-4 py-2 text-sm font-medium bg-gradient-to-r from-rose/10 to-dusty-rose/10 text-burgundy hover:from-rose/20 hover:to-dusty-rose/20 transition-all border border-rose/20 shadow-sm hover:shadow-md"
+                                            >
+                                              <Play className="w-3.5 h-3.5 mr-2 fill-current" />
+                                              Tutorial
+                                            </button>
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                   </div>
@@ -879,6 +933,52 @@ export default function ThrivingsPage() {
                         {selectedThriving.description}
                       </p>
                     </div>
+                    
+                    {/* Pro Tips */}
+                    {selectedThriving.proTips && selectedThriving.proTips.length > 0 && (
+                      <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                          <Lightbulb className="w-5 h-5 mr-2 text-yellow-500" />
+                          Pro Tips
+                        </h3>
+                        
+                        <ul className="space-y-2">
+                          {selectedThriving.proTips.map((tip, index) => (
+                            <li key={index} className="flex items-start">
+                              <span className="text-rose mr-2">•</span>
+                              <span className="text-sm text-gray-600">{tip}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {/* Reminder Schedule */}
+                    {selectedThriving.reminderTimes && selectedThriving.reminderTimes.length > 0 && (
+                      <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                          <Bell className="w-5 h-5 mr-2 text-blue-500" />
+                          Reminder Schedule
+                        </h3>
+                        
+                        <div className="space-y-2">
+                          <p className="text-sm text-gray-600 mb-3">
+                            Daily reminders are set for the following times:
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedThriving.reminderTimes.map((time, index) => (
+                              <span 
+                                key={index}
+                                className="inline-flex items-center px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-sm font-medium"
+                              >
+                                <Clock className="w-3.5 h-3.5 mr-1.5" />
+                                {formatReminderTime(time)}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

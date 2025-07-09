@@ -7,7 +7,7 @@ import { SmartCardChat } from '@/components/features/SmartCardChat';
 import { ArrowLeft, Heart } from 'lucide-react';
 import { saveThrivingToStorage } from '@/src/utils/thrivingStorage';
 import { saveJourneyToStorage } from '@/src/utils/journeyStorage';
-import { Thriving } from '@/src/types/thriving';
+import { Thriving, AdditionalRecommendation } from '@/src/types/thriving';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function ChatPage({ params }: { params: Promise<{ threadId: string }> }) {
@@ -75,9 +75,23 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
                   duration: step.duration || 5,
                   will_video_tutorial_help: step.will_video_tutorial_help
                 })) || [],
-                additionalRecommendations: routine.additionalSteps?.map((s: string | { title?: string; description?: string }) => 
-                  typeof s === 'string' ? s : (s.title || s.description || '')
-                ).filter(Boolean) || [],
+                additionalRecommendations: routine.additionalSteps?.map((s: string | { id?: string; title?: string; description?: string; frequency?: string; tips?: string[]; videoSearchQuery?: string; will_video_tutorial_help?: boolean }) => {
+                  if (typeof s === 'string') return s;
+                  // Ensure title is present for object format
+                  if (s && s.title) {
+                    return {
+                      id: s.id,
+                      title: s.title,
+                      description: s.description,
+                      frequency: s.frequency,
+                      tips: s.tips,
+                      videoSearchQuery: s.videoSearchQuery,
+                      will_video_tutorial_help: s.will_video_tutorial_help
+                    } as AdditionalRecommendation;
+                  }
+                  // Fallback to string if no title
+                  return s.description || '';
+                }).filter(Boolean) || [],
                 proTips: [],
                 reminderTimes: routine.reminderTimes || routine.steps?.filter((s: { reminderTime?: string }) => s.reminderTime).map((s: { reminderTime?: string }) => s.reminderTime!).filter(Boolean) || [],
                 healthConcern: routine.healthConcern,

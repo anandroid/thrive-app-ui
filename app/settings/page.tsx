@@ -28,7 +28,9 @@ export default function SettingsPage() {
         <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-gradient-to-tr from-rose/10 to-burgundy/10 blur-3xl" />
         
         {/* Settings Content */}
-        <div className="px-4 py-6 pb-12">
+        <div className="px-4 py-6 pb-20 relative">
+          {/* Bottom fade gradient */}
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-transparent via-transparent to-white pointer-events-none" />
           <div className="space-y-4">
             {/* Quick Actions */}
             <div className="mb-6">
@@ -169,7 +171,7 @@ export default function SettingsPage() {
           </div>
           
           {/* Footer */}
-          <div className="mt-12 text-center">
+          <div className="mt-12 text-center pb-8">
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center">
               <Leaf className="w-8 h-8 text-white" />
             </div>

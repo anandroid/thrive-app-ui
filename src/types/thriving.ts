@@ -40,6 +40,16 @@ export interface ThrivingJournal {
   createdAt: string;
 }
 
+export interface AdditionalRecommendation {
+  id?: string;
+  title: string;
+  description?: string;
+  frequency?: 'one_time' | 'daily' | 'weekly' | 'as_needed';
+  tips?: string[];
+  videoSearchQuery?: string;
+  will_video_tutorial_help?: boolean;
+}
+
 export interface Thriving {
   id: string;
   title: string;
@@ -50,7 +60,7 @@ export interface Thriving {
   duration: '7_days' | '14_days' | '30_days' | 'ongoing';
   frequency: 'daily' | 'twice_daily' | 'weekly';
   steps: ThrivingStep[];
-  additionalRecommendations?: string[];
+  additionalRecommendations?: (string | AdditionalRecommendation)[];
   proTips?: string[];
   reminderTimes?: string[];
   journalId?: string; // Reference to attached journal

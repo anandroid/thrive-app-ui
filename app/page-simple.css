@@ -22,10 +22,12 @@
 
 /* Page content - scrollable */
 .page-content {
-  flex: 1 1 auto;
+  flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+  min-height: 0; /* Important for flex children */
+  position: relative;
 }
 
 /* Header padding helper */

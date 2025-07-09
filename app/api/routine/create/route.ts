@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
         bestTime?: string;
         tips?: string[];
         videoSearchQuery?: string;
+        will_video_tutorial_help?: boolean;
         reminderText?: string;
         reminderTime?: string;
       }, index: number) => ({
@@ -69,6 +70,7 @@ export async function POST(request: NextRequest) {
         bestTime: step.bestTime,
         tips: step.tips || [],
         videoSearchQuery: step.videoSearchQuery,
+        will_video_tutorial_help: step.will_video_tutorial_help,
         reminderText: step.reminderText,
         reminderTime: step.reminderTime
       })),

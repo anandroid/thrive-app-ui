@@ -553,7 +553,12 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     } else if (action.link) {
       window.open(action.link, '_blank');
     } else if (action.pharmacy_link) {
-      window.open(action.pharmacy_link, '_blank');
+      // Convert pharmacy link to Amazon search
+      // Extract the supplement name from the title or description
+      const supplementName = action.title.replace(/^(Buy|Get|Purchase)\s+/i, '');
+      const searchQuery = encodeURIComponent(supplementName + ' supplement');
+      const amazonSearchUrl = `https://www.amazon.com/s?k=${searchQuery}`;
+      window.open(amazonSearchUrl, '_blank');
     } else if (action.amazon_link) {
       window.open(action.amazon_link, '_blank');
     }
@@ -648,12 +653,12 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
 
                 {/* Additional Information */}
                 {parsed?.additionalInformation && (
-                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-50/50 to-amber-50/30 p-6 border border-amber-100/30">
-                    <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br from-amber-100/20 to-amber-200/10 blur-2xl" />
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#FFE0CC]/40 to-[#FFCBB8]/30 p-6 border border-[#E08B5D]/20">
+                    <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br from-[#E08B5D]/20 to-[#D4696F]/10 blur-2xl" />
                     <div className="relative flex items-start space-x-3">
-                      <div className="w-1 h-full bg-gradient-to-b from-amber-300/50 to-amber-200/20 rounded-full flex-shrink-0" />
+                      <div className="w-1 h-full bg-gradient-to-b from-[#E08B5D]/50 to-[#D4696F]/30 rounded-full flex-shrink-0" />
                       <div 
-                        className="text-[14px] text-secondary-text leading-[1.6] italic"
+                        className="text-[14px] text-[#5A4A42] leading-[1.6] italic font-medium"
                         dangerouslySetInnerHTML={{ __html: parsed.additionalInformation }}
                       />
                     </div>
