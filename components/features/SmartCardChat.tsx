@@ -19,6 +19,7 @@ import { getJourneyByType } from '@/src/utils/journeyStorage';
 import { ChatEditor } from '@/components/ui/ChatEditor';
 import { createChatThread, addMessageToThread, getChatThread, deleteChatThread } from '@/src/utils/chatStorage';
 import { useKeyboardAwareChat } from '@/hooks/useKeyboardAwareChat';
+import { ChatWelcome } from './ChatWelcome';
 import { ThrivingTutorial } from './ThrivingTutorial';
 
 interface SmartCardChatProps {
@@ -659,9 +660,9 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                   </div>
                 )}
 
-                {/* Actionable Items - Balanced Design */}
+                {/* Actionable Items - Compact Design with Original Colors */}
                 {parsed?.actionableItems && parsed.actionableItems.length > 0 && (
-                  <div className="space-y-2.5 pt-2">
+                  <div className="space-y-2 pt-2">
                     {parsed.actionableItems.map((item, idx) => {
                       let Icon = Heart;
                       let gradientClass = "";
@@ -693,7 +694,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                         else if (item.type === 'information') Icon = FileText;
                       }
                       
-                      // Color sequence: sage green -> pink/bronze -> slate blue -> repeat
+                      // Original color sequence: sage green -> pink/bronze -> slate blue -> repeat
                       const colorIndex = idx % 3;
                       
                       if (colorIndex === 0) {
@@ -731,18 +732,20 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                           key={idx}
                           ref={shouldAttachRef ? tutorialTargetButtonRef : undefined}
                           onClick={() => handleActionClick(item)}
-                          className={`w-full p-3.5 rounded-xl bg-gradient-to-r ${backgroundClass} border border-gray-200/50 shadow-md ${shadowClass} hover:shadow-lg ${borderColorHover} transition-all duration-300 text-left group touch-feedback touch-manipulation relative`}
+                          className={`w-full p-3 rounded-xl bg-gradient-to-r ${backgroundClass} border border-gray-200/50 shadow-sm ${shadowClass} hover:shadow-md ${borderColorHover} transition-all duration-200 text-left group touch-feedback touch-manipulation`}
                         >
-                          <div className="flex items-start">
-                            <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${gradientClass} flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-110 transition-transform mr-3`}>
-                              <Icon className={`w-5 h-5 ${iconColorClass}`} />
+                          <div className="flex items-start space-x-3">
+                            <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${gradientClass} flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm group-hover:scale-105 transition-transform`}>
+                              <Icon className={`w-4 h-4 ${iconColorClass}`} />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between mb-0.5">
-                                <h4 className="font-semibold text-gray-900 text-[15px] flex-1">{item.title}</h4>
-                                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all flex-shrink-0 ml-2" />
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-semibold text-gray-900 text-[14px]">{item.title}</h4>
+                                <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-0.5 transition-all flex-shrink-0 ml-2" />
                               </div>
-                              <p className="text-[13px] text-gray-600 leading-relaxed">{item.description || item.details}</p>
+                              {item.description && (
+                                <p className="text-[12px] text-gray-600 mt-0.5 leading-relaxed">{item.description}</p>
+                              )}
                             </div>
                           </div>
                         </button>
@@ -828,11 +831,13 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
           {/* Welcome Screen OR Prompt Templates OR Messages */}
           {messages.length === 0 ? (
             <>
-              {/* Show prompt templates if provided */}
-              {renderPromptTemplates && (
+              {/* Show prompt templates if provided, otherwise show welcome */}
+              {renderPromptTemplates ? (
                 <div className="min-h-full">
                   {renderPromptTemplates(messages)}
                 </div>
+              ) : (
+                <ChatWelcome visible={true} />
               )}
             </>
           ) : (
