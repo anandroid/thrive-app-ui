@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
 import { 
-  ArrowLeft, Plus, X, Camera, Package, 
+  Plus, X, Camera, Package, 
   Search, Shield, Sparkles,
   Pill, Apple, Heart
 } from 'lucide-react';
+import { ActionBar } from '@/components/ui/ActionBar';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { PantryItem, RecommendedSupplement } from '@/src/types/pantry';
 import { 
@@ -142,23 +142,19 @@ export default function PantryPage() {
   return (
     <div className="app-screen bg-gray-50">
       {/* Header */}
-      <div className="app-header bg-white border-b border-gray-200">
-        <div className="flex items-center justify-between px-4 h-14">
-          <Link 
-            href="/settings"
-            className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-gray-100 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-700" />
-          </Link>
-          <h1 className="text-lg font-semibold text-primary-text">My Pantry</h1>
+      <ActionBar
+        title="My Pantry"
+        showBackButton={true}
+        backHref="/settings"
+        rightElement={
           <button
             onClick={() => setShowAddModal(true)}
-            className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-r from-rose to-burgundy text-white touch-feedback touch-manipulation"
+            className="action-bar-button bg-gradient-to-r from-rose to-burgundy text-white"
           >
             <Plus className="w-5 h-5" />
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">

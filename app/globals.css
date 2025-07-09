@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "../styles/touch-feedback.css";
-@import "./layout-system.css";
+@import "./action-bar.css";
+@import "./chat-simple.css";
+@import "./page-simple.css";
 
 :root {
   /* Base Colors */
@@ -285,7 +287,9 @@ input, textarea, [contenteditable] {
   position: sticky;
   top: 0;
   z-index: 50;
-  padding-top: env(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top, 0);
+  background: white;
+  min-height: 3.5rem;
 }
 
 /* Action Bar Styles */

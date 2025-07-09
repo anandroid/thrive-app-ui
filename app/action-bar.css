@@ -1,0 +1,133 @@
+/* Unified Action Bar System */
+
+/* Base action bar container */
+.action-bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  flex-shrink: 0;
+  min-height: 3.5rem; /* 56px */
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+/* Content wrapper with consistent padding */
+.action-bar-content {
+  height: 3.5rem; /* 56px */
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Left section for back button */
+.action-bar-left {
+  flex-shrink: 0;
+}
+
+/* Center section for title */
+.action-bar-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.5rem;
+  min-width: 0; /* Allow text truncation */
+}
+
+/* Right section for actions */
+.action-bar-right {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Unified button style - round with consistent sizing */
+.action-bar-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem; /* 44px */
+  height: 2.75rem; /* 44px */
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border-radius: 9999px; /* Full round */
+  background-color: rgba(255, 255, 255, 0.6);
+  transition: all 0.2s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.action-bar-button:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.action-bar-button:active {
+  transform: scale(0.95);
+}
+
+/* Title styling */
+.action-bar-title {
+  font-size: 1.25rem; /* 20px */
+  font-weight: 700;
+  color: #111827; /* gray-900 */
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Icon button styling (for right elements) */
+.action-bar-icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem; /* 44px */
+  height: 2.75rem; /* 44px */
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border-radius: 9999px; /* Full round */
+  background-color: transparent;
+  box-shadow: none;
+  transition: all 0.2s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.action-bar-icon-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  box-shadow: none;
+}
+
+/* Chat specific action bar adjustments */
+.chat-container .action-bar {
+  /* Chat headers are part of the flex layout */
+  position: relative;
+  min-height: auto;
+}
+
+/* Ensure consistent icon colors */
+.action-bar-button svg,
+.action-bar-icon-button svg {
+  color: #374151; /* gray-700 */
+}
+
+/* Badge styling for notifications */
+.action-bar-badge {
+  position: absolute;
+  top: -0.125rem;
+  right: -0.125rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #fb7185, #e11d48);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-bar-badge-icon {
+  width: 0.625rem;
+  height: 0.625rem;
+  color: white;
+}

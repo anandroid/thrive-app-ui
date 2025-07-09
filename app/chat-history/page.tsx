@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, MessageSquare, Search, Clock, Trash2, Plus } from 'lucide-react';
+import { MessageSquare, Search, Clock, Trash2, Plus } from 'lucide-react';
+import { ActionBar } from '@/components/ui/ActionBar';
 import { getChatHistory, deleteChatThread, searchChatHistory } from '@/src/utils/chatStorage';
 import { ChatHistoryItem } from '@/src/types/chat';
 
@@ -67,21 +68,16 @@ export default function ChatHistoryPage() {
   return (
     <div className="app-screen bg-gray-50">
       {/* Header */}
-      <div className="app-header bg-white border-b border-gray-200">
-        <div className="flex items-center justify-between px-4 h-14">
-          <Link 
-            href="/settings"
-            className="w-10 h-10 rounded-full flex items-center justify-center bg-white/80 hover:bg-white native-transition shadow-md"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-700" />
-          </Link>
+      <ActionBar
+        title={
           <div className="flex items-center space-x-2">
             <MessageSquare className="w-5 h-5 text-sage-dark" />
-            <h1 className="text-xl font-bold text-secondary-text">Chat History</h1>
+            <span>Chat History</span>
           </div>
-          <div className="w-10" />
-        </div>
-      </div>
+        }
+        showBackButton={true}
+        backHref="/settings"
+      />
 
       {/* Search Bar */}
       <div className="px-4 py-4 bg-white border-b border-gray-100">

@@ -131,20 +131,26 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
           selectedPrompt={initialMessage}
           renderHeader={() => (
             <>
-              <div className="flex items-center justify-between px-4 h-14 bg-white">
-                <Link 
-                  href="/"
-                  className="w-10 h-10 rounded-full flex items-center justify-center bg-white/80 hover:bg-white native-transition shadow-md touch-feedback touch-manipulation"
-                >
-                  <ArrowLeft className="w-5 h-5 text-gray-700" />
-                </Link>
-                <div className="flex items-center space-x-2">
-                  <h1 className="text-xl font-bold text-gray-800">Companion</h1>
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose/20 to-dusty-rose/30 flex items-center justify-center">
-                    <Heart className="w-4 h-4 text-rose fill-rose/30" />
+              <div className="action-bar-content">
+                <div className="action-bar-left">
+                  <Link 
+                    href="/"
+                    className="action-bar-button"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                  </Link>
+                </div>
+                <div className="action-bar-center">
+                  <div className="flex items-center space-x-2">
+                    <h1 className="action-bar-title">Companion</h1>
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose/20 to-dusty-rose/30 flex items-center justify-center">
+                      <Heart className="w-4 h-4 text-rose fill-rose/30" />
+                    </div>
                   </div>
                 </div>
-                <div className="w-11" />
+                <div className="action-bar-right">
+                  <div className="w-11" />
+                </div>
               </div>
               {chatIntent === 'create_thriving' && (
                 <div className="flex justify-center py-2 bg-white/80">

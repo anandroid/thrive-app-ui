@@ -164,10 +164,10 @@ export default function HomePage() {
       )}
       
       {/* Main app content - Always rendered but visibility controlled */}
-      <div className={`layout-wrapper home-layout ${showSlideAnimation ? 'animate-scale-in' : ''} ${showOnboarding && !isTransitioning ? 'opacity-0 pointer-events-none' : ''}`}>
+      <div className={`chat-container ${showSlideAnimation ? 'animate-scale-in' : ''} ${showOnboarding && !isTransitioning ? 'opacity-0 pointer-events-none' : ''}`}>
         {/* Header - stays at top */}
-        <div className="layout-header">
-          <div className="flex items-center justify-between header-padding h-full">
+        <div className="chat-header safe-top">
+          <div className="flex items-center justify-between content-padding h-14">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center">
                 <Leaf className="w-6 h-6 text-white" />
@@ -194,8 +194,8 @@ export default function HomePage() {
         </div>
 
         {/* Main Content - Scrollable */}
-        <div className="layout-content">
-          <div className={`transition-opacity duration-300 ${isHydrated ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="chat-messages">
+          <div className={`chat-messages-content transition-opacity duration-300 ${isHydrated ? 'opacity-100' : 'opacity-0'}`}>
             {/* Thrivings Section - Only show if thrivings exist */}
             {thrivings.length > 0 && (
               <div className="content-padding py-6 bg-gray-50">
@@ -328,7 +328,7 @@ export default function HomePage() {
         </div>
 
         {/* Input Area - Fixed at Bottom */}
-        <div className="layout-input">
+        <div className="chat-input-area safe-bottom">
           <ChatEditor
             value={input}
             onChange={setInput}

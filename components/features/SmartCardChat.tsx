@@ -18,6 +18,7 @@ import { WellnessJourney } from '@/src/services/openai/types/journey';
 import { getJourneyByType } from '@/src/utils/journeyStorage';
 import { ChatEditor } from '@/components/ui/ChatEditor';
 import { createChatThread, addMessageToThread, getChatThread, deleteChatThread } from '@/src/utils/chatStorage';
+import { useKeyboardAwareChat } from '@/hooks/useKeyboardAwareChat';
 
 interface SmartCardChatProps {
   threadId?: string;
@@ -53,10 +54,10 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   const [showJourneyModal, setShowJourneyModal] = useState(false);
   const [journeyData, setJourneyData] = useState<ActionableItem | null>(null);
   const [healthConcern, setHealthConcern] = useState<string>('');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const [chatThreadId, setChatThreadId] = useState<string | null>(null);
   const hasScrolledToStreamRef = useRef<Set<number>>(new Set());
+  const { messagesEndRef, chatContainerRef, scrollToBottom } = useKeyboardAwareChat();
 
   // Load existing messages if threadId is provided
   useEffect(() => {
@@ -93,9 +94,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     }
   }, [initialThreadId]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  // scrollToBottom is now provided by useKeyboardAwareChat hook
 
   const scrollToMessage = (messageIndex: number) => {
     const messageElements = document.querySelectorAll('[data-message-index]');
@@ -140,7 +139,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       }
       // Don't scroll for completed assistant messages or after first content appears
     }
-  }, [messages]);
+  }, [messages, scrollToBottom]);
 
   useEffect(() => {
     if (selectedPrompt) {
@@ -771,36 +770,38 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   };
 
   return (
-    <div className="layout-wrapper chat-layout">
+    <div className="chat-container" ref={chatContainerRef}>
       {/* Header - stays at top */}
-      <div className="layout-header">
+      <div className="chat-header safe-top">
         {renderHeader?.()}
       </div>
 
-      {/* Messages - scrollable middle section */}
-      <div className="layout-content">
-        {/* Prompt Templates (only show when no messages) */}
-        {messages.length === 0 && renderPromptTemplates && (
-          <div className="h-full flex flex-col">
-            {renderPromptTemplates(messages)}
-          </div>
-        )}
-        
-        {/* Messages */}
-        {messages.length > 0 && (
-          <div className="content-padding py-4">
-            {messages.map((message, idx) => (
-              <React.Fragment key={idx}>
-                {renderMessage(message, idx)}
-              </React.Fragment>
-            ))}
-            <div ref={messagesEndRef} className="h-4" />
-          </div>
-        )}
+      {/* Messages - scrollable middle section that shrinks */}
+      <div className="chat-messages smooth-scroll">
+        <div className="chat-messages-content">
+          {/* Prompt Templates (only show when no messages) */}
+          {messages.length === 0 && renderPromptTemplates && (
+            <div className="min-h-full">
+              {renderPromptTemplates(messages)}
+            </div>
+          )}
+          
+          {/* Messages */}
+          {messages.length > 0 && (
+            <>
+              {messages.map((message, idx) => (
+                <React.Fragment key={idx}>
+                  {renderMessage(message, idx)}
+                </React.Fragment>
+              ))}
+              <div ref={messagesEndRef} className="h-4" />
+            </>
+          )}
+        </div>
       </div>
 
       {/* Input - stays at bottom */}
-      <div className="layout-input">
+      <div className="chat-input-area safe-bottom">
         <ChatEditor
           value={input}
           onChange={setInput}

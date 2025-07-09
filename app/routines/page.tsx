@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { 
   Clock, AlertCircle, 
   Bell, Edit2, Trash2,
-  Plus, Shield, Target, Settings, ArrowLeft,
+  Plus, Shield, Target, Settings,
   ChevronDown, ChevronUp, Lightbulb, Package, Play, CheckCircle2
 } from 'lucide-react';
+import { ActionBar } from '@/components/ui/ActionBar';
 import { WellnessRoutine } from '@/src/services/openai/types';
 import { getRoutinesFromStorage, updateRoutineInStorage, deleteRoutineFromStorage } from '@/src/utils/routineStorage';
 import { CelebrationShower } from '@/components/ui/CelebrationShower';
@@ -283,26 +284,23 @@ export default function RoutinesPage() {
   return (
     <div className="h-screen flex flex-col bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-100 flex-shrink-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Link href="/" className="p-2 rounded-lg hover:bg-gray-50 transition-all">
-                <ArrowLeft className="w-5 h-5 text-gray-600" />
-              </Link>
-              <h1 className="text-2xl font-bold gradient-text">Thrive</h1>
-            </div>
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Home
-              </Link>
-              <Link href="/routines" className="text-gray-900 font-medium">
-                Routines
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <ActionBar
+        title={
+          <h1 className="text-2xl font-bold gradient-text">Thrive</h1>
+        }
+        showBackButton={true}
+        backHref="/"
+        rightElement={
+          <nav className="hidden md:flex items-center space-x-8">
+            <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
+              Home
+            </Link>
+            <Link href="/routines" className="text-gray-900 font-medium">
+              Routines
+            </Link>
+          </nav>
+        }
+      />
 
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-7xl mx-auto p-4 lg:p-8">
