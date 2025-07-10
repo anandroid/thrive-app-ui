@@ -27,11 +27,12 @@ export async function POST(request: NextRequest) {
       currentThreadId = thread.id;
     }
 
-    // Send the message with intent context
-    await streamingService.sendMessage(currentThreadId, message, chatIntent);
+    // Send the message
+    await streamingService.sendMessage(currentThreadId, message);
 
-    // Create streaming response
-    const stream = streamingService.createStreamingResponse(currentThreadId);
+    // Create streaming response with context
+    // For now, we don't have user auth, so userId is undefined
+    const stream = await streamingService.createStreamingResponse(currentThreadId);
 
     // Add thread ID to the stream if it's a new thread
     if (!threadId) {
