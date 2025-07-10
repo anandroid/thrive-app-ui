@@ -1,18 +1,21 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { AlertCircle, Calendar, Pill, Heart, Sparkles, ChevronRight, Moon, Brain, Activity, FileText, Globe, BookOpen, Leaf, ShoppingCart, PlusCircle } from 'lucide-react';
+import { 
+  AlertCircle, ShoppingCart, PlusCircle, ChevronRight, Heart,
+  Calendar, Pill, Sparkles, Moon, Brain, Activity, FileText, Globe, BookOpen 
+} from 'lucide-react';
 import {
   ChatMessage,
   ActionableItem,
-  ActionItem,
-  AssistantResponse,
-  ASSISTANT_RESPONSE_KEYS,
   WellnessRoutine,
-  PartialAssistantResponse,
   BasicContext,
-  EnhancedQuestion
+  EnhancedQuestion,
+  PartialAssistantResponse
 } from '@/src/services/openai/types';
+import { parseAssistantResponse, parsePartialAssistantResponse } from '@/src/utils/chat/responseParser';
+import { ActionItemList } from './chat/ActionItemCard';
+import { AdditionalInfoCard } from './chat/AdditionalInfoCard';
 import { RoutineCreationModal } from './RoutineCreationModal';
 import { JourneyCreationModal } from './JourneyCreationModal';
 import { WellnessJourney } from '@/src/services/openai/types/journey';
@@ -545,231 +548,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     }
   };
 
-  // Attempt to parse assistant JSON only if it actually contains structured fields
-  const parseAssistantResponse = (content: string): AssistantResponse | undefined => {
-    try {
-      const parsed = JSON.parse(content);
-      // We consider it structured only if it includes at least one expected assistant-response key
-      if (parsed && typeof parsed === 'object' && ASSISTANT_RESPONSE_KEYS.some(key => key in parsed)) {
-        // Post-process actionableItems to ensure both buy and already_have options exist for supplements
-        if (parsed.actionableItems && Array.isArray(parsed.actionableItems)) {
-          const supplementBuyActions = parsed.actionableItems.filter((item: ActionableItem) => 
-            item.type === 'buy' && (item.productName || item.title.toLowerCase().includes('magnesium') || 
-            item.title.toLowerCase().includes('melatonin') || item.title.toLowerCase().includes('vitamin') ||
-            item.title.toLowerCase().includes('supplement'))
-          );
-          
-          // For each buy action, check if there's a corresponding already_have action
-          for (const buyAction of supplementBuyActions) {
-            const productName = buyAction.productName || buyAction.title.replace(/^Where to find |^Buy |^Get /i, '').trim();
-            const hasAlreadyHaveOption = parsed.actionableItems.some((item: ActionableItem) => 
-              item.type === 'already_have' && 
-              (item.productName === productName || item.title.includes(productName))
-            );
-            
-            if (!hasAlreadyHaveOption) {
-              // Insert the already_have option before the buy option
-              const buyIndex = parsed.actionableItems.indexOf(buyAction);
-              const alreadyHaveOption: ActionableItem = {
-                type: 'already_have',
-                title: 'I already have',
-                description: 'Track in pantry',
-                productName: productName,
-                suggestedNotes: buyAction.dosage ? `${buyAction.dosage}, ${buyAction.timing || 'as directed'}` : '',
-                contextMessage: 'Great! Tracking this helps me personalize your wellness routines',
-                dosage: buyAction.dosage,
-                timing: buyAction.timing
-              };
-              parsed.actionableItems.splice(buyIndex, 0, alreadyHaveOption);
-            }
-          }
-        }
-        
-        return parsed as AssistantResponse;
-      }
-      return undefined;
-    } catch {
-      return undefined;
-    }
-  };
-
-  // Parse partial JSON for progressive rendering
-  const parsePartialAssistantResponse = (content: string): PartialAssistantResponse | undefined => {
-    try {
-      // Try to parse complete JSON first
-      const parsed = JSON.parse(content);
-      if (parsed && typeof parsed === 'object') {
-        // Post-process actionableItems to ensure both buy and already_have options exist for supplements
-        if (parsed.actionableItems && Array.isArray(parsed.actionableItems)) {
-          const supplementBuyActions = parsed.actionableItems.filter((item: ActionableItem) => 
-            item.type === 'buy' && (item.productName || item.title.toLowerCase().includes('magnesium') || 
-            item.title.toLowerCase().includes('melatonin') || item.title.toLowerCase().includes('vitamin') ||
-            item.title.toLowerCase().includes('supplement'))
-          );
-          
-          // For each buy action, check if there's a corresponding already_have action
-          for (const buyAction of supplementBuyActions) {
-            const productName = buyAction.productName || buyAction.title.replace(/^Where to find |^Buy |^Get /i, '').trim();
-            const hasAlreadyHaveOption = parsed.actionableItems.some((item: ActionableItem) => 
-              item.type === 'already_have' && 
-              (item.productName === productName || item.title.includes(productName))
-            );
-            
-            if (!hasAlreadyHaveOption) {
-              // Insert the already_have option before the buy option
-              const buyIndex = parsed.actionableItems.indexOf(buyAction);
-              const alreadyHaveOption: ActionableItem = {
-                type: 'already_have',
-                title: 'I already have',
-                description: 'Track in pantry',
-                productName: productName,
-                suggestedNotes: buyAction.dosage ? `${buyAction.dosage}, ${buyAction.timing || 'as directed'}` : '',
-                contextMessage: 'Great! Tracking this helps me personalize your wellness routines',
-                dosage: buyAction.dosage,
-                timing: buyAction.timing
-              };
-              parsed.actionableItems.splice(buyIndex, 0, alreadyHaveOption);
-            }
-          }
-        }
-        
-        return parsed as PartialAssistantResponse;
-      }
-    } catch {
-      // If complete parse fails, try to extract completed fields
-      const partial: PartialAssistantResponse = {};
-      
-      // Extract greeting if complete
-      const greetingMatch = content.match(/"greeting"\s*:\s*"([^"]*)"(?:\s*,|\s*})/);
-      if (greetingMatch && greetingMatch[1]) {
-        partial.greeting = greetingMatch[1];
-      }
-      
-      // Extract attentionRequired if complete
-      const attentionMatch = content.match(/"attentionRequired"\s*:\s*"([^"]*)"/);
-      if (attentionMatch) {
-        partial.attentionRequired = attentionMatch[1] as 'emergency' | null;
-      }
-      
-      // Extract emergencyReasoning if complete
-      const emergencyMatch = content.match(/"emergencyReasoning"\s*:\s*"([^"]*)"/);
-      if (emergencyMatch) {
-        partial.emergencyReasoning = emergencyMatch[1];
-      }
-      
-      // Extract complete action items or individual completed items
-      const actionItemsMatch = content.match(/"actionItems"\s*:\s*\[([\s\S]*?)(?:\]|$)/);
-      if (actionItemsMatch) {
-        try {
-          // First try to parse complete array
-          if (content.includes('"actionItems"') && content.includes(']', content.indexOf('"actionItems"'))) {
-            const completeMatch = content.match(/"actionItems"\s*:\s*\[([\s\S]*?)\]/);
-            if (completeMatch) {
-              const items = JSON.parse('[' + completeMatch[1] + ']');
-              if (Array.isArray(items) && items.length > 0) {
-                partial.actionItems = items;
-              }
-            }
-          } else {
-            // Try to extract individual completed items
-            const partialItems: ActionItem[] = [];
-            const itemMatches = actionItemsMatch[1].matchAll(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g);
-            for (const match of itemMatches) {
-              try {
-                const item = JSON.parse(match[0]);
-                if (item.title && item.content) {
-                  partialItems.push(item);
-                }
-              } catch {}
-            }
-            if (partialItems.length > 0) {
-              partial.actionItems = partialItems;
-            }
-          }
-        } catch {}
-      }
-      
-      // Extract complete actionable items or individual completed items
-      const actionableMatch = content.match(/"actionableItems"\s*:\s*\[([\s\S]*?)(?:\]|$)/);
-      if (actionableMatch) {
-        try {
-          // First try to parse complete array
-          if (content.includes('"actionableItems"') && content.includes(']', content.indexOf('"actionableItems"'))) {
-            const completeMatch = content.match(/"actionableItems"\s*:\s*\[([\s\S]*?)\]/);
-            if (completeMatch) {
-              const items = JSON.parse('[' + completeMatch[1] + ']');
-              if (Array.isArray(items) && items.length > 0) {
-                partial.actionableItems = items;
-              }
-            }
-          } else {
-            // Try to extract individual completed items
-            const partialItems: ActionableItem[] = [];
-            const itemMatches = actionableMatch[1].matchAll(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g);
-            for (const match of itemMatches) {
-              try {
-                const item = JSON.parse(match[0]);
-                if (item.title && item.type) {
-                  partialItems.push(item);
-                }
-              } catch {}
-            }
-            if (partialItems.length > 0) {
-              // Post-process to ensure both buy and already_have options exist for supplements
-              const supplementBuyActions = partialItems.filter((item: ActionableItem) => 
-                item.type === 'buy' && (item.productName || (item.title && item.title.includes('find')))
-              );
-              
-              // For each buy action, check if there's a corresponding already_have action
-              for (const buyAction of supplementBuyActions) {
-                const productName = buyAction.productName || buyAction.title.replace(/^Where to find |^Buy |^Get /i, '').trim();
-                const hasAlreadyHaveOption = partialItems.some((item: ActionableItem) => 
-                  item.type === 'already_have' && 
-                  (item.productName === productName || item.title.includes(productName))
-                );
-                
-                if (!hasAlreadyHaveOption) {
-                  // Insert the already_have option before the buy option
-                  const buyIndex = partialItems.indexOf(buyAction);
-                  const alreadyHaveOption: ActionableItem = {
-                    type: 'already_have',
-                    title: `I already have ${productName}`,
-                    description: 'Add to your pantry for personalized tracking',
-                    productName: productName,
-                    suggestedNotes: buyAction.dosage ? `${buyAction.dosage}, ${buyAction.timing || 'as directed'}` : '',
-                    contextMessage: 'Great! Tracking this helps me personalize your wellness routines'
-                  };
-                  partialItems.splice(buyIndex, 0, alreadyHaveOption);
-                }
-              }
-              
-              partial.actionableItems = partialItems;
-            }
-          }
-        } catch {}
-      }
-      
-      // Extract additionalInformation if complete
-      const infoMatch = content.match(/"additionalInformation"\s*:\s*"([^"]*)"/);
-      if (infoMatch) {
-        partial.additionalInformation = infoMatch[1];
-      }
-      
-      // Extract questions array (now contains enhanced questions)
-      const questionsMatch = content.match(/"questions"\s*:\s*\[([\s\S]*?)\]/);
-      if (questionsMatch) {
-        try {
-          const questionsContent = '[' + questionsMatch[1] + ']';
-          const questions = JSON.parse(questionsContent);
-          if (Array.isArray(questions) && questions.length > 0) {
-            partial.questions = questions;
-          }
-        } catch {}
-      }
-      
-      return Object.keys(partial).length > 0 ? partial : undefined;
-    }
-  };
+  // Parsers are imported from utils/chat/responseParser
 
   const handleActionClick = (action: ActionableItem) => {
     if (action.type === 'create_routine' || action.type === 'routine' || action.type === 'thriving') {
@@ -901,38 +680,12 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
 
                 {/* Action Items */}
                 {parsed?.actionItems && parsed.actionItems.length > 0 && (
-                  <div className="space-y-4">
-                    {parsed.actionItems.map((item, idx) => (
-                      <div key={idx} className="flex space-x-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sage-light/40 to-sage/30 flex items-center justify-center flex-shrink-0 shadow-lg shadow-sage/25">
-                          <Leaf className="w-5 h-5 text-sage-dark" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-bold text-[18px] text-primary-text mb-2">
-                            {item.title}
-                          </h4>
-                          <div 
-                            className="text-[15px] text-primary-text leading-[1.7] [&_strong]:font-bold [&_strong]:text-primary-text [&_em]:font-semibold [&_em]:text-primary-text [&_em]:not-italic"
-                            dangerouslySetInnerHTML={{ __html: item.content || item.description || '' }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <ActionItemList items={parsed.actionItems} />
                 )}
 
                 {/* Additional Information */}
                 {parsed?.additionalInformation && (
-                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-50/50 to-gray-100/30 p-6 border border-gray-200/40">
-                    <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br from-gray-100/20 to-gray-200/10 blur-2xl" />
-                    <div className="relative flex items-start space-x-3">
-                      <div className="w-1 h-full bg-gradient-to-b from-gray-300/50 to-gray-400/30 rounded-full flex-shrink-0" />
-                      <div 
-                        className="text-[14px] text-gray-600 leading-[1.6] italic font-medium"
-                        dangerouslySetInnerHTML={{ __html: parsed.additionalInformation }}
-                      />
-                    </div>
-                  </div>
+                  <AdditionalInfoCard content={parsed.additionalInformation} />
                 )}
 
                 {/* Actionable Items - Compact Design with Original Colors */}
