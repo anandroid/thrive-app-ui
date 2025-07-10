@@ -42,7 +42,7 @@ export interface ActionItem {
 }
 
 export interface ActionableItem {
-  type: 'appointment' | 'medicine' | 'routine' | 'create_routine' | 'prescription' | 'resource' | 'link' | 'start_journey' | 'continue_journey' | 'buy' | 'add_to_pantry' | string;
+  type: 'appointment' | 'medicine' | 'routine' | 'create_routine' | 'prescription' | 'resource' | 'link' | 'start_journey' | 'continue_journey' | 'buy' | 'add_to_pantry' | 'adjust_routine' | string;
   title: string;
   description: string;
   details?: string;
@@ -73,6 +73,9 @@ export interface ActionableItem {
   price_range?: string;
   // Add to pantry fields
   suggestedNotes?: string;
+  // Adjust routine fields
+  routineId?: string;
+  adjustmentInstructions?: string;
 }
 
 export interface WellnessRoutine {

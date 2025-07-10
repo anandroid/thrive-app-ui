@@ -695,6 +695,16 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       // Handle add to pantry action
       setPantryItemToAdd(action);
       setShowPantryModal(true);
+    } else if (action.type === 'adjust_routine') {
+      // Navigate to thrivings page with adjustment instructions
+      if (action.routineId) {
+        const adjustmentData = {
+          routineId: action.routineId,
+          adjustmentInstructions: action.adjustmentInstructions || action.description || ''
+        };
+        sessionStorage.setItem('adjustmentRequest', JSON.stringify(adjustmentData));
+        window.location.href = `/thrivings?id=${action.routineId}&showAdjustment=true`;
+      }
     } else if (action.link) {
       window.open(action.link, '_blank');
     } else if (action.pharmacy_link) {
@@ -1122,6 +1132,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
           } : undefined}
         />
       )}
+
     </div>
   );
 };

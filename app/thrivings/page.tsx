@@ -71,6 +71,24 @@ export default function ThrivingsPage() {
     if (savedCollapsedState !== null) {
       setIsRecommendationsCollapsed(savedCollapsedState === 'true');
     }
+    
+    // Check for adjustment request from chat
+    const showAdjustment = urlParams.get('showAdjustment');
+    if (showAdjustment === 'true') {
+      const adjustmentRequest = sessionStorage.getItem('adjustmentRequest');
+      if (adjustmentRequest) {
+        try {
+          const { adjustmentInstructions } = JSON.parse(adjustmentRequest);
+          if (adjustmentInstructions) {
+            setAdjustmentText(adjustmentInstructions);
+            setShowAdjustmentEditor(true);
+          }
+          sessionStorage.removeItem('adjustmentRequest');
+        } catch (e) {
+          console.error('Error parsing adjustment request:', e);
+        }
+      }
+    }
   }, []);
 
   // Show adjustment tutorial when appropriate

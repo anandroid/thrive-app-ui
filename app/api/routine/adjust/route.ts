@@ -3,11 +3,14 @@ import { RoutineAdjustmentService } from '@/src/services/openai/routines/routine
 
 export async function POST(request: NextRequest) {
   try {
-    const { currentRoutine, userFeedback } = await request.json();
+    const { currentRoutine, userFeedback, routineId, adjustmentInstructions } = await request.json();
 
-    if (!currentRoutine || !userFeedback) {
+    // Support both old format (currentRoutine + userFeedback) and new format (routineId + adjustmentInstructions)
+    const feedback = userFeedback || adjustmentInstructions;
+    
+    if ((!currentRoutine && !routineId) || !feedback) {
       return NextResponse.json(
-        { error: 'Current routine and user feedback are required' },
+        { error: 'Routine information and adjustment instructions are required' },
         { status: 400 }
       );
     }
@@ -20,10 +23,13 @@ export async function POST(request: NextRequest) {
     // Adjust the routine
     const adjustedRoutine = await adjustmentService.adjustRoutine({
       routine: currentRoutine,
-      adjustmentRequest: userFeedback
+      adjustmentRequest: feedback
     });
 
-    return NextResponse.json(adjustedRoutine);
+    // If routineId was provided, include it in the response
+    const response = routineId ? { ...adjustedRoutine, id: routineId } : adjustedRoutine;
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Error adjusting routine:', error);
     return NextResponse.json(
