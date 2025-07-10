@@ -159,7 +159,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       const lastMessage = messages[messages.length - 1];
       if (lastMessage.role === 'assistant' && lastMessage.parsedContent?.actionableItems) {
         const thrivingItem = lastMessage.parsedContent.actionableItems.find(
-          item => item.type === 'create_routine' || item.type === 'routine' || item.type === 'start_journey'
+          item => item.type === 'create_routine' || item.type === 'routine' || item.type === 'thriving' || item.type === 'start_journey'
         );
         const tutorialCount = parseInt(localStorage.getItem('thrivingTutorialCount') || '0');
         const hasCreatedThriving = localStorage.getItem('hasCreatedThriving') === 'true';
@@ -666,7 +666,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   };
 
   const handleActionClick = (action: ActionableItem) => {
-    if (action.type === 'create_routine' || action.type === 'routine') {
+    if (action.type === 'create_routine' || action.type === 'routine' || action.type === 'thriving') {
       setRoutineData(action);
       setShowRoutineModal(true);
     } else if (action.type === 'start_journey') {
@@ -852,7 +852,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                         // Default icons based on type
                         if (item.type === 'appointment') Icon = Calendar;
                         else if (item.type === 'medicine' || item.type === 'supplement') Icon = Pill;
-                        else if (item.type === 'routine' || item.type === 'create_routine') Icon = Sparkles;
+                        else if (item.type === 'routine' || item.type === 'create_routine' || item.type === 'thriving') Icon = Sparkles;
                         else if (item.type === 'information') Icon = FileText;
                         else if (item.type === 'buy') Icon = ShoppingCart;
                         else if (item.type === 'add_to_pantry') Icon = PlusCircle;
@@ -885,7 +885,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                       }
                       
                       // Check if this is a thriving button and if it matches the tutorial
-                      const isThrivingButton = item.type === 'create_routine' || item.type === 'routine' || item.type === 'start_journey';
+                      const isThrivingButton = item.type === 'create_routine' || item.type === 'routine' || item.type === 'thriving' || item.type === 'start_journey';
                       const shouldAttachRef = isThrivingButton && 
                         (item.title === tutorialActionableText || 
                          item.journeyTitle === tutorialActionableText || 
