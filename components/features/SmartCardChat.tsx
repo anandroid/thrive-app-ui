@@ -344,13 +344,18 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
 
               // Handle function calls
               if (data.type === 'function_call') {
+                console.log('Received function call request:', data);
+                
                 // Import the client-side function handler
                 const { executeClientSideFunctions } = await import('@/src/services/openai/functions/clientFunctionHandler');
                 
                 // Execute functions locally with access to localStorage
+                console.log('Executing functions locally...');
                 const toolOutputs = await executeClientSideFunctions(data.toolCalls);
+                console.log('Function execution results:', toolOutputs);
                 
                 // Submit the results back to the API
+                console.log('Submitting results back to API...');
                 const submitResponse = await fetch('/api/assistant/submit-tool-outputs', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },

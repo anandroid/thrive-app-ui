@@ -54,6 +54,8 @@ export class StreamingChatService {
           });
 
           for await (const event of stream) {
+            console.log('Stream event:', event.event, event.data);
+            
             if (event.event === 'thread.message.delta') {
               const delta = event.data.delta;
               if (
@@ -100,20 +102,25 @@ export class StreamingChatService {
                 ),
               );
             } else if (event.event === 'thread.run.failed') {
+              console.error('Run failed:', event.data);
+              const errorMessage = event.data.last_error?.message || 'Run failed';
               controller.enqueue(
                 encoder.encode(
-                  `data: ${JSON.stringify({ type: 'error', error: 'Run failed' })}\n\n`,
+                  `data: ${JSON.stringify({ type: 'error', error: errorMessage })}\n\n`,
                 ),
               );
+              controller.close();
+              return;
             }
           }
           controller.enqueue(encoder.encode('data: [DONE]\n\n'));
           controller.close();
         } catch (error) {
           console.error('Stream error:', error);
+          const errorMessage = error instanceof Error ? error.message : 'Stream error';
           controller.enqueue(
             encoder.encode(
-              `data: ${JSON.stringify({ type: 'error', error: 'Stream error' })}\n\n`,
+              `data: ${JSON.stringify({ type: 'error', error: errorMessage })}\n\n`,
             ),
           );
           controller.close();
