@@ -462,7 +462,10 @@ export default function ThrivingsPage() {
                         <div className="flex justify-between mb-1.5 text-xs">
                           <span className="text-gray-600">Today&apos;s Progress</span>
                           <span className="font-medium text-burgundy">
-                            {getRemainingStepsToday(thriving)} more steps
+                            {getRemainingStepsToday(thriving) === 0 
+                              ? '✓ Done for today!' 
+                              : `${getRemainingStepsToday(thriving)} more ${getRemainingStepsToday(thriving) === 1 ? 'step' : 'steps'}`
+                            }
                           </span>
                         </div>
                         <div className="bg-gray-100 rounded-full overflow-hidden h-2">

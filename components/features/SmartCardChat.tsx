@@ -653,12 +653,12 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
 
                 {/* Additional Information */}
                 {parsed?.additionalInformation && (
-                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#FFE0CC]/40 to-[#FFCBB8]/30 p-6 border border-[#E08B5D]/20">
-                    <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br from-[#E08B5D]/20 to-[#D4696F]/10 blur-2xl" />
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-50/50 to-gray-100/30 p-6 border border-gray-200/40">
+                    <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br from-gray-100/20 to-gray-200/10 blur-2xl" />
                     <div className="relative flex items-start space-x-3">
-                      <div className="w-1 h-full bg-gradient-to-b from-[#E08B5D]/50 to-[#D4696F]/30 rounded-full flex-shrink-0" />
+                      <div className="w-1 h-full bg-gradient-to-b from-gray-300/50 to-gray-400/30 rounded-full flex-shrink-0" />
                       <div 
-                        className="text-[14px] text-[#5A4A42] leading-[1.6] italic font-medium"
+                        className="text-[14px] text-gray-600 leading-[1.6] italic font-medium"
                         dangerouslySetInnerHTML={{ __html: parsed.additionalInformation }}
                       />
                     </div>

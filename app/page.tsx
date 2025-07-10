@@ -243,7 +243,10 @@ export default function HomePage() {
                             }`} />
                           </div>
                           <span className="text-xs font-medium text-burgundy">
-                            {getRemainingStepsToday(thriving)} more steps
+                            {getRemainingStepsToday(thriving) === 0 
+                              ? '✓ Done for today!' 
+                              : `${getRemainingStepsToday(thriving)} more ${getRemainingStepsToday(thriving) === 1 ? 'step' : 'steps'}`
+                            }
                           </span>
                         </div>
                         <h3 className="font-semibold text-primary-text text-lg mb-3">{thriving.title}</h3>
