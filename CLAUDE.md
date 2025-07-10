@@ -13,10 +13,17 @@
 - **Buy/Add to Pantry Actions** - Properly suggests buying supplements and adding to pantry
 - **Medication Management** - Immediately suggests routine creation for medication management
 - **Multiple Function Calls** - Fixed handling of parallel function calls in submit-tool-outputs
+- **Supplement Options Auto-Fix** - Client-side logic automatically generates "I already have it" options when assistant only provides "buy" options
 
 ### ✅ TypeScript Types Added
 - **BasicContext Interface** - Properly typed context passing from client to server
 - **Type Safety** - All context passing is now type-safe with proper interfaces
+
+### ✅ Supplement Recommendation Flow
+- **Dual Options Required** - For each supplement, both "I already have it" and "Where to find it" options should be shown
+- **Client-Side Workaround** - parseAssistantResponse and parsePartialAssistantResponse automatically generate missing "already_have" options
+- **Non-Pushy Design** - "I already have it" option appears first, followed by "Where to find it" for convenience
+- **Pantry Integration** - "I already have it" opens PantryAddModal with contextMessage about personalization
 
 ## Recent Mobile UX Improvements (2025-07-09)
 
@@ -385,6 +392,53 @@ This ensures:
 - Clean dependency resolution
 
 **Important**: Never skip the build step after making changes!
+
+## 🛍️ "I Already Have It" Flow
+
+### Overview
+When the assistant recommends supplements, it provides both options to avoid pushing purchases:
+- **"I already have [Supplement]"** - Opens pantry modal with pre-filled data
+- **"Where to find [Supplement]"** - Opens Amazon search if needed
+
+### Implementation Details
+- Assistant returns both `already_have` and `buy` action types for each supplement
+- `already_have` buttons appear first (non-commercial approach)
+- Context message shows in pantry modal: "Great! Tracking this helps me personalize your wellness routines"
+- Pre-fills supplement name, dosage, and timing information
+
+### User Experience
+1. User asks about health concern (e.g., "I want to sleep better")
+2. Assistant shows supplements with BOTH options
+3. If user clicks "I already have it":
+   - PantryAddModal opens with pre-filled data
+   - Shows helpful context message
+   - Saves to pantry for routine personalization
+4. If user clicks "Where to find it":
+   - Opens Amazon search in new tab
+   - No pressure to purchase
+
+### Key Files
+- `SmartCardChat.tsx` - Handles `already_have` action type
+- `PantryAddModal.tsx` - Shows `contextMessage` prop
+- `assistantInstructions.ts` - Updated to provide both options
+
+## 🔄 Routine Adjustment Flow
+
+### Overview
+When users have existing routines (thrivings) and mention related health concerns, the assistant suggests adjustments instead of creating new routines.
+
+### Implementation
+- Assistant returns `adjust_routine` action type
+- Clicking redirects to `/thrivings?id={routineId}&showAdjustment=true`
+- Thrivings page auto-opens adjustment editor with pre-filled instructions
+- Uses existing `/api/routine/adjust` endpoint
+
+### User Experience
+1. User has a sleep routine but says "I still can't sleep well"
+2. Assistant suggests: "Adjust Your Sleep Wellness Routine"
+3. Click opens thrivings page with adjustment modal
+4. Natural language instructions are pre-filled
+5. Click "Apply Adjustments" to update routine
 
 ## 🔄 Loading Button Component
 

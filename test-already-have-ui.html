@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Already Have Flow UI Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .action-button { 
+            margin: 5px; 
+            padding: 10px 20px; 
+            border: 1px solid #ccc; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            background: white;
+        }
+        .already-have { border-color: #22c55e; color: #22c55e; }
+        .buy { border-color: #3b82f6; color: #3b82f6; }
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%);
+            background: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .context-message {
+            background: #dcfce7;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Test: Already Have Flow</h2>
+    
+    <div id="supplement-options">
+        <h3>Magnesium for Better Sleep</h3>
+        <button class="action-button already-have" onclick="openPantryModal('Magnesium Glycinate', 'Take 200-400mg, 30-60 minutes before bed', 'Great choice! Tracking this helps me personalize your sleep routine.')">
+            ➕ I already have Magnesium
+        </button>
+        <button class="action-button buy" onclick="openAmazon('magnesium glycinate 400mg sleep')">
+            🛒 Where to find Magnesium
+        </button>
+    </div>
+    
+    <div id="pantry-modal" class="modal">
+        <h3>Add to Pantry</h3>
+        <div id="context-message" class="context-message"></div>
+        <p>Name: <input type="text" id="item-name" /></p>
+        <p>Notes: <textarea id="item-notes"></textarea></p>
+        <button onclick="saveToPantry()">Save to Pantry</button>
+        <button onclick="closeModal()">Cancel</button>
+    </div>
+    
+    <div id="results"></div>
+    
+    <script>
+        function openPantryModal(name, notes, contextMessage) {
+            document.getElementById('item-name').value = name;
+            document.getElementById('item-notes').value = notes;
+            document.getElementById('context-message').textContent = '✨ ' + contextMessage;
+            document.getElementById('pantry-modal').style.display = 'block';
+            logResult('✓ Pantry modal opened with pre-filled data');
+        }
+        
+        function openAmazon(searchQuery) {
+            logResult('✓ Would open Amazon with search: ' + searchQuery);
+            console.log('Amazon URL:', 'https://www.amazon.com/s?k=' + encodeURIComponent(searchQuery));
+        }
+        
+        function saveToPantry() {
+            const name = document.getElementById('item-name').value;
+            logResult('✓ Saved to pantry: ' + name);
+            closeModal();
+        }
+        
+        function closeModal() {
+            document.getElementById('pantry-modal').style.display = 'none';
+        }
+        
+        function logResult(message) {
+            const results = document.getElementById('results');
+            results.innerHTML += '<p>' + message + '</p>';
+        }
+    </script>
+</body>
+</html>

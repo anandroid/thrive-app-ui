@@ -1,14 +1,13 @@
 'use client';
 
 import React, { useState, useEffect, use } from 'react';
-// import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { SmartCardChat } from '@/components/features/SmartCardChat';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Heart } from 'lucide-react';
+import { SmartCardChat } from '@/components/features/SmartCardChat';
 import { saveThrivingToStorage } from '@/src/utils/thrivingStorage';
 import { saveJourneyToStorage } from '@/src/utils/journeyStorage';
 import { Thriving, AdditionalRecommendation } from '@/src/types/thriving';
-import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function ChatPage({ params }: { params: Promise<{ threadId: string }> }) {
   const router = useRouter();

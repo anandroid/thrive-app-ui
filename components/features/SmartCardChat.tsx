@@ -70,6 +70,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   const tutorialTargetButtonRef = useRef<HTMLButtonElement | null>(null);
   const [showPantryModal, setShowPantryModal] = useState(false);
   const [pantryItemToAdd, setPantryItemToAdd] = useState<ActionableItem | null>(null);
+  const [lastAssistantQuestions, setLastAssistantQuestions] = useState<string[]>([]);
 
   // Load existing messages if threadId is provided
   useEffect(() => {
@@ -374,7 +375,9 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                 console.log('Received function call request:', data);
                 
                 // Import the client-side function handler
-                const { executeClientSideFunctions } = await import('@/src/services/openai/functions/clientFunctionHandler');
+                // Dynamic import to avoid server-side execution
+                const clientModule = await import('@/src/services/openai/functions/clientFunctionHandler');
+                const { executeClientSideFunctions } = clientModule;
                 
                 // Execute functions locally with access to localStorage
                 console.log('Executing functions locally...');
@@ -480,6 +483,12 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
 
               if (data.type === 'completed') {
                 const parsedResponse = parseAssistantResponse(fullContent);
+                
+                // Store questions if available
+                if (parsedResponse?.questions && parsedResponse.questions.length > 0) {
+                  setLastAssistantQuestions(parsedResponse.questions);
+                }
+                
                 setMessages(prev => {
                   const updated = [...prev];
                   const lastMessage = updated[updated.length - 1];
@@ -541,6 +550,36 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       const parsed = JSON.parse(content);
       // We consider it structured only if it includes at least one expected assistant-response key
       if (parsed && typeof parsed === 'object' && ASSISTANT_RESPONSE_KEYS.some(key => key in parsed)) {
+        // Post-process actionableItems to ensure both buy and already_have options exist for supplements
+        if (parsed.actionableItems && Array.isArray(parsed.actionableItems)) {
+          const supplementBuyActions = parsed.actionableItems.filter((item: ActionableItem) => 
+            item.type === 'buy'
+          );
+          
+          // For each buy action, check if there's a corresponding already_have action
+          for (const buyAction of supplementBuyActions) {
+            const productName = buyAction.productName || buyAction.title.replace(/^Where to find |^Buy |^Get /i, '').trim();
+            const hasAlreadyHaveOption = parsed.actionableItems.some((item: ActionableItem) => 
+              item.type === 'already_have' && 
+              (item.productName === productName || item.title.includes(productName))
+            );
+            
+            if (!hasAlreadyHaveOption) {
+              // Insert the already_have option before the buy option
+              const buyIndex = parsed.actionableItems.indexOf(buyAction);
+              const alreadyHaveOption: ActionableItem = {
+                type: 'already_have',
+                title: `I already have ${productName}`,
+                description: 'Add to your pantry for personalized tracking',
+                productName: productName,
+                suggestedNotes: buyAction.dosage ? `${buyAction.dosage}, ${buyAction.timing || 'as directed'}` : '',
+                contextMessage: 'Great! Tracking this helps me personalize your wellness routines'
+              };
+              parsed.actionableItems.splice(buyIndex, 0, alreadyHaveOption);
+            }
+          }
+        }
+        
         return parsed as AssistantResponse;
       }
       return undefined;
@@ -555,6 +594,35 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       // Try to parse complete JSON first
       const parsed = JSON.parse(content);
       if (parsed && typeof parsed === 'object') {
+        // Post-process actionableItems to ensure both buy and already_have options exist for supplements
+        if (parsed.actionableItems && Array.isArray(parsed.actionableItems)) {
+          const supplementBuyActions = parsed.actionableItems.filter((item: ActionableItem) => 
+            item.type === 'buy'
+          );
+          
+          // For each buy action, check if there's a corresponding already_have action
+          for (const buyAction of supplementBuyActions) {
+            const productName = buyAction.productName || buyAction.title.replace(/^Where to find |^Buy |^Get /i, '').trim();
+            const hasAlreadyHaveOption = parsed.actionableItems.some((item: ActionableItem) => 
+              item.type === 'already_have' && 
+              (item.productName === productName || item.title.includes(productName))
+            );
+            
+            if (!hasAlreadyHaveOption) {
+              // Insert the already_have option before the buy option
+              const buyIndex = parsed.actionableItems.indexOf(buyAction);
+              const alreadyHaveOption: ActionableItem = {
+                type: 'already_have',
+                title: `I already have ${productName}`,
+                description: 'Add to your pantry for personalized tracking',
+                productName: productName,
+                suggestedNotes: buyAction.dosage ? `${buyAction.dosage}, ${buyAction.timing || 'as directed'}` : '',
+                contextMessage: 'Great! Tracking this helps me personalize your wellness routines'
+              };
+              parsed.actionableItems.splice(buyIndex, 0, alreadyHaveOption);
+            }
+          }
+        }
         return parsed as PartialAssistantResponse;
       }
     } catch {
@@ -637,6 +705,34 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
               } catch {}
             }
             if (partialItems.length > 0) {
+              // Post-process to ensure both buy and already_have options exist for supplements
+              const supplementBuyActions = partialItems.filter((item: ActionableItem) => 
+                item.type === 'buy' && (item.productName || (item.title && item.title.includes('find')))
+              );
+              
+              // For each buy action, check if there's a corresponding already_have action
+              for (const buyAction of supplementBuyActions) {
+                const productName = buyAction.productName || buyAction.title.replace(/^Where to find |^Buy |^Get /i, '').trim();
+                const hasAlreadyHaveOption = partialItems.some((item: ActionableItem) => 
+                  item.type === 'already_have' && 
+                  (item.productName === productName || item.title.includes(productName))
+                );
+                
+                if (!hasAlreadyHaveOption) {
+                  // Insert the already_have option before the buy option
+                  const buyIndex = partialItems.indexOf(buyAction);
+                  const alreadyHaveOption: ActionableItem = {
+                    type: 'already_have',
+                    title: `I already have ${productName}`,
+                    description: 'Add to your pantry for personalized tracking',
+                    productName: productName,
+                    suggestedNotes: buyAction.dosage ? `${buyAction.dosage}, ${buyAction.timing || 'as directed'}` : '',
+                    contextMessage: 'Great! Tracking this helps me personalize your wellness routines'
+                  };
+                  partialItems.splice(buyIndex, 0, alreadyHaveOption);
+                }
+              }
+              
               partial.actionableItems = partialItems;
             }
           }
@@ -667,7 +763,14 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
 
   const handleActionClick = (action: ActionableItem) => {
     if (action.type === 'create_routine' || action.type === 'routine' || action.type === 'thriving') {
-      setRoutineData(action);
+      // Ensure the action has required fields
+      const enhancedAction = {
+        ...action,
+        description: action.description || 'Create a personalized wellness routine',
+        modalTitle: action.modalTitle || action.title || 'Create Your Wellness Routine',
+        modalDescription: action.modalDescription || 'Let\'s build a routine that works for you'
+      };
+      setRoutineData(enhancedAction);
       setShowRoutineModal(true);
     } else if (action.type === 'start_journey') {
       // Check if journey already exists
@@ -694,6 +797,13 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     } else if (action.type === 'add_to_pantry') {
       // Handle add to pantry action
       setPantryItemToAdd(action);
+      setShowPantryModal(true);
+    } else if (action.type === 'already_have') {
+      // Handle "I already have it" action - opens pantry modal with context
+      setPantryItemToAdd({
+        ...action,
+        contextMessage: action.contextMessage || "Great! Tracking this helps me personalize your wellness routines"
+      });
       setShowPantryModal(true);
     } else if (action.type === 'adjust_routine') {
       // Navigate to thrivings page with adjustment instructions
@@ -855,7 +965,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                         else if (item.type === 'routine' || item.type === 'create_routine' || item.type === 'thriving') Icon = Sparkles;
                         else if (item.type === 'information') Icon = FileText;
                         else if (item.type === 'buy') Icon = ShoppingCart;
-                        else if (item.type === 'add_to_pantry') Icon = PlusCircle;
+                        else if (item.type === 'add_to_pantry' || item.type === 'already_have') Icon = PlusCircle;
                       }
                       
                       // Original color sequence: sage green -> pink/bronze -> slate blue -> repeat
@@ -1106,30 +1216,137 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
             setShowPantryModal(false);
             setPantryItemToAdd(null);
           }}
-          onAddItem={(item: PantryItem) => {
+          initialData={pantryItemToAdd ? {
+            name: pantryItemToAdd.productName || pantryItemToAdd.title || '',
+            notes: pantryItemToAdd.suggestedNotes || '',
+            tags: pantryItemToAdd.category ? [pantryItemToAdd.category] : []
+          } : undefined}
+          contextMessage={pantryItemToAdd?.contextMessage}
+          onAddItem={async (item: PantryItem) => {
             savePantryItem(item);
             setShowPantryModal(false);
             setPantryItemToAdd(null);
             
-            // Optional: Show a success message
-            const successMessage: ChatMessage = {
+            // Show immediate success message
+            const immediateMessage: ChatMessage = {
               role: 'assistant',
-              content: `Great! I've added ${item.name} to your pantry. You can now track this supplement and I'll provide personalized recommendations based on your inventory.`,
-              timestamp: new Date()
+              content: `Great! I've added ${item.name} to your pantry.`,
+              timestamp: new Date(),
+              isStreaming: true
             };
-            setMessages(prev => [...prev, successMessage]);
+            setMessages(prev => [...prev, immediateMessage]);
             
             // Save to chat history
             const currentThreadId = chatThreadId || threadId;
             if (currentThreadId) {
-              addMessageToThread(currentThreadId, { role: 'assistant', content: successMessage.content });
+              addMessageToThread(currentThreadId, { role: 'assistant', content: immediateMessage.content });
+            }
+            
+            // Request routine recommendation from assistant
+            try {
+              const routinePrompt = `The user just added ${item.name} to their pantry. Suggest creating a routine that includes this supplement. Keep the response brief and actionable.`;
+              
+              const response = await fetch('/api/assistant/stream', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  message: routinePrompt,
+                  threadId: currentThreadId,
+                  basicContext: {
+                    pantryCount: 1, // They just added an item
+                    activeRoutineCount: 0, // We'll assume no routines for now
+                    routineTypes: 'none'
+                  }
+                })
+              });
+              
+              if (response.ok) {
+                // Update the streaming message with the assistant's response
+                const reader = response.body?.getReader();
+                const decoder = new TextDecoder();
+                let fullContent = immediateMessage.content + '\n\n';
+                
+                if (reader) {
+                  let buffer = '';
+                  while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
+                    
+                    for (const line of lines) {
+                      if (line.trim() === '') continue;
+                      if (line.startsWith('data: ')) {
+                        const dataStr = line.slice(6);
+                        if (dataStr === '[DONE]') continue;
+                        
+                        try {
+                          const data = JSON.parse(dataStr);
+                          if (data.type === 'delta' && data.content) {
+                            fullContent += data.content;
+                            setMessages(prev => {
+                              const updated = [...prev];
+                              const lastMessage = updated[updated.length - 1];
+                              if (lastMessage.role === 'assistant') {
+                                lastMessage.content = fullContent;
+                                const partialParsed = parsePartialAssistantResponse(fullContent.substring(immediateMessage.content.length + 2));
+                                if (partialParsed) {
+                                  lastMessage.parsedContent = {
+                                    ...partialParsed,
+                                    questions: partialParsed.questions || lastAssistantQuestions
+                                  };
+                                }
+                              }
+                              return updated;
+                            });
+                          } else if (data.type === 'completed') {
+                            const assistantContent = fullContent.substring(immediateMessage.content.length + 2);
+                            const parsedResponse = parseAssistantResponse(assistantContent);
+                            
+                            setMessages(prev => {
+                              const updated = [...prev];
+                              const lastMessage = updated[updated.length - 1];
+                              if (lastMessage.role === 'assistant') {
+                                lastMessage.content = fullContent;
+                                lastMessage.isStreaming = false;
+                                if (parsedResponse) {
+                                  // Include previous questions if new response doesn't have any
+                                  lastMessage.parsedContent = {
+                                    ...parsedResponse,
+                                    questions: parsedResponse.questions || lastAssistantQuestions
+                                  };
+                                }
+                              }
+                              return updated;
+                            });
+                          }
+                        } catch (e) {
+                          console.error('Error parsing stream data:', e);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            } catch (error) {
+              console.error('Error getting routine recommendation:', error);
+              // Fallback to showing just the questions
+              setMessages(prev => {
+                const updated = [...prev];
+                const lastMessage = updated[updated.length - 1];
+                if (lastMessage.role === 'assistant' && lastAssistantQuestions.length > 0) {
+                  lastMessage.isStreaming = false;
+                  lastMessage.parsedContent = {
+                    greeting: lastMessage.content,
+                    questions: lastAssistantQuestions
+                  };
+                }
+                return updated;
+              });
             }
           }}
-          initialData={pantryItemToAdd ? {
-            name: pantryItemToAdd.productName || pantryItemToAdd.title || '',
-            notes: pantryItemToAdd.suggestedNotes || pantryItemToAdd.dosage || '',
-            tags: ['supplements']
-          } : undefined}
         />
       )}
 

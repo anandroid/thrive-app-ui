@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Supplement Fix</title>
+</head>
+<body>
+    <h1>Testing Supplement Options Fix</h1>
+    <div id="result"></div>
+    
+    <script>
+        // Simulate the parseAssistantResponse function
+        const parseAssistantResponse = (content) => {
+            try {
+                const parsed = JSON.parse(content);
+                if (parsed && typeof parsed === 'object') {
+                    // Post-process actionableItems to ensure both buy and already_have options exist for supplements
+                    if (parsed.actionableItems && Array.isArray(parsed.actionableItems)) {
+                        const supplementBuyActions = parsed.actionableItems.filter((item) => 
+                            item.type === 'buy'
+                        );
+                        
+                        // For each buy action, check if there's a corresponding already_have action
+                        for (const buyAction of supplementBuyActions) {
+                            const productName = buyAction.productName || buyAction.title.replace(/^Where to find |^Buy |^Get /i, '').trim();
+                            const hasAlreadyHaveOption = parsed.actionableItems.some((item) => 
+                                item.type === 'already_have' && 
+                                (item.productName === productName || item.title.includes(productName))
+                            );
+                            
+                            if (!hasAlreadyHaveOption) {
+                                // Insert the already_have option before the buy option
+                                const buyIndex = parsed.actionableItems.indexOf(buyAction);
+                                const alreadyHaveOption = {
+                                    type: 'already_have',
+                                    title: `I already have ${productName}`,
+                                    description: 'Add to your pantry for personalized tracking',
+                                    productName: productName,
+                                    suggestedNotes: buyAction.dosage ? `${buyAction.dosage}, ${buyAction.timing || 'as directed'}` : '',
+                                    contextMessage: 'Great! Tracking this helps me personalize your wellness routines'
+                                };
+                                parsed.actionableItems.splice(buyIndex, 0, alreadyHaveOption);
+                            }
+                        }
+                    }
+                    
+                    return parsed;
+                }
+                return undefined;
+            } catch {
+                return undefined;
+            }
+        };
+
+        // Test with sample assistant response
+        const testResponse = {
+            "greeting": "I'd be happy to help you sleep better! 🌙",
+            "attentionRequired": null,
+            "emergencyReasoning": null,
+            "actionItems": [
+                {
+                    "title": "Magnesium for Better Sleep 🌙",
+                    "content": "<p>Taking <strong>200-400mg of Magnesium Glycinate</strong> 30 minutes before bed may help promote relaxation and improve sleep quality.</p>"
+                }
+            ],
+            "additionalInformation": "<p><em>Creating a consistent sleep schedule can also significantly enhance your sleep quality.</em></p>",
+            "actionableItems": [
+                {
+                    "type": "thriving",
+                    "title": "Create Sleep Wellness Routine",
+                    "description": "A personalized 7-day plan to improve your sleep quality with daily practices and progress tracking",
+                    "thrivingType": "sleep_wellness",
+                    "duration": "7_days",
+                    "frequency": "daily",
+                    "modalTitle": "Sleep Recovery Plan",
+                    "modalDescription": "Transform your nights with a personalized sleep optimization plan including daily practices and progress journaling",
+                    "customInstructionsPlaceholder": "E.g., I work night shifts, have young children, prefer natural remedies..."
+                },
+                {
+                    "type": "buy",
+                    "title": "Buy Magnesium Glycinate",
+                    "productName": "Magnesium Glycinate",
+                    "searchQuery": "magnesium glycinate 400mg capsules",
+                    "reason": "Helps promote relaxation and improve sleep quality",
+                    "dosage": "200-400mg",
+                    "timing": "30 minutes before bed"
+                }
+            ],
+            "questions": [
+                "What time do you usually go to bed?",
+                "Have you tried any sleep aids or supplements before?",
+                "Do you have any specific sleep challenges like trouble falling asleep or staying asleep?"
+            ]
+        };
+
+        // Parse the response
+        const result = parseAssistantResponse(JSON.stringify(testResponse));
+        
+        // Display results
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = '<h2>Actionable Items After Processing:</h2>';
+        
+        result.actionableItems.forEach((item, index) => {
+            resultDiv.innerHTML += `
+                <div style="margin: 10px; padding: 10px; border: 1px solid #ccc;">
+                    <strong>${index + 1}. ${item.title}</strong><br>
+                    Type: ${item.type}<br>
+                    ${item.productName ? `Product: ${item.productName}<br>` : ''}
+                    ${item.description ? `Description: ${item.description}<br>` : ''}
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>

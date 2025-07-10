@@ -1,0 +1,237 @@
+{
+  "example1_sleep_supplements": {
+    "user_message": "I have trouble sleeping. What supplements might help?",
+    "expected_response": {
+      "greeting": "I understand how frustrating sleep troubles can be 😴 Let me help you find natural supplements that can improve your sleep quality.",
+      "attentionRequired": null,
+      "emergencyReasoning": null,
+      "actionItems": [
+        {
+          "title": "Magnesium for Better Sleep 🌙",
+          "content": "<p>Magnesium glycinate is one of the most effective supplements for sleep. It helps <strong>relax muscles</strong> and <em>calm the nervous system</em>. Take 200-400mg about 30 minutes before bed.</p>"
+        },
+        {
+          "title": "Melatonin for Sleep Regulation ⏰",
+          "content": "<p>Melatonin helps regulate your sleep-wake cycle. Start with a <strong>low dose (1-3mg)</strong> taken 1-2 hours before bed. It's especially helpful for jet lag or shift work.</p>"
+        },
+        {
+          "title": "L-Theanine for Relaxation 🍵",
+          "content": "<p>Found in green tea, L-theanine promotes <strong>relaxation without drowsiness</strong>. Take 100-200mg before bed, often combined with magnesium for better effects.</p>"
+        }
+      ],
+      "additionalInformation": "<p><em>Always start with the lowest effective dose and consult your healthcare provider if you take other medications.</em></p>",
+      "actionableItems": [
+        {
+          "type": "buy",
+          "title": "Buy Magnesium Glycinate",
+          "description": "High-absorption magnesium for better sleep and muscle relaxation",
+          "productName": "Magnesium Glycinate 400mg",
+          "searchQuery": "magnesium glycinate 400mg capsules sleep",
+          "reason": "Helps relax muscles and calm nervous system for better sleep",
+          "dosage": "200-400mg",
+          "timing": "30 minutes before bed",
+          "price_range": "$15-25"
+        },
+        {
+          "type": "buy",
+          "title": "Buy Melatonin",
+          "description": "Natural sleep hormone to regulate sleep-wake cycle",
+          "productName": "Melatonin 3mg Time-Release",
+          "searchQuery": "melatonin 3mg time release tablets",
+          "reason": "Helps you fall asleep faster and stay asleep longer",
+          "dosage": "1-3mg",
+          "timing": "1-2 hours before bed",
+          "price_range": "$8-15"
+        },
+        {
+          "type": "add_to_pantry",
+          "title": "Track Your Sleep Supplements",
+          "description": "Add your supplements to pantry for personalized tracking",
+          "suggestedNotes": "Track which supplements work best for your sleep"
+        },
+        {
+          "type": "thriving",
+          "title": "Create Sleep Wellness Routine 🌙",
+          "description": "Build a personalized bedtime routine with supplement timing",
+          "thrivingType": "sleep_wellness",
+          "duration": "7_days"
+        }
+      ],
+      "questions": [
+        "How long have you been experiencing sleep issues?",
+        "Do you have trouble falling asleep, staying asleep, or both?",
+        "Are you taking any medications that might interact with supplements?"
+      ]
+    }
+  },
+  
+  "example2_have_supplement": {
+    "user_message": "I have magnesium but not sure when to take it",
+    "expected_response": {
+      "greeting": "Great that you already have magnesium! 💊 Let me help you use it effectively for better sleep.",
+      "attentionRequired": null,
+      "emergencyReasoning": null,
+      "actionItems": [
+        {
+          "title": "Optimal Magnesium Timing 🕐",
+          "content": "<p>Take your magnesium <strong>30-60 minutes before bed</strong>. This gives it time to be absorbed and start promoting relaxation. Take with a small snack if it upsets your stomach.</p>"
+        },
+        {
+          "title": "Dosage Guidelines 💊",
+          "content": "<p>Start with <strong>200mg</strong> and increase to 400mg if needed. Magnesium glycinate or citrate are best for sleep. <em>Too much can cause digestive issues</em>, so increase gradually.</p>"
+        }
+      ],
+      "additionalInformation": "<p><em>Consistency is key - take magnesium at the same time each night for best results.</em></p>",
+      "actionableItems": [
+        {
+          "type": "add_to_pantry",
+          "title": "Add Magnesium to Your Pantry",
+          "description": "Track your magnesium intake and effects on sleep",
+          "productName": "Magnesium",
+          "suggestedNotes": "Take 200-400mg, 30-60 minutes before bed. Monitor sleep quality."
+        },
+        {
+          "type": "thriving",
+          "title": "Create Bedtime Routine with Magnesium 🌙",
+          "description": "Build a routine that includes proper supplement timing",
+          "thrivingType": "sleep_wellness",
+          "duration": "7_days"
+        }
+      ],
+      "questions": [
+        "What type of magnesium do you have (glycinate, citrate, oxide)?",
+        "What dose is each capsule or tablet?",
+        "Have you noticed any effects when you've taken it before?"
+      ]
+    }
+  },
+  
+  "example3_pain_supplements": {
+    "user_message": "What natural supplements help with chronic pain and inflammation?",
+    "expected_response": {
+      "greeting": "I understand dealing with chronic pain is challenging 💝 Here are evidence-based natural supplements that can help reduce inflammation and manage pain.",
+      "attentionRequired": null,
+      "emergencyReasoning": null,
+      "actionItems": [
+        {
+          "title": "Turmeric/Curcumin Power 🌟",
+          "content": "<p>Curcumin is a powerful anti-inflammatory. Take <strong>500-1000mg twice daily</strong> with black pepper (piperine) for better absorption. Best taken with meals containing healthy fats.</p>"
+        },
+        {
+          "title": "Omega-3 for Inflammation 🐟",
+          "content": "<p>Fish oil reduces inflammatory markers. Take <strong>2-3g daily</strong> of EPA/DHA combined. Choose high-quality, purified fish oil to avoid contaminants.</p>"
+        },
+        {
+          "title": "Boswellia for Joint Health 🌿",
+          "content": "<p>This herb specifically helps with joint pain and arthritis. Take <strong>300-500mg</strong> of standardized extract 2-3 times daily with food.</p>"
+        }
+      ],
+      "additionalInformation": "<p><em>These supplements work best when combined with anti-inflammatory diet and gentle movement.</em></p>",
+      "actionableItems": [
+        {
+          "type": "buy",
+          "title": "Buy Turmeric Curcumin Complex",
+          "description": "Powerful anti-inflammatory for pain relief",
+          "productName": "Turmeric Curcumin with BioPerine 1000mg",
+          "searchQuery": "turmeric curcumin bioperine 1000mg inflammation",
+          "reason": "Reduces inflammation and helps manage chronic pain naturally",
+          "dosage": "500-1000mg twice daily",
+          "timing": "With meals",
+          "price_range": "$20-35"
+        },
+        {
+          "type": "buy",
+          "title": "Buy Omega-3 Fish Oil",
+          "description": "Essential fatty acids for inflammation control",
+          "productName": "High-Potency Omega-3 Fish Oil 2000mg",
+          "searchQuery": "omega 3 fish oil 2000mg EPA DHA",
+          "reason": "Reduces inflammatory markers and supports joint health",
+          "dosage": "2-3g daily",
+          "timing": "With meals",
+          "price_range": "$25-40"
+        },
+        {
+          "type": "buy",
+          "title": "Buy Boswellia Extract",
+          "description": "Traditional herb for joint pain and arthritis",
+          "productName": "Boswellia Serrata Extract 500mg",
+          "searchQuery": "boswellia serrata extract 500mg joint pain",
+          "reason": "Specifically targets joint inflammation and pain",
+          "dosage": "300-500mg",
+          "timing": "2-3 times daily with food",
+          "price_range": "$15-25"
+        },
+        {
+          "type": "thriving",
+          "title": "Create Pain Management Routine 💪",
+          "description": "Comprehensive plan combining supplements, gentle movement, and pain tracking",
+          "thrivingType": "pain_management",
+          "duration": "14_days"
+        }
+      ],
+      "questions": [
+        "Where do you experience the most pain?",
+        "How long have you been dealing with chronic pain?",
+        "Are you currently taking any pain medications?"
+      ]
+    }
+  },
+  
+  "example4_tracking_medications": {
+    "user_message": "I take ibuprofen and tylenol for my back pain",
+    "expected_response": {
+      "greeting": "I see you're managing back pain with over-the-counter medications 💊 Let me help you track these safely and explore complementary approaches.",
+      "attentionRequired": null,
+      "emergencyReasoning": null,
+      "actionItems": [
+        {
+          "title": "Safe Medication Tracking 📋",
+          "content": "<p>Track your medications to avoid exceeding daily limits: <strong>Ibuprofen max 1200mg/day</strong>, <strong>Tylenol max 3000mg/day</strong>. Space doses at least 4-6 hours apart.</p>"
+        },
+        {
+          "title": "Complement with Natural Options 🌿",
+          "content": "<p>Consider adding <strong>topical arnica gel</strong> or <strong>heat/cold therapy</strong> between medication doses. This can reduce your need for oral pain relievers.</p>"
+        }
+      ],
+      "additionalInformation": "<p><em>Long-term NSAID use can affect stomach and kidneys. Consider discussing alternatives with your doctor.</em></p>",
+      "actionableItems": [
+        {
+          "type": "add_to_pantry",
+          "title": "Add Ibuprofen to Pantry",
+          "description": "Track your pain medication usage safely",
+          "productName": "Ibuprofen",
+          "suggestedNotes": "Max 1200mg/day. Take with food. Track doses and pain levels."
+        },
+        {
+          "type": "add_to_pantry",
+          "title": "Add Tylenol to Pantry",
+          "description": "Monitor acetaminophen intake",
+          "productName": "Tylenol (Acetaminophen)",
+          "suggestedNotes": "Max 3000mg/day. Can take every 4-6 hours. Track effectiveness."
+        },
+        {
+          "type": "thriving",
+          "title": "Create Back Pain Management Plan 🎯",
+          "description": "Combine medication tracking with stretches, heat therapy, and natural supplements",
+          "thrivingType": "pain_management",
+          "duration": "14_days"
+        },
+        {
+          "type": "buy",
+          "title": "Consider Natural Pain Relief",
+          "description": "Topical arnica for additional relief",
+          "productName": "Arnica Gel Extra Strength",
+          "searchQuery": "arnica gel extra strength back pain",
+          "reason": "Provides local pain relief without systemic effects",
+          "timing": "Apply 3-4 times daily",
+          "price_range": "$10-20"
+        }
+      ],
+      "questions": [
+        "How often do you typically need to take pain medication?",
+        "Have you tried any physical therapy or stretches for your back?",
+        "Does the pain affect your sleep or daily activities?"
+      ]
+    }
+  }
+}

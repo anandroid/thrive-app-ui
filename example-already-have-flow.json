@@ -1,0 +1,102 @@
+{
+  "example_sleep_recommendation": {
+    "user_message": "I want to sleep better",
+    "assistant_response": {
+      "greeting": "I understand you're looking to improve your sleep quality 😴 Let me help you with some proven supplements that can make a difference.",
+      "attentionRequired": null,
+      "emergencyReasoning": null,
+      "actionItems": [
+        {
+          "title": "Magnesium for Relaxation 🌙",
+          "content": "<p>Magnesium glycinate helps <strong>relax muscles</strong> and <em>calm your nervous system</em>. Take 200-400mg about 30-60 minutes before bed for best results.</p>"
+        },
+        {
+          "title": "L-Theanine for Calm Mind 🍵",
+          "content": "<p>This amino acid promotes <strong>relaxation without drowsiness</strong>. 100-200mg before bed can help quiet racing thoughts.</p>"
+        }
+      ],
+      "additionalInformation": "<p><em>Consistency is key - take supplements at the same time each night for best results.</em></p>",
+      "actionableItems": [
+        {
+          "type": "already_have",
+          "title": "I already have Magnesium",
+          "description": "Add to your pantry for personalized tracking",
+          "productName": "Magnesium Glycinate",
+          "suggestedNotes": "Take 200-400mg, 30-60 minutes before bed",
+          "contextMessage": "Great choice! Tracking this helps me personalize your sleep routine and remind you when to take it.",
+          "icon": "plus-circle"
+        },
+        {
+          "type": "buy",
+          "title": "Where to find Magnesium",
+          "description": "View options if you need to get this",
+          "productName": "Magnesium Glycinate 400mg",
+          "searchQuery": "magnesium glycinate 400mg sleep",
+          "reason": "Helps relax muscles and improve sleep quality",
+          "dosage": "200-400mg",
+          "timing": "30-60 minutes before bed",
+          "icon": "shopping-cart"
+        },
+        {
+          "type": "already_have",
+          "title": "I already have L-Theanine",
+          "description": "Add to your pantry for personalized tracking",
+          "productName": "L-Theanine",
+          "suggestedNotes": "Take 100-200mg before bed",
+          "contextMessage": "Excellent! I'll help you optimize your L-theanine timing with your sleep routine.",
+          "icon": "plus-circle"
+        },
+        {
+          "type": "buy",
+          "title": "Where to find L-Theanine",
+          "description": "View options if you need to get this",
+          "productName": "L-Theanine 200mg",
+          "searchQuery": "l-theanine 200mg sleep anxiety",
+          "reason": "Promotes relaxation and reduces anxiety",
+          "dosage": "100-200mg",
+          "timing": "Before bed",
+          "icon": "shopping-cart"
+        },
+        {
+          "type": "thriving",
+          "title": "Create Sleep Wellness Routine 🌙",
+          "description": "Build a personalized bedtime routine with supplement timing",
+          "thrivingType": "sleep_wellness",
+          "duration": "7_days"
+        }
+      ],
+      "questions": [
+        "What time do you usually go to bed?",
+        "Do you have trouble falling asleep or staying asleep?",
+        "Are you taking any medications currently?"
+      ]
+    }
+  },
+  
+  "ui_behavior": {
+    "when_user_clicks_already_have": {
+      "action": "Opens PantryAddModal",
+      "pre_filled_data": {
+        "name": "Magnesium Glycinate",
+        "notes": "Take 200-400mg, 30-60 minutes before bed",
+        "tags": []
+      },
+      "context_message_displayed": "Great choice! Tracking this helps me personalize your sleep routine and remind you when to take it.",
+      "after_adding": "Item saved to pantry, modal closes, success message in chat"
+    },
+    
+    "when_user_clicks_buy": {
+      "action": "Opens Amazon search in new tab",
+      "search_query": "magnesium glycinate 400mg sleep",
+      "no_modal": true,
+      "user_can_return": "User shops and can later click 'I already have it' after purchasing"
+    }
+  },
+  
+  "design_principles": {
+    "neutral_presentation": "Both options presented equally, no push to buy",
+    "user_convenience": "Quick access to track what they have OR find what they need",
+    "personalization_focus": "Emphasize how tracking helps personalize routines",
+    "non_commercial": "Focus on health benefits, not sales"
+  }
+}

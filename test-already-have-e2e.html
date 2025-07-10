@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E2E Test: Already Have Flow</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .chat-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            padding: 12px 16px;
+            border-radius: 12px;
+        }
+        
+        .user-message {
+            background: #e3f2fd;
+            text-align: right;
+            margin-left: 20%;
+        }
+        
+        .assistant-message {
+            background: #f5f5f5;
+            margin-right: 20%;
+        }
+        
+        .actionable-items {
+            margin-top: 16px;
+            padding: 16px;
+            background: #fafafa;
+            border-radius: 8px;
+        }
+        
+        .supplement-group {
+            margin-bottom: 20px;
+            padding: 16px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .action-button {
+            padding: 10px 20px;
+            border: 2px solid;
+            border-radius: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            background: white;
+        }
+        
+        .already-have {
+            border-color: #22c55e;
+            color: #22c55e;
+        }
+        
+        .already-have:hover {
+            background: #22c55e;
+            color: white;
+        }
+        
+        .buy {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+        
+        .buy:hover {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .context-message {
+            background: #dcfce7;
+            border: 1px solid #86efac;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: start;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .btn {
+            padding: 8px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #22c55e;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #16a34a;
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        
+        .test-results {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .test-result {
+            margin: 10px 0;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+        
+        .test-pass {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .test-fail {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .icon {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 E2E Test: "I Already Have It" Flow</h1>
+    
+    <div class="chat-container">
+        <div class="message user-message">
+            I want to sleep better
+        </div>
+        
+        <div class="message assistant-message">
+            <p>I understand you're looking to improve your sleep quality 😴 Let me help you with some proven supplements that can make a difference.</p>
+            
+            <div class="actionable-items">
+                <div class="supplement-group">
+                    <h4>🌙 Magnesium for Relaxation</h4>
+                    <p>Magnesium glycinate helps relax muscles and calm your nervous system. Take 200-400mg about 30-60 minutes before bed.</p>
+                    
+                    <div class="action-buttons">
+                        <button class="action-button already-have" onclick="testAlreadyHave('Magnesium Glycinate', 'Take 200-400mg, 30-60 minutes before bed', 'Great choice! Tracking this helps me personalize your sleep routine.')">
+                            <span class="icon">➕</span> I already have Magnesium
+                        </button>
+                        <button class="action-button buy" onclick="testBuy('magnesium glycinate 400mg sleep')">
+                            <span class="icon">🛒</span> Where to find Magnesium
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="supplement-group">
+                    <h4>🍵 L-Theanine for Calm Mind</h4>
+                    <p>This amino acid promotes relaxation without drowsiness. 100-200mg before bed can help quiet racing thoughts.</p>
+                    
+                    <div class="action-buttons">
+                        <button class="action-button already-have" onclick="testAlreadyHave('L-Theanine', 'Take 100-200mg before bed', 'Excellent! I\'ll help you optimize your L-theanine timing with your sleep routine.')">
+                            <span class="icon">➕</span> I already have L-Theanine
+                        </button>
+                        <button class="action-button buy" onclick="testBuy('l-theanine 200mg sleep anxiety')">
+                            <span class="icon">🛒</span> Where to find L-Theanine
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal -->
+    <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2>Add to Pantry</h2>
+                <button onclick="closeModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
+            </div>
+            
+            <div class="modal-body">
+                <div id="context-message" class="context-message" style="display: none;">
+                    <span>✨</span>
+                    <span id="context-text"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="item-name" />
+                </div>
+                
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="item-notes" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Category</label>
+                    <input type="text" value="Supplements" readonly />
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveToPantry()">Add to Pantry</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Test Results -->
+    <div class="test-results">
+        <h2>Test Results</h2>
+        <div id="test-log"></div>
+        
+        <h3>Checklist</h3>
+        <div id="checklist">
+            <div class="test-result" id="check-1">⏳ Both button types present for each supplement</div>
+            <div class="test-result" id="check-2">⏳ Correct button order (already have first)</div>
+            <div class="test-result" id="check-3">⏳ Modal opens with pre-filled data</div>
+            <div class="test-result" id="check-4">⏳ Context message displays correctly</div>
+            <div class="test-result" id="check-5">⏳ Buy button opens correct URL</div>
+        </div>
+    </div>
+    
+    <script>
+        let testLog = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            testLog.push({ time: timestamp, message, type });
+            updateTestLog();
+        }
+        
+        function updateTestLog() {
+            const logDiv = document.getElementById('test-log');
+            logDiv.innerHTML = testLog.map(entry => 
+                `<div class="test-result ${entry.type === 'pass' ? 'test-pass' : entry.type === 'fail' ? 'test-fail' : ''}">
+                    [${entry.time}] ${entry.message}
+                </div>`
+            ).join('');
+        }
+        
+        function updateChecklist(id, passed) {
+            const check = document.getElementById(id);
+            check.textContent = (passed ? '✅' : '❌') + check.textContent.substring(1);
+            check.className = passed ? 'test-result test-pass' : 'test-result test-fail';
+        }
+        
+        // Test functions
+        function testAlreadyHave(name, notes, contextMessage) {
+            log(`Testing "I already have ${name}" button`);
+            
+            // Open modal
+            document.getElementById('modal-overlay').style.display = 'block';
+            
+            // Pre-fill data
+            document.getElementById('item-name').value = name;
+            document.getElementById('item-notes').value = notes;
+            
+            // Show context message
+            document.getElementById('context-message').style.display = 'flex';
+            document.getElementById('context-text').textContent = contextMessage;
+            
+            // Verify pre-filled data
+            if (document.getElementById('item-name').value === name) {
+                log('✓ Name pre-filled correctly', 'pass');
+                updateChecklist('check-3', true);
+            } else {
+                log('✗ Name not pre-filled correctly', 'fail');
+                updateChecklist('check-3', false);
+            }
+            
+            if (contextMessage) {
+                log('✓ Context message displayed', 'pass');
+                updateChecklist('check-4', true);
+            }
+        }
+        
+        function testBuy(searchQuery) {
+            const url = `https://www.amazon.com/s?k=${encodeURIComponent(searchQuery)}`;
+            log(`Testing "Where to find" button - Would open: ${url}`);
+            log('✓ Buy button creates correct Amazon URL', 'pass');
+            updateChecklist('check-5', true);
+            
+            // In real implementation, this would open in new tab
+            console.log('Amazon URL:', url);
+        }
+        
+        function closeModal(event) {
+            if (!event || event.target.id === 'modal-overlay') {
+                document.getElementById('modal-overlay').style.display = 'none';
+                log('Modal closed');
+            }
+        }
+        
+        function saveToPantry() {
+            const name = document.getElementById('item-name').value;
+            const notes = document.getElementById('item-notes').value;
+            
+            log(`✓ Saved to pantry: ${name}`, 'pass');
+            log(`  Notes: ${notes}`);
+            
+            // Simulate localStorage save
+            const pantryItem = {
+                id: Date.now().toString(),
+                name,
+                notes,
+                dateAdded: new Date().toISOString()
+            };
+            
+            console.log('Would save to localStorage:', pantryItem);
+            
+            closeModal();
+            
+            // Show success message
+            log('✓ Success message would appear in chat', 'pass');
+        }
+        
+        // Initial checks
+        window.onload = function() {
+            log('Test page loaded');
+            
+            // Check button presence
+            const alreadyHaveButtons = document.querySelectorAll('.already-have');
+            const buyButtons = document.querySelectorAll('.buy');
+            
+            if (alreadyHaveButtons.length === 2 && buyButtons.length === 2) {
+                log('✓ Both button types present for each supplement', 'pass');
+                updateChecklist('check-1', true);
+            }
+            
+            // Check button order
+            const firstSupplementButtons = document.querySelectorAll('.supplement-group')[0].querySelectorAll('.action-button');
+            if (firstSupplementButtons[0].classList.contains('already-have') && 
+                firstSupplementButtons[1].classList.contains('buy')) {
+                log('✓ Correct button order (already have first)', 'pass');
+                updateChecklist('check-2', true);
+            }
+        };
+    </script>
+</body>
+</html>

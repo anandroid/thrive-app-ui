@@ -17,9 +17,10 @@ interface PantryAddModalProps {
     notes?: string;
     tags?: string[];
   };
+  contextMessage?: string;
 }
 
-export function PantryAddModal({ isOpen, onClose, onAddItem, initialData }: PantryAddModalProps) {
+export function PantryAddModal({ isOpen, onClose, onAddItem, initialData, contextMessage }: PantryAddModalProps) {
   const [showCamera, setShowCamera] = useState(false);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -196,25 +197,22 @@ export function PantryAddModal({ isOpen, onClose, onAddItem, initialData }: Pant
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto px-6 pb-6 overscroll-none">
+          {/* Context Message */}
+          {contextMessage && (
+            <div className="mt-4 p-4 bg-sage-light/20 rounded-xl border border-sage/20">
+              <p className="text-sm text-gray-700 leading-relaxed flex items-start">
+                <Sparkles className="w-4 h-4 text-sage-dark mr-2 mt-0.5 flex-shrink-0" />
+                {contextMessage}
+              </p>
+            </div>
+          )}
           <div className="space-y-4 pt-4">
             
-            {/* AI Feature Notice */}
-            {!imagePreview && aiAvailable && (
-              <div className="rounded-xl bg-gradient-to-r from-rose/10 to-burgundy/10 p-4 flex items-start gap-3">
-                <Sparkles className="w-5 h-5 text-rose mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-primary-text">AI-Powered Scanning</p>
-                  <p className="text-xs text-secondary-text-thin mt-1">
-                    Take a photo to automatically identify supplements and extract information
-                  </p>
-                </div>
-              </div>
-            )}
 
             {/* Image Capture Options */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Add Photo {aiAvailable && <span className="text-rose">(AI Enhanced)</span>}
+              <label className="block text-sm font-medium text-gray-500 mb-2">
+                Add Photo <span className="text-xs font-normal">(Optional)</span> {aiAvailable && <span className="text-rose text-xs">• AI Enhanced</span>}
               </label>
               
               {imagePreview ? (
@@ -250,21 +248,21 @@ export function PantryAddModal({ isOpen, onClose, onAddItem, initialData }: Pant
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => setShowCamera(true)}
-                    className="h-32 rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-2 hover:border-rose hover:bg-rose/5 transition-all touch-feedback"
+                    className="h-24 rounded-xl border border-dashed border-gray-200 bg-gray-50/50 flex flex-col items-center justify-center gap-1 hover:border-rose/50 hover:bg-rose/5 transition-all touch-feedback"
                   >
-                    <Scan className="w-8 h-8 text-gray-400" />
-                    <span className="text-sm text-gray-600">Scan Item</span>
+                    <Scan className="w-6 h-6 text-gray-400" />
+                    <span className="text-xs text-gray-500">Scan Item</span>
                     {aiAvailable && (
-                      <span className="text-xs text-rose font-medium">AI</span>
+                      <span className="text-[10px] text-rose font-medium">AI Powered</span>
                     )}
                   </button>
                   
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="h-32 rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-2 hover:border-rose hover:bg-rose/5 transition-all touch-feedback"
+                    className="h-24 rounded-xl border border-dashed border-gray-200 bg-gray-50/50 flex flex-col items-center justify-center gap-1 hover:border-rose/50 hover:bg-rose/5 transition-all touch-feedback"
                   >
-                    <Upload className="w-8 h-8 text-gray-400" />
-                    <span className="text-sm text-gray-600">Upload Photo</span>
+                    <Upload className="w-6 h-6 text-gray-400" />
+                    <span className="text-xs text-gray-500">Upload Photo</span>
                   </button>
                   
                   <input
