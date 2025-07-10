@@ -1,11 +1,14 @@
 import { NextRequest } from 'next/server';
-import OpenAI from 'openai';
 
 export async function POST(request: NextRequest) {
   try {
-    const { threadId, runId, toolOutputs } = await request.json();
+    const body = await request.json();
+    console.log('Submit tool outputs received:', JSON.stringify(body, null, 2));
+    
+    const { threadId, runId, toolOutputs } = body;
 
     if (!threadId || !runId || !toolOutputs) {
+      console.error('Missing parameters:', { threadId, runId, toolOutputs: !!toolOutputs });
       return new Response(
         JSON.stringify({ error: 'Missing required parameters' }), 
         {
@@ -15,78 +18,202 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const openai = new OpenAI({ 
-      apiKey: process.env.THRIVE_OPENAI_API_KEY! 
-    });
+    // OpenAI SDK not used due to submitToolOutputs bug in v5.8.3
+    // Using direct API calls instead
 
-    // Submit the tool outputs and get a new stream
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const stream = await (openai.beta.threads.runs as any).submitToolOutputsStream(
-      threadId,
-      runId,
-      { tool_outputs: toolOutputs }
-    );
+    console.log('Submitting to OpenAI:', { threadId, runId, toolOutputsCount: toolOutputs.length });
+    
+    // First submit the tool outputs without streaming
+    console.log('Submitting tool outputs using manual API call...');
+    try {
+      // Use manual API call due to SDK bug
+      const response = await fetch(
+        `https://api.openai.com/v1/threads/${threadId}/runs/${runId}/submit_tool_outputs`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.THRIVE_OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+            'OpenAI-Beta': 'assistants=v2'
+          },
+          body: JSON.stringify({ tool_outputs: toolOutputs })
+        }
+      );
 
-    const encoder = new TextEncoder();
-    let fullContent = '';
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`API error: ${response.status} - ${JSON.stringify(errorData)}`);
+      }
 
-    return new Response(
-      new ReadableStream({
-        async start(controller) {
-          try {
-            for await (const event of stream) {
-              if (event.event === 'thread.message.delta') {
-                const delta = event.data.delta;
-                if (
-                  delta.content &&
-                  delta.content[0] &&
-                  delta.content[0].type === 'text'
-                ) {
-                  const text = delta.content[0].text?.value || '';
-                  fullContent += text;
-                  controller.enqueue(
-                    encoder.encode(
-                      `data: ${JSON.stringify({ type: 'delta', content: text })}\n\n`,
-                    ),
-                  );
-                }
-              } else if (event.event === 'thread.run.completed') {
+      const updatedRun = await response.json();
+      console.log('Tool outputs submitted successfully, run status:', updatedRun.status);
+      
+      // Poll for completion or stream the messages
+      if (updatedRun.status === 'completed') {
+        // Get the final message using manual API call
+        const messagesResponse = await fetch(
+          `https://api.openai.com/v1/threads/${threadId}/messages?limit=1&order=desc`,
+          {
+            headers: {
+              'Authorization': `Bearer ${process.env.THRIVE_OPENAI_API_KEY}`,
+              'OpenAI-Beta': 'assistants=v2'
+            }
+          }
+        );
+        
+        const messages = await messagesResponse.json();
+        
+        const lastMessage = messages.data[0];
+        if (lastMessage && lastMessage.content[0]?.type === 'text') {
+          const fullContent = lastMessage.content[0].text.value;
+          
+          const encoder = new TextEncoder();
+          return new Response(
+            new ReadableStream({
+              start(controller) {
                 controller.enqueue(
                   encoder.encode(
-                    `data: ${JSON.stringify({ type: 'completed', content: fullContent })}\n\n`,
-                  ),
+                    `data: ${JSON.stringify({ type: 'delta', content: fullContent })}\n\n`
+                  )
                 );
-                controller.close();
-              } else if (event.event === 'thread.run.failed') {
                 controller.enqueue(
                   encoder.encode(
-                    `data: ${JSON.stringify({ type: 'error', error: 'Run failed' })}\n\n`,
-                  ),
+                    `data: ${JSON.stringify({ type: 'completed', content: fullContent })}\n\n`
+                  )
                 );
                 controller.close();
               }
+            }),
+            {
+              headers: {
+                'Content-Type': 'text/event-stream',
+                'Cache-Control': 'no-cache',
+                Connection: 'keep-alive',
+              },
             }
-          } catch (error) {
-            controller.enqueue(
-              encoder.encode(
-                `data: ${JSON.stringify({ 
-                  type: 'error', 
-                  error: error instanceof Error ? error.message : 'Stream error' 
-                })}\n\n`,
-              ),
-            );
-            controller.close();
+          );
+        }
+      }
+      
+      // If not completed, poll for updates
+      let currentRun = updatedRun;
+      const encoder = new TextEncoder();
+      let fullContent = '';
+      
+      return new Response(
+        new ReadableStream({
+          async start(controller) {
+            try {
+              while (currentRun.status === 'in_progress' || currentRun.status === 'queued' || currentRun.status === 'requires_action') {
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+                
+                // Retrieve run status using manual API call
+                const runResponse = await fetch(
+                  `https://api.openai.com/v1/threads/${threadId}/runs/${runId}`,
+                  {
+                    headers: {
+                      'Authorization': `Bearer ${process.env.THRIVE_OPENAI_API_KEY}`,
+                      'OpenAI-Beta': 'assistants=v2'
+                    }
+                  }
+                );
+                currentRun = await runResponse.json();
+                console.log('Run status:', currentRun.status);
+                
+                // If requires_action again, send the function call event
+                if (currentRun.status === 'requires_action' && currentRun.required_action?.submit_tool_outputs) {
+                  const toolCalls = currentRun.required_action.submit_tool_outputs.tool_calls;
+                  
+                  controller.enqueue(
+                    encoder.encode(
+                      `data: ${JSON.stringify({ 
+                        type: 'function_call', 
+                        runId: currentRun.id,
+                        threadId: threadId,
+                        toolCalls: toolCalls 
+                      })}\n\n`
+                    )
+                  );
+                  
+                  controller.enqueue(
+                    encoder.encode(
+                      `data: ${JSON.stringify({ type: 'awaiting_function_results' })}\n\n`
+                    )
+                  );
+                  
+                  // Close the stream as we need new function results
+                  controller.close();
+                  return;
+                }
+                
+                if (currentRun.status === 'completed') {
+                  // Get the final message
+                  const messagesResponse = await fetch(
+                    `https://api.openai.com/v1/threads/${threadId}/messages?limit=1&order=desc`,
+                    {
+                      headers: {
+                        'Authorization': `Bearer ${process.env.THRIVE_OPENAI_API_KEY}`,
+                        'OpenAI-Beta': 'assistants=v2'
+                      }
+                    }
+                  );
+                  const messages = await messagesResponse.json();
+                  
+                  const lastMessage = messages.data[0];
+                  if (lastMessage && lastMessage.content[0]?.type === 'text') {
+                    fullContent = lastMessage.content[0].text.value;
+                    
+                    controller.enqueue(
+                      encoder.encode(
+                        `data: ${JSON.stringify({ type: 'delta', content: fullContent })}\n\n`
+                      )
+                    );
+                    controller.enqueue(
+                      encoder.encode(
+                        `data: ${JSON.stringify({ type: 'completed', content: fullContent })}\n\n`
+                      )
+                    );
+                  }
+                  break;
+                } else if (currentRun.status === 'failed' || currentRun.status === 'cancelled' || currentRun.status === 'expired') {
+                  controller.enqueue(
+                    encoder.encode(
+                      `data: ${JSON.stringify({ type: 'error', error: `Run ${currentRun.status}` })}\n\n`
+                    )
+                  );
+                  break;
+                }
+              }
+              
+              controller.close();
+            } catch (error) {
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify({ 
+                    type: 'error', 
+                    error: error instanceof Error ? error.message : 'Stream error' 
+                  })}\n\n`
+                )
+              );
+              controller.close();
+            }
           }
-        },
-      }),
-      {
-        headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          Connection: 'keep-alive',
-        },
-      },
-    );
+        }),
+        {
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            Connection: 'keep-alive',
+          },
+        }
+      );
+    } catch (submitError) {
+      console.error('Error calling submitToolOutputs:', submitError);
+      if (submitError instanceof Error) {
+        console.error('Error details:', submitError.message);
+      }
+      throw submitError;
+    }
   } catch (error) {
     return new Response(
       JSON.stringify({ 

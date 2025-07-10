@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { AlertCircle, Calendar, Pill, Heart, Sparkles, ChevronRight, Moon, Brain, Activity, FileText, Globe, BookOpen, Leaf } from 'lucide-react';
+import { AlertCircle, Calendar, Pill, Heart, Sparkles, ChevronRight, Moon, Brain, Activity, FileText, Globe, BookOpen, Leaf, ShoppingCart, PlusCircle } from 'lucide-react';
 import {
   ChatMessage,
   ActionableItem,
@@ -9,7 +9,8 @@ import {
   AssistantResponse,
   ASSISTANT_RESPONSE_KEYS,
   WellnessRoutine,
-  PartialAssistantResponse
+  PartialAssistantResponse,
+  BasicContext
 } from '@/src/services/openai/types';
 import { RoutineCreationModal } from './RoutineCreationModal';
 import { JourneyCreationModal } from './JourneyCreationModal';
@@ -21,6 +22,9 @@ import { createChatThread, addMessageToThread, getChatThread, deleteChatThread }
 import { useKeyboardAwareChat } from '@/hooks/useKeyboardAwareChat';
 import { ChatWelcome } from './ChatWelcome';
 import { ThrivingTutorial } from './ThrivingTutorial';
+import { PantryAddModal } from './PantryAddModal';
+import { savePantryItem } from '@/src/utils/pantryStorage';
+import { PantryItem } from '@/src/types/pantry';
 
 interface SmartCardChatProps {
   threadId?: string;
@@ -64,6 +68,8 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   const [tutorialActionableText, setTutorialActionableText] = useState<string>('');
   const hasShownTutorialInSession = useRef(false);
   const tutorialTargetButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [showPantryModal, setShowPantryModal] = useState(false);
+  const [pantryItemToAdd, setPantryItemToAdd] = useState<ActionableItem | null>(null);
 
   // Load existing messages if threadId is provided
   useEffect(() => {
@@ -256,13 +262,34 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
 
     try {
       abortControllerRef.current = new AbortController();
+      
+      // Extract basic context from localStorage for hybrid approach
+      let basicContext: BasicContext | null = null;
+      try {
+        const pantryData = localStorage.getItem('thrive_pantry_items');
+        const pantryCount = pantryData ? JSON.parse(pantryData).length : 0;
+        
+        const routinesData = localStorage.getItem('thrive_wellness_routines');
+        const activeRoutines = routinesData ? JSON.parse(routinesData).filter((r: WellnessRoutine) => r.isActive) : [];
+        const routineTypes = activeRoutines.map((r: WellnessRoutine) => r.type).join(', ');
+        
+        basicContext = {
+          pantryCount,
+          activeRoutineCount: activeRoutines.length,
+          routineTypes: routineTypes || 'none'
+        };
+      } catch (e) {
+        console.log('Could not extract basic context:', e);
+      }
+      
       const response = await fetch('/api/assistant/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: userMessage.content,
           threadId: chatThreadId || threadId,
-          chatIntent
+          chatIntent,
+          basicContext
         }),
         signal: abortControllerRef.current.signal
       });
@@ -356,6 +383,12 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                 
                 // Submit the results back to the API
                 console.log('Submitting results back to API...');
+                console.log('Submit payload:', {
+                  threadId: data.threadId,
+                  runId: data.runId,
+                  toolOutputs
+                });
+                
                 const submitResponse = await fetch('/api/assistant/submit-tool-outputs', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
@@ -366,23 +399,38 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                   })
                 });
 
-                if (!submitResponse.ok) throw new Error('Failed to submit tool outputs');
+                console.log('Submit response status:', submitResponse.status);
+                if (!submitResponse.ok) {
+                  const errorText = await submitResponse.text();
+                  console.error('Submit error:', errorText);
+                  throw new Error('Failed to submit tool outputs');
+                }
 
                 // Continue processing the new stream
                 const submitReader = submitResponse.body?.getReader();
                 if (submitReader) {
+                  console.log('Processing submit response stream...');
+                  let submitBuffer = '';
+                  
                   while (true) {
                     const { done: submitDone, value: submitValue } = await submitReader.read();
-                    if (submitDone) break;
+                    if (submitDone) {
+                      console.log('Submit stream ended');
+                      break;
+                    }
 
-                    const submitChunk = decoder.decode(submitValue);
-                    const submitLines = submitChunk.split('\n');
+                    submitBuffer += decoder.decode(submitValue, { stream: true });
+                    const submitLines = submitBuffer.split('\n');
+                    submitBuffer = submitLines.pop() || ''; // Keep incomplete line in buffer
 
                     for (const submitLine of submitLines) {
+                      if (submitLine.trim() === '') continue;
+                      
                       if (submitLine.startsWith('data: ')) {
                         const submitDataStr = submitLine.slice(6);
                         try {
                           const submitData = JSON.parse(submitDataStr);
+                          console.log('Submit stream event:', submitData.type);
                           
                           if (submitData.type === 'delta' && submitData.content) {
                             fullContent += submitData.content;
@@ -399,11 +447,33 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                               return updated;
                             });
                           }
+                          
+                          if (submitData.type === 'completed') {
+                            console.log('Submit stream completed, final content length:', fullContent.length);
+                            // Mark the message as complete
+                            setMessages(prev => {
+                              const updated = [...prev];
+                              const lastMessage = updated[updated.length - 1];
+                              if (lastMessage.role === 'assistant') {
+                                lastMessage.isStreaming = false;
+                                const finalParsed = parseAssistantResponse(fullContent);
+                                if (finalParsed) {
+                                  lastMessage.parsedContent = finalParsed;
+                                }
+                              }
+                              return updated;
+                            });
+                          }
                         } catch (e) {
                           console.error('Error parsing submit response:', e);
                         }
                       }
                     }
+                  }
+                  
+                  // Process any remaining buffer
+                  if (submitBuffer.trim()) {
+                    console.log('Remaining submit buffer:', submitBuffer);
                   }
                 }
               }
@@ -616,6 +686,15 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       if (existingJourney) {
         onNavigateToJourney?.(existingJourney);
       }
+    } else if (action.type === 'buy') {
+      // Handle buy action for supplements
+      const searchQuery = action.searchQuery || encodeURIComponent(action.productName || action.title);
+      const amazonSearchUrl = `https://www.amazon.com/s?k=${searchQuery}`;
+      window.open(amazonSearchUrl, '_blank');
+    } else if (action.type === 'add_to_pantry') {
+      // Handle add to pantry action
+      setPantryItemToAdd(action);
+      setShowPantryModal(true);
     } else if (action.link) {
       window.open(action.link, '_blank');
     } else if (action.pharmacy_link) {
@@ -754,7 +833,9 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                           'activity': Activity,
                           'file-text': FileText,
                           'globe': Globe,
-                          'book-open': BookOpen
+                          'book-open': BookOpen,
+                          'shopping-cart': ShoppingCart,
+                          'plus-circle': PlusCircle
                         } as const;
                         Icon = iconMap[item.icon as keyof typeof iconMap] || Heart;
                       } else {
@@ -763,6 +844,8 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                         else if (item.type === 'medicine' || item.type === 'supplement') Icon = Pill;
                         else if (item.type === 'routine' || item.type === 'create_routine') Icon = Sparkles;
                         else if (item.type === 'information') Icon = FileText;
+                        else if (item.type === 'buy') Icon = ShoppingCart;
+                        else if (item.type === 'add_to_pantry') Icon = PlusCircle;
                       }
                       
                       // Original color sequence: sage green -> pink/bronze -> slate blue -> repeat
@@ -1003,6 +1086,40 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
               }, 2000);
             }
           }}
+        />
+      )}
+
+      {showPantryModal && (
+        <PantryAddModal
+          isOpen={showPantryModal}
+          onClose={() => {
+            setShowPantryModal(false);
+            setPantryItemToAdd(null);
+          }}
+          onAddItem={(item: PantryItem) => {
+            savePantryItem(item);
+            setShowPantryModal(false);
+            setPantryItemToAdd(null);
+            
+            // Optional: Show a success message
+            const successMessage: ChatMessage = {
+              role: 'assistant',
+              content: `Great! I've added ${item.name} to your pantry. You can now track this supplement and I'll provide personalized recommendations based on your inventory.`,
+              timestamp: new Date()
+            };
+            setMessages(prev => [...prev, successMessage]);
+            
+            // Save to chat history
+            const currentThreadId = chatThreadId || threadId;
+            if (currentThreadId) {
+              addMessageToThread(currentThreadId, { role: 'assistant', content: successMessage.content });
+            }
+          }}
+          initialData={pantryItemToAdd ? {
+            name: pantryItemToAdd.productName || pantryItemToAdd.title || '',
+            notes: pantryItemToAdd.suggestedNotes || pantryItemToAdd.dosage || '',
+            tags: ['supplements']
+          } : undefined}
         />
       )}
     </div>

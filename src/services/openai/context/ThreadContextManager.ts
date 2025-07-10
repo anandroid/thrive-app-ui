@@ -3,15 +3,12 @@
  * Manages user context injection for personalized conversations
  */
 
-import { getPantryItems } from '@/src/utils/pantryStorage';
-import { getRoutinesFromStorage } from '@/src/utils/routineStorage';
 import { 
-  getJourneysFromStorage,
   getRecentEntries 
 } from '@/src/utils/journeyStorage';
 import { PantryItem } from '@/src/types/pantry';
 import { WellnessJourney, JourneyEntry } from '@/src/services/openai/types/journey';
-import { WellnessRoutine } from '@/src/services/openai/types';
+import { WellnessRoutine, BasicContext } from '@/src/services/openai/types';
 
 export interface UserContext {
   pantryItems: string[];
@@ -48,100 +45,108 @@ export class ThreadContextManager {
   /**
    * Build comprehensive user context from local storage
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async buildUserContext(userId?: string): Promise<UserContext> {
-    // For now, we don't have user-specific data, so we'll use all local data
-    const cacheKey = userId || 'default';
+    // Always return empty context on server
+    // The assistant will use function calls to get actual data from client
+    console.log('ThreadContextManager: Building empty context for server-side execution');
     
-    // Check cache first (5 minute TTL)
-    if (this.userContextCache.has(cacheKey)) {
-      return this.userContextCache.get(cacheKey)!;
-    }
+    const context: UserContext = {
+      pantryItems: [],
+      activeThrivings: [],
+      recentJournalEntries: [],
+      healthProfile: {
+        conditions: [],
+        allergies: [],
+        preferences: []
+      }
+    };
 
-    try {
-      // Fetch from storage
-      const [pantryItems, thrivings, journeys] = await Promise.all([
-        getPantryItems(),
-        getRoutinesFromStorage(),
-        getJourneysFromStorage()
-      ]);
-
-      // Build context
-      const context: UserContext = {
-        pantryItems: this.formatPantryItems(pantryItems),
-        activeThrivings: this.formatActiveRoutines(thrivings),
-        recentJournalEntries: await this.getRecentJournalEntries(journeys),
-        healthProfile: this.extractHealthProfileFromRoutines(thrivings, journeys)
-      };
-
-      // Cache for 5 minutes
-      this.userContextCache.set(cacheKey, context);
-      setTimeout(() => this.userContextCache.delete(cacheKey), 5 * 60 * 1000);
-
-      return context;
-    } catch (error) {
-      console.error('Error building user context:', error);
-      // Return empty context on error
-      return {
-        pantryItems: [],
-        activeThrivings: [],
-        recentJournalEntries: [],
-        healthProfile: {
-          conditions: [],
-          allergies: [],
-          preferences: []
-        }
-      };
-    }
+    return context;
   }
 
   /**
-   * Create context-aware run instructions
+   * Create context-aware run instructions with hybrid approach
    */
-  async createRunInstructions(userId?: string, intent?: string): Promise<string> {
-    const context = await this.buildUserContext(userId);
+  async createRunInstructions(userId?: string, intent?: string, clientBasicContext?: BasicContext): Promise<string> {
+    console.log('ThreadContextManager: Creating run instructions with intent:', intent, 'and basic context:', clientBasicContext);
     
-    let instructions = `Current user context:\n\n`;
+    // Use basic context passed from client
+    let basicContext = '';
+    if (clientBasicContext) {
+      basicContext = `
+QUICK CONTEXT (use functions for details if needed):
+- Pantry items: ${clientBasicContext.pantryCount} items stored
+- Active routines: ${clientBasicContext.activeRoutineCount} (${clientBasicContext.routineTypes})
 
-    // Add pantry context if items exist
-    if (context.pantryItems.length > 0) {
-      instructions += `Pantry Items (${context.pantryItems.length} total):\n`;
-      instructions += context.pantryItems.join(', ') + '\n\n';
+`;
     }
+    
+    // Instructions must contain "json" for JSON response format
+    let instructions = `CRITICAL: You MUST respond with valid JSON format as specified in your system instructions. Your response MUST be a JSON object with these fields: greeting, attentionRequired, emergencyReasoning, actionItems, additionalInformation, actionableItems, and questions.
 
-    // Add active thrivings
-    if (context.activeThrivings.length > 0) {
-      instructions += `Active Wellness Routines:\n`;
-      instructions += context.activeThrivings.map(t => 
-        `- ${t.title} (${t.type}) - ${t.progress}% complete${t.nextStep ? `, Next: ${t.nextStep}` : ''}`
-      ).join('\n') + '\n\n';
+${basicContext}
+OPTIMIZATION NOTES:
+- If the user's question can be answered with the quick context above, do so without calling functions
+- Only call get_pantry_items if you need specific item details (e.g., dosage, notes)
+- Only call get_thriving_progress if you need detailed routine information
+- If user asks about supplements and pantry count is 0, skip get_pantry_items and directly recommend buy actions
+- If user mentions health issues and active routine count is 0, skip get_thriving_progress and directly recommend creating routines
+- ALWAYS recommend routines/thrivings if user mentions health management and has no relevant routines
+- ALWAYS recommend buy actions if user asks about supplements they might not have
+
+CRITICAL ROUTINE REMINDERS:
+- If activeRoutineCount is 0 and user mentions: medication management, pain, sleep issues, stress → IMMEDIATELY suggest creating a routine
+- If pantryCount is 0 and user asks about supplements → IMMEDIATELY suggest buy actions without calling get_pantry_items
+
+After using functions (if needed), format your response as JSON with:
+- greeting: A warm greeting acknowledging their concern
+- actionItems: Array of remedy/suggestion objects with title and content
+- questions: Array of follow-up questions
+- actionableItems: Array of actionable items (routine creation, buy supplements, add to pantry, etc.)
+
+Example JSON response:
+{
+  "greeting": "I'd be happy to help you with sleep recommendations! 💤",
+  "attentionRequired": null,
+  "emergencyReasoning": null,
+  "actionItems": [
+    {
+      "title": "Magnesium for Better Sleep 🌙",
+      "content": "<p>Take <strong>200-400mg of Magnesium Glycinate</strong> 30 minutes before bed. This form is gentle on the stomach and promotes relaxation.</p>"
     }
-
-    // Add recent journal entries
-    if (context.recentJournalEntries.length > 0) {
-      instructions += `Recent Health Journal:\n`;
-      instructions += context.recentJournalEntries.map(e => 
-        `- ${e.date}: ${e.summary}${e.mood ? ` (Mood: ${e.mood})` : ''}`
-      ).join('\n') + '\n\n';
+  ],
+  "additionalInformation": "<p><em>Creating a consistent bedtime routine can significantly improve sleep quality.</em></p>",
+  "actionableItems": [
+    {
+      "type": "thriving",
+      "title": "Create Sleep Wellness Routine",
+      "thrivingType": "sleep_wellness",
+      "duration": "7_days",
+      "frequency": "daily"
+    },
+    {
+      "type": "buy",
+      "title": "Buy Magnesium Glycinate",
+      "productName": "Magnesium Glycinate 400mg",
+      "searchQuery": "magnesium glycinate 400mg capsules",
+      "dosage": "400mg",
+      "timing": "30 minutes before bed"
     }
-
-    // Add health profile
-    instructions += `Health Profile:\n`;
-    instructions += `- Conditions: ${context.healthProfile.conditions.join(', ') || 'None reported'}\n`;
-    instructions += `- Allergies: ${context.healthProfile.allergies.join(', ') || 'None reported'}\n`;
-    instructions += `- Preferences: ${context.healthProfile.preferences.join(', ') || 'None specified'}\n\n`;
-
-    instructions += `IMPORTANT: Use this context to provide personalized health recommendations. `;
-    instructions += `Reference specific pantry items when suggesting remedies. `;
-    instructions += `Consider active routines when giving advice. `;
-    instructions += `Be aware of any reported conditions or allergies.`;
+  ],
+  "questions": [
+    "What time do you usually go to bed?",
+    "Have you tried any sleep supplements before?"
+  ]
+}\n\n`;
 
     // Add intent-specific instructions
     if (intent === 'create_routine') {
-      instructions += '\n\nUser wants to create a new wellness routine. Consider their existing routines to avoid conflicts and overlap.';
+      instructions += 'User wants to create a new wellness routine. If they have no routines, immediately suggest routine creation without calling functions. Respond with actionableItems for routine creation.';
     } else if (intent === 'create_journey') {
-      instructions += '\n\nUser wants to create a new wellness journey. Consider their health conditions and current tracking.';
+      instructions += 'User wants to create a new wellness journey. Respond with actionableItems for journey creation.';
     } else if (intent?.includes('pantry')) {
-      instructions += '\n\nUser is asking about their pantry. Be specific about items they have and suggest how to use them for their health concerns.';
+      instructions += 'User is asking about their pantry. Only call get_pantry_items if they need specific item details. Otherwise use the quick context.';
     }
 
     return instructions;

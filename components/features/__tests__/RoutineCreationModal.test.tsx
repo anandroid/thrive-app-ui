@@ -140,7 +140,7 @@ describe('RoutineCreationModal', () => {
     fireEvent.click(screen.getByText('Continue'));
 
     // Create routine
-    const createButton = screen.getByText('Create My Routine ✨');
+    const createButton = screen.getByText('Create Routine');
     fireEvent.click(createButton);
 
     await waitFor(() => {
@@ -156,7 +156,7 @@ describe('RoutineCreationModal', () => {
           userPreferences: {
             sleepSchedule: {
               bedtime: '22:00',
-              wakeTime: '06:00'
+              wakeTime: '07:00'
             },
             availableTime: 20
           }
@@ -192,7 +192,7 @@ describe('RoutineCreationModal', () => {
     fireEvent.click(screen.getByText('Continue'));
 
     // Try to create routine
-    const createButton = screen.getByText('Create My Routine ✨');
+    const createButton = screen.getByText('Create Routine');
     fireEvent.click(createButton);
 
     await waitFor(() => {
@@ -238,7 +238,7 @@ describe('RoutineCreationModal', () => {
     fireEvent.click(screen.getByText('Continue'));
 
     // Add custom instructions
-    const textarea = screen.getByPlaceholderText(/prefer morning workouts/);
+    const textarea = screen.getByPlaceholderText(/Add any specific preferences or limitations/);
     fireEvent.change(textarea, { target: { value: 'I prefer evening workouts' } });
 
     expect(textarea).toHaveValue('I prefer evening workouts');

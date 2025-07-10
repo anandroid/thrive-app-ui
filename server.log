@@ -1,0 +1,1445 @@
+
+> thrive-app@0.1.0 dev
+> next dev --turbopack
+
+   ▲ Next.js 15.3.5 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.55:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Compiled middleware in 58ms
+ ✓ Ready in 648ms
+ ⚠ Webpack is configured while Turbopack is not, which may cause problems.
+ ⚠ See instructions if you need to configure Turbopack:
+  https://nextjs.org/docs/app/api-reference/next-config-js/turbo
+
+ ✓ Compiled /api/assistant/stream in 284ms
+API Route: Received request
+API Route: Message: What supplements do I have for sleep? ThreadId: null Intent: null BasicContext: { pantryCount: 0, activeRoutineCount: 0, routineTypes: 'none' }
+API Route: Creating new thread...
+API Route: Created thread: thread_GNimWr3flcKVXxhRSifi37Yl
+API Route: Sending message to thread...
+API Route: Creating streaming response...
+StreamingService: Creating context instructions...
+ThreadContextManager: Creating run instructions with intent: undefined and basic context: { pantryCount: 0, activeRoutineCount: 0, routineTypes: 'none' }
+StreamingService: Context instructions created
+Stream event: thread.run.created {
+  id: 'run_QYkSzd1yQg3hwEW5P7wxWnmZ',
+  object: 'thread.run',
+  created_at: 1752164386,
+  assistant_id: 'asst_JpIzQR8eZ58ED8aKMkryZv3y',
+  thread_id: 'thread_GNimWr3flcKVXxhRSifi37Yl',
+  status: 'queued',
+  started_at: null,
+  expires_at: 1752164986,
+  cancelled_at: null,
+  failed_at: null,
+  completed_at: null,
+  required_action: null,
+  last_error: null,
+  model: 'gpt-4o-mini',
+  instructions: 'CRITICAL: You MUST respond with valid JSON format as specified in your system instructions. Your response MUST be a JSON object with these fields: greeting, attentionRequired, emergencyReasoning, actionItems, additionalInformation, actionableItems, and questions.\n' +
+    '\n' +
+    '\n' +
+    'QUICK CONTEXT (use functions for details if needed):\n' +
+    '- Pantry items: 0 items stored\n' +
+    '- Active routines: 0 (none)\n' +
+    '\n' +
+    '\n' +
+    'OPTIMIZATION NOTES:\n' +
+    "- If the user's question can be answered with the quick context above, do so without calling functions\n" +
+    '- Only call get_pantry_items if you need specific item details (e.g., dosage, notes)\n' +
+    '- Only call get_thriving_progress if you need detailed routine information\n' +
+    '- If user asks about supplements and pantry count is 0, skip get_pantry_items and directly recommend buy actions\n' +
+    '- If user mentions health issues and active routine count is 0, skip get_thriving_progress and directly recommend creating routines\n' +
+    '- ALWAYS recommend routines/thrivings if user mentions health management and has no relevant routines\n' +
+    '- ALWAYS recommend buy actions if user asks about supplements they might not have\n' +
+    '\n' +
+    'CRITICAL ROUTINE REMINDERS:\n' +
+    '- If activeRoutineCount is 0 and user mentions: medication management, pain, sleep issues, stress → IMMEDIATELY suggest creating a routine\n' +
+    '- If pantryCount is 0 and user asks about supplements → IMMEDIATELY suggest buy actions without calling get_pantry_items\n' +
+    '\n' +
+    'After using functions (if needed), format your response as JSON with:\n' +
+    '- greeting: A warm greeting acknowledging their concern\n' +
+    '- actionItems: Array of remedy/suggestion objects with title and content\n' +
+    '- questions: Array of follow-up questions\n' +
+    '- actionableItems: Array of actionable items (routine creation, buy supplements, add to pantry, etc.)\n' +
+    '\n' +
+    'Example JSON response:\n' +
+    '{\n' +
+    `  "greeting": "I'd be happy to help you with sleep recommendations! 💤",\n` +
+    '  "attentionRequired": null,\n' +
+    '  "emergencyReasoning": null,\n' +
+    '  "actionItems": [\n' +
+    '    {\n' +
+    '      "title": "Magnesium for Better Sleep 🌙",\n' +
+    '      "content": "<p>Take <strong>200-400mg of Magnesium Glycinate</strong> 30 minutes before bed. This form is gentle on the stomach and promotes relaxation.</p>"\n' +
+    '    }\n' +
+    '  ],\n' +
+    '  "additionalInformation": "<p><em>Creating a consistent bedtime routine can significantly improve sleep quality.</em></p>",\n' +
+    '  "actionableItems": [\n' +
+    '    {\n' +
+    '      "type": "thriving",\n' +
+    '      "title": "Create Sleep Wellness Routine",\n' +
+    '      "thrivingType": "sleep_wellness",\n' +
+    '      "duration": "7_days",\n' +
+    '      "frequency": "daily"\n' +
+    '    },\n' +
+    '    {\n' +
+    '      "type": "buy",\n' +
+    '      "title": "Buy Magnesium Glycinate",\n' +
+    '      "productName": "Magnesium Glycinate 400mg",\n' +
+    '      "searchQuery": "magnesium glycinate 400mg capsules",\n' +
+    '      "dosage": "400mg",\n' +
+    '      "timing": "30 minutes before bed"\n' +
+    '    }\n' +
+    '  ],\n' +
+    '  "questions": [\n' +
+    '    "What time do you usually go to bed?",\n' +
+    '    "Have you tried any sleep supplements before?"\n' +
+    '  ]\n' +
+    '}\n' +
+    '\n',
+  tools: [
+    { type: 'function', function: [Object] },
+    { type: 'function', function: [Object] },
+    { type: 'function', function: [Object] },
+    { type: 'function', function: [Object] }
+  ],
+  tool_resources: { code_interpreter: { file_ids: [] } },
+  metadata: { intent: 'general', timestamp: '2025-07-10T16:19:45.580Z' },
+  temperature: 1,
+  top_p: 1,
+  reasoning_effort: null,
+  max_completion_tokens: null,
+  max_prompt_tokens: 10000,
+  truncation_strategy: { type: 'auto', last_messages: null },
+  incomplete_details: null,
+  usage: null,
+  response_format: { type: 'json_object' },
+  tool_choice: 'auto',
+  parallel_tool_calls: true
+}
+Stream event: thread.run.queued {
+  id: 'run_QYkSzd1yQg3hwEW5P7wxWnmZ',
+  object: 'thread.run',
+  created_at: 1752164386,
+  assistant_id: 'asst_JpIzQR8eZ58ED8aKMkryZv3y',
+  thread_id: 'thread_GNimWr3flcKVXxhRSifi37Yl',
+  status: 'queued',
+  started_at: null,
+  expires_at: 1752164986,
+  cancelled_at: null,
+  failed_at: null,
+  completed_at: null,
+  required_action: null,
+  last_error: null,
+  model: 'gpt-4o-mini',
+  instructions: 'CRITICAL: You MUST respond with valid JSON format as specified in your system instructions. Your response MUST be a JSON object with these fields: greeting, attentionRequired, emergencyReasoning, actionItems, additionalInformation, actionableItems, and questions.\n' +
+    '\n' +
+    '\n' +
+    'QUICK CONTEXT (use functions for details if needed):\n' +
+    '- Pantry items: 0 items stored\n' +
+    '- Active routines: 0 (none)\n' +
+    '\n' +
+    '\n' +
+    'OPTIMIZATION NOTES:\n' +
+    "- If the user's question can be answered with the quick context above, do so without calling functions\n" +
+    '- Only call get_pantry_items if you need specific item details (e.g., dosage, notes)\n' +
+    '- Only call get_thriving_progress if you need detailed routine information\n' +
+    '- If user asks about supplements and pantry count is 0, skip get_pantry_items and directly recommend buy actions\n' +
+    '- If user mentions health issues and active routine count is 0, skip get_thriving_progress and directly recommend creating routines\n' +
+    '- ALWAYS recommend routines/thrivings if user mentions health management and has no relevant routines\n' +
+    '- ALWAYS recommend buy actions if user asks about supplements they might not have\n' +
+    '\n' +
+    'CRITICAL ROUTINE REMINDERS:\n' +
+    '- If activeRoutineCount is 0 and user mentions: medication management, pain, sleep issues, stress → IMMEDIATELY suggest creating a routine\n' +
+    '- If pantryCount is 0 and user asks about supplements → IMMEDIATELY suggest buy actions without calling get_pantry_items\n' +
+    '\n' +
+    'After using functions (if needed), format your response as JSON with:\n' +
+    '- greeting: A warm greeting acknowledging their concern\n' +
+    '- actionItems: Array of remedy/suggestion objects with title and content\n' +
+    '- questions: Array of follow-up questions\n' +
+    '- actionableItems: Array of actionable items (routine creation, buy supplements, add to pantry, etc.)\n' +
+    '\n' +
+    'Example JSON response:\n' +
+    '{\n' +
+    `  "greeting": "I'd be happy to help you with sleep recommendations! 💤",\n` +
+    '  "attentionRequired": null,\n' +
+    '  "emergencyReasoning": null,\n' +
+    '  "actionItems": [\n' +
+    '    {\n' +
+    '      "title": "Magnesium for Better Sleep 🌙",\n' +
+    '      "content": "<p>Take <strong>200-400mg of Magnesium Glycinate</strong> 30 minutes before bed. This form is gentle on the stomach and promotes relaxation.</p>"\n' +
+    '    }\n' +
+    '  ],\n' +
+    '  "additionalInformation": "<p><em>Creating a consistent bedtime routine can significantly improve sleep quality.</em></p>",\n' +
+    '  "actionableItems": [\n' +
+    '    {\n' +
+    '      "type": "thriving",\n' +
+    '      "title": "Create Sleep Wellness Routine",\n' +
+    '      "thrivingType": "sleep_wellness",\n' +
+    '      "duration": "7_days",\n' +
+    '      "frequency": "daily"\n' +
+    '    },\n' +
+    '    {\n' +
+    '      "type": "buy",\n' +
+    '      "title": "Buy Magnesium Glycinate",\n' +
+    '      "productName": "Magnesium Glycinate 400mg",\n' +
+    '      "searchQuery": "magnesium glycinate 400mg capsules",\n' +
+    '      "dosage": "400mg",\n' +
+    '      "timing": "30 minutes before bed"\n' +
+    '    }\n' +
+    '  ],\n' +
+    '  "questions": [\n' +
+    '    "What time do you usually go to bed?",\n' +
+    '    "Have you tried any sleep supplements before?"\n' +
+    '  ]\n' +
+    '}\n' +
+    '\n',
+  tools: [
+    { type: 'function', function: [Object] },
+    { type: 'function', function: [Object] },
+    { type: 'function', function: [Object] },
+    { type: 'function', function: [Object] }
+  ],
+  tool_resources: { code_interpreter: { file_ids: [] } },
+  metadata: { intent: 'general', timestamp: '2025-07-10T16:19:45.580Z' },
+  temperature: 1,
+  top_p: 1,
+  reasoning_effort: null,
+  max_completion_tokens: null,
+  max_prompt_tokens: 10000,
+  truncation_strategy: { type: 'auto', last_messages: null },
+  incomplete_details: null,
+  usage: null,
+  response_format: { type: 'json_object' },
+  tool_choice: 'auto',
+  parallel_tool_calls: true
+}
+Stream event: thread.run.in_progress {
+  id: 'run_QYkSzd1yQg3hwEW5P7wxWnmZ',
+  object: 'thread.run',
+  created_at: 1752164386,
+  assistant_id: 'asst_JpIzQR8eZ58ED8aKMkryZv3y',
+  thread_id: 'thread_GNimWr3flcKVXxhRSifi37Yl',
+  status: 'in_progress',
+  started_at: 1752164387,
+  expires_at: 1752164986,
+  cancelled_at: null,
+  failed_at: null,
+  completed_at: null,
+  required_action: null,
+  last_error: null,
+  model: 'gpt-4o-mini',
+  instructions: 'CRITICAL: You MUST respond with valid JSON format as specified in your system instructions. Your response MUST be a JSON object with these fields: greeting, attentionRequired, emergencyReasoning, actionItems, additionalInformation, actionableItems, and questions.\n' +
+    '\n' +
+    '\n' +
+    'QUICK CONTEXT (use functions for details if needed):\n' +
+    '- Pantry items: 0 items stored\n' +
+    '- Active routines: 0 (none)\n' +
+    '\n' +
+    '\n' +
+    'OPTIMIZATION NOTES:\n' +
+    "- If the user's question can be answered with the quick context above, do so without calling functions\n" +
+    '- Only call get_pantry_items if you need specific item details (e.g., dosage, notes)\n' +
+    '- Only call get_thriving_progress if you need detailed routine information\n' +
+    '- If user asks about supplements and pantry count is 0, skip get_pantry_items and directly recommend buy actions\n' +
+    '- If user mentions health issues and active routine count is 0, skip get_thriving_progress and directly recommend creating routines\n' +
+    '- ALWAYS recommend routines/thrivings if user mentions health management and has no relevant routines\n' +
+    '- ALWAYS recommend buy actions if user asks about supplements they might not have\n' +
+    '\n' +
+    'CRITICAL ROUTINE REMINDERS:\n' +
+    '- If activeRoutineCount is 0 and user mentions: medication management, pain, sleep issues, stress → IMMEDIATELY suggest creating a routine\n' +
+    '- If pantryCount is 0 and user asks about supplements → IMMEDIATELY suggest buy actions without calling get_pantry_items\n' +
+    '\n' +
+    'After using functions (if needed), format your response as JSON with:\n' +
+    '- greeting: A warm greeting acknowledging their concern\n' +
+    '- actionItems: Array of remedy/suggestion objects with title and content\n' +
+    '- questions: Array of follow-up questions\n' +
+    '- actionableItems: Array of actionable items (routine creation, buy supplements, add to pantry, etc.)\n' +
+    '\n' +
+    'Example JSON response:\n' +
+    '{\n' +
+    `  "greeting": "I'd be happy to help you with sleep recommendations! 💤",\n` +
+    '  "attentionRequired": null,\n' +
+    '  "emergencyReasoning": null,\n' +
+    '  "actionItems": [\n' +
+    '    {\n' +
+    '      "title": "Magnesium for Better Sleep 🌙",\n' +
+    '      "content": "<p>Take <strong>200-400mg of Magnesium Glycinate</strong> 30 minutes before bed. This form is gentle on the stomach and promotes relaxation.</p>"\n' +
+    '    }\n' +
+    '  ],\n' +
+    '  "additionalInformation": "<p><em>Creating a consistent bedtime routine can significantly improve sleep quality.</em></p>",\n' +
+    '  "actionableItems": [\n' +
+    '    {\n' +
+    '      "type": "thriving",\n' +
+    '      "title": "Create Sleep Wellness Routine",\n' +
+    '      "thrivingType": "sleep_wellness",\n' +
+    '      "duration": "7_days",\n' +
+    '      "frequency": "daily"\n' +
+    '    },\n' +
+    '    {\n' +
+    '      "type": "buy",\n' +
+    '      "title": "Buy Magnesium Glycinate",\n' +
+    '      "productName": "Magnesium Glycinate 400mg",\n' +
+    '      "searchQuery": "magnesium glycinate 400mg capsules",\n' +
+    '      "dosage": "400mg",\n' +
+    '      "timing": "30 minutes before bed"\n' +
+    '    }\n' +
+    '  ],\n' +
+    '  "questions": [\n' +
+    '    "What time do you usually go to bed?",\n' +
+    '    "Have you tried any sleep supplements before?"\n' +
+    '  ]\n' +
+    '}\n' +
+    '\n',
+  tools: [
+    { type: 'function', function: [Object] },
+    { type: 'function', function: [Object] },
+    { type: 'function', function: [Object] },
+    { type: 'function', function: [Object] }
+  ],
+  tool_resources: { code_interpreter: { file_ids: [] } },
+  metadata: { intent: 'general', timestamp: '2025-07-10T16:19:45.580Z' },
+  temperature: 1,
+  top_p: 1,
+  reasoning_effort: null,
+  max_completion_tokens: null,
+  max_prompt_tokens: 10000,
+  truncation_strategy: { type: 'auto', last_messages: null },
+  incomplete_details: null,
+  usage: null,
+  response_format: { type: 'json_object' },
+  tool_choice: 'auto',
+  parallel_tool_calls: true
+}
+Stream event: thread.run.step.created {
+  id: 'step_SPaEFFzm2zVaTxHNhM71acpQ',
+  object: 'thread.run.step',
+  created_at: 1752164388,
+  run_id: 'run_QYkSzd1yQg3hwEW5P7wxWnmZ',
+  assistant_id: 'asst_JpIzQR8eZ58ED8aKMkryZv3y',
+  thread_id: 'thread_GNimWr3flcKVXxhRSifi37Yl',
+  type: 'message_creation',
+  status: 'in_progress',
+  cancelled_at: null,
+  completed_at: null,
+  expires_at: 1752164986,
+  failed_at: null,
+  last_error: null,
+  step_details: {
+    type: 'message_creation',
+    message_creation: { message_id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v' }
+  },
+  usage: null
+}
+Stream event: thread.run.step.in_progress {
+  id: 'step_SPaEFFzm2zVaTxHNhM71acpQ',
+  object: 'thread.run.step',
+  created_at: 1752164388,
+  run_id: 'run_QYkSzd1yQg3hwEW5P7wxWnmZ',
+  assistant_id: 'asst_JpIzQR8eZ58ED8aKMkryZv3y',
+  thread_id: 'thread_GNimWr3flcKVXxhRSifi37Yl',
+  type: 'message_creation',
+  status: 'in_progress',
+  cancelled_at: null,
+  completed_at: null,
+  expires_at: 1752164986,
+  failed_at: null,
+  last_error: null,
+  step_details: {
+    type: 'message_creation',
+    message_creation: { message_id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v' }
+  },
+  usage: null
+}
+Stream event: thread.message.created {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message',
+  created_at: 1752164388,
+  assistant_id: 'asst_JpIzQR8eZ58ED8aKMkryZv3y',
+  thread_id: 'thread_GNimWr3flcKVXxhRSifi37Yl',
+  run_id: 'run_QYkSzd1yQg3hwEW5P7wxWnmZ',
+  status: 'in_progress',
+  incomplete_details: null,
+  incomplete_at: null,
+  completed_at: null,
+  role: 'assistant',
+  content: [],
+  attachments: [],
+  metadata: {}
+}
+Stream event: thread.message.in_progress {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message',
+  created_at: 1752164388,
+  assistant_id: 'asst_JpIzQR8eZ58ED8aKMkryZv3y',
+  thread_id: 'thread_GNimWr3flcKVXxhRSifi37Yl',
+  run_id: 'run_QYkSzd1yQg3hwEW5P7wxWnmZ',
+  status: 'in_progress',
+  incomplete_details: null,
+  incomplete_at: null,
+  completed_at: null,
+  role: 'assistant',
+  content: [],
+  attachments: [],
+  metadata: {}
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+ POST /api/assistant/stream 200 in 5190ms
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.delta {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message.delta',
+  delta: { content: [ [Object] ] }
+}
+Stream event: thread.message.completed {
+  id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v',
+  object: 'thread.message',
+  created_at: 1752164388,
+  assistant_id: 'asst_JpIzQR8eZ58ED8aKMkryZv3y',
+  thread_id: 'thread_GNimWr3flcKVXxhRSifi37Yl',
+  run_id: 'run_QYkSzd1yQg3hwEW5P7wxWnmZ',
+  status: 'completed',
+  incomplete_details: null,
+  incomplete_at: null,
+  completed_at: 1752164391,
+  role: 'assistant',
+  content: [ { type: 'text', text: [Object] } ],
+  attachments: [],
+  metadata: {}
+}
+Stream event: thread.run.step.completed {
+  id: 'step_SPaEFFzm2zVaTxHNhM71acpQ',
+  object: 'thread.run.step',
+  created_at: 1752164388,
+  run_id: 'run_QYkSzd1yQg3hwEW5P7wxWnmZ',
+  assistant_id: 'asst_JpIzQR8eZ58ED8aKMkryZv3y',
+  thread_id: 'thread_GNimWr3flcKVXxhRSifi37Yl',
+  type: 'message_creation',
+  status: 'completed',
+  cancelled_at: null,
+  completed_at: 1752164392,
+  expires_at: 1752164986,
+  failed_at: null,
+  last_error: null,
+  step_details: {
+    type: 'message_creation',
+    message_creation: { message_id: 'msg_RpRSMBPbIxT4LbFy8x6nOe8v' }
+  },
+  usage: {
+    prompt_tokens: 1050,
+    completion_tokens: 185,
+    total_tokens: 1235,
+    prompt_token_details: { cached_tokens: 0 },
+    completion_tokens_details: { reasoning_tokens: 0 }
+  }
+}
+Stream event: thread.run.completed {
+  id: 'run_QYkSzd1yQg3hwEW5P7wxWnmZ',
+  object: 'thread.run',
+  created_at: 1752164386,
+  assistant_id: 'asst_JpIzQR8eZ58ED8aKMkryZv3y',
+  thread_id: 'thread_GNimWr3flcKVXxhRSifi37Yl',
+  status: 'completed',
+  started_at: 1752164387,
+  expires_at: null,
+  cancelled_at: null,
+  failed_at: null,
+  completed_at: 1752164392,
+  required_action: null,
+  last_error: null,
+  model: 'gpt-4o-mini',
+  instructions: 'CRITICAL: You MUST respond with valid JSON format as specified in your system instructions. Your response MUST be a JSON object with these fields: greeting, attentionRequired, emergencyReasoning, actionItems, additionalInformation, actionableItems, and questions.\n' +
+    '\n' +
+    '\n' +
+    'QUICK CONTEXT (use functions for details if needed):\n' +
+    '- Pantry items: 0 items stored\n' +
+    '- Active routines: 0 (none)\n' +
+    '\n' +
+    '\n' +
+    'OPTIMIZATION NOTES:\n' +
+    "- If the user's question can be answered with the quick context above, do so without calling functions\n" +
+    '- Only call get_pantry_items if you need specific item details (e.g., dosage, notes)\n' +
+    '- Only call get_thriving_progress if you need detailed routine information\n' +
+    '- If user asks about supplements and pantry count is 0, skip get_pantry_items and directly recommend buy actions\n' +
+    '- If user mentions health issues and active routine count is 0, skip get_thriving_progress and directly recommend creating routines\n' +
+    '- ALWAYS recommend routines/thrivings if user mentions health management and has no relevant routines\n' +
+    '- ALWAYS recommend buy actions if user asks about supplements they might not have\n' +
+    '\n' +
+    'CRITICAL ROUTINE REMINDERS:\n' +
+    '- If activeRoutineCount is 0 and user mentions: medication management, pain, sleep issues, stress → IMMEDIATELY suggest creating a routine\n' +
+    '- If pantryCount is 0 and user asks about supplements → IMMEDIATELY suggest buy actions without calling get_pantry_items\n' +
+    '\n' +
+    'After using functions (if needed), format your response as JSON with:\n' +
+    '- greeting: A warm greeting acknowledging their concern\n' +
+    '- actionItems: Array of remedy/suggestion objects with title and content\n' +
+    '- questions: Array of follow-up questions\n' +
+    '- actionableItems: Array of actionable items (routine creation, buy supplements, add to pantry, etc.)\n' +
+    '\n' +
+    'Example JSON response:\n' +
+    '{\n' +
+    `  "greeting": "I'd be happy to help you with sleep recommendations! 💤",\n` +
+    '  "attentionRequired": null,\n' +
+    '  "emergencyReasoning": null,\n' +
+    '  "actionItems": [\n' +
+    '    {\n' +
+    '      "title": "Magnesium for Better Sleep 🌙",\n' +
+    '      "content": "<p>Take <strong>200-400mg of Magnesium Glycinate</strong> 30 minutes before bed. This form is gentle on the stomach and promotes relaxation.</p>"\n' +
+    '    }\n' +
+    '  ],\n' +
+    '  "additionalInformation": "<p><em>Creating a consistent bedtime routine can significantly improve sleep quality.</em></p>",\n' +
+    '  "actionableItems": [\n' +
+    '    {\n' +
+    '      "type": "thriving",\n' +
+    '      "title": "Create Sleep Wellness Routine",\n' +
+    '      "thrivingType": "sleep_wellness",\n' +
+    '      "duration": "7_days",\n' +
+    '      "frequency": "daily"\n' +
+    '    },\n' +
+    '    {\n' +
+    '      "type": "buy",\n' +
+    '      "title": "Buy Magnesium Glycinate",\n' +
+    '      "productName": "Magnesium Glycinate 400mg",\n' +
+    '      "searchQuery": "magnesium glycinate 400mg capsules",\n' +
+    '      "dosage": "400mg",\n' +
+    '      "timing": "30 minutes before bed"\n' +
+    '    }\n' +
+    '  ],\n' +
+    '  "questions": [\n' +
+    '    "What time do you usually go to bed?",\n' +
+    '    "Have you tried any sleep supplements before?"\n' +
+    '  ]\n' +
+    '}\n' +
+    '\n',
+  tools: [
+    { type: 'function', function: [Object] },
+    { type: 'function', function: [Object] },
+    { type: 'function', function: [Object] },
+    { type: 'function', function: [Object] }
+  ],
+  tool_resources: { code_interpreter: { file_ids: [] } },
+  metadata: { intent: 'general', timestamp: '2025-07-10T16:19:45.580Z' },
+  temperature: 1,
+  top_p: 1,
+  reasoning_effort: null,
+  max_completion_tokens: null,
+  max_prompt_tokens: 10000,
+  truncation_strategy: { type: 'auto', last_messages: null },
+  incomplete_details: null,
+  usage: {
+    prompt_tokens: 1050,
+    completion_tokens: 185,
+    total_tokens: 1235,
+    prompt_token_details: { cached_tokens: 0 },
+    completion_tokens_details: { reasoning_tokens: 0 }
+  },
+  response_format: { type: 'json_object' },
+  tool_choice: 'auto',
+  parallel_tool_calls: true
+}

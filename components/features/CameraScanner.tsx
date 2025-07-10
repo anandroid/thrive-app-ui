@@ -178,12 +178,12 @@ export function CameraScanner({
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black">
+    <div className="fixed inset-0 z-50 bg-black flex flex-col">
       {/* Hidden canvas for image capture */}
       <canvas ref={canvasRef} className="hidden" />
 
-      {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/50 to-transparent p-4 safe-area-top">
+      {/* Header - Fixed height */}
+      <div className="flex-shrink-0 bg-black/80 backdrop-blur-sm p-4 safe-area-top">
         <div className="flex items-center justify-between">
           <button
             onClick={handleClose}
@@ -191,6 +191,8 @@ export function CameraScanner({
           >
             <X className="w-5 h-5 text-white" />
           </button>
+          
+          <h2 className="text-white font-medium">Scan Item</h2>
           
           {!capturedImage && (
             <button
@@ -207,78 +209,85 @@ export function CameraScanner({
         </div>
       </div>
 
-      {/* Camera View or Captured Image */}
-      {capturedImage ? (
-        <div className="relative w-full h-full flex items-center justify-center bg-black">
-          <OptimizedImage
-            src={capturedImage}
-            alt="Captured item"
-            fill
-            className="object-contain"
-          />
-          
-          {/* Processing Overlay */}
-          {isProcessing && (
-            <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center">
-              <div className="bg-white rounded-2xl p-6 flex flex-col items-center">
-                <Loader2 className="w-8 h-8 text-rose animate-spin mb-3" />
-                <p className="text-sm font-medium text-gray-900">{processingMessage}</p>
+      {/* Main Content Area - Flex grow to fill space */}
+      <div className="flex-1 relative overflow-hidden">
+        {capturedImage ? (
+          <div className="relative w-full h-full flex items-center justify-center bg-black">
+            <OptimizedImage
+              src={capturedImage}
+              alt="Captured item"
+              fill
+              className="object-contain"
+            />
+            
+            {/* Processing Overlay */}
+            {isProcessing && (
+              <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center">
+                <div className="bg-white rounded-2xl p-6 flex flex-col items-center">
+                  <Loader2 className="w-8 h-8 text-rose animate-spin mb-3" />
+                  <p className="text-sm font-medium text-gray-900">{processingMessage}</p>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-      ) : (
-        <>
-          {/* Camera Feed */}
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            {...{ 'webkit-playsinline': 'true' } as WebkitVideoAttributes}
-            className={`w-full h-full object-cover ${!isVideoReady ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
-            style={{ WebkitTransform: 'translateZ(0)' }} // Force hardware acceleration
-          />
+            )}
+          </div>
+        ) : (
+          <div className="h-full flex flex-col">
+            {/* Camera Preview - 60% of remaining height */}
+            <div className="flex-[3] relative overflow-hidden bg-black">
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                {...{ 'webkit-playsinline': 'true' } as WebkitVideoAttributes}
+                className={`absolute inset-0 w-full h-full object-cover ${!isVideoReady ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+                style={{ WebkitTransform: 'translateZ(0)' }} // Force hardware acceleration
+              />
 
-          {/* Loading Overlay - shows while camera initializes */}
-          {!isVideoReady && (
-            <div className="absolute inset-0 bg-black flex items-center justify-center">
+              {/* Loading Overlay - shows while camera initializes */}
+              {!isVideoReady && (
+                <div className="absolute inset-0 bg-black flex items-center justify-center">
+                  <div className="text-center">
+                    <Loader2 className="w-8 h-8 text-white animate-spin mx-auto mb-3" />
+                    <p className="text-white text-sm">Initializing camera...</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Scanning Guide - Positioned within camera preview */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="relative">
+                  {/* Scanning frame - Smaller for split view */}
+                  <div className="w-48 h-48 md:w-64 md:h-64 border-2 border-white/60 rounded-2xl">
+                    <div className="absolute -top-1 -left-1 w-6 h-6 border-t-2 border-l-2 border-white rounded-tl-lg" />
+                    <div className="absolute -top-1 -right-1 w-6 h-6 border-t-2 border-r-2 border-white rounded-tr-lg" />
+                    <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-2 border-l-2 border-white rounded-bl-lg" />
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-2 border-r-2 border-white rounded-br-lg" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Capture Animation */}
+              {isCapturing && (
+                <div className="absolute inset-0 bg-white animate-flash pointer-events-none" />
+              )}
+            </div>
+
+            {/* Instructions Area - 20% of remaining height */}
+            <div className="flex-[1] bg-black/90 backdrop-blur-sm flex items-center justify-center px-6">
               <div className="text-center">
-                <Loader2 className="w-8 h-8 text-white animate-spin mx-auto mb-3" />
-                <p className="text-white text-sm">Initializing camera...</p>
-              </div>
-            </div>
-          )}
-
-          {/* Scanning Guide */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="relative">
-              {/* Scanning frame */}
-              <div className="w-72 h-72 border-2 border-white/50 rounded-3xl">
-                <div className="absolute -top-1 -left-1 w-8 h-8 border-t-2 border-l-2 border-white rounded-tl-xl" />
-                <div className="absolute -top-1 -right-1 w-8 h-8 border-t-2 border-r-2 border-white rounded-tr-xl" />
-                <div className="absolute -bottom-1 -left-1 w-8 h-8 border-b-2 border-l-2 border-white rounded-bl-xl" />
-                <div className="absolute -bottom-1 -right-1 w-8 h-8 border-b-2 border-r-2 border-white rounded-br-xl" />
-              </div>
-              
-              {/* Instructions */}
-              <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 text-center">
-                <p className="text-white text-sm font-medium bg-black/50 px-4 py-2 rounded-full backdrop-blur">
-                  Position item within frame
+                <p className="text-white text-lg font-medium mb-1">Position item in frame</p>
+                <p className="text-white/70 text-sm">
+                  Center the product label for best results
                 </p>
               </div>
             </div>
           </div>
+        )}
+      </div>
 
-          {/* Capture Animation */}
-          {isCapturing && (
-            <div className="absolute inset-0 bg-white animate-flash pointer-events-none" />
-          )}
-        </>
-      )}
-
-      {/* Bottom Controls */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/50 to-transparent p-6 pb-8 safe-area-bottom">
+      {/* Bottom Controls - Fixed height, 20% of screen */}
+      <div className="flex-shrink-0 bg-black/90 backdrop-blur-sm p-6 safe-area-bottom">
         {capturedImage ? (
           <div className="flex items-center justify-around max-w-sm mx-auto">
             <button
@@ -310,7 +319,8 @@ export function CameraScanner({
           <div className="text-center">
             <button
               onClick={captureImage}
-              className="w-20 h-20 rounded-full bg-white flex items-center justify-center touch-feedback mx-auto"
+              disabled={!isVideoReady}
+              className="w-20 h-20 rounded-full bg-white flex items-center justify-center touch-feedback mx-auto disabled:opacity-50"
             >
               <div className="w-16 h-16 rounded-full bg-rose flex items-center justify-center">
                 <Camera className="w-8 h-8 text-white" />

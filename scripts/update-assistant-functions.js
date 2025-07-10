@@ -90,12 +90,26 @@ async function updateAssistant() {
     const currentAssistant = await openai.beta.assistants.retrieve(assistantId);
     console.log(`✅ Found assistant: ${currentAssistant.name}`);
 
-    // Update with function calling tools
+    // Read the assistant instructions from the TypeScript file
+    const fs = require('fs');
+    const path = require('path');
+    const instructionsFile = fs.readFileSync(
+      path.join(__dirname, '../src/services/openai/assistant/assistantInstructions.ts'),
+      'utf8'
+    );
+    
+    // Extract the ASSISTANT_INSTRUCTIONS constant
+    const match = instructionsFile.match(/export const ASSISTANT_INSTRUCTIONS = `([^`]+)`/s);
+    const ASSISTANT_INSTRUCTIONS = match ? match[1] : '';
+
+    // Update with function calling tools and instructions
     const updatedAssistant = await openai.beta.assistants.update(assistantId, {
-      tools: assistantFunctions
+      tools: assistantFunctions,
+      instructions: ASSISTANT_INSTRUCTIONS
     });
 
     console.log('✅ Assistant updated successfully!');
+    console.log('   Instructions updated: ' + (ASSISTANT_INSTRUCTIONS.length > 0 ? 'Yes' : 'No'));
     console.log('   Functions added:');
     assistantFunctions.forEach(tool => {
       console.log(`   - ${tool.function.name}: ${tool.function.description}`);

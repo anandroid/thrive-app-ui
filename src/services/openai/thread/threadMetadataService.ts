@@ -1,20 +1,16 @@
 /**
  * Thread Metadata Service
- * Updates OpenAI thread metadata when user data changes
+ * Manages context cache clearing when user data changes
+ * Note: In our privacy-first architecture, we don't send user data to OpenAI servers
  */
 
-import OpenAI from 'openai';
 import { ThreadContextManager, UserContext } from '../context/ThreadContextManager';
 
 export class ThreadMetadataService {
   private static instance: ThreadMetadataService;
-  private openai: OpenAI;
   private contextManager: ThreadContextManager;
 
   private constructor() {
-    this.openai = new OpenAI({ 
-      apiKey: process.env.THRIVE_OPENAI_API_KEY! 
-    });
     this.contextManager = ThreadContextManager.getInstance();
   }
 
@@ -27,30 +23,15 @@ export class ThreadMetadataService {
 
   /**
    * Update thread metadata with user context summary
+   * Note: In our privacy-first architecture, we don't actually update OpenAI's thread metadata
+   * This method is kept for API compatibility but does nothing on the client
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async updateThreadMetadata(threadId: string, userId?: string) {
-    try {
-      const context = await this.contextManager.buildUserContext(userId);
-      
-      // Create a summary of user context for metadata
-      const metadata = {
-        lastUpdated: new Date().toISOString(),
-        pantryItemCount: context.pantryItems.length.toString(),
-        activeThrivings: context.activeThrivings.length.toString(),
-        healthConditions: context.healthProfile.conditions.join(', ') || 'none',
-        // Metadata values must be strings
-        contextSummary: this.createContextSummary(context)
-      };
-
-      // Update the thread
-      await this.openai.beta.threads.update(threadId, {
-        metadata
-      });
-
-      console.log(`Updated thread ${threadId} metadata:`, metadata);
-    } catch (error) {
-      console.error('Error updating thread metadata:', error);
-    }
+    // In our privacy-first approach, we don't send user data to OpenAI
+    // Thread metadata updates would need to happen server-side
+    // For now, we just clear the cache to ensure fresh data on next request
+    console.log(`Thread metadata update requested for ${threadId} (no-op on client)`);
   }
 
   /**
@@ -76,15 +57,12 @@ export class ThreadMetadataService {
 
   /**
    * Get thread metadata
+   * Note: Returns null on client side as we don't store metadata
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getThreadMetadata(threadId: string): Promise<Record<string, string> | null> {
-    try {
-      const thread = await this.openai.beta.threads.retrieve(threadId);
-      return thread.metadata as Record<string, string>;
-    } catch (error) {
-      console.error('Error retrieving thread metadata:', error);
-      return null;
-    }
+    // In our privacy-first approach, metadata is not available on client
+    return null;
   }
 
   /**

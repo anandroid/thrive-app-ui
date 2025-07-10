@@ -5,6 +5,12 @@ export interface StreamEvent {
   error?: string;
 }
 
+export interface BasicContext {
+  pantryCount: number;
+  activeRoutineCount: number;
+  routineTypes: string;
+}
+
 export interface AssistantResponse {
   greeting: string;
   attentionRequired: string | null;
@@ -36,7 +42,7 @@ export interface ActionItem {
 }
 
 export interface ActionableItem {
-  type: 'appointment' | 'medicine' | 'routine' | 'create_routine' | 'prescription' | 'resource' | 'link' | 'start_journey' | 'continue_journey' | string;
+  type: 'appointment' | 'medicine' | 'routine' | 'create_routine' | 'prescription' | 'resource' | 'link' | 'start_journey' | 'continue_journey' | 'buy' | 'add_to_pantry' | string;
   title: string;
   description: string;
   details?: string;
@@ -50,7 +56,7 @@ export interface ActionableItem {
   modalTitle?: string;
   modalDescription?: string;
   customInstructionsPlaceholder?: string;
-  icon?: 'calendar' | 'pill' | 'heart' | 'sparkles' | 'moon' | 'brain' | 'activity' | 'file-text' | 'globe' | 'book-open' | 'edit' | string;
+  icon?: 'calendar' | 'pill' | 'heart' | 'sparkles' | 'moon' | 'brain' | 'activity' | 'file-text' | 'globe' | 'book-open' | 'edit' | 'shopping-cart' | 'plus-circle' | string;
   journeyType?: 'pain' | 'mental_health' | 'chronic_condition' | 'wellness_general';
   journey_type?: string; // For compatibility with assistant responses
   journeyId?: string;
@@ -58,6 +64,15 @@ export interface ActionableItem {
   isExisting?: boolean;
   emoji?: string;
   action?: string;
+  // Buy-specific fields
+  productName?: string;
+  searchQuery?: string;
+  reason?: string;
+  dosage?: string;
+  timing?: string;
+  price_range?: string;
+  // Add to pantry fields
+  suggestedNotes?: string;
 }
 
 export interface WellnessRoutine {

@@ -1,16 +1,19 @@
 import OpenAI from 'openai';
 import { ThreadContextManager } from '../context/ThreadContextManager';
+import { BasicContext } from '../types';
 
 export class StreamingChatService {
   private openai: OpenAI;
   private assistantId: string;
   private chatIntent?: string | null;
+  private basicContext?: BasicContext;
   private contextManager: ThreadContextManager;
 
-  constructor(apiKey: string, assistantId: string, chatIntent?: string | null) {
+  constructor(apiKey: string, assistantId: string, chatIntent?: string | null, basicContext?: BasicContext) {
     this.openai = new OpenAI({ apiKey });
     this.assistantId = assistantId;
     this.chatIntent = chatIntent;
+    this.basicContext = basicContext;
     this.contextManager = ThreadContextManager.getInstance();
   }
 
@@ -28,11 +31,15 @@ export class StreamingChatService {
   }
 
   async createStreamingResponse(threadId: string, userId?: string) {
-    // Get dynamic context instructions
-    const contextInstructions = await this.contextManager.createRunInstructions(
-      userId,
-      this.chatIntent || undefined
-    );
+    try {
+      // Get dynamic context instructions with basic context
+      console.log('StreamingService: Creating context instructions...');
+      const contextInstructions = await this.contextManager.createRunInstructions(
+        userId,
+        this.chatIntent || undefined,
+        this.basicContext
+      );
+      console.log('StreamingService: Context instructions created');
 
     const encoder = new TextEncoder();
     let fullContent = '';
@@ -76,6 +83,11 @@ export class StreamingChatService {
               const requiredAction = event.data.required_action;
               if (requiredAction?.type === 'submit_tool_outputs') {
                 // Send function call request to client
+                console.log('StreamingService: Sending function call to client', {
+                  runId: event.data.id,
+                  threadId: threadId,
+                  toolCallsCount: requiredAction.submit_tool_outputs.tool_calls.length
+                });
                 controller.enqueue(
                   encoder.encode(
                     `data: ${JSON.stringify({ 
@@ -127,6 +139,10 @@ export class StreamingChatService {
         }
       },
     });
+    } catch (error) {
+      console.error('StreamingService: Error creating streaming response:', error);
+      throw error;
+    }
   }
 
   getStreamHeaders() {
