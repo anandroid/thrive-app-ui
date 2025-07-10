@@ -1,6 +1,5 @@
 import OpenAI from 'openai';
 import { ThreadContextManager } from '../context/ThreadContextManager';
-import { handleFunctionCall } from '../functions/assistantFunctions';
 
 export class StreamingChatService {
   private openai: OpenAI;
@@ -71,54 +70,28 @@ export class StreamingChatService {
                 );
               }
             } else if (event.event === 'thread.run.requires_action') {
-              // Handle function calls
+              // Send function calls to client for execution
               const requiredAction = event.data.required_action;
               if (requiredAction?.type === 'submit_tool_outputs') {
-                const toolOutputs = [];
-                
-                for (const toolCall of requiredAction.submit_tool_outputs.tool_calls) {
-                  if (toolCall.type === 'function') {
-                    const functionName = toolCall.function.name;
-                    const functionArgs = JSON.parse(toolCall.function.arguments);
-                    
-                    // Execute the function
-                    const result = await handleFunctionCall(functionName, functionArgs);
-                    
-                    toolOutputs.push({
-                      tool_call_id: toolCall.id,
-                      output: JSON.stringify(result)
-                    });
-                  }
-                }
-                
-                // Submit the tool outputs and continue the run
-                // The types might be incorrect in the OpenAI SDK
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const toolStream = await (openai.beta.threads.runs as any).submitToolOutputsStream(
-                  threadId,
-                  event.data.id,
-                  { tool_outputs: toolOutputs }
+                // Send function call request to client
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({ 
+                      type: 'function_call',
+                      runId: event.data.id,
+                      threadId: threadId,
+                      toolCalls: requiredAction.submit_tool_outputs.tool_calls
+                    })}\n\n`
+                  )
                 );
                 
-                // Process the tool stream events
-                for await (const toolEvent of toolStream) {
-                  if (toolEvent.event === 'thread.message.delta') {
-                    const delta = toolEvent.data.delta;
-                    if (
-                      delta.content &&
-                      delta.content[0] &&
-                      delta.content[0].type === 'text'
-                    ) {
-                      const text = delta.content[0].text?.value || '';
-                      fullContent += text;
-                      controller.enqueue(
-                        encoder.encode(
-                          `data: ${JSON.stringify({ type: 'delta', content: text })}\n\n`,
-                        ),
-                      );
-                    }
-                  }
-                }
+                // The client will need to call a new endpoint to submit the results
+                // For now, we'll close this stream
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({ type: 'awaiting_function_results' })}\n\n`
+                  )
+                );
               }
             } else if (event.event === 'thread.run.completed') {
               controller.enqueue(

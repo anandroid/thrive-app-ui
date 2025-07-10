@@ -342,6 +342,67 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                 });
               }
 
+              // Handle function calls
+              if (data.type === 'function_call') {
+                // Import the client-side function handler
+                const { executeClientSideFunctions } = await import('@/src/services/openai/functions/clientFunctionHandler');
+                
+                // Execute functions locally with access to localStorage
+                const toolOutputs = await executeClientSideFunctions(data.toolCalls);
+                
+                // Submit the results back to the API
+                const submitResponse = await fetch('/api/assistant/submit-tool-outputs', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    threadId: data.threadId,
+                    runId: data.runId,
+                    toolOutputs
+                  })
+                });
+
+                if (!submitResponse.ok) throw new Error('Failed to submit tool outputs');
+
+                // Continue processing the new stream
+                const submitReader = submitResponse.body?.getReader();
+                if (submitReader) {
+                  while (true) {
+                    const { done: submitDone, value: submitValue } = await submitReader.read();
+                    if (submitDone) break;
+
+                    const submitChunk = decoder.decode(submitValue);
+                    const submitLines = submitChunk.split('\n');
+
+                    for (const submitLine of submitLines) {
+                      if (submitLine.startsWith('data: ')) {
+                        const submitDataStr = submitLine.slice(6);
+                        try {
+                          const submitData = JSON.parse(submitDataStr);
+                          
+                          if (submitData.type === 'delta' && submitData.content) {
+                            fullContent += submitData.content;
+                            setMessages(prev => {
+                              const updated = [...prev];
+                              const lastMessage = updated[updated.length - 1];
+                              if (lastMessage.role === 'assistant') {
+                                lastMessage.content = fullContent;
+                                const partialParsed = parsePartialAssistantResponse(fullContent);
+                                if (partialParsed) {
+                                  lastMessage.parsedContent = partialParsed;
+                                }
+                              }
+                              return updated;
+                            });
+                          }
+                        } catch (e) {
+                          console.error('Error parsing submit response:', e);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+
               if (data.type === 'completed') {
                 const parsedResponse = parseAssistantResponse(fullContent);
                 setMessages(prev => {
