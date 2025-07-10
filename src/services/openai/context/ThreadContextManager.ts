@@ -126,17 +126,31 @@ Example JSON response:
       "frequency": "daily"
     },
     {
-      "type": "buy",
-      "title": "Buy Magnesium Glycinate",
+      "type": "supplement_choice",
+      "title": "Consider Magnesium for Better Sleep 🌙",
+      "description": "Magnesium Glycinate helps promote relaxation and improve sleep quality",
       "productName": "Magnesium Glycinate 400mg",
-      "searchQuery": "magnesium glycinate 400mg capsules",
       "dosage": "400mg",
-      "timing": "30 minutes before bed"
+      "timing": "30 minutes before bed",
+      "searchQuery": "magnesium glycinate 400mg capsules",
+      "suggestedNotes": "400mg, 30 minutes before bed"
     }
   ],
   "questions": [
-    "What time do you usually go to bed?",
-    "Have you tried any sleep supplements before?"
+    {
+      "id": "bedtime",
+      "type": "time_input",
+      "prompt": "What time do you usually go to bed?",
+      "userVoice": "I usually go to bed at",
+      "quickOptions": ["9:00 PM", "10:00 PM", "11:00 PM", "After midnight"]
+    },
+    {
+      "id": "supplements_tried",
+      "type": "quick_reply", 
+      "prompt": "Have you tried any sleep supplements before?",
+      "userVoice": "Yes, I have tried",
+      "quickOptions": ["Yes", "No", "Not sure"]
+    }
   ]
 }\n\n`;
 

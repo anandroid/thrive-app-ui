@@ -105,7 +105,8 @@ async function updateAssistant() {
     // Update with function calling tools and instructions
     const updatedAssistant = await openai.beta.assistants.update(assistantId, {
       tools: assistantFunctions,
-      instructions: ASSISTANT_INSTRUCTIONS
+      instructions: ASSISTANT_INSTRUCTIONS,
+      response_format: { type: 'json_object' }
     });
 
     console.log('✅ Assistant updated successfully!');

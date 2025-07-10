@@ -11,6 +11,26 @@ export interface BasicContext {
   routineTypes: string;
 }
 
+export interface QuestionField {
+  type: 'text' | 'time' | 'select' | 'checkbox';
+  name: string;
+  label?: string;
+  placeholder?: string;
+  options?: string[];
+  default?: string;
+}
+
+export interface EnhancedQuestion {
+  id: string;
+  type: 'simple' | 'time_input' | 'multi_select' | 'text_input' | 'quick_reply';
+  prompt: string;
+  userVoice: string;
+  fields?: QuestionField[];
+  quickOptions?: string[];
+  options?: string[];
+  placeholder?: string;
+}
+
 export interface AssistantResponse {
   greeting: string;
   attentionRequired: string | null;
@@ -18,7 +38,7 @@ export interface AssistantResponse {
   actionItems: ActionItem[];
   additionalInformation: string;
   actionableItems: ActionableItem[];
-  questions: string[];
+  questions: EnhancedQuestion[];
 }
 
 // Partial type for progressive rendering during streaming
@@ -42,7 +62,7 @@ export interface ActionItem {
 }
 
 export interface ActionableItem {
-  type: 'appointment' | 'medicine' | 'routine' | 'create_routine' | 'prescription' | 'resource' | 'link' | 'start_journey' | 'continue_journey' | 'buy' | 'add_to_pantry' | 'already_have' | 'adjust_routine' | string;
+  type: 'appointment' | 'medicine' | 'routine' | 'create_routine' | 'prescription' | 'resource' | 'link' | 'start_journey' | 'continue_journey' | 'buy' | 'add_to_pantry' | 'already_have' | 'adjust_routine' | 'supplement_choice' | string;
   title: string;
   description: string;
   details?: string;

@@ -10,11 +10,11 @@ import {
   ASSISTANT_RESPONSE_KEYS,
   WellnessRoutine,
   PartialAssistantResponse,
-  BasicContext
+  BasicContext,
+  EnhancedQuestion
 } from '@/src/services/openai/types';
 import { RoutineCreationModal } from './RoutineCreationModal';
 import { JourneyCreationModal } from './JourneyCreationModal';
-import { stripHtml } from '@/src/utils/html';
 import { WellnessJourney } from '@/src/services/openai/types/journey';
 import { getJourneyByType } from '@/src/utils/journeyStorage';
 import { ChatEditor } from '@/components/ui/ChatEditor';
@@ -25,6 +25,7 @@ import { ThrivingTutorial } from './ThrivingTutorial';
 import { PantryAddModal } from './PantryAddModal';
 import { savePantryItem } from '@/src/utils/pantryStorage';
 import { PantryItem } from '@/src/types/pantry';
+import { EnhancedQuestions } from './EnhancedQuestions';
 
 interface SmartCardChatProps {
   threadId?: string;
@@ -70,7 +71,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   const tutorialTargetButtonRef = useRef<HTMLButtonElement | null>(null);
   const [showPantryModal, setShowPantryModal] = useState(false);
   const [pantryItemToAdd, setPantryItemToAdd] = useState<ActionableItem | null>(null);
-  const [lastAssistantQuestions, setLastAssistantQuestions] = useState<string[]>([]);
+  const [lastAssistantQuestions, setLastAssistantQuestions] = useState<EnhancedQuestion[]>([]);
 
   // Load existing messages if threadId is provided
   useEffect(() => {
@@ -553,7 +554,9 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
         // Post-process actionableItems to ensure both buy and already_have options exist for supplements
         if (parsed.actionableItems && Array.isArray(parsed.actionableItems)) {
           const supplementBuyActions = parsed.actionableItems.filter((item: ActionableItem) => 
-            item.type === 'buy'
+            item.type === 'buy' && (item.productName || item.title.toLowerCase().includes('magnesium') || 
+            item.title.toLowerCase().includes('melatonin') || item.title.toLowerCase().includes('vitamin') ||
+            item.title.toLowerCase().includes('supplement'))
           );
           
           // For each buy action, check if there's a corresponding already_have action
@@ -569,11 +572,13 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
               const buyIndex = parsed.actionableItems.indexOf(buyAction);
               const alreadyHaveOption: ActionableItem = {
                 type: 'already_have',
-                title: `I already have ${productName}`,
-                description: 'Add to your pantry for personalized tracking',
+                title: 'I already have',
+                description: 'Track in pantry',
                 productName: productName,
                 suggestedNotes: buyAction.dosage ? `${buyAction.dosage}, ${buyAction.timing || 'as directed'}` : '',
-                contextMessage: 'Great! Tracking this helps me personalize your wellness routines'
+                contextMessage: 'Great! Tracking this helps me personalize your wellness routines',
+                dosage: buyAction.dosage,
+                timing: buyAction.timing
               };
               parsed.actionableItems.splice(buyIndex, 0, alreadyHaveOption);
             }
@@ -597,7 +602,9 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
         // Post-process actionableItems to ensure both buy and already_have options exist for supplements
         if (parsed.actionableItems && Array.isArray(parsed.actionableItems)) {
           const supplementBuyActions = parsed.actionableItems.filter((item: ActionableItem) => 
-            item.type === 'buy'
+            item.type === 'buy' && (item.productName || item.title.toLowerCase().includes('magnesium') || 
+            item.title.toLowerCase().includes('melatonin') || item.title.toLowerCase().includes('vitamin') ||
+            item.title.toLowerCase().includes('supplement'))
           );
           
           // For each buy action, check if there's a corresponding already_have action
@@ -613,16 +620,19 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
               const buyIndex = parsed.actionableItems.indexOf(buyAction);
               const alreadyHaveOption: ActionableItem = {
                 type: 'already_have',
-                title: `I already have ${productName}`,
-                description: 'Add to your pantry for personalized tracking',
+                title: 'I already have',
+                description: 'Track in pantry',
                 productName: productName,
                 suggestedNotes: buyAction.dosage ? `${buyAction.dosage}, ${buyAction.timing || 'as directed'}` : '',
-                contextMessage: 'Great! Tracking this helps me personalize your wellness routines'
+                contextMessage: 'Great! Tracking this helps me personalize your wellness routines',
+                dosage: buyAction.dosage,
+                timing: buyAction.timing
               };
               parsed.actionableItems.splice(buyIndex, 0, alreadyHaveOption);
             }
           }
         }
+        
         return parsed as PartialAssistantResponse;
       }
     } catch {
@@ -745,7 +755,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
         partial.additionalInformation = infoMatch[1];
       }
       
-      // Extract complete questions array
+      // Extract questions array (now contains enhanced questions)
       const questionsMatch = content.match(/"questions"\s*:\s*\[([\s\S]*?)\]/);
       if (questionsMatch) {
         try {
@@ -829,11 +839,6 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     }
   };
 
-  const handleQuestionClick = (question: string) => {
-    setInput(question);
-    // Pass the question directly to avoid state update delay
-    handleSendMessage(question);
-  };
 
   const renderMessage = (message: ChatMessage, messageIndex: number) => {
     if (message.role === 'user') {
@@ -933,16 +938,173 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                 {/* Actionable Items - Compact Design with Original Colors */}
                 {parsed?.actionableItems && parsed.actionableItems.length > 0 && (
                   <div className="space-y-2 pt-2">
-                    {parsed.actionableItems.map((item, idx) => {
-                      let Icon = Heart;
-                      let gradientClass = "";
-                      let iconColorClass = "";
-                      let backgroundClass = "";
-                      let shadowClass = "";
-                      let borderColorHover = "";
+                    {(() => {
+                      // Only group supplement options after streaming is complete
+                      const shouldGroup = !message.isStreaming;
                       
-                      // Icon selection logic
-                      if (item.icon) {
+                      if (!shouldGroup) {
+                        // During streaming, show items as they come
+                        return parsed.actionableItems.map((item, idx) => {
+                          // Render each item individually during streaming
+                          const Icon = item.type === 'already_have' ? PlusCircle : 
+                                       item.type === 'buy' ? ShoppingCart : Heart;
+                          return (
+                            <button
+                              key={idx}
+                              onClick={() => handleActionClick(item)}
+                              className="w-full p-3 rounded-xl bg-gradient-to-r from-gray-50 to-white border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-200 text-left group touch-feedback"
+                            >
+                              <div className="flex items-start space-x-3">
+                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center flex-shrink-0">
+                                  <Icon className="w-4 h-4 text-gray-600" />
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="font-semibold text-gray-900 text-[14px]">{item.title}</h4>
+                                  {item.description && (
+                                    <p className="text-[12px] text-gray-600 mt-0.5">{item.description}</p>
+                                  )}
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        });
+                      }
+                      
+                      // After streaming is complete, group supplement options
+                      const groupedItems: (ActionableItem | ActionableItem[])[] = [];
+                      const processedIndices = new Set<number>();
+                      
+                      parsed.actionableItems.forEach((item, idx) => {
+                        if (processedIndices.has(idx)) return;
+                        
+                        if (item.type === 'already_have' && item.productName) {
+                          // Find corresponding buy option
+                          const buyIndex = parsed.actionableItems!.findIndex((buyItem, buyIdx) => 
+                            buyIdx > idx && 
+                            buyItem.type === 'buy' && 
+                            buyItem.productName === item.productName
+                          );
+                          
+                          if (buyIndex !== -1) {
+                            groupedItems.push([item, parsed.actionableItems![buyIndex]]);
+                            processedIndices.add(idx);
+                            processedIndices.add(buyIndex);
+                          } else {
+                            groupedItems.push(item);
+                            processedIndices.add(idx);
+                          }
+                        } else if (!processedIndices.has(idx)) {
+                          groupedItems.push(item);
+                          processedIndices.add(idx);
+                        }
+                      });
+                      
+                      return groupedItems.map((itemOrGroup, groupIdx) => {
+                        if (Array.isArray(itemOrGroup)) {
+                          // Render supplement options with product name as title
+                          const productName = itemOrGroup[0].productName || 'Supplement';
+                          const alreadyHaveItem = itemOrGroup.find(item => item.type === 'already_have');
+                          const buyItem = itemOrGroup.find(item => item.type === 'buy');
+                          
+                          return (
+                            <div key={`group-${groupIdx}`} className="rounded-xl bg-gradient-to-r from-gray-50/50 to-white border border-gray-200/70 p-4 shadow-sm hover:shadow-md transition-all">
+                              <h4 className="font-semibold text-gray-900 text-[15px] mb-3">{productName}</h4>
+                              <div className="flex gap-2">
+                                {alreadyHaveItem && (
+                                  <button
+                                    onClick={() => handleActionClick(alreadyHaveItem)}
+                                    className="flex-1 px-4 py-2.5 rounded-lg bg-gradient-to-r from-sage-light/20 to-sage/10 border border-sage/20 hover:border-sage/40 hover:shadow-sm transition-all duration-200 group touch-feedback"
+                                  >
+                                    <div className="flex items-center justify-center space-x-2">
+                                      <PlusCircle className="w-4 h-4 text-sage-dark" />
+                                      <span className="text-[13px] font-medium text-sage-dark">I already have it</span>
+                                    </div>
+                                  </button>
+                                )}
+                                {buyItem && (
+                                  <button
+                                    onClick={() => handleActionClick(buyItem)}
+                                    className="flex-1 px-4 py-2.5 rounded-lg bg-gradient-to-r from-rose/10 to-dusty-rose/10 border border-rose/20 hover:border-rose/40 hover:shadow-sm transition-all duration-200 group touch-feedback"
+                                  >
+                                    <div className="flex items-center justify-center space-x-2">
+                                      <ShoppingCart className="w-4 h-4 text-rose" />
+                                      <span className="text-[13px] font-medium text-rose">Buy</span>
+                                    </div>
+                                  </button>
+                                )}
+                              </div>
+                              {(alreadyHaveItem?.dosage || buyItem?.dosage) && (
+                                <p className="text-[11px] text-gray-500 mt-2 text-center">
+                                  {alreadyHaveItem?.dosage || buyItem?.dosage} • {alreadyHaveItem?.timing || buyItem?.timing || 'As directed'}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        } else {
+                          // Check if this is a supplement_choice type
+                          const item = itemOrGroup;
+                          if (item.type === 'supplement_choice') {
+                            return (
+                              <div key={groupIdx} className="rounded-xl bg-gradient-to-r from-white to-gray-50/30 border border-gray-200/70 p-4 shadow-sm hover:shadow-md transition-all">
+                                <div className="mb-3">
+                                  <h4 className="font-semibold text-gray-900 text-[16px]">{item.title}</h4>
+                                </div>
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => {
+                                      // Handle "I already have it" action
+                                      const alreadyHaveAction: ActionableItem = {
+                                        type: 'already_have',
+                                        title: 'I already have',
+                                        description: 'Track in pantry',
+                                        productName: item.productName,
+                                        suggestedNotes: item.suggestedNotes || `${item.dosage}, ${item.timing}`,
+                                        contextMessage: 'Great! Tracking this helps me personalize your wellness routines'
+                                      };
+                                      handleActionClick(alreadyHaveAction);
+                                    }}
+                                    className="flex-1 px-4 py-2.5 rounded-lg bg-gradient-to-r from-sage-light/20 to-sage/10 border border-sage/20 hover:border-sage/40 hover:shadow-sm transition-all duration-200 group touch-feedback"
+                                  >
+                                    <div className="flex items-center justify-center space-x-2">
+                                      <PlusCircle className="w-4 h-4 text-sage-dark" />
+                                      <span className="text-[13px] font-medium text-sage-dark">I already have it</span>
+                                    </div>
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      // Handle "Buy" action
+                                      const searchQuery = item.searchQuery || encodeURIComponent(item.productName || item.title);
+                                      const amazonSearchUrl = `https://www.amazon.com/s?k=${searchQuery}`;
+                                      window.open(amazonSearchUrl, '_blank');
+                                    }}
+                                    className="flex-1 px-4 py-2.5 rounded-lg bg-gradient-to-r from-rose/10 to-dusty-rose/10 border border-rose/20 hover:border-rose/40 hover:shadow-sm transition-all duration-200 group touch-feedback"
+                                  >
+                                    <div className="flex items-center justify-center space-x-2">
+                                      <ShoppingCart className="w-4 h-4 text-rose" />
+                                      <span className="text-[13px] font-medium text-rose">Buy</span>
+                                    </div>
+                                  </button>
+                                </div>
+                                {item.dosage && item.timing && (
+                                  <p className="text-[11px] text-gray-500 mt-2 text-center">
+                                    {item.dosage} • {item.timing}
+                                  </p>
+                                )}
+                              </div>
+                            );
+                          }
+                          // Render single item (non-supplement actions)
+                          const singleItem = itemOrGroup;
+                          const idx = groupIdx;
+                          let Icon = Heart;
+                          let gradientClass = "";
+                          let iconColorClass = "";
+                          let backgroundClass = "";
+                          let shadowClass = "";
+                          let borderColorHover = "";
+                          
+                          // Icon selection logic
+                      if (singleItem.icon) {
                         const iconMap = {
                           'calendar': Calendar,
                           'pill': Pill,
@@ -957,15 +1119,15 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                           'shopping-cart': ShoppingCart,
                           'plus-circle': PlusCircle
                         } as const;
-                        Icon = iconMap[item.icon as keyof typeof iconMap] || Heart;
+                        Icon = iconMap[singleItem.icon as keyof typeof iconMap] || Heart;
                       } else {
                         // Default icons based on type
-                        if (item.type === 'appointment') Icon = Calendar;
-                        else if (item.type === 'medicine' || item.type === 'supplement') Icon = Pill;
-                        else if (item.type === 'routine' || item.type === 'create_routine' || item.type === 'thriving') Icon = Sparkles;
-                        else if (item.type === 'information') Icon = FileText;
-                        else if (item.type === 'buy') Icon = ShoppingCart;
-                        else if (item.type === 'add_to_pantry' || item.type === 'already_have') Icon = PlusCircle;
+                        if (singleItem.type === 'appointment') Icon = Calendar;
+                        else if (singleItem.type === 'medicine' || singleItem.type === 'supplement') Icon = Pill;
+                        else if (singleItem.type === 'routine' || singleItem.type === 'create_routine' || singleItem.type === 'thriving') Icon = Sparkles;
+                        else if (singleItem.type === 'information') Icon = FileText;
+                        else if (singleItem.type === 'buy') Icon = ShoppingCart;
+                        else if (singleItem.type === 'add_to_pantry' || singleItem.type === 'already_have') Icon = PlusCircle;
                       }
                       
                       // Original color sequence: sage green -> pink/bronze -> slate blue -> repeat
@@ -995,17 +1157,17 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                       }
                       
                       // Check if this is a thriving button and if it matches the tutorial
-                      const isThrivingButton = item.type === 'create_routine' || item.type === 'routine' || item.type === 'thriving' || item.type === 'start_journey';
+                      const isThrivingButton = singleItem.type === 'create_routine' || singleItem.type === 'routine' || singleItem.type === 'thriving' || singleItem.type === 'start_journey';
                       const shouldAttachRef = isThrivingButton && 
-                        (item.title === tutorialActionableText || 
-                         item.journeyTitle === tutorialActionableText || 
-                         item.description === tutorialActionableText);
+                        (singleItem.title === tutorialActionableText || 
+                         singleItem.journeyTitle === tutorialActionableText || 
+                         singleItem.description === tutorialActionableText);
 
                       return (
                         <button
                           key={idx}
                           ref={shouldAttachRef ? tutorialTargetButtonRef : undefined}
-                          onClick={() => handleActionClick(item)}
+                          onClick={() => handleActionClick(singleItem)}
                           className={`w-full p-3 rounded-xl bg-gradient-to-r ${backgroundClass} border border-gray-200/50 shadow-sm ${shadowClass} hover:shadow-md ${borderColorHover} transition-all duration-200 text-left group touch-feedback touch-manipulation`}
                         >
                           <div className="flex items-start space-x-3">
@@ -1014,17 +1176,19 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between">
-                                <h4 className="font-semibold text-gray-900 text-[14px]">{item.title}</h4>
+                                <h4 className="font-semibold text-gray-900 text-[14px]">{singleItem.title}</h4>
                                 <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-0.5 transition-all flex-shrink-0 ml-2" />
                               </div>
-                              {item.description && (
-                                <p className="text-[12px] text-gray-600 mt-0.5 leading-relaxed">{item.description}</p>
+                              {singleItem.description && (
+                                <p className="text-[12px] text-gray-600 mt-0.5 leading-relaxed">{singleItem.description}</p>
                               )}
                             </div>
                           </div>
                         </button>
                       );
-                    })}
+                        }
+                      });
+                    })()}
                   </div>
                 )}
 
@@ -1045,34 +1209,27 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                 )}
 
                 {/* Questions Section - Inside the card */}
-                {message.parsedContent?.questions && 
-                 message.parsedContent.questions.length > 0 && (
+                {message.parsedContent?.questions && message.parsedContent.questions.length > 0 && (
                   <div className="mt-6 pt-6 border-t border-gray-100">
                     <p className="text-[14px] text-secondary-text-thin mb-3">Let&apos;s talk more?</p>
-                    <div className="space-y-3">
-                      {message.parsedContent.questions.map((question, qIdx) => {
-                        const cleanQuestion = stripHtml(question);
-                        return (
-                          <button
-                            key={qIdx}
-                            onClick={() => handleQuestionClick(cleanQuestion)}
-                            className="relative w-full flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-white to-gray-50/30 hover:from-white hover:to-sage-light/10 hover:shadow-xl hover:shadow-sage/20 transition-all duration-300 text-left group border-2 border-gray-200 hover:border-sage/40 cursor-pointer touch-feedback-subtle touch-manipulation"
-                          >
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sage-light/30 to-sage/20 flex items-center justify-center flex-shrink-0 group-hover:from-sage/40 group-hover:to-sage-dark/30 transition-all shadow-md shadow-sage/20 group-hover:shadow-lg">
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-sage-dark group-hover:text-sage-dark transition-colors">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                              </svg>
+                    {/* Debug: Check question format */}
+                    {typeof message.parsedContent.questions[0] === 'string' ? (
+                      <div className="p-3 bg-red-50 text-red-800 rounded-lg mb-3">
+                        <p className="font-semibold">Warning: Questions are in old format. The assistant needs to return enhanced questions.</p>
+                        <div className="mt-2 space-y-2">
+                          {(message.parsedContent.questions as unknown as string[]).map((q, idx) => (
+                            <div key={idx} className="p-2 bg-white rounded">
+                              {q}
                             </div>
-                            <p className="text-[14px] text-secondary-text-thin leading-[1.5] group-hover:text-primary-text transition-colors flex-1">
-                              {cleanQuestion}
-                            </p>
-                            
-                            {/* Clickable indicator dot - bottom right */}
-                            <div className="absolute bottom-3 right-3 w-2 h-2 rounded-full bg-slate-400 group-hover:bg-slate-600 transition-colors" />
-                          </button>
-                        );
-                      })}
-                    </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <EnhancedQuestions 
+                        questions={message.parsedContent.questions as EnhancedQuestion[]}
+                        onQuestionSubmit={handleSendMessage}
+                      />
+                    )}
                   </div>
                 )}
               </div>
