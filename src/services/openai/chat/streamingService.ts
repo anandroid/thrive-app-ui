@@ -1,48 +1,68 @@
 import OpenAI from 'openai';
+import { ThreadContextManager } from '../context/ThreadContextManager';
+import { BasicContext } from '../types';
 
 export class StreamingChatService {
   private openai: OpenAI;
   private assistantId: string;
   private chatIntent?: string | null;
+  private basicContext?: BasicContext;
+  private contextManager: ThreadContextManager;
 
-  constructor(apiKey: string, assistantId: string, chatIntent?: string | null) {
+  constructor(apiKey: string, assistantId: string, chatIntent?: string | null, basicContext?: BasicContext) {
     this.openai = new OpenAI({ apiKey });
     this.assistantId = assistantId;
     this.chatIntent = chatIntent;
+    this.basicContext = basicContext;
+    this.contextManager = ThreadContextManager.getInstance();
   }
 
   async createThread() {
     return await this.openai.beta.threads.create();
   }
 
-  async sendMessage(threadId: string, message: string, chatIntent?: string | null) {
-    // Augment message with intent context if in creation mode
-    let augmentedMessage = message;
-    if (chatIntent) {
-      const intentContext = chatIntent === 'create_journey' 
-        ? '\n\n[SYSTEM: User is in Journey Creation Mode. Focus only on creating a wellness journey. Ask 2-3 focused questions and show ONLY the journey creation actionableItem.]'
-        : '\n\n[SYSTEM: User is in Thriving Creation Mode. Focus only on creating a wellness thriving. Ask about schedule/preferences and show ONLY the thriving creation actionableItem.]';
-      augmentedMessage = message + intentContext;
-    }
-    
+  async sendMessage(threadId: string, message: string) {
+    // Simply add the user message to the thread
+    // Context will be injected at the run level instead
     return await this.openai.beta.threads.messages.create(threadId, {
       role: 'user',
-      content: augmentedMessage,
+      content: message,
     });
   }
 
-  createStreamingResponse(threadId: string) {
-    const stream = this.openai.beta.threads.runs.stream(threadId, {
-      assistant_id: this.assistantId,
-    });
+  async createStreamingResponse(threadId: string, userId?: string) {
+    try {
+      // Get dynamic context instructions with basic context
+      console.log('StreamingService: Creating context instructions...');
+      const contextInstructions = await this.contextManager.createRunInstructions(
+        userId,
+        this.chatIntent || undefined,
+        this.basicContext
+      );
+      console.log('StreamingService: Context instructions created');
 
     const encoder = new TextEncoder();
     let fullContent = '';
+    const openai = this.openai;
+    const assistantId = this.assistantId;
+    const chatIntent = this.chatIntent;
 
     return new ReadableStream({
       async start(controller) {
         try {
+          const stream = openai.beta.threads.runs.stream(threadId, {
+            assistant_id: assistantId,
+            instructions: contextInstructions,
+            max_prompt_tokens: 10000, // Limit context to manage costs
+            metadata: {
+              intent: chatIntent || 'general',
+              timestamp: new Date().toISOString()
+            }
+          });
+
           for await (const event of stream) {
+            console.log('Stream event:', event.event, event.data);
+            
             if (event.event === 'thread.message.delta') {
               const delta = event.data.delta;
               if (
@@ -58,6 +78,35 @@ export class StreamingChatService {
                   ),
                 );
               }
+            } else if (event.event === 'thread.run.requires_action') {
+              // Send function calls to client for execution
+              const requiredAction = event.data.required_action;
+              if (requiredAction?.type === 'submit_tool_outputs') {
+                // Send function call request to client
+                console.log('StreamingService: Sending function call to client', {
+                  runId: event.data.id,
+                  threadId: threadId,
+                  toolCallsCount: requiredAction.submit_tool_outputs.tool_calls.length
+                });
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({ 
+                      type: 'function_call',
+                      runId: event.data.id,
+                      threadId: threadId,
+                      toolCalls: requiredAction.submit_tool_outputs.tool_calls
+                    })}\n\n`
+                  )
+                );
+                
+                // The client will need to call a new endpoint to submit the results
+                // For now, we'll close this stream
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({ type: 'awaiting_function_results' })}\n\n`
+                  )
+                );
+              }
             } else if (event.event === 'thread.run.completed') {
               controller.enqueue(
                 encoder.encode(
@@ -65,26 +114,35 @@ export class StreamingChatService {
                 ),
               );
             } else if (event.event === 'thread.run.failed') {
+              console.error('Run failed:', event.data);
+              const errorMessage = event.data.last_error?.message || 'Run failed';
               controller.enqueue(
                 encoder.encode(
-                  `data: ${JSON.stringify({ type: 'error', error: 'Run failed' })}\n\n`,
+                  `data: ${JSON.stringify({ type: 'error', error: errorMessage })}\n\n`,
                 ),
               );
+              controller.close();
+              return;
             }
           }
           controller.enqueue(encoder.encode('data: [DONE]\n\n'));
           controller.close();
         } catch (error) {
           console.error('Stream error:', error);
+          const errorMessage = error instanceof Error ? error.message : 'Stream error';
           controller.enqueue(
             encoder.encode(
-              `data: ${JSON.stringify({ type: 'error', error: 'Stream error' })}\n\n`,
+              `data: ${JSON.stringify({ type: 'error', error: errorMessage })}\n\n`,
             ),
           );
           controller.close();
         }
       },
     });
+    } catch (error) {
+      console.error('StreamingService: Error creating streaming response:', error);
+      throw error;
+    }
   }
 
   getStreamHeaders() {

@@ -13,6 +13,7 @@ import { getThrivingsFromStorage, updateThrivingInStorage, deleteThrivingFromSto
 import { CelebrationShower } from '@/components/ui/CelebrationShower';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { AdjustmentTutorial } from '@/components/features/AdjustmentTutorial';
+import { LoadingButton } from '@/components/ui/LoadingButton';
 
 export default function ThrivingsPage() {
   const [thrivings, setThrivings] = useState<Thriving[]>([]);
@@ -69,6 +70,24 @@ export default function ThrivingsPage() {
     const savedCollapsedState = localStorage.getItem('recommendationsCollapsed');
     if (savedCollapsedState !== null) {
       setIsRecommendationsCollapsed(savedCollapsedState === 'true');
+    }
+    
+    // Check for adjustment request from chat
+    const showAdjustment = urlParams.get('showAdjustment');
+    if (showAdjustment === 'true') {
+      const adjustmentRequest = sessionStorage.getItem('adjustmentRequest');
+      if (adjustmentRequest) {
+        try {
+          const { adjustmentInstructions } = JSON.parse(adjustmentRequest);
+          if (adjustmentInstructions) {
+            setAdjustmentText(adjustmentInstructions);
+            setShowAdjustmentEditor(true);
+          }
+          sessionStorage.removeItem('adjustmentRequest');
+        } catch (e) {
+          console.error('Error parsing adjustment request:', e);
+        }
+      }
     }
   }, []);
 
@@ -895,20 +914,22 @@ export default function ThrivingsPage() {
                             rows={4}
                           />
                           <div className="flex gap-2">
-                            <button
+                            <LoadingButton
                               onClick={handleAdjustThriving}
-                              disabled={!adjustmentText.trim() || isAdjusting}
-                              className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose to-burgundy text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                              disabled={!adjustmentText.trim()}
+                              isLoading={isAdjusting}
+                              className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose to-burgundy text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all"
+                              loadingMessages={[
+                                'Adjusting...',
+                                'Analyzing...',
+                                'Updating...',
+                                'Personalizing...',
+                                'Finalizing...'
+                              ]}
+                              messageInterval={2500}
                             >
-                              {isAdjusting ? (
-                                <>
-                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                  Adjusting...
-                                </>
-                              ) : (
-                                'Apply Adjustments'
-                              )}
-                            </button>
+                              Apply Adjustments
+                            </LoadingButton>
                             <button
                               onClick={() => {
                                 setShowAdjustmentEditor(false);

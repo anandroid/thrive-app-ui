@@ -12,9 +12,14 @@ interface PantryAddModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddItem: (item: PantryItem) => void;
+  initialData?: {
+    name?: string;
+    notes?: string;
+    tags?: string[];
+  };
 }
 
-export function PantryAddModal({ isOpen, onClose, onAddItem }: PantryAddModalProps) {
+export function PantryAddModal({ isOpen, onClose, onAddItem, initialData }: PantryAddModalProps) {
   const [showCamera, setShowCamera] = useState(false);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -38,8 +43,15 @@ export function PantryAddModal({ isOpen, onClose, onAddItem }: PantryAddModalPro
       setAnalysis(null);
       setError(null);
       setShowCamera(false);
+    } else if (initialData) {
+      // Pre-fill form with initial data
+      setFormData({
+        name: initialData.name || '',
+        notes: initialData.notes || '',
+        tags: initialData.tags || []
+      });
     }
-  }, [isOpen]);
+  }, [isOpen, initialData]);
 
   // Handle camera capture
   const handleCameraCapture = async (imageData: string) => {

@@ -1,5 +1,23 @@
 # Thrive App - Mobile-First Development Guidelines
 
+## Recent Performance & AI Improvements (2025-07-10)
+
+### ✅ Hybrid Context Approach for Performance
+- **Basic Context Extraction** - Client sends pantry count, routine count, and types to reduce function calls
+- **Optimized Instructions** - Assistant skips unnecessary function calls when basic context is sufficient
+- **Reduced Latency** - Significantly faster responses for common queries about empty pantry or no routines
+- **Smart Function Calling** - Only calls functions when specific details are needed
+
+### ✅ Fixed Assistant Behavior
+- **Routine Recommendations** - Assistant now consistently recommends routines after function calls
+- **Buy/Add to Pantry Actions** - Properly suggests buying supplements and adding to pantry
+- **Medication Management** - Immediately suggests routine creation for medication management
+- **Multiple Function Calls** - Fixed handling of parallel function calls in submit-tool-outputs
+
+### ✅ TypeScript Types Added
+- **BasicContext Interface** - Properly typed context passing from client to server
+- **Type Safety** - All context passing is now type-safe with proper interfaces
+
 ## Recent Mobile UX Improvements (2025-07-09)
 
 ### ✅ Thriving Tutorial Overlay

@@ -78,7 +78,8 @@ describe('SSE Parser', () => {
       parser.onComplete = onComplete;
       
       const content = '{"greeting": "Hello"}';
-      parser.processMessage(`data: {"type":"completed","content":"${content}","threadId":"thread_123"}`);
+      const escapedContent = JSON.stringify(content);
+      parser.processMessage(`data: {"type":"completed","content":${escapedContent},"threadId":"thread_123"}`);
       
       expect(onComplete).toHaveBeenCalledWith(content, 'thread_123');
     });
@@ -107,12 +108,22 @@ describe('SSE Parser', () => {
 
     it('should parse full example response correctly', () => {
       const parser = new SSEParser();
+      const fullResponse = {
+        greeting: "It's great that you're taking steps toward a healthier routine! 🌟",
+        attentionRequired: null,
+        emergencyReasoning: null,
+        actionItems: [],
+        additionalInformation: "",
+        actionableItems: [],
+        questions: ["<p><em>How can I ensure I never miss a dose? ⏰</em></p>", "<p><em>What should I do if I forget to take a dose? 💬</em></p>"]
+      };
+      
       const messages = [
         'data: {"type":"thread_created","threadId":"thread_oGPRYzqGmetzrv7c4de9w9od"}',
         'data: {"type":"delta","content":"{\\n"}',
         'data: {"type":"delta","content":" \\"greeting\\":"}',
         'data: {"type":"delta","content":" \\"It\'s great that you\'re taking steps toward a healthier routine! 🌟\\",\\n"}',
-        'data: {"type":"completed","content":"{\n  \\"greeting\\": \\"It\'s great that you\'re taking steps toward a healthier routine! 🌟\\",\n  \\"attentionRequired\\": null,\n  \\"emergencyReasoning\\": null,\n  \\"actionItems\\": [],\n  \\"additionalInformation\\": \\"\\",\n  \\"actionableItems\\": [],\n  \\"questions\\": [\\"<p><em>How can I ensure I never miss a dose? ⏰</em></p>\\", \\"<p><em>What should I do if I forget to take a dose? 💬</em></p>\\"]\n}","threadId":"thread_oGPRYzqGmetzrv7c4de9w9od"}',
+        `data: {"type":"completed","content":${JSON.stringify(JSON.stringify(fullResponse))},"threadId":"thread_oGPRYzqGmetzrv7c4de9w9od"}`,
         'data: [DONE]'
       ];
 

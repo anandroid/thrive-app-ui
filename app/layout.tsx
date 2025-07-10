@@ -5,6 +5,7 @@ import { ServiceWorkerProvider } from "@/src/providers/ServiceWorkerProvider";
 import { OfflineIndicator } from "@/components/ui/OfflineIndicator";
 import { TouchFeedbackProvider } from "@/src/providers/TouchFeedbackProvider";
 import "@/src/utils/clearCorruptedData";
+import { Toaster } from 'react-hot-toast';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,6 +53,7 @@ export default function RootLayout({
         <ServiceWorkerProvider>
           <TouchFeedbackProvider>
             <OfflineIndicator />
+            <Toaster position="top-center" />
             {children}
           </TouchFeedbackProvider>
         </ServiceWorkerProvider>

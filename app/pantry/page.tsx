@@ -15,6 +15,7 @@ import {
   getRecommendedSupplements, saveRecommendedSupplement
 } from '@/src/utils/pantryStorage';
 import { generateSupplementRecommendations } from '@/src/services/recommendations/supplementRecommendations';
+import { useThreadMetadata } from '@/src/hooks/useThreadMetadata';
 
 const categoryIcons = {
   supplement: Sparkles,
@@ -39,6 +40,9 @@ export default function PantryPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string>('all');
   // Removed old state variables as they're now handled by PantryAddModal
+  
+  // Hook for updating thread metadata when pantry changes
+  const { onPantryChange } = useThreadMetadata();
 
   useEffect(() => {
     const items = getPantryItems();
@@ -73,7 +77,7 @@ export default function PantryPage() {
     }
   }, []);
 
-  const handleAddItem = (item: PantryItem) => {
+  const handleAddItem = async (item: PantryItem) => {
     savePantryItem(item);
     setPantryItems([...pantryItems, item]);
     
@@ -84,9 +88,12 @@ export default function PantryPage() {
       !updatedPantryItemNames.includes(rec.name.toLowerCase())
     );
     setRecommendations(filteredRecs);
+    
+    // Update thread metadata for context awareness
+    await onPantryChange();
   };
 
-  const handleDeleteItem = (itemId: string) => {
+  const handleDeleteItem = async (itemId: string) => {
     if (confirm('Are you sure you want to remove this item from your pantry?')) {
       deletePantryItem(itemId);
       const updatedPantryItems = pantryItems.filter(item => item.id !== itemId);
@@ -99,6 +106,9 @@ export default function PantryPage() {
         !pantryItemNames.includes(rec.name.toLowerCase())
       );
       setRecommendations(filteredRecs);
+      
+      // Update thread metadata for context awareness
+      await onPantryChange();
     }
   };
 
@@ -345,7 +355,7 @@ export default function PantryPage() {
                     </div>
 
                     <button
-                      onClick={() => {
+                      onClick={async () => {
                         const newPantryItem: PantryItem = {
                           id: Date.now().toString(),
                           name: rec.name,
@@ -358,6 +368,9 @@ export default function PantryPage() {
                         
                         // Remove this recommendation from the displayed list
                         setRecommendations(recommendations.filter(r => r.id !== rec.id));
+                        
+                        // Update thread metadata for context awareness
+                        await onPantryChange();
                       }}
                       className="mt-3 w-full py-2 rounded-xl bg-gradient-to-r from-rose/10 to-burgundy/10 text-burgundy font-medium text-sm hover:from-rose/20 hover:to-burgundy/20 transition-all"
                     >
