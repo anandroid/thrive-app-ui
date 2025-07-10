@@ -59,9 +59,9 @@ export const ThrivingTutorial: React.FC<ThrivingTutorialProps> = ({ onClose, act
         {/* Close button */}
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors touch-feedback touch-manipulation cursor-pointer"
+          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-all duration-200 touch-feedback touch-manipulation cursor-pointer active:scale-95 active:bg-gray-300"
         >
-          <X className="w-4 h-4 text-gray-600" />
+          <X className="w-5 h-5 text-gray-600" />
         </button>
         
         {/* Title */}
@@ -117,7 +117,7 @@ export const ThrivingTutorial: React.FC<ThrivingTutorialProps> = ({ onClose, act
                   onArrowClick?.();
                 }, 300);
               }}
-              className="w-full p-4 rounded-2xl bg-gradient-to-r from-sage-light/20 to-sage/10 border border-sage-light/30 hover:from-sage-light/30 hover:to-sage/20 transition-all group cursor-pointer"
+              className="w-full p-4 rounded-2xl bg-gradient-to-r from-sage-light/20 to-sage/10 border border-sage-light/30 hover:from-sage-light/30 hover:to-sage/20 transition-all group cursor-pointer touch-feedback touch-manipulation active:scale-[0.98] active:from-sage-light/40 active:to-sage/30"
             >
               <div className="flex flex-col items-center space-y-2">
                 <div className="relative">

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
 import { X, ArrowDown, Edit2, Plus, Minus, Clock } from 'lucide-react';
 
 interface AdjustmentTutorialProps {
@@ -10,8 +11,10 @@ interface AdjustmentTutorialProps {
 
 export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose, onArrowClick }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     // Delay to ensure smooth transition
     setTimeout(() => setIsVisible(true), 100);
   }, []);
@@ -21,45 +24,35 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
     setTimeout(onClose, 300);
   };
 
-  return (
-    <div 
-      className={`fixed inset-0 z-50 transition-opacity duration-300 ${
-        isVisible ? 'opacity-100' : 'opacity-0'
-      }`}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0
-      }}
-      onClick={handleClose}
-    >
+  if (!mounted) return null;
+
+  const modalContent = (
+    <div className="fixed inset-0 z-[9998]">
       {/* Dark overlay */}
-      <div className="fixed inset-0 bg-black/60" />
+      <div 
+        className={`fixed inset-0 bg-black/60 transition-opacity duration-300 ${
+          isVisible ? 'opacity-100' : 'opacity-0'
+        }`}
+        onClick={handleClose}
+      />
       
       {/* Tutorial content - centered in viewport */}
       <div 
-        className={`fixed bg-white rounded-3xl shadow-2xl p-6 max-w-sm w-[90%] transition-all duration-300 ${
+        className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-3xl shadow-2xl p-6 max-w-sm w-[90%] z-10 transition-all duration-300 ${
           isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
         }`}
         style={{
-          position: 'fixed',
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          zIndex: 51
+          maxHeight: 'calc(90vh - 2rem)',
+          overflowY: 'auto'
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors touch-feedback touch-manipulation cursor-pointer"
+          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-all duration-200 touch-feedback touch-manipulation cursor-pointer active:scale-95 active:bg-gray-300"
         >
-          <X className="w-4 h-4 text-gray-600" />
+          <X className="w-5 h-5 text-gray-600" />
         </button>
         
         {/* Title */}
@@ -114,7 +107,7 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
                 onArrowClick?.();
               }, 300);
             }}
-            className="w-full p-4 rounded-2xl bg-gradient-to-r from-sage-light/20 to-sage/10 border border-sage-light/30 hover:from-sage-light/30 hover:to-sage/20 transition-all group cursor-pointer"
+            className="w-full p-4 rounded-2xl bg-gradient-to-r from-sage-light/20 to-sage/10 border border-sage-light/30 hover:from-sage-light/30 hover:to-sage/20 transition-all group cursor-pointer touch-feedback touch-manipulation active:scale-[0.98] active:from-sage-light/40 active:to-sage/30"
           >
             <div className="flex flex-col items-center space-y-2">
               <div className="relative">
@@ -141,4 +134,6 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };

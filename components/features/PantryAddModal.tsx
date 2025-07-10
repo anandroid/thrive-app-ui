@@ -229,9 +229,9 @@ export function PantryAddModal({ isOpen, onClose, onAddItem }: PantryAddModalPro
                       setFormData({ ...formData, imageUrl: undefined });
                       setAnalysis(null);
                     }}
-                    className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-all"
+                    className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-all duration-200 touch-feedback touch-manipulation active:scale-95 active:bg-gray-100"
                   >
-                    <X className="w-4 h-4 text-gray-600" />
+                    <X className="w-5 h-5 text-gray-600" />
                   </button>
                 </div>
               ) : (

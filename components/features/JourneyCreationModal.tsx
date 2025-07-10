@@ -117,11 +117,11 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
               e.stopPropagation();
               onClose();
             }}
-            className="w-8 h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center hover:bg-white transition-all shadow-lg touch-feedback touch-manipulation cursor-pointer"
+            className="w-8 h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center hover:bg-white transition-all duration-200 shadow-lg touch-feedback touch-manipulation cursor-pointer active:scale-95 active:bg-gray-100"
             aria-label="Close modal"
             type="button"
           >
-            <X className="w-4 h-4 text-gray-700" />
+            <X className="w-5 h-5 text-gray-700" />
           </button>
         </div>
         

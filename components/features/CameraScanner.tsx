@@ -4,6 +4,11 @@ import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { Camera, X, Loader2, CheckCircle } from 'lucide-react';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 
+// Type assertion for webkit-specific attributes
+type WebkitVideoAttributes = {
+  'webkit-playsinline'?: string;
+};
+
 interface CameraScannerProps {
   onCapture: (imageData: string) => void;
   onClose: () => void;
@@ -24,10 +29,12 @@ export function CameraScanner({
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isVideoReady, setIsVideoReady] = useState(false);
 
   // Initialize camera
   const initializeCamera = useCallback(async () => {
     try {
+      setIsVideoReady(false); // Reset video ready state
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: facingMode,
@@ -40,7 +47,27 @@ export function CameraScanner({
       setHasPermission(true);
       
       if (videoRef.current) {
+        // Set attributes before srcObject for Android Chrome
+        videoRef.current.setAttribute('playsinline', 'true');
+        videoRef.current.setAttribute('webkit-playsinline', 'true');
+        videoRef.current.setAttribute('autoplay', 'true');
+        videoRef.current.setAttribute('muted', 'true');
+        videoRef.current.muted = true;
+        videoRef.current.autoplay = true;
+        
+        // Set srcObject
         videoRef.current.srcObject = mediaStream;
+        
+        // Android Chrome specific fix - add delay before play
+        videoRef.current.onloadedmetadata = () => {
+          setTimeout(() => {
+            videoRef.current?.play().then(() => {
+              setIsVideoReady(true);
+            }).catch(err => 
+              console.error('Video play error:', err)
+            );
+          }, 100); // 100ms delay for Android Chrome
+        };
       }
     } catch (error) {
       console.error('Camera access error:', error);
@@ -56,11 +83,26 @@ export function CameraScanner({
     }
   }, [stream]);
 
-  // Initialize on mount
+  // Initialize on mount and when facing mode changes
   useEffect(() => {
-    initializeCamera();
-    return cleanupCamera;
-  }, [facingMode, initializeCamera, cleanupCamera]);
+    let mounted = true;
+    
+    const init = async () => {
+      if (mounted) {
+        await initializeCamera();
+      }
+    };
+    
+    init();
+    
+    return () => {
+      mounted = false;
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [facingMode]); // Only re-run when facing mode changes
 
   // Capture image
   const captureImage = useCallback(() => {
@@ -193,8 +235,20 @@ export function CameraScanner({
             autoPlay
             playsInline
             muted
-            className="w-full h-full object-cover"
+            {...{ 'webkit-playsinline': 'true' } as WebkitVideoAttributes}
+            className={`w-full h-full object-cover ${!isVideoReady ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+            style={{ WebkitTransform: 'translateZ(0)' }} // Force hardware acceleration
           />
+
+          {/* Loading Overlay - shows while camera initializes */}
+          {!isVideoReady && (
+            <div className="absolute inset-0 bg-black flex items-center justify-center">
+              <div className="text-center">
+                <Loader2 className="w-8 h-8 text-white animate-spin mx-auto mb-3" />
+                <p className="text-white text-sm">Initializing camera...</p>
+              </div>
+            </div>
+          )}
 
           {/* Scanning Guide */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
