@@ -60,28 +60,33 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
 
         {/* Bottom Section - Fixed with Terms and Button */}
         <div className="layout-footer">
-          {/* Terms Notice - Always visible */}
-          <div className="text-center mb-3">
-            <p className="text-sm text-gray-600">
-              By continuing, you accept our{' '}
-              <button
-                onClick={() => setShowTermsModal(true)}
-                className="text-burgundy font-medium underline hover:no-underline transition-all"
-              >
-                Terms & Conditions
-              </button>
-            </p>
+          <div className="space-y-3">
+            {/* Terms Notice - Always visible */}
+            <div className="text-center">
+              <p className="text-sm text-gray-600">
+                By continuing, you accept our{' '}
+                <button
+                  onClick={() => setShowTermsModal(true)}
+                  className="text-burgundy font-medium underline hover:no-underline transition-all"
+                >
+                  Terms & Conditions
+                </button>
+              </p>
+            </div>
+            
+            {/* Get Started Button */}
+            <button
+              onClick={handleGetStarted}
+              className="w-full py-4 rounded-2xl bg-gradient-to-r from-sage-light/70 to-sage/70 text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center active:scale-[0.98] touch-manipulation"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+            >
+              Get Started
+              <ChevronRight className="w-5 h-5 ml-2" />
+            </button>
+            
+            {/* Extra spacer for browsers with bottom UI - invisible but takes space */}
+            <div className="h-2" aria-hidden="true" />
           </div>
-          
-          {/* Get Started Button */}
-          <button
-            onClick={handleGetStarted}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-sage-light/70 to-sage/70 text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center active:scale-[0.98] touch-manipulation"
-            style={{ WebkitTapHighlightColor: 'transparent' }}
-          >
-            Get Started
-            <ChevronRight className="w-5 h-5 ml-2" />
-          </button>
         </div>
       </div>
 

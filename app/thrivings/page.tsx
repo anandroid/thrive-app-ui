@@ -160,11 +160,11 @@ export default function ThrivingsPage() {
     
     setIsAdjusting(true);
     try {
-      const response = await fetch('/api/thriving/adjust', {
+      const response = await fetch('/api/routine/adjust', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          currentThriving: selectedThriving,
+          currentRoutine: selectedThriving,
           userFeedback: adjustmentText,
         }),
       });

@@ -581,6 +581,11 @@ input, textarea, [contenteditable] {
   flex-direction: column;
   background: white;
   height: 100%;
+  /* Use dynamic viewport height to account for browser UI */
+  min-height: 100vh;
+  min-height: 100dvh;
+  /* Ensure proper sizing on all devices */
+  position: relative;
 }
 
 .illustration-layout .layout-header,
@@ -618,6 +623,42 @@ input, textarea, [contenteditable] {
   padding: 1rem;
   background: linear-gradient(to top, white 0%, white 80%, rgba(255, 255, 255, 0.98) 100%);
   flex-shrink: 0;
-  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  /* Use a larger minimum padding and add extra space for browsers with bottom UI */
+  padding-bottom: max(2rem, calc(env(safe-area-inset-bottom) + 1rem));
   box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+  /* Ensure the footer is always accessible */
+  min-height: fit-content;
+}
+
+/* Additional padding for browsers with persistent bottom UI (like iOS Safari) */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .illustration-layout .layout-footer,
+  .welcome-layout .layout-footer {
+    /* Add extra padding when safe area is detected */
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 2.5rem);
+  }
+}
+
+/* For browsers with bottom navigation bars */
+@media (display-mode: browser) {
+  .illustration-layout .layout-footer,
+  .welcome-layout .layout-footer {
+    /* Add extra bottom margin to ensure visibility above browser UI */
+    margin-bottom: env(safe-area-inset-bottom, 0);
+    padding-bottom: calc(env(safe-area-inset-bottom, 1rem) + 3rem);
+  }
+}
+
+/* Additional helper class for dynamic bottom spacing */
+.pb-safe-extra {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 3rem);
+}
+
+/* Detect iOS Safari specifically for additional adjustments */
+@supports (-webkit-touch-callout: none) {
+  .illustration-layout .layout-footer,
+  .welcome-layout .layout-footer {
+    /* iOS Safari specific adjustments */
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 3.5rem);
+  }
 }

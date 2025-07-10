@@ -26,16 +26,32 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
       className={`fixed inset-0 z-50 transition-opacity duration-300 ${
         isVisible ? 'opacity-100' : 'opacity-0'
       }`}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0
+      }}
       onClick={handleClose}
     >
       {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/60" />
+      <div className="fixed inset-0 bg-black/60" />
       
-      {/* Tutorial content - centered on screen */}
+      {/* Tutorial content - centered in viewport */}
       <div 
-        className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-3xl shadow-2xl p-6 max-w-sm w-[90%] transition-all duration-300 ${
+        className={`fixed bg-white rounded-3xl shadow-2xl p-6 max-w-sm w-[90%] transition-all duration-300 ${
           isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
         }`}
+        style={{
+          position: 'fixed',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          zIndex: 51
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
