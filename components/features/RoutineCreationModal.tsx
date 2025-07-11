@@ -5,6 +5,7 @@ import { X, Sparkles, Moon, Sun, Info } from 'lucide-react';
 import { ActionableItem, WellnessRoutine } from '@/src/services/openai/types';
 import { LoadingButton } from '@/components/ui/LoadingButton';
 import bridge from '@/src/lib/react-native-bridge';
+import { NotificationHelper } from '@/src/utils/notificationHelper';
 
 interface RoutineModalData {
   title?: string;
@@ -89,6 +90,14 @@ export const RoutineCreationModal: React.FC<RoutineCreationModalProps> = ({
 
       const routine = await response.json();
       onRoutineCreated(routine);
+      
+      // Schedule notifications if in React Native
+      if (NotificationHelper.isSupported()) {
+        const result = await NotificationHelper.scheduleRoutineReminders([routine]);
+        if (result.success) {
+          console.log('Routine reminders scheduled successfully');
+        }
+      }
       
       // Notify React Native that a thriving was created
       bridge.notifyThrivingCreated();

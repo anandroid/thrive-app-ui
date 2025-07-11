@@ -10,10 +10,13 @@ export const getThrivingsFromStorage = (): Thriving[] => {
   return stored ? JSON.parse(stored) : [];
 };
 
-export const saveThrivingToStorage = (thriving: Thriving): void => {
+export const saveThrivingToStorage = async (thriving: Thriving): Promise<void> => {
   const thrivings = getThrivingsFromStorage();
   const updatedThrivings = [...thrivings, thriving];
   localStorage.setItem(THRIVINGS_STORAGE_KEY, JSON.stringify(updatedThrivings));
+  
+  // Note: Thrivings are different from routines. 
+  // If you need to sync routine notifications, use the routine storage utilities instead.
 };
 
 export const updateThrivingInStorage = (thrivingId: string, updates: Partial<Thriving>): void => {

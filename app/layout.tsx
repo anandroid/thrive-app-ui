@@ -4,6 +4,7 @@ import "./globals.css";
 import { ServiceWorkerProvider } from "@/src/providers/ServiceWorkerProvider";
 import { OfflineIndicator } from "@/components/ui/OfflineIndicator";
 import { TouchFeedbackProvider } from "@/src/providers/TouchFeedbackProvider";
+import { NotificationProvider } from "@/src/providers/NotificationProvider";
 import "@/src/utils/clearCorruptedData";
 import { Toaster } from 'react-hot-toast';
 import { MobileDebugConsole } from '@/components/ui/MobileDebugConsole';
@@ -59,12 +60,14 @@ export default function RootLayout({
       >
         <ServiceWorkerProvider>
           <TouchFeedbackProvider>
-            <OfflineIndicator />
-            <Toaster position="top-center" />
-            {children}
-            {/* Mobile debug console */}
-            <MobileDebugConsole />
-            <MicrophoneTest />
+            <NotificationProvider>
+              <OfflineIndicator />
+              <Toaster position="top-center" />
+              {children}
+              {/* Mobile debug console */}
+              <MobileDebugConsole />
+              <MicrophoneTest />
+            </NotificationProvider>
           </TouchFeedbackProvider>
         </ServiceWorkerProvider>
       </body>

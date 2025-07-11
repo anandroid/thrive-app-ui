@@ -76,13 +76,13 @@ export class ThreadContextManager {
     if (clientBasicContext) {
       basicContext = `
 CURRENT USER DATA:
-- Pantry items: ${clientBasicContext.pantryCount} items stored
-${clientBasicContext.pantryItems && clientBasicContext.pantryItems.length > 0 ? 
+- Pantry items: ${clientBasicContext.pantryItems.length} items stored
+${clientBasicContext.pantryItems.length > 0 ? 
   `  Items:\n    ${clientBasicContext.pantryItems.join('\n    ')}` : 
   '  No items in pantry'}
 
-- Active routines: ${clientBasicContext.activeRoutineCount} (${clientBasicContext.routineTypes})
-${clientBasicContext.activeRoutines && clientBasicContext.activeRoutines.length > 0 ?
+- Active routines: ${clientBasicContext.activeRoutines.length}
+${clientBasicContext.activeRoutines.length > 0 ?
   clientBasicContext.activeRoutines.map(r => {
     let routineStr = `  • ${r.name} (${r.type})`;
     if (r.reminderTimes && r.reminderTimes.length > 0) {

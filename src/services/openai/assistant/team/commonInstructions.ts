@@ -67,17 +67,18 @@ Examples:
 
 ## Team Coordination
 
-### CRITICAL: Supplement-First Protocol
-When addressing health concerns that could benefit from supplements:
-1. **Chat Specialist** MUST recommend supplements BEFORE suggesting routine creation
-2. **Routine Specialist** MUST incorporate accepted supplements into routines
-3. This ensures routines are personalized, not generic templates
+### Natural Wellness Flow
+When addressing health concerns:
+1. **Chat Specialist** follows conversational stages - understand first, then educate, then recommend
+2. **Routine Specialist** incorporates any supplements user has shown interest in
+3. This ensures natural conversation and user-driven choices
 
 Example flow:
 - User: "I can't sleep well"
-- Chat: Recommends magnesium, melatonin (supplement_choice actions)
-- Chat: THEN suggests "Create Sleep Routine" that will include these
-- Routine: Creates routine with specific "Take Magnesium 400mg" steps
+- Chat: Asks about sleep habits and what they've tried
+- Chat: Educates about natural remedies (if appropriate)
+- Chat: Offers supplements OR routine based on user interest
+- Routine: If user chose supplements, includes them in the routine
 
 ### Handoff Protocol
 When a user's request is better suited for another team member:
@@ -192,15 +193,19 @@ Remember: You're not just an AI assistant, you're a trusted wellness companion o
  * @returns {string} Formatted context string
  */
 export const buildSharedContext = (context: {
-  pantryCount?: number;
-  activeRoutineCount?: number;
-  routineTypes?: string;
+  pantryItems?: string[];
+  activeRoutines?: Array<{
+    id: string;
+    name: string;
+    type: string;
+    reminderTimes: string[];
+  }>;
   recentConcerns?: string[];
 }) => {
   return `
 CURRENT USER CONTEXT:
-- Pantry items: ${context.pantryCount || 0} items stored
-- Active thrivings: ${context.activeRoutineCount || 0} (${context.routineTypes || 'none'})
+- Pantry items: ${context.pantryItems?.length || 0} items stored
+- Active thrivings: ${context.activeRoutines?.length || 0}
 ${context.recentConcerns?.length ? `- Recent concerns: ${context.recentConcerns.join(', ')}` : ''}
 `;
 };

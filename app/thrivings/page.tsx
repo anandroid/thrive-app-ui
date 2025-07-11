@@ -14,6 +14,7 @@ import { CelebrationShower } from '@/components/ui/CelebrationShower';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { AdjustmentTutorial } from '@/components/features/AdjustmentTutorial';
 import { LoadingButton } from '@/components/ui/LoadingButton';
+import { NotificationSettings } from '@/components/features/NotificationSettings';
 
 export default function ThrivingsPage() {
   const [thrivings, setThrivings] = useState<Thriving[]>([]);
@@ -481,6 +482,11 @@ export default function ThrivingsPage() {
                             left: index * (cardWidth + 16), // 16px gap
                             behavior: 'smooth'
                           });
+                          
+                          // Update selection for thrivings (not the add-new card)
+                          if (index < thrivings.length) {
+                            setSelectedThriving(thrivings[index]);
+                          }
                         }
                       }}
                       className={`w-2 h-2 rounded-full transition-all ${
@@ -506,11 +512,12 @@ export default function ThrivingsPage() {
                   onTouchMove={onTouchMove}
                   onTouchEnd={onTouchEnd}
                   onScroll={(e) => {
-                    // Debounce scroll selection to work better with snap points
+                    // Clear any existing timeout
                     if (scrollTimeoutRef.current) {
                       clearTimeout(scrollTimeoutRef.current);
                     }
                     
+                    // Update selection after scrolling stops
                     scrollTimeoutRef.current = setTimeout(() => {
                       const container = e.currentTarget;
                       const scrollPosition = container.scrollLeft;
@@ -537,7 +544,7 @@ export default function ThrivingsPage() {
                       if (thrivings[closestIndex] && thrivings[closestIndex].id !== selectedThriving?.id) {
                         setSelectedThriving(thrivings[closestIndex]);
                       }
-                    }, 100); // Debounce by 100ms
+                    }, 150); // Wait for scroll to settle
                   }}
                 >
                   {thrivings.map((thriving) => (
@@ -1098,6 +1105,17 @@ export default function ThrivingsPage() {
                                 {formatReminderTime(time)}
                               </span>
                             ))}
+                          </div>
+                          
+                          {/* Notification Settings */}
+                          <div className="mt-4">
+                            <NotificationSettings 
+                              thriving={selectedThriving}
+                              onToggle={(enabled) => {
+                                // Update the thriving's active state if needed
+                                console.log('Notifications', enabled ? 'enabled' : 'disabled', 'for', selectedThriving.title);
+                              }}
+                            />
                           </div>
                         </div>
                       </div>

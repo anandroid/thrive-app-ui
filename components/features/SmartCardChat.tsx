@@ -9,7 +9,6 @@ import {
   ChatMessage,
   ActionableItem,
   WellnessRoutine,
-  BasicContext,
   EnhancedQuestion,
   PartialAssistantResponse
 } from '@/src/services/openai/types';
@@ -31,6 +30,7 @@ import { savePantryItem } from '@/src/utils/pantryStorage';
 import { PantryItem } from '@/src/types/pantry';
 import { EnhancedQuestions } from './EnhancedQuestions';
 import { ConversationalAnswerFlow } from './ConversationalAnswerFlow';
+import { getBasicContext } from '@/src/utils/contextHelper';
 
 interface SmartCardChatProps {
   threadId?: string;
@@ -372,49 +372,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       abortControllerRef.current = new AbortController();
       
       // Extract enhanced basic context from localStorage for hybrid approach
-      let basicContext: BasicContext | null = null;
-      try {
-        const pantryData = localStorage.getItem('thrive_pantry_items');
-        const pantryItems: PantryItem[] = pantryData ? JSON.parse(pantryData) : [];
-        
-        const routinesData = localStorage.getItem('thrive_wellness_routines');
-        const activeRoutines: WellnessRoutine[] = routinesData ? JSON.parse(routinesData).filter((r: WellnessRoutine) => r.isActive) : [];
-        const routineTypes = activeRoutines.map((r: WellnessRoutine) => r.type).join(', ');
-        
-        // Format pantry items with key details
-        const formattedPantryItems = pantryItems
-          .slice(0, 20) // Limit to 20 most recent items
-          .map(item => {
-            let formatted = item.name;
-            if (item.notes) formatted += ` - ${item.notes.substring(0, 30)}`;
-            return formatted;
-          });
-        
-        // Format routines with step names and times
-        const formattedRoutines = activeRoutines
-          .slice(0, 10) // Limit to 10 routines
-          .map(routine => ({
-            name: routine.name,
-            type: routine.type,
-            reminderTimes: routine.reminderTimes || [],
-            steps: routine.steps.slice(0, 5).map(step => {
-              let stepStr = step.title || step.description?.substring(0, 30) || 'Step';
-              if (step.bestTime) stepStr += ` (${step.bestTime})`;
-              if (step.reminderTime) stepStr += ` (${step.reminderTime})`;
-              return stepStr;
-            })
-          }));
-        
-        basicContext = {
-          pantryCount: pantryItems.length,
-          activeRoutineCount: activeRoutines.length,
-          routineTypes: routineTypes || 'none',
-          pantryItems: formattedPantryItems,
-          activeRoutines: formattedRoutines
-        };
-      } catch (e) {
-        console.log('Could not extract basic context:', e);
-      }
+      const basicContext = getBasicContext();
       
       const response = await fetch('/api/assistant/stream', {
         method: 'POST',
@@ -769,12 +727,10 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
         window.location.href = `/thrivings?id=${action.routineId}&showAdjustment=true`;
       } else {
         // If no specific routine ID, find the first active routine of the type
-        const routinesData = localStorage.getItem('thrive_wellness_routines');
-        if (routinesData) {
-          const routines: WellnessRoutine[] = JSON.parse(routinesData);
-          const relevantRoutine = routines.find(r => 
-            r.isActive && 
-            (action.routineType ? r.type === action.routineType : true)
+        const { activeRoutines } = getBasicContext();
+        if (activeRoutines && activeRoutines.length > 0) {
+          const relevantRoutine = activeRoutines.find(r => 
+            action.routineType ? r.type === action.routineType : true
           );
           
           if (relevantRoutine) {
@@ -1423,11 +1379,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                 body: JSON.stringify({
                   message: routinePrompt,
                   threadId: currentThreadId,
-                  basicContext: {
-                    pantryCount: 1, // They just added an item
-                    activeRoutineCount: 0, // We'll assume no routines for now
-                    routineTypes: 'none'
-                  }
+                  basicContext: getBasicContext() // Get current context dynamically
                 })
               });
               

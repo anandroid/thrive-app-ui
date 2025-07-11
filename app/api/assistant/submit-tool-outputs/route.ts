@@ -267,7 +267,7 @@ export async function POST(request: NextRequest) {
             try {
               // Send initial event to establish the connection
               controller.enqueue(
-                encoder.encode(`: ping\n\n`)
+                encoder.encode(`data: {"type":"init"}\n\n`)
               );
               
               // Send status update

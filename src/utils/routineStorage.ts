@@ -1,15 +1,21 @@
 import { WellnessRoutine } from '@/src/services/openai/types';
+import { NotificationHelper } from './notificationHelper';
 
 const STORAGE_KEY = 'wellness-routines';
 
 /**
- * Save a new routine to localStorage
+ * Save a new routine to localStorage and sync with native app
  */
-export const saveRoutineToStorage = (routine: WellnessRoutine): void => {
+export const saveRoutineToStorage = async (routine: WellnessRoutine): Promise<void> => {
   try {
     const existingRoutines = getRoutinesFromStorage();
     const updatedRoutines = [...existingRoutines, routine];
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedRoutines));
+    
+    // Sync with native app if available
+    if (NotificationHelper.isSupported() && routine.isActive && routine.reminderTimes?.length > 0) {
+      await NotificationHelper.scheduleRoutineReminders([routine]);
+    }
   } catch (error) {
     console.error('Error saving routine to storage:', error);
     throw new Error('Failed to save routine');
@@ -38,9 +44,9 @@ export const getRoutinesFromStorage = (): WellnessRoutine[] => {
 };
 
 /**
- * Update an existing routine in localStorage
+ * Update an existing routine in localStorage and sync with native app
  */
-export const updateRoutineInStorage = (updatedRoutine: WellnessRoutine): boolean => {
+export const updateRoutineInStorage = async (updatedRoutine: WellnessRoutine): Promise<boolean> => {
   try {
     const routines = getRoutinesFromStorage();
     const index = routines.findIndex(r => r.id === updatedRoutine.id);
@@ -52,6 +58,12 @@ export const updateRoutineInStorage = (updatedRoutine: WellnessRoutine): boolean
     
     routines[index] = updatedRoutine;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(routines));
+    
+    // Update in native app if available
+    if (NotificationHelper.isSupported()) {
+      await NotificationHelper.updateRoutine(updatedRoutine);
+    }
+    
     return true;
   } catch (error) {
     console.error('Error updating routine in storage:', error);
@@ -60,9 +72,9 @@ export const updateRoutineInStorage = (updatedRoutine: WellnessRoutine): boolean
 };
 
 /**
- * Delete a routine from localStorage
+ * Delete a routine from localStorage and cancel notifications
  */
-export const deleteRoutineFromStorage = (routineId: string): boolean => {
+export const deleteRoutineFromStorage = async (routineId: string): Promise<boolean> => {
   try {
     const routines = getRoutinesFromStorage();
     const filteredRoutines = routines.filter(r => r.id !== routineId);
@@ -73,6 +85,12 @@ export const deleteRoutineFromStorage = (routineId: string): boolean => {
     }
     
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filteredRoutines));
+    
+    // Cancel notifications in native app if available
+    if (NotificationHelper.isSupported()) {
+      await NotificationHelper.cancelRoutineReminders(routineId);
+    }
+    
     return true;
   } catch (error) {
     console.error('Error deleting routine from storage:', error);
@@ -81,9 +99,9 @@ export const deleteRoutineFromStorage = (routineId: string): boolean => {
 };
 
 /**
- * Toggle routine active status
+ * Toggle routine active status and update notifications
  */
-export const toggleRoutineStatus = (routineId: string): boolean => {
+export const toggleRoutineStatus = async (routineId: string): Promise<boolean> => {
   try {
     const routines = getRoutinesFromStorage();
     const routine = routines.find(r => r.id === routineId);
@@ -96,7 +114,7 @@ export const toggleRoutineStatus = (routineId: string): boolean => {
     routine.isActive = !routine.isActive;
     routine.updatedAt = new Date();
     
-    return updateRoutineInStorage(routine);
+    return await updateRoutineInStorage(routine);
   } catch (error) {
     console.error('Error toggling routine status:', error);
     return false;
@@ -115,4 +133,18 @@ export const getActiveRoutines = (): WellnessRoutine[] => {
  */
 export const clearAllRoutines = (): void => {
   localStorage.removeItem(STORAGE_KEY);
+};
+
+/**
+ * Sync all routines with native app (called on app load)
+ */
+export const syncRoutinesWithNativeApp = async (): Promise<void> => {
+  if (!NotificationHelper.isSupported()) return;
+  
+  try {
+    const routines = getRoutinesFromStorage();
+    await NotificationHelper.syncRoutines(routines);
+  } catch (error) {
+    console.error('Error syncing routines with native app:', error);
+  }
 };

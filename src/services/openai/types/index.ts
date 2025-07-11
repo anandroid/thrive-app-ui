@@ -6,12 +6,10 @@ export interface StreamEvent {
 }
 
 export interface BasicContext {
-  pantryCount: number;
-  activeRoutineCount: number;
-  routineTypes: string;
-  // Enhanced context with actual content
-  pantryItems?: string[]; // e.g., ["Magnesium 400mg - for sleep", "Vitamin D 2000IU"]
-  activeRoutines?: {
+  // Arrays provide actual content - empty arrays if no items
+  pantryItems: string[]; // e.g., ["Magnesium 400mg - for sleep", "Vitamin D 2000IU"]
+  activeRoutines: {
+    id: string;
     name: string;
     type: string;
     reminderTimes: string[]; // e.g., ["8:00 AM", "9:00 PM"]

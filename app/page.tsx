@@ -9,6 +9,7 @@ import { getThrivingsFromStorage, migrateRoutinesToThrivings } from '@/src/utils
 import { GetStarted } from '@/components/features/GetStarted';
 import { ChatEditor } from '@/components/ui/ChatEditor';
 import { PrivacySection } from '@/components/features/PrivacySection';
+import { NotificationPermissionBanner } from '@/components/features/NotificationPermissionBanner';
 // import { PrivacySection2 } from '@/components/features/PrivacySection2';
 // import { PrivacySection3 } from '@/components/features/PrivacySection3';
 
@@ -351,6 +352,9 @@ export default function HomePage() {
         </div>
       </div>
       )}
+      
+      {/* Notification Permission Banner */}
+      <NotificationPermissionBanner />
     </>
   );
 }
