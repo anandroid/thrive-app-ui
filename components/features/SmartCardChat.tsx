@@ -552,6 +552,9 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                   console.log('Processing submit response stream...');
                   let submitBuffer = '';
                   
+                  // Reset fullContent when starting to process tool output response
+                  fullContent = '';
+                  
                   while (true) {
                     const { done: submitDone, value: submitValue } = await submitReader.read();
                     if (submitDone) {
@@ -573,6 +576,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                           console.log('Submit stream event:', submitData.type);
                           
                           if (submitData.type === 'delta' && submitData.content) {
+                            // Update the outer fullContent variable
                             fullContent += submitData.content;
                             setMessages(prev => {
                               const updated = [...prev];

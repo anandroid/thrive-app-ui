@@ -20,12 +20,12 @@ create_or_update_secret() {
     local secret_value=$2
     
     # Check if secret exists
-    if gcloud secrets describe "$secret_name" --project="api-project-269146618053" >/dev/null 2>&1; then
+    if gcloud secrets describe "$secret_name" --project="thrive-465618" >/dev/null 2>&1; then
         echo "📝 Updating secret: $secret_name"
-        echo -n "$secret_value" | gcloud secrets versions add "$secret_name" --data-file=- --project="api-project-269146618053"
+        echo -n "$secret_value" | gcloud secrets versions add "$secret_name" --data-file=- --project="thrive-465618"
     else
         echo "✨ Creating new secret: $secret_name"
-        echo -n "$secret_value" | gcloud secrets create "$secret_name" --data-file=- --project="api-project-269146618053"
+        echo -n "$secret_value" | gcloud secrets create "$secret_name" --data-file=- --project="thrive-465618"
     fi
 }
 
@@ -60,12 +60,12 @@ echo "✅ All secrets uploaded successfully!"
 echo "🔧 Granting Cloud Run service access to secrets..."
 
 # Get all THRIVE_ secrets
-for secret in $(gcloud secrets list --filter="name:THRIVE_" --format="value(name)" --project="api-project-269146618053"); do
+for secret in $(gcloud secrets list --filter="name:THRIVE_" --format="value(name)" --project="thrive-465618"); do
     echo "🔓 Granting access to: $secret"
     gcloud secrets add-iam-policy-binding "$secret" \
-        --member="serviceAccount:269146618053-compute@developer.gserviceaccount.com" \
+        --member="serviceAccount:465618-compute@developer.gserviceaccount.com" \
         --role="roles/secretmanager.secretAccessor" \
-        --project="api-project-269146618053" >/dev/null 2>&1
+        --project="thrive-465618" >/dev/null 2>&1
 done
 
 echo "✅ Access granted to all secrets!"

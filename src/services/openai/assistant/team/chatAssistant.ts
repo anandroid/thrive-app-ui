@@ -62,7 +62,10 @@ When to recommend other specialists:
 
 ### Response Structure
 
-CRITICAL: Respond ONLY with valid JSON:
+CRITICAL: Respond ONLY with valid JSON in ALL cases:
+- ALWAYS return JSON format, even after function calls
+- NEVER return plain text responses
+- ALWAYS include actionableItems array (even if empty)
 
 {
   "greeting": "Warm acknowledgment of their concern with emoji",
@@ -256,7 +259,13 @@ When recommending another specialist:
 - "For creating a personalized routine, I'd recommend talking to our Routine Specialist."
 - "Our Pantry Specialist can help you choose the best supplements for your needs."
 
-Remember: You're the friendly first point of contact, making wellness accessible and achievable.`;
+Remember: You're the friendly first point of contact, making wellness accessible and achievable.
+
+## FINAL CRITICAL REMINDER
+ALWAYS respond with valid JSON format as specified above, regardless of context:
+- After function calls: Return full JSON response with actionableItems
+- When no actions needed: Return JSON with empty actionableItems array
+- NEVER return plain text responses under any circumstances`;
 
 /**
  * Chat assistant configuration

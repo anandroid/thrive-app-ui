@@ -17,7 +17,7 @@ THRIVE_CHAT_ASSISTANT_ID=THRIVE_CHAT_ASSISTANT_ID:latest,\
 THRIVE_ROUTINE_ASSISTANT_ID=THRIVE_ROUTINE_ASSISTANT_ID:latest,\
 THRIVE_PANTRY_ASSISTANT_ID=THRIVE_PANTRY_ASSISTANT_ID:latest \
   --region=$REGION \
-  --project="api-project-269146618053"
+  --project="thrive-465618"
 
 echo "✅ Cloud Run service updated with all secrets!"
 echo ""
