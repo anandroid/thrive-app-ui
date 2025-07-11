@@ -28,10 +28,56 @@ export async function POST(request: NextRequest) {
         const multiAssistantService = getMultiAssistantService();
         const messages = await multiAssistantService.getThreadMessagesWithWindow(threadId);
         
-        // Create a summary of the conversation for context
-        conversationContext = messages.map(msg => 
-          `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
-        ).join('\n');
+        // Create a detailed context with emphasis on user's specific situation
+        const contextMessages = messages.map(msg => {
+          if (msg.role === 'user') {
+            return `USER'S ACTUAL WORDS: "${msg.content}"`;
+          } else {
+            // Include full assistant responses, especially recommendations
+            const content = msg.content;
+            
+            // Try to parse structured responses
+            try {
+              const parsed = JSON.parse(content);
+              let assistantMessage = `ASSISTANT'S RECOMMENDATIONS:\n`;
+              
+              // Extract greeting/main message
+              if (parsed.greeting) {
+                assistantMessage += `${parsed.greeting}\n`;
+              }
+              
+              // Extract action items (like exercises)
+              if (parsed.actionItems && parsed.actionItems.length > 0) {
+                assistantMessage += `\nSpecific recommendations provided:`;
+                parsed.actionItems.forEach((item: { title?: string; description?: string }) => {
+                  assistantMessage += `\n- ${item.title}`;
+                  if (item.description) assistantMessage += `: ${item.description}`;
+                });
+              }
+              
+              // Extract additional information
+              if (parsed.additionalInformation) {
+                assistantMessage += `\n\nAdditional guidance: ${parsed.additionalInformation}`;
+              }
+              
+              return assistantMessage;
+            } catch {
+              // If not JSON, include the full content as it might contain exercises or recommendations
+              return `ASSISTANT'S RESPONSE: ${content}`;
+            }
+          }
+        }).join('\n\n');
+        
+        conversationContext = `CONVERSATION CONTEXT:
+
+${contextMessages}
+
+CRITICAL INSTRUCTIONS:
+1. Pay special attention to USER'S ACTUAL WORDS - these reveal their specific situation
+2. INCORPORATE ALL ASSISTANT'S RECOMMENDATIONS - especially any exercises, techniques, or specific advice given
+3. If the assistant recommended specific exercises (like shoulder strengthening), these MUST be included in the routine
+4. Create a routine that builds upon what was already discussed - don't start from scratch
+5. Make it feel like a natural continuation of the conversation, not a generic routine`;
       } catch (error) {
         console.error('Error fetching thread context:', error);
         // Continue without context if fetching fails

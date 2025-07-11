@@ -20,8 +20,11 @@ export class RoutinePromptBuilder {
       conversationContext,
     } = params;
 
-    return `${conversationContext ? `Based on the previous conversation:
+    return `${conversationContext ? `CRITICAL CONTEXT - This routine MUST be based on the following conversation where the user shared specific details about their situation:
+
 ${conversationContext}
+
+IMPORTANT: The routine you create MUST directly address ALL specific concerns, symptoms, preferences, and circumstances mentioned in the conversation above. Do not create a generic routine - it must be highly personalized to what the user shared.
 
 ` : ''}Create a detailed wellness routine for: ${healthConcern}
 
@@ -71,6 +74,30 @@ Include 3-7 daily routine steps that need reminders, and 2-5 additional steps fo
   }
 
   getSystemPrompt(): string {
-    return "You are a wellness routine expert. Create detailed, practical, and safe wellness routines. When conversation context is provided, use it to deeply personalize the routine based on the user's specific situation, symptoms, concerns, and preferences mentioned in the conversation. Always consider the user's sleep schedule when suggesting activity times. Schedule activities appropriately based on their wake and sleep times. For each routine step, provide a specific reminderTime in 24-hour format (HH:MM) that aligns with the bestTime description and the user's sleep schedule. For example, if wake time is 06:00 and a step is best done 'in the morning', set reminderTime to something like '07:00' or '08:00'. Separate regular daily routine steps (that need reminders) from additional one-time or as-needed steps. For the will_video_tutorial_help field: set to true for activities that benefit from visual demonstration (exercises, stretches, breathing techniques, massage techniques, cooking/preparation methods), and false for simple activities (taking medication, drinking water, going for a walk, journaling, sleeping). Always return valid JSON.";
+    return `You are a wellness routine expert who creates HIGHLY PERSONALIZED routines based on user conversations. 
+
+CRITICAL INSTRUCTIONS:
+1. When conversation context is provided, it is YOUR PRIMARY SOURCE OF TRUTH
+2. Extract and address EVERY specific detail the user mentioned:
+   - Specific symptoms they're experiencing
+   - Times of day when issues occur
+   - What they've already tried
+   - Their lifestyle constraints
+   - Personal preferences
+   - Medical conditions mentioned
+   - Emotional state and concerns
+3. INCORPORATE ALL ASSISTANT'S RECOMMENDATIONS:
+   - If specific exercises were shown (e.g., shoulder strengthening), include them in the routine
+   - If techniques were explained, make them part of the daily steps
+   - Build upon the foundation already established in the conversation
+4. The routine MUST feel like a direct response to their conversation, not a generic template
+5. Reference specific things they said AND specific recommendations given to show continuity
+
+For timing: Always consider the user's sleep schedule when suggesting activity times. Schedule activities appropriately based on their wake and sleep times. For each routine step, provide a specific reminderTime in 24-hour format (HH:MM) that aligns with the bestTime description and the user's sleep schedule.
+
+Technical requirements:
+- Separate regular daily routine steps (that need reminders) from additional one-time or as-needed steps
+- For will_video_tutorial_help: true for visual demonstrations (exercises, techniques), false for simple activities (medication, water, journaling)
+- Always return valid JSON with the exact structure specified`;
   }
 }

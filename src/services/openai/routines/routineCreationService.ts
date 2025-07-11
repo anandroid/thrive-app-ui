@@ -56,7 +56,7 @@ export class RoutineCreationService {
         },
       ],
       response_format: { type: 'json_object' },
-      temperature: 0.7,
+      temperature: params.conversationContext ? 0.8 : 0.7, // Higher temperature when context is provided for more creative personalization
     });
 
     const routineData = JSON.parse(

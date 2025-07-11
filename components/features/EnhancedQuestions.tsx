@@ -44,8 +44,8 @@ export const EnhancedQuestions: React.FC<EnhancedQuestionsProps> = ({
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answeredQuestions, setAnsweredQuestions] = useState<Record<string, string>>({});
-  const [isAnimating, setIsAnimating] = useState(false);
   const [showAnswered, setShowAnswered] = useState(false);
+  const [questionKey, setQuestionKey] = useState(0); // Force re-render for animation
 
   const currentQuestion = questions[currentIndex];
   
@@ -76,24 +76,21 @@ export const EnhancedQuestions: React.FC<EnhancedQuestionsProps> = ({
   }, [userAnswer]);
   
   const moveToNext = () => {
-    setIsAnimating(true);
-    setTimeout(() => {
-      if (currentIndex < questions.length - 1) {
-        setCurrentIndex(prev => prev + 1);
-      } else {
-        // This is the last question - trigger immediate send if in conversational flow
-        if (useConversationalFlow && onLastQuestionAnswered) {
-          onLastQuestionAnswered();
-        }
-        // Move past the last question to show thank you
-        setCurrentIndex(prev => prev + 1);
-        // Notify parent after a delay so thank you message is visible
-        setTimeout(() => {
-          onAllQuestionsAnswered?.();
-        }, 3000); // Show thank you for 3 seconds
+    if (currentIndex < questions.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+      setQuestionKey(prev => prev + 1); // Update key for animation
+    } else {
+      // This is the last question - trigger immediate send if in conversational flow
+      if (useConversationalFlow && onLastQuestionAnswered) {
+        onLastQuestionAnswered();
       }
-      setIsAnimating(false);
-    }, 300);
+      // Move past the last question to show thank you
+      setCurrentIndex(prev => prev + 1);
+      // Notify parent after a delay so thank you message is visible
+      setTimeout(() => {
+        onAllQuestionsAnswered?.();
+      }, 3000); // Show thank you for 3 seconds
+    }
   };
 
   const handleQuickReply = (question: EnhancedQuestion, option: string) => {
@@ -404,33 +401,43 @@ export const EnhancedQuestions: React.FC<EnhancedQuestionsProps> = ({
 
   return (
     <div className="space-y-3">
-      {/* Progress indicator - minimal and modern */}
+      {/* Progress indicator with counter - minimal and modern */}
       {questions.length > 1 && (
-        <div className="flex items-center justify-center space-x-1 animate-in fade-in duration-500">
-          {questions.map((_, idx) => (
-            <div
-              key={idx}
-              className={`transition-all duration-300 ${
-                idx < currentIndex 
-                  ? 'h-0.5 w-0.5 rounded-full bg-gray-400' 
-                  : idx === currentIndex 
-                  ? 'h-0.5 w-4 rounded-full bg-gray-900' 
-                  : 'h-0.5 w-0.5 rounded-full bg-gray-200'
-              }`}
-            />
-          ))}
+        <div className="flex flex-col items-center space-y-2 animate-in fade-in duration-500">
+          <div className="text-xs font-medium text-gray-600">
+            Question {currentIndex + 1} of {questions.length}
+          </div>
+          <div className="flex items-center justify-center space-x-1">
+            {questions.map((_, idx) => (
+              <div
+                key={idx}
+                className={`transition-all duration-300 ${
+                  idx < currentIndex 
+                    ? 'h-0.5 w-0.5 rounded-full bg-gray-400' 
+                    : idx === currentIndex 
+                    ? 'h-0.5 w-4 rounded-full bg-gray-900' 
+                    : 'h-0.5 w-0.5 rounded-full bg-gray-200'
+                }`}
+              />
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Current Question - Modern card design */}
+      {/* Current Question - Modern card design with slide animation */}
       {currentQuestion && (
-        <div className={`animate-in slide-in-from-bottom duration-300 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-xl p-4 
-                        border border-gray-200/50 backdrop-blur-sm">
-            <h3 className="text-sm font-medium text-gray-900 mb-3">
-              {currentQuestion.prompt}
-            </h3>
-            {renderQuestionContent(currentQuestion)}
+        <div className="relative overflow-hidden">
+          <div
+            key={questionKey}
+            className="animate-slide-in-from-right"
+          >
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-xl p-4 
+                          border border-gray-200/50 backdrop-blur-sm">
+              <h3 className="text-sm font-medium text-gray-900 mb-3">
+                {currentQuestion.prompt}
+              </h3>
+              {renderQuestionContent(currentQuestion)}
+            </div>
           </div>
         </div>
       )}
