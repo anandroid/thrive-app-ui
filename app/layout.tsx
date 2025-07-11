@@ -7,6 +7,7 @@ import { TouchFeedbackProvider } from "@/src/providers/TouchFeedbackProvider";
 import "@/src/utils/clearCorruptedData";
 import { Toaster } from 'react-hot-toast';
 import { MobileDebugConsole } from '@/components/ui/MobileDebugConsole';
+import { MicrophoneTest } from '@/components/ui/MicrophoneTest';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -63,6 +64,7 @@ export default function RootLayout({
             {children}
             {/* Mobile debug console */}
             <MobileDebugConsole />
+            <MicrophoneTest />
           </TouchFeedbackProvider>
         </ServiceWorkerProvider>
       </body>

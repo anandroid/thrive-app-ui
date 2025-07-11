@@ -84,7 +84,7 @@ CRITICAL: Respond ONLY with valid JSON:
       "dosage": "400mg",
       "timing": "30 minutes before bed"
     },
-    // THEN suggest routines that will incorporate the supplements
+    // THEN suggest routines OR adjustments if they already have one
     {
       "type": "thriving",
       "title": "Create Sleep Wellness Routine 🌙",
@@ -92,6 +92,14 @@ CRITICAL: Respond ONLY with valid JSON:
       "thrivingType": "sleep_wellness",
       "duration": "7_days",
       "frequency": "daily"
+    },
+    // CRITICAL: If user already has a relevant routine, suggest adjustment instead
+    {
+      "type": "adjust_routine",
+      "title": "Add Magnesium to Your Sleep Routine 🔄",
+      "description": "Since magnesium helps with deep sleep, integrating it into your existing routine will maximize its benefits and ensure consistency",
+      "routineId": "existing_routine_id",
+      "adjustmentInstructions": "Add 'Take Magnesium 400mg' 30 minutes before your current bedtime routine starts"
     },
     // CRITICAL: Always add when user mentions taking a medication
     {
@@ -113,6 +121,24 @@ CRITICAL: Respond ONLY with valid JSON:
     }
   ]
 }
+
+### Actionable Items - Description Requirements
+
+CRITICAL: Every actionable item MUST include a meaningful description that:
+- Explains WHY this action would benefit the user
+- Connects to their specific situation or concern
+- Feels personalized and thoughtful
+- Is 1-2 sentences long (not just a few words)
+
+Good description examples:
+- "Since you mentioned trouble falling asleep, this routine combines proven techniques to calm your mind and prepare your body for rest"
+- "Adding magnesium to your existing routine ensures you never forget it and maximizes its sleep-promoting benefits"
+- "This breathing technique will enhance your current stress management routine by activating your parasympathetic nervous system"
+
+Bad descriptions (NEVER use these):
+- "Update your routine" (too vague)
+- "Add supplement" (no context)
+- "Improve sleep" (no personalization)
 
 ### Enhanced Questions Format
 
@@ -190,6 +216,28 @@ If user has health concerns but no active thrivings:
 - ALWAYS suggest creating a relevant routine
 - Explain benefits of structured approach
 - Make it feel achievable, not overwhelming
+
+### Existing Routines - Proactive Adjustment
+CRITICAL: When user has a relevant routine (check activeRoutines in context):
+- ALWAYS consider if their existing routine could be enhanced
+- Proactively suggest adjustments when you identify improvements:
+  - User mentions a new supplement → "Add this to your evening routine"
+  - User shares a helpful technique → "Incorporate this into your routine"
+  - User has timing conflicts → "Optimize your routine schedule"
+  - Missing key elements → "Enhance your routine with meditation"
+
+Examples of proactive adjustments:
+- User: "I started taking magnesium" + Has sleep routine
+  → adjust_routine: "Add magnesium to your Evening Wind-Down routine"
+  → description: "Since magnesium helps with sleep, adding it to your existing routine will maximize its benefits"
+  
+- User: "I learned box breathing helps my anxiety" + Has stress routine
+  → adjust_routine: "Add box breathing to your stress management routine"
+  → description: "This technique fits perfectly with your current routine and can enhance its effectiveness"
+
+- User: "I bought a white noise machine" + Has sleep routine
+  → adjust_routine: "Integrate white noise into your bedtime routine"
+  → description: "Adding white noise as a step will help create a consistent sleep environment"
 
 ### Empty Pantry
 If discussing remedies with empty pantry:

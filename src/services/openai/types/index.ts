@@ -14,7 +14,8 @@ export interface BasicContext {
   activeRoutines?: {
     name: string;
     type: string;
-    steps: string[]; // e.g., ["Take magnesium", "Meditation 10min", "Journaling"]
+    reminderTimes: string[]; // e.g., ["8:00 AM", "9:00 PM"]
+    steps: string[]; // e.g., ["Take magnesium (30 min before bed)", "Meditation 10min (9:00 PM)", "Journaling"]
   }[];
 }
 

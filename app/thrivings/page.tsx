@@ -75,14 +75,42 @@ export default function ThrivingsPage() {
     
     // Check for adjustment request from chat
     const showAdjustment = urlParams.get('showAdjustment');
-    if (showAdjustment === 'true') {
+    if (showAdjustment === 'true' && thrivingId) {
       const adjustmentRequest = sessionStorage.getItem('adjustmentRequest');
       if (adjustmentRequest) {
         try {
           const { adjustmentInstructions } = JSON.parse(adjustmentRequest);
           if (adjustmentInstructions) {
             setAdjustmentText(adjustmentInstructions);
-            setShowAdjustmentEditor(true);
+            
+            // Find and select the thriving after a delay
+            setTimeout(() => {
+              const targetThriving = savedThrivings.find(t => t.id === thrivingId);
+              if (targetThriving) {
+                setSelectedThriving(targetThriving);
+                
+                // Scroll to the adjust button area after selecting thriving
+                setTimeout(() => {
+                  const adjustSection = document.querySelector('[data-adjust-section]');
+                  if (adjustSection) {
+                    adjustSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Open the adjustment editor after scrolling
+                    setTimeout(() => {
+                      setShowAdjustmentEditor(true);
+                      
+                      // Auto-click the adjust button after another delay
+                      setTimeout(() => {
+                        const adjustButton = document.querySelector('[data-adjust-button]');
+                        if (adjustButton && adjustButton instanceof HTMLButtonElement) {
+                          adjustButton.click();
+                        }
+                      }, 1000);
+                    }, 1500);
+                  }
+                }, 500);
+              }
+            }, 500);
           }
           sessionStorage.removeItem('adjustmentRequest');
         } catch (e) {
@@ -955,7 +983,7 @@ export default function ThrivingsPage() {
                     </div>
                     
                     {/* Thriving Adjustment */}
-                    <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
+                    <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200" data-adjust-section>
                       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                         <Settings className="w-5 h-5 mr-2 text-rose" />
                         Adjust Thriving
@@ -968,6 +996,7 @@ export default function ThrivingsPage() {
                           </p>
                           <button
                             ref={adjustButtonRef}
+                            data-adjust-button
                             onClick={() => setShowAdjustmentEditor(true)}
                             className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-rose/10 to-dusty-rose/10 text-burgundy text-sm font-medium hover:from-rose/20 hover:to-dusty-rose/20 transition-all"
                           >

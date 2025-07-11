@@ -49,9 +49,15 @@ export const useSpeechToText = ({
   const recognitionRef = useRef<any>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTranscriptRef = useRef<string>('');
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   // Check if mobile device
   const isMobile = typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  // Check if Chrome on mobile
+  const isChromeMobile = isMobile && /Chrome/i.test(navigator.userAgent) && !/Edge/i.test(navigator.userAgent);
 
   useEffect(() => {
     // Only run on client side
@@ -68,11 +74,19 @@ export const useSpeechToText = ({
       try {
         const recognition = new SpeechRecognition();
       
-      // On mobile, continuous mode often doesn't work well
-      recognition.continuous = isMobile ? false : continuous;
+      // On mobile, use specific settings
+      recognition.continuous = continuous;
       recognition.interimResults = true;
       recognition.lang = 'en-US';
       recognition.maxAlternatives = 1;
+      
+      // Chrome mobile specific settings
+      if (isChromeMobile) {
+        // Force continuous mode for Chrome mobile
+        recognition.continuous = true;
+        // Try to prevent early termination
+        (recognition as any).serviceURI = '';
+      }
       
       // Mobile browsers need these for better performance
       if (isMobile) {
@@ -109,12 +123,18 @@ export const useSpeechToText = ({
       
       recognition.onstart = () => {
         mDebug(`onstart event at ${new Date().toISOString().substring(11, 23)}`);
+        
+        // Store start time for duration calculation
+        if (recognitionRef.current) {
+          (recognitionRef.current as any).startTime = Date.now();
+        }
+        
         setIsListening(true);
         onStartListening?.();
         lastTranscriptRef.current = '';
         
-        // Start timeout on mobile
-        if (isMobile) {
+        // Don't use timeout for Chrome mobile - let it fail naturally
+        if (isMobile && !isChromeMobile) {
           timeoutRef.current = setTimeout(() => {
             if (recognitionRef.current) {
               mDebug('Initial timeout - stopping recognition');
@@ -126,6 +146,60 @@ export const useSpeechToText = ({
       
       recognition.onend = () => {
         mDebug(`onend event at ${new Date().toISOString().substring(11, 23)}`);
+        
+        // Calculate duration
+        if (recognitionRef.current && (recognitionRef.current as any).startTime) {
+          const duration = Date.now() - (recognitionRef.current as any).startTime;
+          mDebug(`Recognition ended after ${duration}ms`);
+          
+          // If it ended too quickly on Chrome mobile, switch to MediaRecorder
+          if (isChromeMobile && duration < 500 && !lastTranscriptRef.current && streamRef.current) {
+            mDebug('Chrome mobile early termination detected - switching to MediaRecorder fallback');
+            
+            // Try MediaRecorder as fallback
+            try {
+              const recorder = new MediaRecorder(streamRef.current, {
+                mimeType: 'audio/webm',
+                audioBitsPerSecond: 16000
+              });
+              
+              mediaRecorderRef.current = recorder;
+              audioChunksRef.current = [];
+              
+              recorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                  audioChunksRef.current.push(event.data);
+                }
+              };
+              
+              recorder.onstart = () => {
+                mDebug('MediaRecorder fallback started');
+                setIsListening(true);
+                onStartListening?.();
+              };
+              
+              recorder.onstop = () => {
+                mDebug('MediaRecorder fallback stopped');
+                setIsListening(false);
+                onStopListening?.();
+                
+                if (audioChunksRef.current.length > 0) {
+                  const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                  mDebug(`Fallback captured ${audioBlob.size} bytes of audio`);
+                  onTranscript('[Voice input recorded - Chrome mobile fallback active]');
+                }
+                
+                audioChunksRef.current = [];
+              };
+              
+              recorder.start(100);
+              return; // Don't complete the onend handler
+            } catch (e) {
+              mDebug(`MediaRecorder fallback failed: ${e}`, 'error');
+            }
+          }
+        }
+        
         setIsListening(false);
         onStopListening?.();
         
@@ -138,6 +212,13 @@ export const useSpeechToText = ({
       
       recognition.onerror = (event: any) => {
         mDebug(`onerror at ${new Date().toISOString().substring(11, 23)} - ${event.error}: ${event.message}`, 'error');
+        
+        // Calculate time between start and error
+        if (recognitionRef.current && (recognitionRef.current as any).startTime) {
+          const duration = Date.now() - (recognitionRef.current as any).startTime;
+          mDebug(`Error occurred ${duration}ms after start`, 'error');
+        }
+        
         setIsListening(false);
         onStopListening?.();
         
@@ -154,12 +235,22 @@ export const useSpeechToText = ({
           // This is common on mobile - the recognition times out quickly
           mDebug('No speech detected - this is normal');
         } else if (event.error === 'network') {
+          mDebug('Network error - checking connection...', 'error');
           alert('Speech recognition requires an internet connection.');
         } else if (event.error === 'aborted') {
-          mDebug('Recognition aborted');
+          mDebug('Recognition aborted - possibly by browser');
+        } else if (event.error === 'audio-capture') {
+          mDebug('Audio capture failed - mic may be in use by another app', 'error');
+        } else if (event.error === 'language-not-supported') {
+          mDebug('Language not supported', 'error');
         } else {
           // Log any other errors
-          mDebug(`Unknown error: ${JSON.stringify(event)}`, 'error');
+          mDebug(`Unknown error type: "${event.error}"`, 'error');
+          mDebug(`Full error object: ${JSON.stringify({
+            error: event.error,
+            message: event.message,
+            type: event.type
+          })}`, 'error');
         }
       };
       
@@ -219,33 +310,130 @@ export const useSpeechToText = ({
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+      // Clean up audio resources
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close().catch(() => {});
+      }
     };
   }, [continuous, onTranscript, onStartListening, onStopListening, isMobile]);
 
   const startListening = async () => {
     mDebug(`startListening called at ${new Date().toISOString().substring(11, 23)}`);
+    
+    // Debug browser and platform info
+    mDebug(`Browser: ${navigator.userAgent.substring(0, 50)}...`);
+    mDebug(`Platform: ${navigator.platform}, Mobile: ${isMobile}`);
+    
     if (recognitionRef.current && !isListening) {
       try {
+        // Check if we're in a secure context (HTTPS)
+        if (window.isSecureContext !== undefined) {
+          mDebug(`Secure context: ${window.isSecureContext}`);
+        }
+        
+        // For Chrome mobile, prepare special handling
+        if (isChromeMobile) {
+          mDebug('Chrome mobile detected - implementing workarounds');
+          try {
+            // Create AudioContext to potentially help
+            if (!audioContextRef.current) {
+              const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+              audioContextRef.current = new AudioCtx();
+              if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+                await audioContextRef.current.resume();
+              }
+            }
+            
+            // Try to wake up the speech recognition service
+            mDebug('Attempting to wake up speech service...');
+            // Sometimes a dummy recognition helps
+            try {
+              const dummyRecognition = new ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition)();
+              dummyRecognition.continuous = false;
+              dummyRecognition.start();
+              setTimeout(() => {
+                try { dummyRecognition.stop(); } catch (e) {}
+              }, 100);
+            } catch (e) {
+              mDebug('Dummy recognition failed (expected)');
+            }
+          } catch (audioError) {
+            mDebug(`Failed to create AudioContext: ${audioError}`, 'error');
+          }
+        }
+        
         // On mobile, we need to request permissions first
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
           try {
             mDebug('Requesting microphone permission...');
-            await navigator.mediaDevices.getUserMedia({ audio: true });
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+              audio: {
+                echoCancellation: false, // Try disabling echo cancellation
+                noiseSuppression: false, // Try disabling noise suppression
+                autoGainControl: true,
+                sampleRate: 16000 // Lower sample rate for speech
+              } 
+            });
             mDebug(`Microphone permission granted at ${new Date().toISOString().substring(11, 23)}`);
+            
+            // Check if we got audio tracks
+            const audioTracks = stream.getAudioTracks();
+            mDebug(`Audio tracks: ${audioTracks.length}, Track enabled: ${audioTracks[0]?.enabled}`);
+            
+            // For Chrome mobile, keep the stream active but try speech recognition first
+            if (isChromeMobile) {
+              mDebug('Chrome mobile: Keeping stream active as backup');
+              streamRef.current = stream;
+              // Don't return - continue to try speech recognition
+              // We'll use MediaRecorder as fallback if speech recognition fails quickly
+            } else if (isMobile && audioContextRef.current) {
+              // For non-Chrome mobile, try the audio pipeline approach
+              try {
+                const source = audioContextRef.current.createMediaStreamSource(stream);
+                const gainNode = audioContextRef.current.createGain();
+                gainNode.gain.value = 0;
+                source.connect(gainNode);
+                gainNode.connect(audioContextRef.current.destination);
+                streamRef.current = stream;
+                mDebug('Audio pipeline created to keep mic active');
+              } catch (pipelineError) {
+                mDebug(`Failed to create audio pipeline: ${pipelineError}`, 'error');
+                stream.getTracks().forEach(track => track.stop());
+              }
+            } else {
+              // Desktop - just stop the stream
+              stream.getTracks().forEach(track => track.stop());
+            }
           } catch (permError) {
-            mDebug(`Microphone permission denied: ${permError}`, 'error');
+            mDebug(`Microphone permission error: ${permError}`, 'error');
+            mDebug(`Error name: ${(permError as any).name}, Code: ${(permError as any).code}`, 'error');
             alert('Please allow microphone access to use voice input.');
             return;
           }
+        }
+        
+        // Log recognition settings
+        mDebug(`Recognition settings - continuous: ${recognitionRef.current.continuous}, interimResults: ${recognitionRef.current.interimResults}`);
+        
+        // Try a small delay on mobile before starting recognition
+        if (isMobile) {
+          mDebug('Waiting 100ms before starting recognition on mobile...');
+          await new Promise(resolve => setTimeout(resolve, 100));
         }
         
         mDebug(`Calling recognition.start() at ${new Date().toISOString().substring(11, 23)}`);
         recognitionRef.current.start();
       } catch (error) {
         mDebug(`Error starting speech recognition: ${error}`, 'error');
+        mDebug(`Error details: ${JSON.stringify(error)}`, 'error');
+        
         // If the error is because recognition is already started, stop and restart
         if (error instanceof Error && error.message.includes('already started')) {
           try {
+            mDebug('Recognition already started, attempting restart...');
             recognitionRef.current.stop();
             setTimeout(() => {
               recognitionRef.current.start();
@@ -261,8 +449,34 @@ export const useSpeechToText = ({
   };
 
   const stopListening = () => {
-    if (recognitionRef.current && isListening) {
+    mDebug('stopListening called');
+    
+    // Stop MediaRecorder if using Chrome mobile fallback
+    if (isChromeMobile && mediaRecorderRef.current) {
+      if (mediaRecorderRef.current.state === 'recording') {
+        mDebug('Stopping MediaRecorder...');
+        mediaRecorderRef.current.stop();
+      }
+      mediaRecorderRef.current = null;
+    } else if (recognitionRef.current && isListening) {
       recognitionRef.current.stop();
+    }
+    
+    // Clean up audio resources
+    if (streamRef.current) {
+      mDebug('Stopping audio stream...');
+      streamRef.current.getTracks().forEach(track => {
+        track.stop();
+      });
+      streamRef.current = null;
+    }
+    
+    if (audioContextRef.current) {
+      mDebug('Closing audio context...');
+      audioContextRef.current.close().catch(e => {
+        mDebug(`Error closing audio context: ${e}`, 'error');
+      });
+      audioContextRef.current = null;
     }
   };
 

@@ -12,7 +12,7 @@
     "test:coverage": "jest --coverage",
     "test:assistant": "node tests/puppeteer-assistant-tests.js",
     "update-assistants": "node scripts/create-assistant-team.js",
-    "update-assistant": "node scripts/update-assistant-functions.js"
+    "update-assistant": "node scripts/update-assistants-with-functions.js"
   },
   "dependencies": {
     "clsx": "^2.1.1",

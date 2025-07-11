@@ -10,7 +10,7 @@ const fs = require('fs').promises;
 const path = require('path');
 
 // Configuration
-const BASE_URL = 'http://localhost:3001';
+const BASE_URL = 'http://localhost:3000';
 const SCREENSHOTS_DIR = path.join(__dirname, 'screenshots');
 const WAIT_TIME = 2000; // Time to wait for responses
 

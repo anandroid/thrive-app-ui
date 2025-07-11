@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   AlertCircle, ShoppingCart, PlusCircle, ChevronRight, Heart,
-  Calendar, Pill, Sparkles, Moon, Brain, Activity, FileText, Globe, BookOpen 
+  Calendar, Pill, Sparkles, Moon, Brain, Activity, FileText, Globe, BookOpen, Settings 
 } from 'lucide-react';
 import {
   ChatMessage,
@@ -390,15 +390,19 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
             return formatted;
           });
         
-        // Format routines with step names
+        // Format routines with step names and times
         const formattedRoutines = activeRoutines
-          .slice(0, 5) // Limit to 5 routines
+          .slice(0, 10) // Limit to 10 routines
           .map(routine => ({
             name: routine.name,
             type: routine.type,
-            steps: routine.steps.slice(0, 5).map(step => 
-              step.title || step.description?.substring(0, 30) || 'Step'
-            )
+            reminderTimes: routine.reminderTimes || [],
+            steps: routine.steps.slice(0, 5).map(step => {
+              let stepStr = step.title || step.description?.substring(0, 30) || 'Step';
+              if (step.bestTime) stepStr += ` (${step.bestTime})`;
+              if (step.reminderTime) stepStr += ` (${step.reminderTime})`;
+              return stepStr;
+            })
           }));
         
         basicContext = {
@@ -756,7 +760,28 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
           adjustmentInstructions: action.adjustmentInstructions || action.description || ''
         };
         sessionStorage.setItem('adjustmentRequest', JSON.stringify(adjustmentData));
+        
+        // Navigate to thrivings page
         window.location.href = `/thrivings?id=${action.routineId}&showAdjustment=true`;
+      } else {
+        // If no specific routine ID, find the first active routine of the type
+        const routinesData = localStorage.getItem('thrive_wellness_routines');
+        if (routinesData) {
+          const routines: WellnessRoutine[] = JSON.parse(routinesData);
+          const relevantRoutine = routines.find(r => 
+            r.isActive && 
+            (action.routineType ? r.type === action.routineType : true)
+          );
+          
+          if (relevantRoutine) {
+            const adjustmentData = {
+              routineId: relevantRoutine.id,
+              adjustmentInstructions: action.adjustmentInstructions || action.description || ''
+            };
+            sessionStorage.setItem('adjustmentRequest', JSON.stringify(adjustmentData));
+            window.location.href = `/thrivings?id=${relevantRoutine.id}&showAdjustment=true`;
+          }
+        }
       }
     } else if (action.link) {
       bridge.openExternalUrl(action.link);
@@ -1024,7 +1049,9 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                           'globe': Globe,
                           'book-open': BookOpen,
                           'shopping-cart': ShoppingCart,
-                          'plus-circle': PlusCircle
+                          'plus-circle': PlusCircle,
+                          'settings': Settings,
+                          'edit': Settings
                         } as const;
                         Icon = iconMap[singleItem.icon as keyof typeof iconMap] || Heart;
                       } else {
@@ -1032,6 +1059,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                         if (singleItem.type === 'appointment') Icon = Calendar;
                         else if (singleItem.type === 'medicine' || singleItem.type === 'supplement') Icon = Pill;
                         else if (singleItem.type === 'routine' || singleItem.type === 'create_routine' || singleItem.type === 'thriving') Icon = Sparkles;
+                        else if (singleItem.type === 'adjust_routine') Icon = Settings;
                         else if (singleItem.type === 'information') Icon = FileText;
                         else if (singleItem.type === 'buy') Icon = ShoppingCart;
                         else if (singleItem.type === 'add_to_pantry' || singleItem.type === 'already_have') Icon = PlusCircle;

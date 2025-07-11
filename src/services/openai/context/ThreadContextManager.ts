@@ -78,14 +78,19 @@ export class ThreadContextManager {
 CURRENT USER DATA:
 - Pantry items: ${clientBasicContext.pantryCount} items stored
 ${clientBasicContext.pantryItems && clientBasicContext.pantryItems.length > 0 ? 
-  `  Items: ${clientBasicContext.pantryItems.join(', ')}` : 
+  `  Items:\n    ${clientBasicContext.pantryItems.join('\n    ')}` : 
   '  No items in pantry'}
 
 - Active routines: ${clientBasicContext.activeRoutineCount} (${clientBasicContext.routineTypes})
 ${clientBasicContext.activeRoutines && clientBasicContext.activeRoutines.length > 0 ?
-  clientBasicContext.activeRoutines.map(r => 
-    `  • ${r.name} (${r.type}): ${r.steps.join(' → ')}`
-  ).join('\n') :
+  clientBasicContext.activeRoutines.map(r => {
+    let routineStr = `  • ${r.name} (${r.type})`;
+    if (r.reminderTimes && r.reminderTimes.length > 0) {
+      routineStr += ` - Scheduled: ${r.reminderTimes.join(', ')}`;
+    }
+    routineStr += `\n    Steps: ${r.steps.join(' → ')}`;
+    return routineStr;
+  }).join('\n') :
   '  No active routines'}
 
 `;
@@ -96,13 +101,21 @@ ${clientBasicContext.activeRoutines && clientBasicContext.activeRoutines.length 
 
 ${basicContext}
 CONTEXT USAGE GUIDELINES:
-- You now have detailed pantry items and routine information in the context above
+- You now have detailed pantry items with dosages and routine information with scheduled times
 - For questions like "What supplements do I have?", use the context data instead of calling functions
-- For questions like "What's in my sleep routine?", use the context data instead of calling functions
-- Only call get_pantry_items if you need additional details not shown (full notes, dates, etc.)
-- Only call get_thriving_progress if you need complete routine details or progress tracking
-- If user asks about supplements and pantry is empty, directly recommend buy actions
-- If user mentions health issues and has no relevant routines, directly recommend creating routines
+- For questions like "What's in my sleep routine?" or "When should I take my supplements?", use the context data
+- The context shows:
+  * Pantry items with dosages and notes
+  * Routine names, types, and scheduled reminder times
+  * Individual steps with their specific times (if set)
+- Only call get_pantry_items if you need:
+  * Full item details (expiration dates, purchase dates, categories)
+  * Items beyond the 20 shown in context
+- Only call get_thriving_progress if you need:
+  * Complete progress tracking data
+  * Completion history
+  * All steps (context shows first 5)
+- If user asks about timing, check both routine reminder times AND individual step times
 - The context gives you enough information for most common queries without function calls
 
 CRITICAL ROUTINE REMINDERS:

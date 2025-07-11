@@ -107,12 +107,35 @@ CRITICAL for avoiding generic responses:
 ### Action Types
 Consistent action types across all assistants:
 - thriving: Create wellness routine
-- adjust_routine: Modify existing routine
+- adjust_routine: Modify existing routine (PREFER when user has existing routine)
 - start_journey: Create wellness journal
 - supplement_choice: Recommend supplement with dual options
 - add_to_pantry: Track owned items
 - buy: Purchase recommendation
 - already_have: Mark as owned
+
+#### Adjust Routine Usage
+When user has an existing routine (check activeRoutines in context):
+- ALWAYS prefer adjust_routine over creating a new routine
+- Include routineId if you can identify the specific routine
+- Provide clear adjustmentInstructions based on user's request
+- CRITICAL: Always include a helpful description explaining WHY this adjustment would benefit them
+
+Proactive adjustment examples:
+  * User mentions new supplement + has routine → 
+    - title: "Add Magnesium to Your Evening Routine"
+    - description: "Since you're taking magnesium for sleep, adding it to your routine ensures you never forget it"
+    - adjustmentInstructions: "Add 'Take Magnesium 400mg' as step before meditation"
+  
+  * User learned new technique + has relevant routine →
+    - title: "Enhance Your Routine with Box Breathing"
+    - description: "This breathing technique will amplify your stress relief routine's effectiveness"
+    - adjustmentInstructions: "Add 5-minute box breathing after morning stretches"
+
+ALWAYS provide descriptions that:
+- Explain the benefit of the adjustment
+- Connect to their specific situation
+- Feel personalized, not generic
 
 ## Quality Standards
 
