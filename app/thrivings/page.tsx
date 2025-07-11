@@ -31,6 +31,7 @@ export default function ThrivingsPage() {
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
   const adjustButtonRef = useRef<HTMLButtonElement | null>(null);
   const hasShownTutorialInSession = useRef(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Load thrivings from localStorage
@@ -257,16 +258,29 @@ export default function ThrivingsPage() {
   // Touch handling for swipe gestures
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [isScrolling, setIsScrolling] = useState(false);
 
   const minSwipeDistance = 50;
 
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
+    setIsScrolling(false);
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
     setTouchEnd(e.targetTouches[0].clientX);
+    
+    // Prevent default scrolling to control the swipe behavior
+    if (touchStart !== null) {
+      const currentTouch = e.targetTouches[0].clientX;
+      const diff = Math.abs(currentTouch - touchStart);
+      
+      // If significant horizontal movement, prevent default scrolling
+      if (diff > 10 && !isScrolling) {
+        e.preventDefault();
+      }
+    }
   };
 
   const onTouchEnd = () => {
@@ -289,14 +303,21 @@ export default function ThrivingsPage() {
       if (nextIndex !== currentIndex) {
         setSelectedThriving(thrivings[nextIndex]);
         if (scrollContainerRef.current) {
-          const cardWidth = 320 + 16;
-          scrollContainerRef.current.scrollTo({
-            left: nextIndex * cardWidth,
-            behavior: 'smooth'
-          });
+          const container = scrollContainerRef.current;
+          const cardElement = container.children[nextIndex] as HTMLElement;
+          
+          if (cardElement) {
+            // Use the card's offset for more accurate positioning
+            container.scrollTo({
+              left: cardElement.offsetLeft - 16, // Subtract padding
+              behavior: 'smooth'
+            });
+          }
         }
       }
     }
+    
+    setIsScrolling(false);
   };
 
   // Get the next upcoming step based on current time
@@ -445,30 +466,62 @@ export default function ThrivingsPage() {
 
                 <div 
                   ref={scrollContainerRef}
-                  className="flex gap-4 overflow-x-auto pb-6 scrollbar-hide snap-x snap-mandatory -mx-4 px-4"
-                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                  className="flex gap-4 overflow-x-auto pb-6 scrollbar-hide snap-x snap-mandatory scroll-smooth -mx-4 px-4"
+                  style={{ 
+                    scrollbarWidth: 'none', 
+                    msOverflowStyle: 'none',
+                    scrollSnapType: 'x mandatory',
+                    scrollBehavior: 'smooth',
+                    WebkitOverflowScrolling: 'touch'
+                  }}
                   onTouchStart={onTouchStart}
                   onTouchMove={onTouchMove}
                   onTouchEnd={onTouchEnd}
                   onScroll={(e) => {
-                    const container = e.currentTarget;
-                    const cardWidth = 320 + 16; // card width + gap
-                    const scrollPosition = container.scrollLeft;
-                    const index = Math.round(scrollPosition / cardWidth);
-                    if (thrivings[index]) {
-                      setSelectedThriving(thrivings[index]);
+                    // Debounce scroll selection to work better with snap points
+                    if (scrollTimeoutRef.current) {
+                      clearTimeout(scrollTimeoutRef.current);
                     }
+                    
+                    scrollTimeoutRef.current = setTimeout(() => {
+                      const container = e.currentTarget;
+                      const scrollPosition = container.scrollLeft;
+                      const containerWidth = container.clientWidth;
+                      
+                      // Find the card that's most centered in view
+                      let closestIndex = 0;
+                      let closestDistance = Infinity;
+                      
+                      Array.from(container.children).forEach((child, index) => {
+                        if (index < thrivings.length) { // Exclude the "add new" card
+                          const cardElement = child as HTMLElement;
+                          const cardCenter = cardElement.offsetLeft + (cardElement.offsetWidth / 2);
+                          const viewCenter = scrollPosition + (containerWidth / 2);
+                          const distance = Math.abs(cardCenter - viewCenter);
+                          
+                          if (distance < closestDistance) {
+                            closestDistance = distance;
+                            closestIndex = index;
+                          }
+                        }
+                      });
+                      
+                      if (thrivings[closestIndex] && thrivings[closestIndex].id !== selectedThriving?.id) {
+                        setSelectedThriving(thrivings[closestIndex]);
+                      }
+                    }, 100); // Debounce by 100ms
                   }}
                 >
                   {thrivings.map((thriving) => (
                     <div
                       key={thriving.id}
                       onClick={() => setSelectedThriving(thriving)}
-                      className={`flex-shrink-0 w-[calc(100vw-2rem)] max-w-sm rounded-2xl p-6 cursor-pointer transition-all snap-center ${
+                      className={`flex-shrink-0 w-[calc(100vw-2rem)] max-w-sm rounded-2xl p-6 cursor-pointer transition-all snap-center snap-always ${
                         selectedThriving?.id === thriving.id 
                           ? 'bg-white shadow-xl border-2 border-rose/20' 
                           : 'bg-white hover:shadow-lg border border-gray-200'
                       }`}
+                      style={{ scrollSnapAlign: 'center', scrollSnapStop: 'always' }}
                     >
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex-1">
@@ -585,7 +638,8 @@ export default function ThrivingsPage() {
                       sessionStorage.setItem('initialMessage', 'Create a wellness thriving for me');
                       window.location.href = '/chat/new?intent=create_thriving';
                     }}
-                    className="flex-shrink-0 w-[calc(100vw-2rem)] max-w-sm rounded-2xl border-2 border-dashed border-gray-300 p-6 flex flex-col items-center justify-center cursor-pointer hover:border-rose/50 hover:bg-gray-50 transition-all snap-center"
+                    className="flex-shrink-0 w-[calc(100vw-2rem)] max-w-sm rounded-2xl border-2 border-dashed border-gray-300 p-6 flex flex-col items-center justify-center cursor-pointer hover:border-rose/50 hover:bg-gray-50 transition-all snap-center snap-always"
+                    style={{ scrollSnapAlign: 'center', scrollSnapStop: 'always' }}
                   >
                     <Plus className="w-12 h-12 text-gray-400 mb-3" />
                     <p className="text-gray-900 font-medium">Create New Thriving</p>

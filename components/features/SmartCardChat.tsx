@@ -371,20 +371,42 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     try {
       abortControllerRef.current = new AbortController();
       
-      // Extract basic context from localStorage for hybrid approach
+      // Extract enhanced basic context from localStorage for hybrid approach
       let basicContext: BasicContext | null = null;
       try {
         const pantryData = localStorage.getItem('thrive_pantry_items');
-        const pantryCount = pantryData ? JSON.parse(pantryData).length : 0;
+        const pantryItems: PantryItem[] = pantryData ? JSON.parse(pantryData) : [];
         
         const routinesData = localStorage.getItem('thrive_wellness_routines');
-        const activeRoutines = routinesData ? JSON.parse(routinesData).filter((r: WellnessRoutine) => r.isActive) : [];
+        const activeRoutines: WellnessRoutine[] = routinesData ? JSON.parse(routinesData).filter((r: WellnessRoutine) => r.isActive) : [];
         const routineTypes = activeRoutines.map((r: WellnessRoutine) => r.type).join(', ');
         
+        // Format pantry items with key details
+        const formattedPantryItems = pantryItems
+          .slice(0, 20) // Limit to 20 most recent items
+          .map(item => {
+            let formatted = item.name;
+            if (item.notes) formatted += ` - ${item.notes.substring(0, 30)}`;
+            return formatted;
+          });
+        
+        // Format routines with step names
+        const formattedRoutines = activeRoutines
+          .slice(0, 5) // Limit to 5 routines
+          .map(routine => ({
+            name: routine.name,
+            type: routine.type,
+            steps: routine.steps.slice(0, 5).map(step => 
+              step.title || step.description?.substring(0, 30) || 'Step'
+            )
+          }));
+        
         basicContext = {
-          pantryCount,
+          pantryCount: pantryItems.length,
           activeRoutineCount: activeRoutines.length,
-          routineTypes: routineTypes || 'none'
+          routineTypes: routineTypes || 'none',
+          pantryItems: formattedPantryItems,
+          activeRoutines: formattedRoutines
         };
       } catch (e) {
         console.log('Could not extract basic context:', e);
@@ -511,8 +533,13 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                 console.log('Submit response status:', submitResponse.status);
                 if (!submitResponse.ok) {
                   const errorText = await submitResponse.text();
-                  console.error('Submit error:', errorText);
-                  throw new Error('Failed to submit tool outputs');
+                  console.error('Submit tool outputs HTTP error:', submitResponse.status, errorText);
+                  console.debug('Failed tool outputs:', toolOutputs);
+                  console.debug('Continuing without tool results - AI will work with available data');
+                  
+                  // Don't throw - let AI continue without the tool results
+                  // Just skip processing the submit response
+                  continue;
                 }
 
                 // Continue processing the new stream
@@ -572,6 +599,31 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                               }
                               return updated;
                             });
+                          }
+                          
+                          if (submitData.type === 'error') {
+                            console.error('Submit tool outputs error (continuing without results):', submitData.error);
+                            console.debug('Tool outputs that failed:', toolOutputs);
+                            console.debug('Thread ID:', data.threadId);
+                            console.debug('Run ID:', data.runId);
+                            
+                            // Don't show error to user - let AI continue without tool results
+                            // The AI can still provide a meaningful response
+                            console.log('Continuing without tool results - AI will handle gracefully');
+                            
+                            // Keep the streaming state to show AI is still working
+                            setMessages(prev => {
+                              const updated = [...prev];
+                              const lastMessage = updated[updated.length - 1];
+                              if (lastMessage.role === 'assistant') {
+                                // Keep streaming, AI will continue
+                                lastMessage.isStreaming = true;
+                              }
+                              return updated;
+                            });
+                            
+                            // Don't break - let the stream continue
+                            // The AI assistant should handle the missing data gracefully
                           }
                         } catch (e) {
                           console.error('Error parsing submit response:', e);

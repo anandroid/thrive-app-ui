@@ -60,6 +60,23 @@ export async function POST(request: NextRequest) {
                 assistantMessage += `\n\nAdditional guidance: ${parsed.additionalInformation}`;
               }
               
+              // Extract supplement recommendations (CRITICAL for routine personalization)
+              if (parsed.actionableItems && parsed.actionableItems.length > 0) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const supplements = parsed.actionableItems.filter((item: any) => 
+                  item.type === 'supplement_choice' || item.type === 'already_have'
+                );
+                if (supplements.length > 0) {
+                  assistantMessage += `\n\nSUPPLEMENTS RECOMMENDED/ACCEPTED:`;
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  supplements.forEach((supp: any) => {
+                    assistantMessage += `\n- ${supp.productName || supp.title}`;
+                    if (supp.dosage) assistantMessage += ` (${supp.dosage})`;
+                    if (supp.timing) assistantMessage += ` - Take: ${supp.timing}`;
+                  });
+                }
+              }
+              
               return assistantMessage;
             } catch {
               // If not JSON, include the full content as it might contain exercises or recommendations

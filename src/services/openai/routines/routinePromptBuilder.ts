@@ -24,7 +24,12 @@ export class RoutinePromptBuilder {
 
 ${conversationContext}
 
-IMPORTANT: The routine you create MUST directly address ALL specific concerns, symptoms, preferences, and circumstances mentioned in the conversation above. Do not create a generic routine - it must be highly personalized to what the user shared.
+IMPORTANT REQUIREMENTS:
+1. The routine MUST directly address ALL specific concerns, symptoms, preferences, and circumstances mentioned above
+2. If the user accepted any supplements (like magnesium, melatonin, etc.), they MUST be included as specific steps with exact dosages and timing
+3. If specific exercises or techniques were recommended (like shoulder exercises), include them EXACTLY as described
+4. NEVER create a generic routine - every element must tie back to the conversation
+5. For specialty conditions (chronic pain, autoimmune, etc.), include condition-specific management strategies
 
 ` : ''}Create a detailed wellness routine for: ${healthConcern}
 
@@ -76,7 +81,7 @@ Include 3-7 daily routine steps that need reminders, and 2-5 additional steps fo
   getSystemPrompt(): string {
     return `You are a wellness routine expert who creates HIGHLY PERSONALIZED routines based on user conversations. 
 
-CRITICAL INSTRUCTIONS:
+CRITICAL INSTRUCTIONS FOR NON-GENERIC ROUTINES:
 1. When conversation context is provided, it is YOUR PRIMARY SOURCE OF TRUTH
 2. Extract and address EVERY specific detail the user mentioned:
    - Specific symptoms they're experiencing
@@ -86,12 +91,21 @@ CRITICAL INSTRUCTIONS:
    - Personal preferences
    - Medical conditions mentioned
    - Emotional state and concerns
-3. INCORPORATE ALL ASSISTANT'S RECOMMENDATIONS:
-   - If specific exercises were shown (e.g., shoulder strengthening), include them in the routine
+3. INCORPORATE ALL SUPPLEMENTS AND MEDICATIONS:
+   - If user accepted specific supplements (magnesium, melatonin, etc.), create dedicated steps
+   - Include exact dosages and timing mentioned in conversation
+   - Reference their pantry items if mentioned
+   - Never use generic "take your supplements" - specify WHICH ones
+4. INCORPORATE ALL ASSISTANT'S RECOMMENDATIONS:
+   - If specific exercises were shown (e.g., shoulder strengthening), include them EXACTLY
    - If techniques were explained, make them part of the daily steps
    - Build upon the foundation already established in the conversation
-4. The routine MUST feel like a direct response to their conversation, not a generic template
-5. Reference specific things they said AND specific recommendations given to show continuity
+5. The routine MUST feel like a direct response to their conversation, not a generic template
+6. Reference specific things they said AND specific recommendations given to show continuity
+7. For specialty conditions (pain management, autoimmune, hormonal issues):
+   - Include condition-specific strategies
+   - Address their exact symptoms, not general wellness
+   - Use medical terminology they used
 
 For timing: Always consider the user's sleep schedule when suggesting activity times. Schedule activities appropriately based on their wake and sleep times. For each routine step, provide a specific reminderTime in 24-hour format (HH:MM) that aligns with the bestTime description and the user's sleep schedule.
 

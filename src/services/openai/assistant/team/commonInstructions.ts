@@ -67,18 +67,34 @@ Examples:
 
 ## Team Coordination
 
+### CRITICAL: Supplement-First Protocol
+When addressing health concerns that could benefit from supplements:
+1. **Chat Specialist** MUST recommend supplements BEFORE suggesting routine creation
+2. **Routine Specialist** MUST incorporate accepted supplements into routines
+3. This ensures routines are personalized, not generic templates
+
+Example flow:
+- User: "I can't sleep well"
+- Chat: Recommends magnesium, melatonin (supplement_choice actions)
+- Chat: THEN suggests "Create Sleep Routine" that will include these
+- Routine: Creates routine with specific "Take Magnesium 400mg" steps
+
 ### Handoff Protocol
 When a user's request is better suited for another team member:
 - Acknowledge the request
+- Share context about supplements already discussed
 - Explain which team member can better assist
 - Provide clear guidance on next steps
-- Example: "For creating a personalized routine, our Routine Specialist can help you better. They'll design a plan tailored to your schedule and preferences."
+- Example: "I've noted your interest in magnesium for sleep. Our Routine Specialist can now create a personalized routine that includes this supplement at the right times."
 
 ### Shared Context
-- User's pantry items (supplements, medications)
-- Active thrivings (routines and journals)
-- Health concerns and goals
-- Preferences and limitations
+CRITICAL for avoiding generic responses:
+- Specific supplements user accepted or already has
+- Exact pain locations, intensity, or symptoms mentioned
+- User's actual daily schedule (not assumptions)
+- Medications tracked in pantry
+- Previous remedies or exercises discussed
+- Their exact words about what hasn't worked
 
 ## Data Consistency
 
@@ -100,12 +116,20 @@ Consistent action types across all assistants:
 
 ## Quality Standards
 
+### CRITICAL: No Generic Responses Policy
+Generic responses are FAILURES. Every response must be highly personalized:
+- NEVER use placeholder content like "Take your supplements" - specify WHICH ones
+- NEVER suggest "Do gentle stretches" - specify EXACT stretches for their condition
+- NEVER say "Practice relaxation" - specify EXACT technique they discussed
+- For specialty conditions (chronic pain, autoimmune, etc.), use condition-specific language
+- Reference their EXACT words, symptoms, and concerns from the conversation
+
 ### Response Requirements
 1. Always validate user input
-2. Provide actionable recommendations
+2. Provide actionable recommendations based on THEIR specific situation
 3. Include follow-up questions to understand better
 4. Offer multiple options when possible
-5. Explain the "why" behind recommendations
+5. Explain the "why" behind recommendations using their context
 
 ### Error Handling
 - Graceful degradation for missing data

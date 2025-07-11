@@ -2,6 +2,18 @@
 
 import { useState, useRef, useEffect } from 'react';
 
+// Import type from MobileDebugConsole
+import type { MobileDebug } from '@/components/ui/MobileDebugConsole';
+
+// Mobile debug logger
+const mDebug = (message: string, type: 'log' | 'error' = 'log') => {
+  if (typeof window !== 'undefined' && window.mobileDebug) {
+    window.mobileDebug[type](message);
+  } else {
+    console[type](`[Speech] ${message}`);
+  }
+};
+
 /**
  * useSpeechToText Hook
  * 
@@ -70,8 +82,33 @@ export const useSpeechToText = ({
         // recognition.serviceURI = undefined;
       }
       
+      // Add all event listeners for debugging
+      recognition.onaudiostart = () => {
+        mDebug(`onaudiostart - mic capturing at ${new Date().toISOString().substring(11, 23)}`);
+      };
+      
+      recognition.onaudioend = () => {
+        mDebug(`onaudioend - mic stopped at ${new Date().toISOString().substring(11, 23)}`);
+      };
+      
+      recognition.onsoundstart = () => {
+        mDebug(`onsoundstart - sound detected at ${new Date().toISOString().substring(11, 23)}`);
+      };
+      
+      recognition.onsoundend = () => {
+        mDebug(`onsoundend - sound stopped at ${new Date().toISOString().substring(11, 23)}`);
+      };
+      
+      recognition.onspeechstart = () => {
+        mDebug(`onspeechstart - speech detected at ${new Date().toISOString().substring(11, 23)}`);
+      };
+      
+      recognition.onspeechend = () => {
+        mDebug(`onspeechend - speech stopped at ${new Date().toISOString().substring(11, 23)}`);
+      };
+      
       recognition.onstart = () => {
-        console.log('Speech recognition started');
+        mDebug(`onstart event at ${new Date().toISOString().substring(11, 23)}`);
         setIsListening(true);
         onStartListening?.();
         lastTranscriptRef.current = '';
@@ -80,7 +117,7 @@ export const useSpeechToText = ({
         if (isMobile) {
           timeoutRef.current = setTimeout(() => {
             if (recognitionRef.current) {
-              console.log('Initial timeout - stopping recognition');
+              mDebug('Initial timeout - stopping recognition');
               recognitionRef.current.stop();
             }
           }, 5000); // 5 seconds initial timeout
@@ -88,7 +125,7 @@ export const useSpeechToText = ({
       };
       
       recognition.onend = () => {
-        console.log('Speech recognition ended');
+        mDebug(`onend event at ${new Date().toISOString().substring(11, 23)}`);
         setIsListening(false);
         onStopListening?.();
         
@@ -100,7 +137,7 @@ export const useSpeechToText = ({
       };
       
       recognition.onerror = (event: any) => {
-        console.error('[Speech] Error:', event.error, 'Message:', event.message);
+        mDebug(`onerror at ${new Date().toISOString().substring(11, 23)} - ${event.error}: ${event.message}`, 'error');
         setIsListening(false);
         onStopListening?.();
         
@@ -115,19 +152,19 @@ export const useSpeechToText = ({
           alert('Microphone access was denied. Please check your browser settings.');
         } else if (event.error === 'no-speech') {
           // This is common on mobile - the recognition times out quickly
-          console.log('[Speech] No speech detected - this is normal');
+          mDebug('No speech detected - this is normal');
         } else if (event.error === 'network') {
           alert('Speech recognition requires an internet connection.');
         } else if (event.error === 'aborted') {
-          console.log('[Speech] Recognition aborted');
+          mDebug('Recognition aborted');
         } else {
           // Log any other errors
-          console.error('[Speech] Unknown error:', event);
+          mDebug(`Unknown error: ${JSON.stringify(event)}`, 'error');
         }
       };
       
       recognition.onresult = (event: any) => {
-        console.log('[Speech] Result event:', event);
+        mDebug(`Result event with ${event.results.length} results`);
         let finalTranscript = '';
         let interimTranscript = '';
         
@@ -140,7 +177,7 @@ export const useSpeechToText = ({
           }
         }
         
-        console.log('[Speech] Final:', finalTranscript, 'Interim:', interimTranscript);
+        mDebug(`Final: '${finalTranscript}' Interim: '${interimTranscript}'`);
         
         // Send the transcript (final or interim)
         const text = finalTranscript || interimTranscript;
@@ -154,7 +191,7 @@ export const useSpeechToText = ({
             // Stop after 3 seconds of silence on mobile
             timeoutRef.current = setTimeout(() => {
               if (recognitionRef.current) {
-                console.log('Stopping due to silence timeout');
+                mDebug('Stopping due to silence timeout');
                 recognitionRef.current.stop();
               }
             }, 3000);
@@ -164,7 +201,7 @@ export const useSpeechToText = ({
       
         recognitionRef.current = recognition;
       } catch (error) {
-        console.error('[Speech] Failed to initialize recognition:', error);
+        mDebug(`Failed to initialize recognition: ${error}`, 'error');
         setIsSupported(false);
       }
     }
@@ -186,23 +223,26 @@ export const useSpeechToText = ({
   }, [continuous, onTranscript, onStartListening, onStopListening, isMobile]);
 
   const startListening = async () => {
+    mDebug(`startListening called at ${new Date().toISOString().substring(11, 23)}`);
     if (recognitionRef.current && !isListening) {
       try {
         // On mobile, we need to request permissions first
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
           try {
+            mDebug('Requesting microphone permission...');
             await navigator.mediaDevices.getUserMedia({ audio: true });
-            console.log('Microphone permission granted');
+            mDebug(`Microphone permission granted at ${new Date().toISOString().substring(11, 23)}`);
           } catch (permError) {
-            console.error('Microphone permission denied:', permError);
+            mDebug(`Microphone permission denied: ${permError}`, 'error');
             alert('Please allow microphone access to use voice input.');
             return;
           }
         }
         
+        mDebug(`Calling recognition.start() at ${new Date().toISOString().substring(11, 23)}`);
         recognitionRef.current.start();
       } catch (error) {
-        console.error('Error starting speech recognition:', error);
+        mDebug(`Error starting speech recognition: ${error}`, 'error');
         // If the error is because recognition is already started, stop and restart
         if (error instanceof Error && error.message.includes('already started')) {
           try {
@@ -211,10 +251,12 @@ export const useSpeechToText = ({
               recognitionRef.current.start();
             }, 100);
           } catch (restartError) {
-            console.error('Error restarting speech recognition:', restartError);
+            mDebug(`Error restarting speech recognition: ${restartError}`, 'error');
           }
         }
       }
+    } else {
+      mDebug(`Cannot start - recognitionRef: ${!!recognitionRef.current}, isListening: ${isListening}`);
     }
   };
 

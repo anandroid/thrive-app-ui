@@ -52,6 +52,7 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
   const [isCreating, setIsCreating] = useState(false);
   const [goals, setGoals] = useState<string[]>(['']);
   const [specificCondition, setSpecificCondition] = useState('');
+  const [painIntensity, setPainIntensity] = useState(5); // For pain journey
 
   if (!isOpen) return null;
 
@@ -71,7 +72,8 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
           journeyType: journeyConfig.type,
           healthConcern: journeyData.description || healthConcern,
           specificCondition: specificCondition || undefined,
-          goals: goals.filter(g => g.trim())
+          goals: goals.filter(g => g.trim()),
+          painIntensity: journeyConfig.type === 'pain' ? painIntensity : undefined
         })
       });
 
@@ -177,6 +179,41 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
                   placeholder="e.g., Diabetes, Arthritis, IBS..."
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-sage focus:ring-2 focus:ring-sage/20 transition-all"
                 />
+              </div>
+            )}
+
+            {/* Pain Intensity Slider (for pain journeys) */}
+            {journeyConfig.type === 'pain' && (
+              <div className="space-y-3">
+                <label className="block text-sm font-medium text-secondary-text">
+                  Current Pain Intensity
+                </label>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-xs text-gray-500">No Pain</span>
+                    <span className="text-2xl font-bold text-rose">{painIntensity}</span>
+                    <span className="text-xs text-gray-500">Worst Pain</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="10"
+                    value={painIntensity}
+                    onChange={(e) => setPainIntensity(parseInt(e.target.value))}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                    style={{
+                      background: `linear-gradient(to right, #10b981 0%, #f59e0b 50%, #ef4444 100%)`
+                    }}
+                  />
+                  <div className="flex justify-between mt-2">
+                    <span className="text-xs text-gray-400">0</span>
+                    <span className="text-xs text-gray-400">5</span>
+                    <span className="text-xs text-gray-400">10</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-3 text-center">
+                    This helps us personalize your pain management journey
+                  </p>
+                </div>
               </div>
             )}
 

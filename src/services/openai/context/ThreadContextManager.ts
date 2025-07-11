@@ -71,13 +71,22 @@ export class ThreadContextManager {
   async createRunInstructions(userId?: string, intent?: string, clientBasicContext?: BasicContext): Promise<string> {
     console.log('ThreadContextManager: Creating run instructions with intent:', intent, 'and basic context:', clientBasicContext);
     
-    // Use basic context passed from client
+    // Use enhanced basic context passed from client
     let basicContext = '';
     if (clientBasicContext) {
       basicContext = `
-QUICK CONTEXT (use functions for details if needed):
+CURRENT USER DATA:
 - Pantry items: ${clientBasicContext.pantryCount} items stored
+${clientBasicContext.pantryItems && clientBasicContext.pantryItems.length > 0 ? 
+  `  Items: ${clientBasicContext.pantryItems.join(', ')}` : 
+  '  No items in pantry'}
+
 - Active routines: ${clientBasicContext.activeRoutineCount} (${clientBasicContext.routineTypes})
+${clientBasicContext.activeRoutines && clientBasicContext.activeRoutines.length > 0 ?
+  clientBasicContext.activeRoutines.map(r => 
+    `  • ${r.name} (${r.type}): ${r.steps.join(' → ')}`
+  ).join('\n') :
+  '  No active routines'}
 
 `;
     }
@@ -86,14 +95,15 @@ QUICK CONTEXT (use functions for details if needed):
     let instructions = `CRITICAL: You MUST respond with valid JSON format as specified in your system instructions. Your response MUST be a JSON object with these fields: greeting, attentionRequired, emergencyReasoning, actionItems, additionalInformation, actionableItems, and questions.
 
 ${basicContext}
-OPTIMIZATION NOTES:
-- If the user's question can be answered with the quick context above, do so without calling functions
-- Only call get_pantry_items if you need specific item details (e.g., dosage, notes)
-- Only call get_thriving_progress if you need detailed routine information
-- If user asks about supplements and pantry count is 0, skip get_pantry_items and directly recommend buy actions
-- If user mentions health issues and active routine count is 0, skip get_thriving_progress and directly recommend creating routines
-- ALWAYS recommend routines/thrivings if user mentions health management and has no relevant routines
-- ALWAYS recommend buy actions if user asks about supplements they might not have
+CONTEXT USAGE GUIDELINES:
+- You now have detailed pantry items and routine information in the context above
+- For questions like "What supplements do I have?", use the context data instead of calling functions
+- For questions like "What's in my sleep routine?", use the context data instead of calling functions
+- Only call get_pantry_items if you need additional details not shown (full notes, dates, etc.)
+- Only call get_thriving_progress if you need complete routine details or progress tracking
+- If user asks about supplements and pantry is empty, directly recommend buy actions
+- If user mentions health issues and has no relevant routines, directly recommend creating routines
+- The context gives you enough information for most common queries without function calls
 
 CRITICAL ROUTINE REMINDERS:
 - If activeRoutineCount is 0 and user mentions: medication management, pain, sleep issues, stress → IMMEDIATELY suggest creating a routine

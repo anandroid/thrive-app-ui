@@ -11,7 +11,8 @@ export async function POST(request: NextRequest) {
       journeyType, 
       healthConcern,
       specificCondition,
-      goals
+      goals,
+      painIntensity
     } = await request.json();
 
     if (!journeyType || !healthConcern) {
@@ -22,13 +23,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Build the prompt
-    const prompt = JOURNEY_CREATION_PROMPT
+    let prompt = JOURNEY_CREATION_PROMPT
       .replace('{{journeyType}}', journeyType)
       .replace('{{healthConcern}}', healthConcern)
       .replace('{{#if specificCondition}}Condition: {{specificCondition}}{{/if}}', 
         specificCondition ? `Condition: ${specificCondition}` : '')
       .replace('{{#if goals}}Goals: {{goals}}{{/if}}', 
         goals ? `Goals: ${goals.join(', ')}` : '');
+    
+    // Add pain intensity context for pain journeys
+    if (journeyType === 'pain' && painIntensity !== undefined) {
+      prompt += `\n\nCurrent Pain Intensity: ${painIntensity}/10\nIMPORTANT: Create prompts and tracking appropriate for someone experiencing ${painIntensity <= 3 ? 'mild' : painIntensity <= 6 ? 'moderate' : 'severe'} pain levels.`;
+    }
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4-turbo-preview',

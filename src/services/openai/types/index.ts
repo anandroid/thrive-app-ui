@@ -9,6 +9,13 @@ export interface BasicContext {
   pantryCount: number;
   activeRoutineCount: number;
   routineTypes: string;
+  // Enhanced context with actual content
+  pantryItems?: string[]; // e.g., ["Magnesium 400mg - for sleep", "Vitamin D 2000IU"]
+  activeRoutines?: {
+    name: string;
+    type: string;
+    steps: string[]; // e.g., ["Take magnesium", "Meditation 10min", "Journaling"]
+  }[];
 }
 
 export interface QuestionField {

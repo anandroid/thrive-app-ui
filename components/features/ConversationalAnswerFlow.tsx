@@ -40,7 +40,7 @@ export const ConversationalAnswerFlow: React.FC<ConversationalAnswerFlowProps> =
   
   // Duration to wait before auto-sending staged answers
   // This mimics a natural conversational pause
-  const PAUSE_DURATION = 10000; // 10 seconds pause before sending
+  const PAUSE_DURATION = 60000; // 10 seconds pause before sending
 
   useEffect(() => {
     // IMMEDIATE SEND TRIGGER: User typing interrupts the waiting period

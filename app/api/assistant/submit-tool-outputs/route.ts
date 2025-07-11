@@ -7,11 +7,28 @@ export async function POST(request: NextRequest) {
       body = await request.json();
     } catch (parseError) {
       console.error('Failed to parse request body:', parseError);
+      const encoder = new TextEncoder();
       return new Response(
-        JSON.stringify({ error: 'Invalid JSON in request body' }), 
+        new ReadableStream({
+          start(controller) {
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({ 
+                  type: 'error', 
+                  error: 'Invalid JSON in request body' 
+                })}\n\n`
+              )
+            );
+            controller.close();
+          }
+        }),
         {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no',
+          },
         }
       );
     }
@@ -22,11 +39,28 @@ export async function POST(request: NextRequest) {
 
     if (!threadId || !runId || !toolOutputs) {
       console.error('Missing parameters:', { threadId, runId, toolOutputs: !!toolOutputs });
+      const encoder = new TextEncoder();
       return new Response(
-        JSON.stringify({ error: 'Missing required parameters' }), 
+        new ReadableStream({
+          start(controller) {
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({ 
+                  type: 'error', 
+                  error: 'Missing required parameters' 
+                })}\n\n`
+              )
+            );
+            controller.close();
+          }
+        }),
         {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no',
+          },
         }
       );
     }
@@ -53,13 +87,49 @@ export async function POST(request: NextRequest) {
         }
       );
 
+      let updatedRun;
+      
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(`API error: ${response.status} - ${JSON.stringify(errorData)}`);
+        console.error('OpenAI API error submitting tool outputs:', errorData);
+        console.error('Tool outputs that failed:', JSON.stringify(toolOutputs, null, 2));
+        
+        // For certain errors, we might want to continue
+        // For example, if the run has already moved on
+        if (response.status === 400 && errorData.error?.message?.includes('run is not in a state')) {
+          console.log('Run state has changed - attempting to get current status');
+          
+          // Try to get the current run status
+          const currentRunResponse = await fetch(
+            `https://api.openai.com/v1/threads/${threadId}/runs/${runId}`,
+            {
+              headers: {
+                'Authorization': `Bearer ${process.env.THRIVE_OPENAI_API_KEY}`,
+                'OpenAI-Beta': 'assistants=v2'
+              }
+            }
+          );
+          
+          if (currentRunResponse.ok) {
+            updatedRun = await currentRunResponse.json();
+            console.log('Current run status:', updatedRun.status);
+            
+            // If the run is not completed, we can't continue
+            if (updatedRun.status !== 'completed' && updatedRun.status !== 'in_progress') {
+              throw new Error(`Cannot continue - run status is ${updatedRun.status}`);
+            }
+            // Otherwise continue with the current run state
+          } else {
+            throw new Error(`API error: ${response.status} - ${JSON.stringify(errorData)}`);
+          }
+        } else {
+          throw new Error(`API error: ${response.status} - ${JSON.stringify(errorData)}`);
+        }
+      } else {
+        updatedRun = await response.json();
       }
-
-      const updatedRun = await response.json();
-      console.log('Tool outputs submitted successfully, run status:', updatedRun.status);
+      console.log('Tool outputs submitted successfully');
+      console.log('Updated run:', JSON.stringify(updatedRun, null, 2));
       
       // Poll for completion or stream the messages
       if (updatedRun.status === 'completed') {
@@ -118,7 +188,8 @@ export async function POST(request: NextRequest) {
               headers: {
                 'Content-Type': 'text/event-stream',
                 'Cache-Control': 'no-cache',
-                Connection: 'keep-alive',
+                'Connection': 'keep-alive',
+                'X-Accel-Buffering': 'no',
               },
             }
           );
@@ -150,7 +221,8 @@ export async function POST(request: NextRequest) {
                 headers: {
                   'Content-Type': 'text/event-stream',
                   'Cache-Control': 'no-cache',
-                  Connection: 'keep-alive',
+                  'Connection': 'keep-alive',
+                  'X-Accel-Buffering': 'no',
                 },
               }
             );
@@ -172,7 +244,8 @@ export async function POST(request: NextRequest) {
                 headers: {
                   'Content-Type': 'text/event-stream',
                   'Cache-Control': 'no-cache',
-                  Connection: 'keep-alive',
+                  'Connection': 'keep-alive',
+                  'X-Accel-Buffering': 'no',
                 },
               }
             );
@@ -192,6 +265,22 @@ export async function POST(request: NextRequest) {
         new ReadableStream({
           async start(controller) {
             try {
+              // Send initial event to establish the connection
+              controller.enqueue(
+                encoder.encode(`: ping\n\n`)
+              );
+              
+              // Send status update
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify({ 
+                    type: 'status', 
+                    message: 'Processing tool outputs...',
+                    runStatus: currentRun.status 
+                  })}\n\n`
+                )
+              );
+              
               // Handle unexpected initial status
               if (!['in_progress', 'queued', 'requires_action', 'completed'].includes(currentRun.status)) {
                 console.error('Unexpected run status:', currentRun.status);
@@ -350,7 +439,8 @@ export async function POST(request: NextRequest) {
           headers: {
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache',
-            Connection: 'keep-alive',
+            'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no',
           },
         }
       );
@@ -362,13 +452,31 @@ export async function POST(request: NextRequest) {
       throw submitError;
     }
   } catch (error) {
+    console.error('Submit tool outputs error:', error);
+    
+    // Always return a streaming response for consistency
+    const encoder = new TextEncoder();
     return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Failed to submit tool outputs' 
-      }), 
+      new ReadableStream({
+        start(controller) {
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({ 
+                type: 'error', 
+                error: error instanceof Error ? error.message : 'Failed to submit tool outputs' 
+              })}\n\n`
+            )
+          );
+          controller.close();
+        }
+      }),
       {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+          'X-Accel-Buffering': 'no',
+        },
       }
     );
   }

@@ -191,7 +191,7 @@ Remember: Supplements are meant to supplement, not replace, a healthy diet. Alwa
  */
 export const PANTRY_ASSISTANT_CONFIG = {
   name: 'Thrive Pantry Specialist',
-  model: 'gpt-4o-mini',
+  model: 'gpt-4.1-nano-2025-04-14',
   description: 'Supplement recommendations and pantry management',
   temperature: 0.5,
   instructions: PANTRY_ASSISTANT_INSTRUCTIONS,

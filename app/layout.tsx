@@ -6,6 +6,7 @@ import { OfflineIndicator } from "@/components/ui/OfflineIndicator";
 import { TouchFeedbackProvider } from "@/src/providers/TouchFeedbackProvider";
 import "@/src/utils/clearCorruptedData";
 import { Toaster } from 'react-hot-toast';
+import { MobileDebugConsole } from '@/components/ui/MobileDebugConsole';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -60,6 +61,8 @@ export default function RootLayout({
             <OfflineIndicator />
             <Toaster position="top-center" />
             {children}
+            {/* Mobile debug console */}
+            <MobileDebugConsole />
           </TouchFeedbackProvider>
         </ServiceWorkerProvider>
       </body>
