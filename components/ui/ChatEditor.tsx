@@ -25,6 +25,7 @@ interface ChatEditorProps {
   disabled?: boolean;
   className?: string;
   autoFocus?: boolean;
+  onFocus?: () => void;
 }
 
 export function ChatEditor({
@@ -35,7 +36,8 @@ export function ChatEditor({
   isLoading = false,
   disabled = false,
   className = "",
-  autoFocus = false
+  autoFocus = false,
+  onFocus
 }: ChatEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isFocused, setIsFocused] = useState(false);
@@ -121,7 +123,10 @@ export function ChatEditor({
               value={value}
               onChange={(e) => onChange(e.target.value)}
               onKeyDown={handleKeyDown}
-              onFocus={() => setIsFocused(true)}
+              onFocus={() => {
+                setIsFocused(true);
+                onFocus?.();
+              }}
               onBlur={() => setIsFocused(false)}
               placeholder={isListening ? "Listening..." : placeholder}
               disabled={isLoading || disabled || isListening}

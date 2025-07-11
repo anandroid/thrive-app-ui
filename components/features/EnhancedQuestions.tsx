@@ -49,6 +49,18 @@ export const EnhancedQuestions: React.FC<EnhancedQuestionsProps> = ({
 
   const currentQuestion = questions[currentIndex];
   
+  // Get subtle background color for each question
+  const getQuestionBackground = (index: number) => {
+    const colors = [
+      'from-blue-50/30 to-blue-100/20 border-blue-200/30',
+      'from-purple-50/30 to-purple-100/20 border-purple-200/30',
+      'from-green-50/30 to-green-100/20 border-green-200/30',
+      'from-amber-50/30 to-amber-100/20 border-amber-200/30',
+      'from-rose-50/30 to-rose-100/20 border-rose-200/30',
+      'from-indigo-50/30 to-indigo-100/20 border-indigo-200/30',
+    ];
+    return colors[index % colors.length];
+  };
   
   // Notify parent of current question
   useEffect(() => {
@@ -431,9 +443,10 @@ export const EnhancedQuestions: React.FC<EnhancedQuestionsProps> = ({
             key={questionKey}
             className="animate-slide-in-from-right"
           >
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-xl p-4 
-                          border border-gray-200/50 backdrop-blur-sm">
-              <h3 className="text-sm font-medium text-gray-900 mb-3">
+            <div className={`bg-gradient-to-br rounded-xl p-4 
+                          border backdrop-blur-sm transition-colors duration-300
+                          ${getQuestionBackground(currentIndex)}`}>
+              <h3 className="text-base font-medium text-gray-900 mb-3">
                 {currentQuestion.prompt}
               </h3>
               {renderQuestionContent(currentQuestion)}

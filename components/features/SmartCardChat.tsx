@@ -1123,7 +1123,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                   <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0.15s' }} />
                   <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0.3s' }} />
                 </div>
-                <span className="text-sm text-gray-500">Wellness Companion is typing...</span>
+                <span className="text-sm text-gray-500">Companion is typing...</span>
               </div>
             </div>
           )}
@@ -1216,6 +1216,12 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
               ? "Ask follow-ups or explore other aspects of this topic..."
               : "Ask about your wellness journey..."
           }
+          onFocus={() => {
+            // Scroll to bottom when chat editor is focused
+            setTimeout(() => {
+              scrollToBottom();
+            }, 300); // Delay to account for keyboard animation
+          }}
         />
       </div>
 
