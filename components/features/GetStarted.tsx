@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
-import { ChevronRight, Shield } from 'lucide-react';
+import { ChevronRight, Shield, Sparkles, Heart, Leaf } from 'lucide-react';
 
 interface GetStartedProps {
   onComplete: () => void;
@@ -10,6 +10,13 @@ interface GetStartedProps {
 
 export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
   const [showTermsModal, setShowTermsModal] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  useEffect(() => {
+    // Trigger animations after component mounts
+    setIsLoaded(true);
+  }, []);
 
   const handleGetStarted = () => {
     localStorage.setItem('hasSeenGetStarted', 'true');
@@ -20,78 +27,181 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
   return (
     <>
       <div className="layout-wrapper welcome-layout">
-        {/* Background Layer - Always visible */}
-        <div className="absolute inset-0 z-0">
-          {/* Soft gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-soft-blush/50 via-white/80 to-soft-lavender/20" />
+        {/* Background Layer - Animated gradient mesh */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          {/* Base gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-soft-blush/30 via-white to-soft-lavender/20" />
           
-          {/* Animated floating elements - subtle and minimal */}
-          <div className="absolute top-[15%] left-[10%] w-[15vw] h-[15vw] max-w-24 max-h-24 rounded-full bg-gradient-to-br from-rose/10 to-dusty-rose/5 blur-2xl animate-pulse-slow" />
-          <div className="absolute top-[60%] right-[15%] w-[12vw] h-[12vw] max-w-20 max-h-20 rounded-full bg-gradient-to-br from-sage-light/10 to-sage/5 blur-2xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
-          <div className="absolute bottom-[30%] left-[20%] w-[10vw] h-[10vw] max-w-16 max-h-16 rounded-full bg-gradient-to-br from-soft-lavender/10 to-dusty-rose/5 blur-2xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
+          {/* Animated gradient orbs */}
+          <div className="absolute inset-0">
+            {/* Large orb - top left */}
+            <div 
+              className={`absolute -top-[20vh] -left-[20vw] w-[60vw] h-[60vw] max-w-[400px] max-h-[400px] rounded-full bg-gradient-to-br from-rose/20 via-dusty-rose/15 to-transparent blur-3xl transition-all duration-[3000ms] ${
+                isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
+              }`}
+              style={{ 
+                animation: isLoaded ? 'float 20s ease-in-out infinite' : 'none',
+                animationDelay: '0s'
+              }}
+            />
+            
+            {/* Medium orb - bottom right */}
+            <div 
+              className={`absolute -bottom-[15vh] -right-[15vw] w-[50vw] h-[50vw] max-w-[350px] max-h-[350px] rounded-full bg-gradient-to-tl from-sage-light/20 via-sage/10 to-transparent blur-3xl transition-all duration-[3000ms] ${
+                isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
+              }`}
+              style={{ 
+                animation: isLoaded ? 'float 25s ease-in-out infinite reverse' : 'none',
+                animationDelay: '2s'
+              }}
+            />
+            
+            {/* Small orb - center */}
+            <div 
+              className={`absolute top-[40%] left-[60%] w-[30vw] h-[30vw] max-w-[200px] max-h-[200px] rounded-full bg-gradient-to-br from-soft-lavender/15 via-dusty-rose/10 to-transparent blur-2xl transition-all duration-[3000ms] ${
+                isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
+              }`}
+              style={{ 
+                animation: isLoaded ? 'float 15s ease-in-out infinite' : 'none',
+                animationDelay: '4s'
+              }}
+            />
+          </div>
           
-          {/* Subtle gradient overlay for depth */}
-          <div className="absolute inset-0 bg-gradient-to-t from-white/60 via-transparent to-transparent" />
+          {/* Subtle texture overlay */}
+          <div className="absolute inset-0 opacity-[0.02]" 
+               style={{ 
+                 backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+               }}
+          />
         </div>
 
-        {/* Scrollable Content */}
+        {/* Content */}
         <div className="layout-content relative z-10">
-          <div className="w-full h-full px-[5vw] py-[2vh] sm:py-[3vh] md:py-[4vh] flex flex-col items-center justify-center">
-            {/* Welcome Illustration - Viewport based sizing */}
-            <div className="relative w-full max-w-[80vw] sm:max-w-[60vw] md:max-w-[40vw] h-[30vh] sm:h-[35vh] md:h-[40vh] mb-[2vh] sm:mb-[3vh] md:mb-[4vh]">
-              <OptimizedImage
-                src="/illustrations/welcome.png"
-                alt="Welcome to Thrive"
-                fill
-                className="object-contain"
-                priority
-                sizes="(max-width: 768px) 80vw, 40vw"
-              />
+          <div className="w-full h-full px-[6vw] py-[3vh] flex flex-col items-center justify-center">
+            {/* Logo and illustration container */}
+            <div className={`relative w-full max-w-[75vw] sm:max-w-[50vw] md:max-w-[35vw] h-[28vh] sm:h-[32vh] md:h-[35vh] mb-[3vh] transition-all duration-1000 ${
+              isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}>
+              {/* Decorative elements */}
+              <div className="absolute -top-4 -right-4 text-rose/30 animate-pulse">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <div className="absolute -bottom-2 -left-3 text-sage/30 animate-pulse" style={{ animationDelay: '1s' }}>
+                <Leaf className="w-5 h-5" />
+              </div>
+              <div className="absolute top-1/2 -right-6 text-dusty-rose/30 animate-pulse" style={{ animationDelay: '2s' }}>
+                <Heart className="w-4 h-4" />
+              </div>
+              
+              {/* Beautiful placeholder - shows while loading */}
+              <div className={`absolute inset-0 transition-all duration-700 ${
+                imageLoaded ? 'opacity-0 scale-110' : 'opacity-100 scale-100'
+              }`}>
+                <div className="w-full h-full flex items-center justify-center">
+                  {/* Animated placeholder with brand colors */}
+                  <div className="relative w-[60%] h-[60%]">
+                    <div className="absolute inset-0 bg-gradient-to-br from-rose/20 to-dusty-rose/15 rounded-full blur-2xl animate-pulse" />
+                    <div className="absolute inset-0 bg-gradient-to-tl from-sage-light/15 to-sage/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-[50%] h-[50%] bg-gradient-to-br from-soft-blush/30 to-soft-lavender/30 rounded-full" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Main illustration with smooth transition */}
+              <div className={`absolute inset-0 transition-all duration-700 ${
+                imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+              }`}>
+                <OptimizedImage
+                  src="/illustrations/welcome.png"
+                  alt="Welcome to Thrive"
+                  fill
+                  className="object-contain drop-shadow-lg"
+                  priority
+                  sizes="(max-width: 768px) 75vw, 35vw"
+                  onLoad={() => {
+                    // Small delay to ensure smooth transition
+                    setTimeout(() => setImageLoaded(true), 100);
+                  }}
+                />
+              </div>
             </div>
 
-            {/* Text Content - Viewport based spacing */}
-            <div className="text-center space-y-[1.5vh] sm:space-y-[2vh]">
-              <h1 className="text-[min(6vw,2rem)] sm:text-[min(5vw,2.5rem)] md:text-[min(3.5vw,3rem)] font-bold bg-gradient-to-r from-burgundy to-rose bg-clip-text text-transparent">
-                Welcome to Thrive
+            {/* Text Content with staggered animations */}
+            <div className="text-center space-y-[2vh] max-w-[90vw] sm:max-w-[80vw] md:max-w-[60vw]">
+              <h1 className={`text-[min(7vw,2.5rem)] sm:text-[min(5.5vw,3rem)] md:text-[min(4vw,3.5rem)] font-bold transition-all duration-1000 delay-300 ${
+                isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              }`}>
+                <span className="bg-gradient-to-r from-burgundy via-rose to-dusty-rose bg-clip-text text-transparent animate-gradient-shift">
+                  Welcome to Thrive
+                </span>
               </h1>
-              <p className="text-[min(4vw,1.125rem)] sm:text-[min(3vw,1.25rem)] md:text-[min(2vw,1.125rem)] font-medium text-secondary-text">
+              
+              <p className={`text-[min(4.5vw,1.25rem)] sm:text-[min(3.5vw,1.375rem)] md:text-[min(2.5vw,1.25rem)] font-medium text-secondary-text transition-all duration-1000 delay-500 ${
+                isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              }`}>
                 Your natural wellness companion
               </p>
-              <p className="text-[min(3.5vw,0.875rem)] sm:text-[min(2.5vw,1rem)] md:text-[min(1.5vw,1rem)] text-secondary-text-thin/80 leading-relaxed max-w-[85vw] sm:max-w-[70vw] md:max-w-[50vw] mx-auto">
+              
+              <p className={`text-[min(3.8vw,1rem)] sm:text-[min(2.8vw,1.125rem)] md:text-[min(2vw,1.125rem)] text-secondary-text-thin leading-relaxed transition-all duration-1000 delay-700 ${
+                isLoaded ? 'opacity-100' : 'opacity-0'
+              }`}>
                 Blend timeless natural remedies with modern wellness tracking. Create personalized wellness routines, journal your healing journey, and seamlessly integrate any medications you take - all guided by holistic practices, completely private.
               </p>
+              
+              {/* Feature pills */}
+              <div className={`flex flex-wrap justify-center gap-2 pt-[1vh] transition-all duration-1000 delay-900 ${
+                isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              }`}>
+                <span className="px-3 py-1 text-[min(3vw,0.75rem)] bg-rose/10 text-rose rounded-full border border-rose/20">
+                  100% Private
+                </span>
+                <span className="px-3 py-1 text-[min(3vw,0.75rem)] bg-sage/10 text-sage-dark rounded-full border border-sage/20">
+                  Natural First
+                </span>
+                <span className="px-3 py-1 text-[min(3vw,0.75rem)] bg-dusty-rose/10 text-burgundy rounded-full border border-dusty-rose/20">
+                  Personalized
+                </span>
+              </div>
             </div>
-
           </div>
         </div>
 
-        {/* Bottom Section - Fixed with Terms and Button */}
-        <div className="layout-footer">
+        {/* Bottom Section */}
+        <div className={`layout-footer transition-all duration-1000 delay-1000 ${
+          isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`}>
           <div className="space-y-3">
-            {/* Terms Notice - Always visible */}
+            {/* Terms Notice */}
             <div className="text-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-[min(3.5vw,0.875rem)] text-gray-600">
                 By continuing, you accept our{' '}
                 <button
                   onClick={() => setShowTermsModal(true)}
-                  className="text-burgundy font-medium underline hover:no-underline transition-all"
+                  className="text-burgundy font-medium underline decoration-burgundy/30 hover:decoration-burgundy/60 transition-all"
                 >
                   Terms & Conditions
                 </button>
               </p>
             </div>
             
-            {/* Get Started Button */}
+            {/* Get Started Button with enhanced styling */}
             <button
               onClick={handleGetStarted}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-sage-light/70 to-sage/70 text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center active:scale-[0.98] touch-manipulation"
+              className="relative w-full py-[2vh] min-h-[50px] rounded-2xl bg-gradient-to-r from-sage-light to-sage text-white font-semibold text-[min(4vw,1.125rem)] shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 group overflow-hidden active:scale-[0.98] touch-manipulation"
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
-              Get Started
-              <ChevronRight className="w-5 h-5 ml-2" />
+              {/* Button background animation */}
+              <div className="absolute inset-0 bg-gradient-to-r from-sage to-sage-dark opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              
+              {/* Button content */}
+              <span className="relative">Get Started</span>
+              <ChevronRight className="relative w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
             </button>
             
-            {/* Extra spacer for browsers with bottom UI - invisible but takes space */}
+            {/* Safe area spacer */}
             <div className="h-2" aria-hidden="true" />
           </div>
         </div>
@@ -153,7 +263,7 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
 
             <button
               onClick={() => setShowTermsModal(false)}
-              className="w-full mt-6 py-3 rounded-2xl bg-gradient-to-r from-sage-light/70 to-sage/70 text-white font-medium shadow-lg hover:shadow-xl transition-all active:scale-[0.98] touch-manipulation"
+              className="w-full mt-6 py-3 rounded-2xl bg-gradient-to-r from-sage-light to-sage text-white font-medium shadow-lg hover:shadow-xl transition-all active:scale-[0.98] touch-manipulation"
             >
               I Understand
             </button>

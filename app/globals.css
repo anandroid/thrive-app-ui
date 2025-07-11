@@ -666,3 +666,20 @@ input, textarea, [contenteditable] {
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 3.5rem);
   }
 }
+
+/* Onboarding animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33% { transform: translateY(-10px) rotate(2deg); }
+  66% { transform: translateY(10px) rotate(-2deg); }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
