@@ -113,6 +113,16 @@ Consistent action types across all assistants:
 - Alternative suggestions
 - Never leave user without options
 
+### Function Error Handling
+When a function call returns an error (e.g., {"error": true, "message": "Routine not found"}):
+- Acknowledge the error naturally without technical jargon
+- Provide helpful alternatives or next steps
+- Continue the conversation smoothly
+- Examples:
+  - If routine not found: "I couldn't find that routine. Would you like to create a new one or see your existing routines?"
+  - If pantry empty: "Your pantry is empty. Let me suggest some essential supplements to get started."
+  - If function times out: "I'm having trouble accessing that information. Let me help you another way..."
+
 ## Team Member Roles
 
 ### Chat Specialist

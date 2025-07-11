@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thrive Function Integration Test Suite</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #1a1a1a;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .test-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #007AFF;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+        button.danger {
+            background: #dc3545;
+        }
+        button.danger:hover {
+            background: #c82333;
+        }
+        button.success {
+            background: #28a745;
+        }
+        button.success:hover {
+            background: #218838;
+        }
+        .output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .log-entry {
+            margin: 4px 0;
+            padding: 4px 0;
+            border-bottom: 1px solid #333;
+        }
+        .log-entry.error {
+            color: #ff6b6b;
+        }
+        .log-entry.success {
+            color: #51cf66;
+        }
+        .log-entry.info {
+            color: #339af0;
+        }
+        .log-entry.warning {
+            color: #ffd43b;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .status.running {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .instructions {
+            background: #e3f2fd;
+            border: 1px solid #1976d2;
+            color: #0d47a1;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .chat-iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Thrive Function Integration Test Suite</h1>
+        
+        <div class="instructions">
+            <strong>Instructions:</strong> Use this test suite to verify that function calls work correctly with the multi-assistant architecture. 
+            Each test will prepare specific data states and provide prompts to test in the chat interface.
+        </div>
+
+        <h2>Test Controls</h2>
+        <div class="test-controls">
+            <button onclick="testSuite.runAllTests()" class="success">🚀 Run All Tests</button>
+            <button onclick="testSuite.clearAll()" class="danger">🗑️ Clear All Data</button>
+            <button onclick="testSuite.setupTestData()">📦 Setup Test Data</button>
+            <button onclick="testSuite.monitorFunctions()">🔍 Monitor Functions</button>
+            <button onclick="testSuite.clearOutput()">🧹 Clear Output</button>
+        </div>
+
+        <h2>Individual Tests</h2>
+        
+        <div class="test-section">
+            <h3>Test 1: Empty Data States</h3>
+            <p>Tests how assistants handle empty pantry and no routines.</p>
+            <button onclick="testSuite.tests.emptyPantry()">Test Empty Pantry</button>
+            <button onclick="testSuite.tests.noRoutines()">Test No Routines</button>
+            <div class="test-prompts" style="margin-top: 10px; font-style: italic;">
+                Try: "What supplements do I have?" or "Show me my routines"
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 2: Error Handling</h3>
+            <p>Tests how assistants handle corrupted data and function errors.</p>
+            <button onclick="testSuite.tests.corruptedData()">Corrupt Pantry Data</button>
+            <button onclick="testSuite.tests.simulateTimeout()">Simulate Timeout</button>
+            <div class="test-prompts" style="margin-top: 10px; font-style: italic;">
+                Try: "Show me my supplements" (with corrupted data)
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 3: Valid Data & Multiple Functions</h3>
+            <p>Tests successful function calls and multiple function execution.</p>
+            <button onclick="testSuite.tests.validPantry()">Add Valid Pantry Items</button>
+            <button onclick="testSuite.tests.validRoutine()">Add Valid Routine</button>
+            <button onclick="testSuite.tests.multipleFunctions()">Test Multiple Functions</button>
+            <div class="test-prompts" style="margin-top: 10px; font-style: italic;">
+                Try: "Review my sleep routine and supplements"
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 4: Assistant Handoffs</h3>
+            <p>Tests function calls during assistant transitions.</p>
+            <button onclick="testSuite.tests.handoffScenario()">Setup Handoff Test</button>
+            <div class="test-prompts" style="margin-top: 10px; font-style: italic;">
+                Try: "I need help creating a sleep routine" → Click create routine → Ask about supplements
+            </div>
+        </div>
+
+        <h2>Test Output</h2>
+        <div class="output" id="output">
+            <div class="log-entry info">🧪 Test suite ready. Click any test button to begin.</div>
+        </div>
+
+        <h2>Chat Interface</h2>
+        <iframe src="/" class="chat-iframe" id="chatFrame"></iframe>
+    </div>
+
+    <script>
+        const testSuite = {
+            output: document.getElementById('output'),
+            
+            log(message, type = 'info') {
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${type}`;
+                const timestamp = new Date().toLocaleTimeString();
+                entry.innerHTML = `[${timestamp}] ${message}`;
+                this.output.appendChild(entry);
+                this.output.scrollTop = this.output.scrollHeight;
+            },
+
+            clearOutput() {
+                this.output.innerHTML = '<div class="log-entry info">🧪 Output cleared. Ready for new tests.</div>';
+            },
+
+            clearAll() {
+                this.log('🗑️ Clearing all data...', 'warning');
+                localStorage.removeItem('thriveApp_pantryItems');
+                localStorage.removeItem('thriveApp_routines');
+                localStorage.removeItem('thriveApp_journals');
+                this.log('✅ All data cleared', 'success');
+                this.reloadChat();
+            },
+
+            setupTestData() {
+                this.log('📦 Setting up test data...', 'info');
+                
+                // Pantry items
+                const pantryItems = [
+                    {
+                        id: 'test-1',
+                        name: 'Vitamin D3',
+                        tags: ['supplement', 'vitamin'],
+                        notes: '2000 IU daily with breakfast',
+                        dateAdded: new Date().toISOString()
+                    },
+                    {
+                        id: 'test-2',
+                        name: 'Magnesium Glycinate',
+                        tags: ['supplement', 'mineral', 'sleep'],
+                        notes: '400mg before bed',
+                        dateAdded: new Date().toISOString()
+                    },
+                    {
+                        id: 'test-3',
+                        name: 'Melatonin',
+                        tags: ['supplement', 'sleep'],
+                        notes: '3mg, 30 minutes before sleep',
+                        dateAdded: new Date().toISOString()
+                    }
+                ];
+                
+                // Routines
+                const routines = [
+                    {
+                        id: 'test-routine-1',
+                        name: 'Evening Wind-Down',
+                        type: 'sleep_wellness',
+                        description: 'Relaxing bedtime routine for better sleep',
+                        duration: 45,
+                        frequency: 'daily',
+                        steps: [
+                            { order: 1, description: 'Dim all lights', duration: 5 },
+                            { order: 2, description: 'Take magnesium supplement', duration: 2 },
+                            { order: 3, description: 'Do gentle stretches', duration: 10 },
+                            { order: 4, description: 'Take melatonin', duration: 2 },
+                            { order: 5, description: 'Read or meditate', duration: 20 }
+                        ],
+                        isActive: true,
+                        createdAt: new Date().toISOString()
+                    }
+                ];
+                
+                localStorage.setItem('thriveApp_pantryItems', JSON.stringify(pantryItems));
+                localStorage.setItem('thriveApp_routines', JSON.stringify(routines));
+                
+                this.log(`✅ Added ${pantryItems.length} pantry items`, 'success');
+                this.log(`✅ Added ${routines.length} routines`, 'success');
+                this.reloadChat();
+            },
+
+            monitorFunctions() {
+                this.log('🔍 Monitoring function calls in console...', 'info');
+                this.log('Open browser console to see detailed function execution', 'info');
+                
+                // Inject monitoring script into iframe
+                const chatFrame = document.getElementById('chatFrame');
+                chatFrame.onload = () => {
+                    const script = chatFrame.contentDocument.createElement('script');
+                    script.textContent = `
+                        console.log('🔍 Function monitoring enabled');
+                        const originalLog = console.log;
+                        console.log = function(...args) {
+                            const message = args.join(' ');
+                            if (message.includes('[FUNCTION]') || 
+                                message.includes('Function execution') || 
+                                message.includes('Tool outputs') ||
+                                message.includes('Submit tool outputs')) {
+                                originalLog.apply(console, ['🔧 FUNCTION:', ...args]);
+                            } else {
+                                originalLog.apply(console, args);
+                            }
+                        };
+                    `;
+                    chatFrame.contentDocument.body.appendChild(script);
+                };
+            },
+
+            reloadChat() {
+                const chatFrame = document.getElementById('chatFrame');
+                chatFrame.src = chatFrame.src;
+            },
+
+            tests: {
+                emptyPantry() {
+                    testSuite.log('📋 Test: Empty Pantry Response', 'info');
+                    localStorage.removeItem('thriveApp_pantryItems');
+                    testSuite.log('✅ Pantry cleared', 'success');
+                    testSuite.log('💬 Try: "What supplements do I have?"', 'info');
+                    testSuite.log('Expected: Assistant acknowledges empty pantry and offers to help add items', 'info');
+                },
+
+                noRoutines() {
+                    testSuite.log('📋 Test: No Routines', 'info');
+                    localStorage.removeItem('thriveApp_routines');
+                    testSuite.log('✅ Routines cleared', 'success');
+                    testSuite.log('💬 Try: "Show me my sleep routine"', 'info');
+                    testSuite.log('Expected: Assistant offers to create a routine', 'info');
+                },
+
+                corruptedData() {
+                    testSuite.log('📋 Test: Corrupted Data Handling', 'warning');
+                    localStorage.setItem('thriveApp_pantryItems', 'invalid json {]');
+                    testSuite.log('⚠️ Pantry data corrupted', 'warning');
+                    testSuite.log('💬 Try: "Show me my supplements"', 'info');
+                    testSuite.log('Expected: Assistant handles error gracefully', 'info');
+                },
+
+                simulateTimeout() {
+                    testSuite.log('📋 Test: Function Timeout', 'warning');
+                    // This would need backend support to actually simulate
+                    testSuite.log('⚠️ Note: Timeout simulation requires backend modification', 'warning');
+                    testSuite.log('This test validates error handling when functions take too long', 'info');
+                },
+
+                validPantry() {
+                    testSuite.log('📋 Test: Valid Pantry Data', 'info');
+                    const items = [
+                        {
+                            id: 'valid-1',
+                            name: 'Ashwagandha',
+                            tags: ['supplement', 'adaptogen'],
+                            notes: '600mg daily for stress',
+                            dateAdded: new Date().toISOString()
+                        },
+                        {
+                            id: 'valid-2',
+                            name: 'Omega-3',
+                            tags: ['supplement', 'essential fatty acid'],
+                            notes: '1000mg EPA/DHA daily',
+                            dateAdded: new Date().toISOString()
+                        }
+                    ];
+                    localStorage.setItem('thriveApp_pantryItems', JSON.stringify(items));
+                    testSuite.log('✅ Added valid pantry items', 'success');
+                    testSuite.log('💬 Try: "What supplements am I taking?"', 'info');
+                    testSuite.log('Expected: Assistant lists Ashwagandha and Omega-3', 'info');
+                },
+
+                validRoutine() {
+                    testSuite.log('📋 Test: Valid Routine Data', 'info');
+                    const routine = {
+                        id: 'morning-1',
+                        name: 'Morning Energy Boost',
+                        type: 'energy_wellness',
+                        description: 'Start your day with energy',
+                        duration: 30,
+                        frequency: 'daily',
+                        steps: [
+                            { order: 1, description: 'Drink water with lemon', duration: 5 },
+                            { order: 2, description: 'Take morning supplements', duration: 3 },
+                            { order: 3, description: 'Do sun salutations', duration: 15 },
+                            { order: 4, description: 'Cold shower', duration: 7 }
+                        ],
+                        isActive: true,
+                        createdAt: new Date().toISOString()
+                    };
+                    const existing = JSON.parse(localStorage.getItem('thriveApp_routines') || '[]');
+                    existing.push(routine);
+                    localStorage.setItem('thriveApp_routines', JSON.stringify(existing));
+                    testSuite.log('✅ Added morning routine', 'success');
+                    testSuite.log('💬 Try: "Show me my morning routine"', 'info');
+                },
+
+                multipleFunctions() {
+                    testSuite.log('📋 Test: Multiple Function Calls', 'info');
+                    testSuite.log('Ensuring both pantry and routines have data...', 'info');
+                    // Use existing data or set up both
+                    testSuite.log('💬 Try: "Review my sleep routine and what supplements I should take with it"', 'info');
+                    testSuite.log('Expected: Assistant calls both get_routines and get_pantry_items', 'info');
+                },
+
+                handoffScenario() {
+                    testSuite.log('📋 Test: Assistant Handoff with Functions', 'info');
+                    testSuite.log('Setting up scenario for handoff test...', 'info');
+                    testSuite.log('Step 1: 💬 "I need help with my sleep"', 'info');
+                    testSuite.log('Step 2: Click on "Create Sleep Routine" when offered', 'info');
+                    testSuite.log('Step 3: During routine creation, ask about supplements', 'info');
+                    testSuite.log('Expected: Smooth handoff, functions work across assistants', 'info');
+                }
+            },
+
+            async runAllTests() {
+                this.log('🚀 Running all integration tests...', 'info');
+                this.clearOutput();
+                
+                const tests = [
+                    () => this.tests.emptyPantry(),
+                    () => this.tests.noRoutines(),
+                    () => this.tests.corruptedData(),
+                    () => this.tests.validPantry(),
+                    () => this.tests.validRoutine(),
+                    () => this.tests.multipleFunctions(),
+                    () => this.tests.handoffScenario()
+                ];
+
+                for (let i = 0; i < tests.length; i++) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    tests[i]();
+                    this.log('---', 'info');
+                }
+
+                this.log('✅ All test scenarios prepared. Interact with the chat to execute tests.', 'success');
+            }
+        };
+
+        // Auto-monitor on load
+        window.addEventListener('load', () => {
+            testSuite.monitorFunctions();
+        });
+    </script>
+</body>
+</html>

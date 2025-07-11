@@ -113,10 +113,28 @@ export async function POST(request: NextRequest) {
       const encoder = new TextEncoder();
       let fullContent = '';
       
+      // Log the initial run status
+      console.log('Initial run status after tool output submission:', currentRun.status);
+      
       return new Response(
         new ReadableStream({
           async start(controller) {
             try {
+              // Handle unexpected initial status
+              if (!['in_progress', 'queued', 'requires_action', 'completed'].includes(currentRun.status)) {
+                console.error('Unexpected run status:', currentRun.status);
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({ 
+                      type: 'error', 
+                      error: `Unexpected run status: ${currentRun.status}` 
+                    })}\n\n`
+                  )
+                );
+                controller.close();
+                return;
+              }
+              
               while (currentRun.status === 'in_progress' || currentRun.status === 'queued' || currentRun.status === 'requires_action') {
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
                 

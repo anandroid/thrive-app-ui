@@ -21,6 +21,11 @@ export const metadata: Metadata = {
   title: "Thrive - Holistic Healing",
   description: "Your personalized AI-powered wellness journey",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
 };
 
 export const viewport: Viewport & { interactiveWidget?: string } = {

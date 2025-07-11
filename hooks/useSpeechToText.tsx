@@ -33,6 +33,7 @@ export const useSpeechToText = ({
 }: UseSpeechToTextProps) => {
   const [isListening, setIsListening] = useState(false);
   const [isSupported, setIsSupported] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const recognitionRef = useRef<any>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTranscriptRef = useRef<string>('');
@@ -41,6 +42,9 @@ export const useSpeechToText = ({
   const isMobile = typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+    
     // Check if speech recognition is supported
     const SpeechRecognition = 
       (window as any).SpeechRecognition || 
@@ -49,7 +53,8 @@ export const useSpeechToText = ({
     if (SpeechRecognition) {
       setIsSupported(true);
       
-      const recognition = new SpeechRecognition();
+      try {
+        const recognition = new SpeechRecognition();
       
       // On mobile, continuous mode often doesn't work well
       recognition.continuous = isMobile ? false : continuous;
@@ -59,9 +64,10 @@ export const useSpeechToText = ({
       
       // Mobile browsers need these for better performance
       if (isMobile) {
-        recognition.grammars = undefined;
+        // Don't set grammars on mobile - it causes errors
+        // recognition.grammars = undefined; // This causes TypeError
         // @ts-ignore - these properties might not be in types but exist
-        recognition.serviceURI = undefined;
+        // recognition.serviceURI = undefined;
       }
       
       recognition.onstart = () => {
@@ -94,22 +100,34 @@ export const useSpeechToText = ({
       };
       
       recognition.onerror = (event: any) => {
-        console.error('Speech recognition error:', event.error);
+        console.error('[Speech] Error:', event.error, 'Message:', event.message);
         setIsListening(false);
         onStopListening?.();
+        
+        // Clear any timeouts
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
         
         // Common mobile errors
         if (event.error === 'not-allowed') {
           alert('Microphone access was denied. Please check your browser settings.');
         } else if (event.error === 'no-speech') {
           // This is common on mobile - the recognition times out quickly
-          console.log('No speech detected');
+          console.log('[Speech] No speech detected - this is normal');
         } else if (event.error === 'network') {
           alert('Speech recognition requires an internet connection.');
+        } else if (event.error === 'aborted') {
+          console.log('[Speech] Recognition aborted');
+        } else {
+          // Log any other errors
+          console.error('[Speech] Unknown error:', event);
         }
       };
       
       recognition.onresult = (event: any) => {
+        console.log('[Speech] Result event:', event);
         let finalTranscript = '';
         let interimTranscript = '';
         
@@ -122,6 +140,8 @@ export const useSpeechToText = ({
           }
         }
         
+        console.log('[Speech] Final:', finalTranscript, 'Interim:', interimTranscript);
+        
         // Send the transcript (final or interim)
         const text = finalTranscript || interimTranscript;
         if (text.trim() && text !== lastTranscriptRef.current) {
@@ -133,7 +153,7 @@ export const useSpeechToText = ({
             clearTimeout(timeoutRef.current);
             // Stop after 3 seconds of silence on mobile
             timeoutRef.current = setTimeout(() => {
-              if (recognitionRef.current && isListening) {
+              if (recognitionRef.current) {
                 console.log('Stopping due to silence timeout');
                 recognitionRef.current.stop();
               }
@@ -142,12 +162,22 @@ export const useSpeechToText = ({
         }
       };
       
-      recognitionRef.current = recognition;
+        recognitionRef.current = recognition;
+      } catch (error) {
+        console.error('[Speech] Failed to initialize recognition:', error);
+        setIsSupported(false);
+      }
     }
+    
+    setIsInitialized(true);
     
     return () => {
       if (recognitionRef.current) {
-        recognitionRef.current.stop();
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {
+          // Ignore errors on cleanup
+        }
       }
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -204,7 +234,7 @@ export const useSpeechToText = ({
 
   return {
     isListening,
-    isSupported,
+    isSupported: isInitialized && isSupported,
     startListening,
     stopListening,
     toggleListening
