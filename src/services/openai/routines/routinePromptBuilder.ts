@@ -7,6 +7,7 @@ export class RoutinePromptBuilder {
     sleepTime?: string;
     wakeTime?: string;
     customInstructions?: string;
+    conversationContext?: string;
   }): string {
     const {
       healthConcern,
@@ -16,9 +17,13 @@ export class RoutinePromptBuilder {
       sleepTime,
       wakeTime,
       customInstructions,
+      conversationContext,
     } = params;
 
-    return `Create a detailed wellness routine for: ${healthConcern}
+    return `${conversationContext ? `Based on the previous conversation:
+${conversationContext}
+
+` : ''}Create a detailed wellness routine for: ${healthConcern}
 
 Routine Type: ${routineType}
 Duration: ${duration}
@@ -66,6 +71,6 @@ Include 3-7 daily routine steps that need reminders, and 2-5 additional steps fo
   }
 
   getSystemPrompt(): string {
-    return "You are a wellness routine expert. Create detailed, practical, and safe wellness routines. Always consider the user's sleep schedule when suggesting activity times. Schedule activities appropriately based on their wake and sleep times. For each routine step, provide a specific reminderTime in 24-hour format (HH:MM) that aligns with the bestTime description and the user's sleep schedule. For example, if wake time is 06:00 and a step is best done 'in the morning', set reminderTime to something like '07:00' or '08:00'. Separate regular daily routine steps (that need reminders) from additional one-time or as-needed steps. For the will_video_tutorial_help field: set to true for activities that benefit from visual demonstration (exercises, stretches, breathing techniques, massage techniques, cooking/preparation methods), and false for simple activities (taking medication, drinking water, going for a walk, journaling, sleeping). Always return valid JSON.";
+    return "You are a wellness routine expert. Create detailed, practical, and safe wellness routines. When conversation context is provided, use it to deeply personalize the routine based on the user's specific situation, symptoms, concerns, and preferences mentioned in the conversation. Always consider the user's sleep schedule when suggesting activity times. Schedule activities appropriately based on their wake and sleep times. For each routine step, provide a specific reminderTime in 24-hour format (HH:MM) that aligns with the bestTime description and the user's sleep schedule. For example, if wake time is 06:00 and a step is best done 'in the morning', set reminderTime to something like '07:00' or '08:00'. Separate regular daily routine steps (that need reminders) from additional one-time or as-needed steps. For the will_video_tutorial_help field: set to true for activities that benefit from visual demonstration (exercises, stretches, breathing techniques, massage techniques, cooking/preparation methods), and false for simple activities (taking medication, drinking water, going for a walk, journaling, sleeping). Always return valid JSON.";
   }
 }

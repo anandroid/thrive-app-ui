@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { RoutineCreationService } from '@/src/services/openai/routines/routineCreationService';
+import { getMultiAssistantService } from '@/src/services/openai/multiAssistantService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,7 +10,8 @@ export async function POST(request: NextRequest) {
       customInstructions, 
       frequency, 
       duration,
-      userPreferences 
+      userPreferences,
+      threadId 
     } = await request.json();
 
     if (!healthConcern) {
@@ -19,12 +21,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Extract context from thread if provided
+    let conversationContext = '';
+    if (threadId) {
+      try {
+        const multiAssistantService = getMultiAssistantService();
+        const messages = await multiAssistantService.getThreadMessagesWithWindow(threadId);
+        
+        // Create a summary of the conversation for context
+        conversationContext = messages.map(msg => 
+          `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
+        ).join('\n');
+      } catch (error) {
+        console.error('Error fetching thread context:', error);
+        // Continue without context if fetching fails
+      }
+    }
+
     // Initialize service
     const routineService = new RoutineCreationService(
       process.env.THRIVE_OPENAI_API_KEY!
     );
 
-    // Create the routine
+    // Create the routine with context
     const routine = await routineService.createRoutine({
       routineType: routineType || 'wellness_routine',
       duration: duration || '7_days',
@@ -32,7 +51,8 @@ export async function POST(request: NextRequest) {
       healthConcern,
       customInstructions: customInstructions || '',
       sleepTime: userPreferences?.sleepSchedule?.bedtime || '22:00',
-      wakeTime: userPreferences?.sleepSchedule?.wakeTime || '07:00'
+      wakeTime: userPreferences?.sleepSchedule?.wakeTime || '07:00',
+      conversationContext
     });
 
     // Transform the response to match WellnessRoutine type

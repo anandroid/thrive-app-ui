@@ -10,6 +10,7 @@ export interface RoutineCreationParams {
   customInstructions?: string;
   sleepTime?: string;
   wakeTime?: string;
+  conversationContext?: string;
 }
 
 export class RoutineCreationService {

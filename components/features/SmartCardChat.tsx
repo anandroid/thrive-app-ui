@@ -1200,6 +1200,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
           }}
           routineData={routineData}
           healthConcern={healthConcern}
+          threadId={threadId}
           onRoutineCreated={(routine) => {
             onRoutineCreated?.(routine);
             setShowRoutineModal(false);

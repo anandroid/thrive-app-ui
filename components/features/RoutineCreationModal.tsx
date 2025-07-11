@@ -22,6 +22,7 @@ interface RoutineCreationModalProps {
   onClose: () => void;
   routineData: ActionableItem;
   healthConcern?: string;
+  threadId?: string;
   onRoutineCreated: (routine: WellnessRoutine) => void;
 }
 
@@ -30,6 +31,7 @@ export const RoutineCreationModal: React.FC<RoutineCreationModalProps> = ({
   onClose,
   routineData,
   healthConcern,
+  threadId,
   onRoutineCreated
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -72,6 +74,7 @@ export const RoutineCreationModal: React.FC<RoutineCreationModalProps> = ({
           customInstructions: customInstructions.trim() || undefined,
           frequency: modalData.frequency,
           duration: selectedDuration,
+          threadId: threadId,
           userPreferences: {
             sleepSchedule: {
               bedtime: sleepTime,
