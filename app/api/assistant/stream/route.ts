@@ -70,6 +70,7 @@ async function handleMultiAssistant(
                   type: 'function_call',
                   toolCalls: chunk.toolCalls,
                   runId: chunk.runId,
+                  threadId: currentThreadId,
                   role: chunk.role
                 })}\n\n`)
               );

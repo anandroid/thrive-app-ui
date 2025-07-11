@@ -30,6 +30,7 @@ import { PantryAddModal } from './PantryAddModal';
 import { savePantryItem } from '@/src/utils/pantryStorage';
 import { PantryItem } from '@/src/types/pantry';
 import { EnhancedQuestions } from './EnhancedQuestions';
+import { ConversationalAnswerFlow } from './ConversationalAnswerFlow';
 
 interface SmartCardChatProps {
   threadId?: string;
@@ -75,7 +76,14 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   const tutorialTargetButtonRef = useRef<HTMLButtonElement | null>(null);
   const [showPantryModal, setShowPantryModal] = useState(false);
   const [pantryItemToAdd, setPantryItemToAdd] = useState<ActionableItem | null>(null);
+  // Conversational Flow State
+  // These manage the "voice-style" answer batching system
   const [lastAssistantQuestions, setLastAssistantQuestions] = useState<EnhancedQuestion[]>([]);
+  const [stagedAnswers, setStagedAnswers] = useState<Array<{ question: string; answer: string; timestamp: number }>>([]);  // Answers waiting to be sent
+  const [isUserTyping, setIsUserTyping] = useState(false);  // Triggers immediate send of staged answers
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);  // Detects when user stops typing
+  const [currentQuestion, setCurrentQuestion] = useState<EnhancedQuestion | null>(null);  // Track current question for unified input
+  const [submittedAnswer, setSubmittedAnswer] = useState<string>('');  // Answer submitted through main chat input
 
   // Load existing messages if threadId is provided
   useEffect(() => {
@@ -192,9 +200,82 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     }
   }, [selectedPrompt, onPromptUsed]); // Remove input from dependencies to avoid infinite loop
 
-  const handleSendMessage = async (messageOverride?: string) => {
+  /**
+   * Handles staging answers for conversational flow
+   * Called when user answers a question in multi-question scenarios
+   * Answers are collected here and sent after a pause or when user types
+   */
+  const handleAnswerStaged = (question: string, answer: string) => {
+    setStagedAnswers(prev => [...prev, {
+      question,
+      answer,
+      timestamp: Date.now()
+    }]);
+  };
+
+  /**
+   * Sends all staged answers after the conversational pause
+   * Called by ConversationalAnswerFlow component when:
+   * 1. 6-second pause timer expires (natural conversation pause)
+   * 2. User starts typing (interruption)
+   * 
+   * @param answers - Array of staged Q&A pairs
+   * @param additionalMessage - User's typed message (if they interrupted by typing)
+   */
+  const handleSendStagedAnswers = async (answers: Array<{ question: string; answer: string; timestamp: number }>, additionalMessage?: string) => {
+    if (answers.length === 0) return;
+    
+    // Clear staged answers
+    setStagedAnswers([]);
+    
+    // Format answers for display (clean, no context)
+    const displayMessage = answers.map(a => a.answer).join(', ');
+    
+    // Format answers for API (with context)
+    const apiMessage = answers.map(a => 
+      `${a.answer} (answering: "${a.question}")`
+    ).join(' ');
+    
+    // SENDING STRATEGY:
+    // If user typed something, we send Q&A first, then their message
+    // This maintains conversation context and flow
+    if (additionalMessage) {
+      // Send Q&A answers first (appears as separate bubble in UI)
+      await handleSendMessage(displayMessage, apiMessage);
+      // Then send user's typed message (another bubble)
+      await handleSendMessage(additionalMessage);
+    } else {
+      // Just send the batched Q&A answers
+      await handleSendMessage(displayMessage, apiMessage);
+    }
+  };
+
+  const handleSendMessage = async (messageOverride?: string, apiMessageOverride?: string) => {
     const messageToSend = messageOverride || input;
     if (!messageToSend.trim() || isLoading) return;
+    
+    // INTERRUPTION HANDLING:
+    // If user types while answers are staged, send everything
+    // This creates a natural flow: Q&A answers first, then user's new message
+    if (stagedAnswers.length > 0 && !messageOverride) {
+      await handleSendStagedAnswers(stagedAnswers, messageToSend);
+      setInput('');
+      return;
+    }
+    
+    // Check if we're answering a question
+    if (currentQuestion && !messageOverride) {
+      // This is an answer to the current question, not a regular message
+      setSubmittedAnswer(messageToSend);
+      setInput('');
+      // Reset submitted answer after a short delay
+      setTimeout(() => setSubmittedAnswer(''), 100);
+      return;  // The answer will be handled by the userAnswer prop in EnhancedQuestions
+    }
+    
+    // Use separate display and API messages if provided
+    const displayMessage = messageToSend;
+    const apiMessage = apiMessageOverride || messageToSend;
 
     // Mark that user has sent a message
     localStorage.setItem('hasEverSentMessage', 'true');
@@ -239,7 +320,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
 
     const userMessage: ChatMessage = {
       role: 'user',
-      content: messageToSend,
+      content: displayMessage, // Show clean message in UI
       timestamp: new Date()
     };
 
@@ -292,7 +373,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: userMessage.content,
+          message: apiMessage, // Send full message with context to API
           threadId: chatThreadId || threadId,
           basicContext
         }),
@@ -981,6 +1062,18 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                       <EnhancedQuestions 
                         questions={message.parsedContent.questions as EnhancedQuestion[]}
                         onQuestionSubmit={handleSendMessage}
+                        onAnswerStaged={handleAnswerStaged}
+                        // BATCHING DECISION: Only use conversational flow for multiple questions
+                        // Single questions = immediate send (no waiting)
+                        // Multiple questions = batch with 6-second pause
+                        useConversationalFlow={message.parsedContent.questions.length > 1}
+                        onAllQuestionsAnswered={() => {
+                          // Clear the last assistant questions when all are answered
+                          setLastAssistantQuestions([]);
+                          setCurrentQuestion(null);
+                        }}
+                        onCurrentQuestionChange={setCurrentQuestion}
+                        userAnswer={submittedAnswer || undefined}
                       />
                     )}
                   </div>
@@ -1038,14 +1131,54 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
         </div>
       </div>
 
+      {/* Conversational Answer Flow - Voice-style conversation batching */}
+      {/* Shows "thinking" indicator with countdown when answers are staged */}
+      {/* Auto-sends after 6 seconds OR immediately if user starts typing */}
+      <ConversationalAnswerFlow
+        stagedAnswers={stagedAnswers}
+        onSendAnswers={handleSendStagedAnswers}
+        isUserTyping={isUserTyping}  // Triggers immediate send when true
+      />
+
       {/* Input - stays at bottom */}
       <div className="chat-input-area safe-bottom">
         <ChatEditor
           value={input}
-          onChange={setInput}
+          onChange={(value) => {
+            setInput(value);
+            
+            // TYPING DETECTION for conversational flow
+            // This triggers immediate send of staged answers when user starts typing
+            
+            // Clear any existing typing timeout
+            if (typingTimeoutRef.current) {
+              clearTimeout(typingTimeoutRef.current);
+            }
+            
+            // If user is typing (value is not empty)
+            if (value.trim()) {
+              setIsUserTyping(true);  // This will trigger ConversationalAnswerFlow to send staged answers
+              
+              // Set a timeout to detect when user stops typing
+              // This prevents the typing state from staying true forever
+              typingTimeoutRef.current = setTimeout(() => {
+                setIsUserTyping(false);
+              }, 500); // Consider user stopped typing after 500ms of inactivity
+            } else {
+              // Input is empty
+              setIsUserTyping(false);
+            }
+          }}
           onSubmit={handleSendMessage}
           isLoading={isLoading}
           autoFocus={!!selectedPrompt}
+          placeholder={
+            currentQuestion 
+              ? `Answer: ${currentQuestion.prompt.substring(0, 50)}${currentQuestion.prompt.length > 50 ? '...' : ''}`
+              : messages.some(m => m.role === 'assistant') 
+              ? "Ask follow-ups or explore other aspects of this topic..."
+              : "Ask about your wellness journey..."
+          }
         />
       </div>
 

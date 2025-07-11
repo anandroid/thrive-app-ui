@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Send } from 'lucide-react';
+import { Send, Mic, MicOff } from 'lucide-react';
+import { useSpeechToText } from '@/hooks/useSpeechToText';
 
 // Inline keyframe style for spinner
 const spinnerStyle = `
@@ -39,6 +40,30 @@ export function ChatEditor({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isFocused, setIsFocused] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Speech to text integration
+  // IMPORTANT: Voice input is treated exactly like keyboard typing
+  // This ensures voice triggers the same conversational flow behaviors:
+  // - Immediate send of staged answers
+  // - Same "user is typing" detection
+  const { isListening, isSupported, toggleListening } = useSpeechToText({
+    onTranscript: (text) => {
+      // Append transcript to existing value (doesn't replace)
+      const newValue = value ? `${value} ${text}` : text;
+      onChange(newValue);  // This triggers parent's onChange handler
+      
+      // VOICE = TYPING for conversational flow
+      // The onChange call above will trigger isUserTyping=true in parent
+      // This causes any staged answers to be sent immediately
+      if (text.trim()) {
+        // Parent component detects this as typing activity
+      }
+    },
+    onStopListening: () => {
+      // Focus back on textarea when done for better UX
+      textareaRef.current?.focus();
+    }
+  });
 
   // Auto-resize textarea based on content and focus state
   useEffect(() => {
@@ -90,7 +115,7 @@ export function ChatEditor({
       <style dangerouslySetInnerHTML={{ __html: spinnerStyle }} />
       <div ref={containerRef} className={`chat-input-wrapper ${className}`}>
         <div className="px-4 py-3">
-          <div className="flex items-start gap-3 bg-gray-50 rounded-2xl p-3 transition-all focus-within:bg-white focus-within:ring-2 focus-within:ring-rose/20">
+          <div className="flex items-start gap-2 bg-gray-50 rounded-2xl p-3 transition-all focus-within:bg-white focus-within:ring-2 focus-within:ring-rose/20">
             <textarea
               ref={textareaRef}
               value={value}
@@ -98,12 +123,31 @@ export function ChatEditor({
               onKeyDown={handleKeyDown}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
-              placeholder={placeholder}
-              disabled={isLoading || disabled}
+              placeholder={isListening ? "Listening..." : placeholder}
+              disabled={isLoading || disabled || isListening}
               rows={1}
               className="flex-1 resize-none bg-transparent text-gray-900 placeholder:text-gray-500 focus:outline-none text-base leading-relaxed min-h-[32px] max-h-[64px] transition-all pt-0"
               style={{ overflow: 'hidden' }}
             />
+            {/* Microphone button */}
+            {isSupported && (
+              <button
+                onClick={toggleListening}
+                disabled={isLoading || disabled}
+                className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all touch-feedback touch-manipulation ${
+                  isListening 
+                    ? 'bg-red-500 text-white animate-pulse shadow-lg' 
+                    : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {isListening ? (
+                  <MicOff className="w-5 h-5" />
+                ) : (
+                  <Mic className="w-5 h-5" />
+                )}
+              </button>
+            )}
+            {/* Send button */}
             <button
               onClick={() => onSubmit()}
               disabled={!value.trim() || isLoading || disabled}

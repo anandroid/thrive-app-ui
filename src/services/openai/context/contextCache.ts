@@ -121,8 +121,15 @@ export class ContextCache {
     
     let context = `CONVERSATION CONTEXT:\n`;
     context += `User has discussed: ${Array.from(userTopics).join(', ') || 'general wellness'}\n`;
-    context += `You have already recommended: ${Array.from(assistantRecommendations).join(', ') || 'no specific recommendations yet'}\n\n`;
-    context += `Recent exchanges:\n`;
+    context += `You have already recommended: ${Array.from(assistantRecommendations).join(', ') || 'no specific recommendations yet'}\n`;
+    
+    // Highlight the most recent user input
+    const lastUserMessage = [...messages].reverse().find(m => m.role === 'user');
+    if (lastUserMessage) {
+      context += `\nMOST RECENT USER INPUT: "${lastUserMessage.content}" - You MUST acknowledge this before proceeding.\n`;
+    }
+    
+    context += `\nRecent exchanges:\n`;
     
     // Add last 6 messages with clear attribution
     messages.slice(-6).forEach(msg => {
