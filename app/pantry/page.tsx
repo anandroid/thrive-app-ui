@@ -16,6 +16,7 @@ import {
 } from '@/src/utils/pantryStorage';
 import { generateSupplementRecommendations } from '@/src/services/recommendations/supplementRecommendations';
 import { useThreadMetadata } from '@/src/hooks/useThreadMetadata';
+import { PantryNaturalInput } from '@/components/features/PantryNaturalInput';
 
 const categoryIcons = {
   supplement: Sparkles,
@@ -93,6 +94,22 @@ export default function PantryPage() {
     await onPantryChange();
   };
 
+  const handleAddMultipleItems = async (items: PantryItem[]) => {
+    items.forEach(item => savePantryItem(item));
+    setPantryItems([...pantryItems, ...items]);
+    
+    // Refresh recommendations
+    const existingRecs = getRecommendedSupplements();
+    const updatedPantryItemNames = [...pantryItems, ...items].map(i => i.name.toLowerCase());
+    const filteredRecs = existingRecs.filter(rec => 
+      !updatedPantryItemNames.includes(rec.name.toLowerCase())
+    );
+    setRecommendations(filteredRecs);
+    
+    // Update thread metadata
+    await onPantryChange();
+  };
+
   const handleDeleteItem = async (itemId: string) => {
     if (confirm('Are you sure you want to remove this item from your pantry?')) {
       deletePantryItem(itemId);
@@ -157,6 +174,12 @@ export default function PantryPage() {
               </div>
             </div>
           )}
+
+          {/* Natural Language Input - Always visible for easy adding */}
+          <PantryNaturalInput 
+            onAddItems={handleAddMultipleItems}
+            visible={true}
+          />
 
           {/* Search and Filter */}
           <div className="space-y-3">

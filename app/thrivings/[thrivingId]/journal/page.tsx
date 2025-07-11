@@ -12,6 +12,7 @@ import {
  
 } from '@/src/utils/thrivingStorage';
 import { Thriving, ThrivingJournal, JournalEntry } from '@/src/types/thriving';
+import { JournalEditor } from '@/components/ui/JournalEditor';
 
 const moodOptions = [
   { type: 'great', emoji: '😊', label: 'Great', color: 'text-green-600' },
@@ -208,11 +209,11 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
               </div>
 
               {/* Journal Content */}
-              <textarea
+              <JournalEditor
                 value={newEntry.content}
-                onChange={(e) => setNewEntry({ ...newEntry, content: e.target.value })}
+                onChange={(content) => setNewEntry({ ...newEntry, content })}
                 placeholder="Write about your day, how you're feeling, any observations... (optional)"
-                className="w-full h-32 p-3 rounded-xl border border-gray-200 focus:border-rose focus:ring-2 focus:ring-rose/20 resize-none"
+                rows={6}
               />
 
               {/* Pain Level (if relevant) */}

@@ -84,6 +84,7 @@ export async function POST(request: NextRequest) {
         console.log('Immediate completion - messages:', JSON.stringify(messages, null, 2));
         
         // Find the assistant's message from this run
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const assistantMessage = messages.data.find((msg: any) => 
           msg.role === 'assistant' && 
           msg.run_id === updatedRun.id
@@ -123,6 +124,7 @@ export async function POST(request: NextRequest) {
           );
         } else {
           // Try the last assistant message as fallback
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const lastAssistantMsg = messages.data.find((msg: any) => msg.role === 'assistant');
           if (lastAssistantMsg && lastAssistantMsg.content[0]?.type === 'text') {
             const fullContent = lastAssistantMsg.content[0].text.value;
@@ -268,6 +270,7 @@ export async function POST(request: NextRequest) {
                   console.log('Messages response:', JSON.stringify(messages, null, 2));
                   
                   // Find the assistant's message from this run
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   const assistantMessage = messages.data.find((msg: any) => 
                     msg.role === 'assistant' && 
                     msg.run_id === currentRun.id
@@ -293,6 +296,7 @@ export async function POST(request: NextRequest) {
                   } else {
                     console.log('No assistant message found for this run');
                     // Try the last assistant message as fallback
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const lastAssistantMsg = messages.data.find((msg: any) => msg.role === 'assistant');
                     if (lastAssistantMsg && lastAssistantMsg.content[0]?.type === 'text') {
                       fullContent = lastAssistantMsg.content[0].text.value;
