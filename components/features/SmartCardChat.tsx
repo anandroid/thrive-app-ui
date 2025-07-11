@@ -137,21 +137,34 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   };
 
   useEffect(() => {
-    // Only scroll for new user messages or initial load
     if (messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
       const messageIndex = messages.length - 1;
       
-      if (lastMessage.role === 'user' || messages.length === 1) {
-        scrollToBottom();
+      // Always scroll for user messages
+      if (lastMessage.role === 'user') {
+        // Add small delay to ensure message is rendered
+        setTimeout(() => {
+          scrollToBottom();
+        }, 50);
         // Clear scroll tracking for this position when user sends new message
         hasScrolledToStreamRef.current.delete(messageIndex);
       } else if (lastMessage.role === 'assistant' && lastMessage.isStreaming) {
-        // For streaming messages, only scroll when first content appears and we haven't scrolled yet
+        // For AI messages, scroll when:
+        // 1. Typing indicator first appears (no content yet)
+        // 2. First content appears
         const hasContent = lastMessage.parsedContent && Object.keys(lastMessage.parsedContent).length > 0;
         const hasNotScrolledYet = !hasScrolledToStreamRef.current.has(messageIndex);
         
-        if (hasContent && hasNotScrolledYet) {
+        // Scroll immediately when typing indicator appears
+        if (!hasContent && hasNotScrolledYet) {
+          hasScrolledToStreamRef.current.add(messageIndex);
+          setTimeout(() => {
+            scrollToBottom();
+          }, 100);
+        }
+        // Also scroll when first content appears
+        else if (hasContent && hasNotScrolledYet) {
           hasScrolledToStreamRef.current.add(messageIndex);
           setTimeout(() => {
             const messageElements = document.querySelectorAll('[data-message-index]');
@@ -163,7 +176,10 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
           }, 100);
         }
       }
-      // Don't scroll for completed assistant messages or after first content appears
+      // Initial load
+      else if (messages.length === 1) {
+        scrollToBottom();
+      }
     }
   }, [messages, scrollToBottom]);
 
@@ -346,6 +362,11 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       parsedContent: {} as PartialAssistantResponse
     };
     setMessages(prev => [...prev, assistantMessage]);
+    
+    // Immediately scroll to show the typing indicator
+    setTimeout(() => {
+      scrollToBottom();
+    }, 100);
 
     try {
       abortControllerRef.current = new AbortController();
@@ -1091,11 +1112,18 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
             </div>
           ) : (
             /* Show only typing indicator if streaming with no content yet */
-            <div className="rounded-3xl bg-white shadow-2xl shadow-gray-300/80 p-6" data-testid="typing-indicator-only">
-              <div className="flex space-x-1">
-                <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0s' }} />
-                <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0.15s' }} />
-                <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0.3s' }} />
+            <div 
+              className="rounded-3xl bg-white shadow-2xl shadow-gray-300/80 p-6" 
+              data-testid="typing-indicator-only"
+              data-message-index={messageIndex}
+            >
+              <div className="flex items-center space-x-3">
+                <div className="flex space-x-1">
+                  <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0s' }} />
+                  <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0.15s' }} />
+                  <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0.3s' }} />
+                </div>
+                <span className="text-sm text-gray-500">Wellness Companion is typing...</span>
               </div>
             </div>
           )}
