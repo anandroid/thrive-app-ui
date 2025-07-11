@@ -7,6 +7,7 @@ import { CameraScanner } from './CameraScanner';
 import { PantryItem } from '@/src/types/pantry';
 import { imageToBase64 } from '@/src/utils/pantryStorage';
 import { imageAnalysisService, PantryItemAnalysis } from '@/src/services/ai/fallback/ImageAnalysisService';
+import bridge from '@/src/lib/react-native-bridge';
 
 interface PantryAddModalProps {
   isOpen: boolean;
@@ -247,7 +248,17 @@ export function PantryAddModal({ isOpen, onClose, onAddItem, initialData, contex
               ) : (
                 <div className="grid grid-cols-2 gap-3">
                   <button
-                    onClick={() => setShowCamera(true)}
+                    onClick={async () => {
+                      // Request camera permission if in React Native
+                      if (bridge.isInReactNative()) {
+                        const granted = await bridge.requestCameraPermission();
+                        if (!granted) {
+                          setError('Camera permission is required to scan items');
+                          return;
+                        }
+                      }
+                      setShowCamera(true);
+                    }}
                     className="h-24 rounded-xl border border-dashed border-gray-200 bg-gray-50/50 flex flex-col items-center justify-center gap-1 hover:border-rose/50 hover:bg-rose/5 transition-all touch-feedback"
                   >
                     <Scan className="w-6 h-6 text-gray-400" />

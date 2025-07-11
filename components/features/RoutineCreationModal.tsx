@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Sparkles, Moon, Sun, Info } from 'lucide-react';
 import { ActionableItem, WellnessRoutine } from '@/src/services/openai/types';
 import { LoadingButton } from '@/components/ui/LoadingButton';
+import bridge from '@/src/lib/react-native-bridge';
 
 interface RoutineModalData {
   title?: string;
@@ -85,6 +86,9 @@ export const RoutineCreationModal: React.FC<RoutineCreationModalProps> = ({
 
       const routine = await response.json();
       onRoutineCreated(routine);
+      
+      // Notify React Native that a thriving was created
+      bridge.notifyThrivingCreated();
     } catch (error) {
       console.error('Error creating routine:', error);
     } finally {

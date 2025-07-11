@@ -18,6 +18,7 @@ import { ActionItemList } from './chat/ActionItemCard';
 import { AdditionalInfoCard } from './chat/AdditionalInfoCard';
 import { RoutineCreationModal } from './RoutineCreationModal';
 import { JourneyCreationModal } from './JourneyCreationModal';
+import bridge from '@/src/lib/react-native-bridge';
 import { WellnessJourney } from '@/src/services/openai/types/journey';
 import { getJourneyByType } from '@/src/utils/journeyStorage';
 import { ChatEditor } from '@/components/ui/ChatEditor';
@@ -293,7 +294,6 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
         body: JSON.stringify({
           message: userMessage.content,
           threadId: chatThreadId || threadId,
-          chatIntent,
           basicContext
         }),
         signal: abortControllerRef.current.signal
@@ -357,7 +357,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                 }
               }
 
-              if (data.type === 'delta' && data.content) {
+              if ((data.type === 'delta' || data.type === 'content') && data.content) {
                 fullContent += data.content;
                 setMessages(prev => {
                   const updated = [...prev];
@@ -485,7 +485,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                 }
               }
 
-              if (data.type === 'completed') {
+              if (data.type === 'completed' || data.type === 'done') {
                 const parsedResponse = parseAssistantResponse(fullContent);
                 
                 // Store questions if available
@@ -582,7 +582,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       // Handle buy action for supplements
       const searchQuery = action.searchQuery || encodeURIComponent(action.productName || action.title);
       const amazonSearchUrl = `https://www.amazon.com/s?k=${searchQuery}`;
-      window.open(amazonSearchUrl, '_blank');
+      bridge.openExternalUrl(amazonSearchUrl);
     } else if (action.type === 'add_to_pantry') {
       // Handle add to pantry action
       setPantryItemToAdd(action);
@@ -605,16 +605,16 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
         window.location.href = `/thrivings?id=${action.routineId}&showAdjustment=true`;
       }
     } else if (action.link) {
-      window.open(action.link, '_blank');
+      bridge.openExternalUrl(action.link);
     } else if (action.pharmacy_link) {
       // Convert pharmacy link to Amazon search
       // Extract the supplement name from the title or description
       const supplementName = action.title.replace(/^(Buy|Get|Purchase)\s+/i, '');
       const searchQuery = encodeURIComponent(supplementName + ' supplement');
       const amazonSearchUrl = `https://www.amazon.com/s?k=${searchQuery}`;
-      window.open(amazonSearchUrl, '_blank');
+      bridge.openExternalUrl(amazonSearchUrl);
     } else if (action.amazon_link) {
-      window.open(action.amazon_link, '_blank');
+      bridge.openExternalUrl(action.amazon_link);
     }
   };
 
@@ -828,7 +828,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                                       // Handle "Buy" action
                                       const searchQuery = item.searchQuery || encodeURIComponent(item.productName || item.title);
                                       const amazonSearchUrl = `https://www.amazon.com/s?k=${searchQuery}`;
-                                      window.open(amazonSearchUrl, '_blank');
+                                      bridge.openExternalUrl(amazonSearchUrl);
                                     }}
                                     className="flex-1 px-4 py-2.5 rounded-lg bg-gradient-to-r from-rose/10 to-dusty-rose/10 border border-rose/20 hover:border-rose/40 hover:shadow-sm transition-all duration-200 group touch-feedback"
                                   >

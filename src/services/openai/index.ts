@@ -1,5 +1,5 @@
-// Chat Services
-export { StreamingChatService } from './chat/streamingService';
+// Multi-Assistant Services
+export { MultiAssistantService, getMultiAssistantService } from './multiAssistantService';
 
 // Routine Services
 export { RoutineCreationService } from './routines/routineCreationService';
@@ -7,9 +7,9 @@ export { RoutineAdjustmentService } from './routines/routineAdjustmentService';
 export { RoutineOptimizer } from './routines/routineOptimizer';
 export { RoutinePromptBuilder } from './routines/routinePromptBuilder';
 
-// Assistant Services
-export { AssistantConfigService } from './assistant/assistantConfigService';
-export { ASSISTANT_INSTRUCTIONS } from './assistant/assistantInstructions';
+// Assistant Team Services
+export * from './assistant/team/assistantManager';
+export * from './assistant/team/sharedFunctions';
 
 // Types
 export * from './types';
@@ -20,4 +20,3 @@ export * from './utils';
 // Re-export for convenience
 export type { RoutineCreationParams } from './routines/routineCreationService';
 export type { AdjustmentParams } from './routines/routineAdjustmentService';
-export type { AssistantConfig } from './assistant/assistantConfigService';

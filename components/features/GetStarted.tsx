@@ -22,35 +22,42 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
       <div className="layout-wrapper welcome-layout">
         {/* Background Layer - Always visible */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-soft-blush/80 via-white to-soft-lavender/30" />
-          <div className="absolute top-20 -right-20 w-96 h-96 rounded-full bg-gradient-to-br from-rose/20 to-dusty-rose/20 blur-3xl" />
+          {/* Soft gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-soft-blush/50 via-white/80 to-soft-lavender/20" />
+          
+          {/* Animated floating elements - subtle and minimal */}
+          <div className="absolute top-[15%] left-[10%] w-[15vw] h-[15vw] max-w-24 max-h-24 rounded-full bg-gradient-to-br from-rose/10 to-dusty-rose/5 blur-2xl animate-pulse-slow" />
+          <div className="absolute top-[60%] right-[15%] w-[12vw] h-[12vw] max-w-20 max-h-20 rounded-full bg-gradient-to-br from-sage-light/10 to-sage/5 blur-2xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
+          <div className="absolute bottom-[30%] left-[20%] w-[10vw] h-[10vw] max-w-16 max-h-16 rounded-full bg-gradient-to-br from-soft-lavender/10 to-dusty-rose/5 blur-2xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
+          
+          {/* Subtle gradient overlay for depth */}
+          <div className="absolute inset-0 bg-gradient-to-t from-white/60 via-transparent to-transparent" />
         </div>
-
 
         {/* Scrollable Content */}
         <div className="layout-content relative z-10">
-          <div className="max-w-md mx-auto w-full px-6 py-4 sm:py-6 md:py-8 flex flex-col items-center justify-center gap-4">
-            {/* Welcome Illustration */}
-            <div className="relative w-full h-48 sm:h-56 md:h-64 mb-4 sm:mb-6 md:mb-8">
+          <div className="w-full h-full px-[5vw] py-[2vh] sm:py-[3vh] md:py-[4vh] flex flex-col items-center justify-center">
+            {/* Welcome Illustration - Viewport based sizing */}
+            <div className="relative w-full max-w-[80vw] sm:max-w-[60vw] md:max-w-[40vw] h-[30vh] sm:h-[35vh] md:h-[40vh] mb-[2vh] sm:mb-[3vh] md:mb-[4vh]">
               <OptimizedImage
                 src="/illustrations/welcome.png"
                 alt="Welcome to Thrive"
                 fill
-                className="object-contain p-4 sm:p-5 md:p-6"
+                className="object-contain"
                 priority
-                sizes="(max-width: 768px) 80vw, 400px"
+                sizes="(max-width: 768px) 80vw, 40vw"
               />
             </div>
 
-            {/* Text Content */}
-            <div className="text-center space-y-3 sm:space-y-4">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-burgundy to-rose bg-clip-text text-transparent">
+            {/* Text Content - Viewport based spacing */}
+            <div className="text-center space-y-[1.5vh] sm:space-y-[2vh]">
+              <h1 className="text-[min(6vw,2rem)] sm:text-[min(5vw,2.5rem)] md:text-[min(3.5vw,3rem)] font-bold bg-gradient-to-r from-burgundy to-rose bg-clip-text text-transparent">
                 Welcome to Thrive
               </h1>
-              <p className="text-base sm:text-lg font-medium text-secondary-text">
+              <p className="text-[min(4vw,1.125rem)] sm:text-[min(3vw,1.25rem)] md:text-[min(2vw,1.125rem)] font-medium text-secondary-text">
                 Your natural wellness companion
               </p>
-              <p className="text-sm sm:text-base text-secondary-text-thin leading-relaxed max-w-sm mx-auto px-2">
+              <p className="text-[min(3.5vw,0.875rem)] sm:text-[min(2.5vw,1rem)] md:text-[min(1.5vw,1rem)] text-secondary-text-thin/80 leading-relaxed max-w-[85vw] sm:max-w-[70vw] md:max-w-[50vw] mx-auto">
                 Blend timeless natural remedies with modern wellness tracking. Create personalized wellness routines, journal your healing journey, and seamlessly integrate any medications you take - all guided by holistic practices, completely private.
               </p>
             </div>

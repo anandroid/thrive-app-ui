@@ -5,6 +5,7 @@ import { X, Edit3, AlertCircle, Target, BookOpen } from 'lucide-react';
 import { ActionableItem } from '@/src/services/openai/types';
 import { WellnessJourney, JourneyType } from '@/src/services/openai/types/journey';
 import { LoadingButton } from '@/components/ui/LoadingButton';
+import bridge from '@/src/lib/react-native-bridge';
 
 interface JourneyCreationModalProps {
   isOpen: boolean;
@@ -80,6 +81,9 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
 
       const journey = await response.json();
       onJourneyCreated(journey);
+      
+      // Notify React Native that a thriving was created
+      bridge.notifyThrivingCreated();
     } catch (error) {
       console.error('Error creating journey:', error);
       alert('Failed to create journey. Please try again.');

@@ -103,8 +103,24 @@ export default function ThrivingsPage() {
       if (tutorialCount < 2) {
         // Show tutorial after a delay
         const timer = setTimeout(() => {
-          setShowAdjustmentTutorial(true);
-          hasShownTutorialInSession.current = true;
+          // First scroll to the adjust button area to center it in viewport
+          if (adjustButtonRef.current) {
+            adjustButtonRef.current.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+            // Wait for scroll to complete before showing tutorial
+            setTimeout(() => {
+              setShowAdjustmentTutorial(true);
+              hasShownTutorialInSession.current = true;
+              // Add a subtle glow to the button area
+              adjustButtonRef.current?.parentElement?.classList.add('ring-2', 'ring-sage/40', 'ring-offset-2');
+            }, 500);
+          } else {
+            // If button ref not available, show tutorial anyway
+            setShowAdjustmentTutorial(true);
+            hasShownTutorialInSession.current = true;
+          }
         }, 3000); // 3 second delay to let the page load
         
         return () => clearTimeout(timer);
@@ -1025,6 +1041,8 @@ export default function ThrivingsPage() {
             setShowAdjustmentTutorial(false);
             const currentCount = parseInt(localStorage.getItem('adjustmentTutorialCount') || '0');
             localStorage.setItem('adjustmentTutorialCount', String(currentCount + 1));
+            // Remove the glow from the button area
+            adjustButtonRef.current?.parentElement?.classList.remove('ring-2', 'ring-sage/40', 'ring-offset-2');
           }}
           onArrowClick={() => {
             // Scroll to the adjust button and click it after 2 seconds

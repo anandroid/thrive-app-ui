@@ -1,5 +1,8 @@
 # Thrive App - Mobile-First Development Guidelines
 
+## 🚨 VIEWPORT-FIRST DEVELOPMENT RULE
+**This is a MOBILE APP - NEVER use hardcoded pixel values!** Always use viewport units (vw, vh, dvh) with appropriate constraints. This ensures the app scales perfectly on ALL devices from iPhone SE to tablets.
+
 ## Recent Performance & AI Improvements (2025-07-10)
 
 ### ✅ Hybrid Context Approach for Performance
@@ -205,6 +208,47 @@ This app is designed as a **mobile-first** application. All development must sta
 - Card padding: `p-4 md:p-6`
 - Never use padding less than `p-3` on mobile
 
+### 🚨 CRITICAL: Viewport-Based Sizing Guidelines
+**NEVER use hardcoded pixel values for mobile-first apps!** Always use viewport units for responsive design:
+
+#### ❌ BAD - Hardcoded pixels:
+```jsx
+// Never do this for mobile apps!
+<div className="w-96 h-96" />  // 384px fixed
+<div className="max-w-[340px]" />  // Fixed max-width
+<div className="text-2xl" />  // Fixed font size
+```
+
+#### ✅ GOOD - Viewport-based units:
+```jsx
+// Always use viewport units with constraints
+<div className="w-[80vw] max-w-md h-[40vh]" />
+<div className="text-[min(6vw,2rem)]" />  // Responsive with max
+<div className="p-[5vw] max-p-8" />  // Responsive padding
+```
+
+#### Viewport Unit Guidelines:
+1. **Width**: Use `vw` (viewport width)
+   - `w-[80vw]` = 80% of viewport width
+   - Always add max constraints: `w-[80vw] max-w-md`
+
+2. **Height**: Use `vh` (viewport height) 
+   - `h-[50vh]` = 50% of viewport height
+   - Consider dynamic viewport height: `h-[100dvh]`
+
+3. **Text Sizing**: Use `min()` function
+   - `text-[min(6vw,2rem)]` = 6% of viewport or 2rem max
+   - Ensures readability on all devices
+
+4. **Spacing**: Combine viewport units with max values
+   - `p-[5vw] max-p-8` = 5% viewport padding, 2rem max
+   - `space-y-[2vh]` = 2% viewport vertical spacing
+
+5. **Safe Boundaries**:
+   - Mobile text: `min(4vw, 1rem)` to `min(8vw, 2rem)`
+   - Padding: `min(5vw, 2rem)` max
+   - Margins: `min(3vh, 1.5rem)` for vertical rhythm
+
 ### Navigation
 - Mobile menu: Full-screen overlay or slide-out drawer
 - Sticky header height: `h-14` on mobile, `h-16` on desktop
@@ -235,8 +279,8 @@ This app is designed as a **mobile-first** application. All development must sta
 
 ### Cards
 ```jsx
-// Mobile-optimized card
-<div className="rounded-xl bg-white p-4 shadow-sm border border-gray-100 
+// Mobile-optimized card with viewport units
+<div className="rounded-xl bg-white p-[4vw] max-p-6 shadow-sm border border-gray-100 
                 md:rounded-2xl md:p-6 md:shadow-md">
   {/* Content */}
 </div>
@@ -244,11 +288,29 @@ This app is designed as a **mobile-first** application. All development must sta
 
 ### Buttons
 ```jsx
-// Touch-friendly button
-<button className="min-h-[44px] px-6 rounded-full text-sm font-medium
-                   md:text-base md:px-8">
+// Touch-friendly button with viewport-based sizing
+<button className="min-h-[44px] px-[6vw] max-px-8 rounded-full 
+                   text-[min(4vw,0.875rem)] md:text-base font-medium">
   Tap Me
 </button>
+```
+
+### Full-Screen Layouts
+```jsx
+// Proper viewport-based full-screen layout
+<div className="h-[100vh] h-[100dvh] w-screen flex flex-col">
+  <header className="h-[8vh] min-h-[3.5rem]" />
+  <main className="flex-1 overflow-y-auto p-[5vw]" />
+  <footer className="h-[10vh] min-h-[4rem]" />
+</div>
+```
+
+### Responsive Images
+```jsx
+// Viewport-based image sizing
+<div className="relative w-[80vw] h-[40vh] max-w-md max-h-64">
+  <Image fill className="object-contain" />
+</div>
 ```
 
 ### Modals
