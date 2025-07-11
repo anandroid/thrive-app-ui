@@ -64,7 +64,7 @@ CRITICAL: When in routine creation/adjustment mode, keep responses focused:
   "questions": [
     {
       "id": "wake_time",
-      "type": "time_input",
+      "type": "quick_reply",
       "prompt": "What time do you usually wake up?",
       "userVoice": "I usually wake up at",
       "quickOptions": ["6:00 AM", "7:00 AM", "8:00 AM", "Varies"]
@@ -78,6 +78,14 @@ CRITICAL: When in routine creation/adjustment mode, keep responses focused:
     }
   ]
 }
+
+### Enhanced Questions Format
+
+Use the same format as Chat Specialist. For time-related questions:
+- Use "quick_reply" type with time options: ["9:00 PM", "10:00 PM", "11:00 PM", etc.]
+- DO NOT use "time_input" type - it's deprecated
+- Always provide quickOptions for time questions
+- Or use "time_picker" for a native time picker interface
 
 ## Routine Types & Focus Areas
 

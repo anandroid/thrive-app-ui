@@ -1060,21 +1060,27 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                       </div>
                     ) : (
                       <EnhancedQuestions 
-                        questions={message.parsedContent.questions as EnhancedQuestion[]}
-                        onQuestionSubmit={handleSendMessage}
-                        onAnswerStaged={handleAnswerStaged}
-                        // BATCHING DECISION: Only use conversational flow for multiple questions
-                        // Single questions = immediate send (no waiting)
-                        // Multiple questions = batch with 6-second pause
-                        useConversationalFlow={message.parsedContent.questions.length > 1}
-                        onAllQuestionsAnswered={() => {
-                          // Clear the last assistant questions when all are answered
-                          setLastAssistantQuestions([]);
-                          setCurrentQuestion(null);
-                        }}
-                        onCurrentQuestionChange={setCurrentQuestion}
-                        userAnswer={submittedAnswer || undefined}
-                      />
+                          questions={message.parsedContent.questions as EnhancedQuestion[]}
+                          onQuestionSubmit={handleSendMessage}
+                          onAnswerStaged={handleAnswerStaged}
+                          // BATCHING DECISION: Only use conversational flow for multiple questions
+                          // Single questions = immediate send (no waiting)
+                          // Multiple questions = batch with 6-second pause
+                          useConversationalFlow={message.parsedContent.questions.length > 1}
+                          onAllQuestionsAnswered={() => {
+                            // Clear the last assistant questions when all are answered
+                            setLastAssistantQuestions([]);
+                            setCurrentQuestion(null);
+                          }}
+                          onCurrentQuestionChange={setCurrentQuestion}
+                          userAnswer={submittedAnswer || undefined}
+                          onLastQuestionAnswered={() => {
+                            // Immediately send staged answers when last question is answered
+                            if (stagedAnswers.length > 0) {
+                              handleSendStagedAnswers(stagedAnswers);
+                            }
+                          }}
+                        />
                     )}
                   </div>
                 )}

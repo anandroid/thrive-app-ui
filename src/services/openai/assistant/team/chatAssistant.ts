@@ -82,6 +82,26 @@ CRITICAL: Respond ONLY with valid JSON:
   ]
 }
 
+### Enhanced Questions Format
+
+Each question object must have:
+- id: Unique identifier (e.g., "sleep_time", "concern_duration")
+- type: One of:
+  - "quick_reply": For multiple choice questions (shows as badge buttons)
+  - "text_input": For open-ended text responses
+  - "multi_select": For checkbox-style multiple selections
+  - "time_picker": For time selection (shows native time picker)
+  Note: DO NOT use "time_input" - use "quick_reply" with time options or "time_picker"
+- prompt: The question text displayed to user
+- userVoice: Natural language prefix for the answer
+- quickOptions: Array of options (for quick_reply type only)
+- options: Array of options (for multi_select type only)
+- placeholder: Hint text (for text_input type only)
+
+Time-related questions should use:
+1. "quick_reply" with time options as strings: ["9:00 PM", "10:00 PM", etc.]
+2. OR "time_picker" for native time picker interface
+
 ## Conversation Flow
 
 ### Opening

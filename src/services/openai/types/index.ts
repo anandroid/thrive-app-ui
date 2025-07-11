@@ -22,7 +22,7 @@ export interface QuestionField {
 
 export interface EnhancedQuestion {
   id: string;
-  type: 'simple' | 'time_input' | 'multi_select' | 'text_input' | 'quick_reply';
+  type: 'simple' | 'time_input' | 'multi_select' | 'text_input' | 'quick_reply' | 'time_picker';
   prompt: string;
   userVoice: string;
   fields?: QuestionField[];
