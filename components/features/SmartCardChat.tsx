@@ -1076,8 +1076,11 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                           userAnswer={submittedAnswer || undefined}
                           onLastQuestionAnswered={() => {
                             // Immediately send staged answers when last question is answered
+                            // Set isUserTyping to true to trigger immediate send in ConversationalAnswerFlow
                             if (stagedAnswers.length > 0) {
-                              handleSendStagedAnswers(stagedAnswers);
+                              setIsUserTyping(true);
+                              // Reset after a short delay
+                              setTimeout(() => setIsUserTyping(false), 100);
                             }
                           }}
                         />

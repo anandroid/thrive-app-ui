@@ -37,6 +37,9 @@ export const useSpeechToText = ({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTranscriptRef = useRef<string>('');
 
+  // Check if mobile device
+  const isMobile = typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
   useEffect(() => {
     // Check if speech recognition is supported
     const SpeechRecognition = 
@@ -47,9 +50,6 @@ export const useSpeechToText = ({
       setIsSupported(true);
       
       const recognition = new SpeechRecognition();
-      
-      // Mobile-specific configuration
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       
       // On mobile, continuous mode often doesn't work well
       recognition.continuous = isMobile ? false : continuous;
@@ -68,12 +68,29 @@ export const useSpeechToText = ({
         console.log('Speech recognition started');
         setIsListening(true);
         onStartListening?.();
+        lastTranscriptRef.current = '';
+        
+        // Start timeout on mobile
+        if (isMobile) {
+          timeoutRef.current = setTimeout(() => {
+            if (recognitionRef.current) {
+              console.log('Initial timeout - stopping recognition');
+              recognitionRef.current.stop();
+            }
+          }, 5000); // 5 seconds initial timeout
+        }
       };
       
       recognition.onend = () => {
         console.log('Speech recognition ended');
         setIsListening(false);
         onStopListening?.();
+        
+        // Clear timeout on end
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
       };
       
       recognition.onerror = (event: any) => {
@@ -136,7 +153,7 @@ export const useSpeechToText = ({
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [continuous, onTranscript, onStartListening, onStopListening]);
+  }, [continuous, onTranscript, onStartListening, onStopListening, isMobile]);
 
   const startListening = async () => {
     if (recognitionRef.current && !isListening) {
