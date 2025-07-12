@@ -102,18 +102,8 @@ export const parseAssistantResponse = (content: string): AssistantResponse | und
           const dosage = dosageMatch ? dosageMatch[0] : "200-400mg";
           const timing = timingMatch ? "30 minutes before bed" : "before bed";
           
-          // Add both already_have and buy options
+          // Only add supplement_choice - the UI will automatically create both buttons
           fallbackResponse.actionableItems = [
-            {
-              type: 'already_have',
-              title: 'I already have',
-              description: 'Track in pantry',
-              productName: productName,
-              suggestedNotes: `${dosage}, ${timing}`,
-              contextMessage: 'Great! Tracking this helps me personalize your wellness routines',
-              dosage: dosage,
-              timing: timing
-            },
             {
               type: 'supplement_choice',
               title: `Consider ${productName}`,
@@ -121,7 +111,8 @@ export const parseAssistantResponse = (content: string): AssistantResponse | und
               productName: productName,
               dosage: dosage,
               timing: timing,
-              searchQuery: 'magnesium+glycinate'
+              searchQuery: 'magnesium+glycinate',
+              suggestedNotes: `${dosage}, ${timing}`
             }
           ];
         }
