@@ -4,10 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { 
   Activity, Heart, Moon, Footprints, 
   TrendingUp, TrendingDown, Minus,
-  Calendar, ChevronRight, Sparkles,
+  ChevronRight, Sparkles,
   Zap, Droplets, Brain
 } from 'lucide-react';
-import { Line, Bar } from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -72,7 +72,7 @@ export const HealthInsights: React.FC = () => {
 
   useEffect(() => {
     checkHealthPermissions();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkHealthPermissions = async () => {
     // Check if we have health permissions via the native bridge

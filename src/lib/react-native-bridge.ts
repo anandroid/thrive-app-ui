@@ -11,6 +11,37 @@ declare global {
       requestNotificationPermission: () => void;
       notifyThrivingCreated: () => void;
       openExternalUrl: (url: string) => void;
+      checkHealthPermission?: () => Promise<boolean>;
+      requestHealthPermission?: () => Promise<boolean>;
+      getHealthData?: (params: {
+        metrics: string[];
+        timeRange: 'day' | 'week' | 'month';
+      }) => Promise<{
+        metrics: Array<{
+          type: 'steps' | 'heart_rate' | 'sleep' | 'water' | 'calories' | 'mindfulness';
+          value: number;
+          unit: string;
+          trend: 'up' | 'down' | 'stable';
+          changePercent: number;
+          goal?: number;
+          lastUpdated: Date;
+        }>;
+        weeklyTrends: {
+          labels: string[];
+          datasets: Array<{
+            label: string;
+            data: number[];
+            borderColor: string;
+            backgroundColor: string;
+          }>;
+        };
+        correlations: Array<{
+          thriving: string;
+          metric: string;
+          correlation: number;
+          insight: string;
+        }>;
+      }>;
     };
     onReactNativeMessage?: (message: unknown) => void;
     onReactNativeBridgeReady?: () => void;
