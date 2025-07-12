@@ -12,9 +12,12 @@ interface AdjustmentTutorialProps {
 export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose, onArrowClick }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [scrollPosition, setScrollPosition] = useState(0);
 
   useEffect(() => {
     setMounted(true);
+    // Capture current scroll position
+    setScrollPosition(window.scrollY);
     // Delay to ensure smooth transition
     setTimeout(() => setIsVisible(true), 100);
   }, []);
@@ -28,23 +31,26 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
 
   const modalContent = (
     <>
-      {/* Dark overlay - prevents interaction with background */}
+      {/* Dark overlay - prevents interaction with background, NO dismiss on click */}
       <div 
         className={`fixed inset-0 z-[9998] bg-black/60 transition-opacity duration-300 ${
           isVisible ? 'opacity-100' : 'opacity-0'
         }`}
-        onClick={handleClose}
         style={{ 
           touchAction: 'none',
           overscrollBehavior: 'none'
         }}
       />
       
-      {/* Modal positioned in center of current viewport */}
+      {/* Modal positioned in center of user's current view */}
       <div 
-        className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[9999] bg-white rounded-3xl shadow-2xl p-[min(6vw,1.5rem)] w-[90vw] max-w-sm transition-all duration-300 ${
+        className={`absolute left-1/2 -translate-x-1/2 z-[9999] bg-white rounded-3xl shadow-2xl p-[min(6vw,1.5rem)] w-[90vw] max-w-sm transition-all duration-300 ${
           isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
         }`}
+        style={{
+          top: `${scrollPosition + window.innerHeight / 2}px`,
+          transform: 'translateX(-50%) translateY(-50%)'
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
