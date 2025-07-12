@@ -17,12 +17,12 @@ const openai = new OpenAI({
 // Feature flag check
 const FUNCTIONS_ENABLED = process.env.ENABLE_ASSISTANT_FUNCTIONS === 'true';
 
-// Function-free mode instructions to append
-const FUNCTION_FREE_INSTRUCTIONS = `
-## Function-Free Mode
-You currently have no functions/tools available. Work entirely with basicContext:
+// BasicContext instructions to append when functions are disabled
+const BASIC_CONTEXT_INSTRUCTIONS = `
+## Working with BasicContext
+You receive basicContext in conversations containing:
 
-### Using basicContext
+### basicContext structure:
 - pantryItems: Array of strings describing supplements/medications
   Example: ["Magnesium 400mg - for sleep", "Vitamin D 2000IU"]
 - activeRoutines: Array of routine objects with:
@@ -33,11 +33,10 @@ You currently have no functions/tools available. Work entirely with basicContext
   - steps: Array of routine steps
 
 ### Guidelines
-- Make recommendations based solely on provided context
+- Use the provided context to understand user's current setup
 - Empty arrays mean user has no items/routines
-- Still provide personalized, high-quality responses
-- Suggest actions (supplements, routines) even without functions
-- Use the context to understand user's current wellness setup`;
+- Make personalized recommendations based on this context
+- Follow all conversation flow rules as normal`;
 
 // Function-enabled instructions for each role
 const FUNCTION_ENABLED_INSTRUCTIONS = {
@@ -96,7 +95,7 @@ async function getInstructions(role) {
   if (FUNCTIONS_ENABLED) {
     instructions += FUNCTION_ENABLED_INSTRUCTIONS[role] || '';
   } else {
-    instructions += FUNCTION_FREE_INSTRUCTIONS;
+    instructions += BASIC_CONTEXT_INSTRUCTIONS;
   }
   
   return instructions;
@@ -213,8 +212,8 @@ async function createOrUpdateAssistant(role) {
     const instructions = await getInstructions(role);
     const tools = await getFunctions(role);
     
-    console.log(`   Mode: ${FUNCTIONS_ENABLED ? 'Functions Enabled' : 'Function-Free Mode'}`);
-    console.log(`   Tools: ${tools.length} functions configured`);
+    console.log(`   Functions: ${FUNCTIONS_ENABLED ? '✅ Enabled' : '❌ Disabled'}`);
+    console.log(`   Tools: ${tools.length} configured`);
     
     const assistantData = {
       name: config.name,

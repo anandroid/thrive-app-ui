@@ -41,13 +41,13 @@ Use functions for comprehensive pantry management.`
 };
 
 /**
- * Function-free mode instructions to append when functions are disabled
+ * BasicContext instructions to append when functions are disabled
  */
-const FUNCTION_FREE_INSTRUCTIONS = `
-## Function-Free Mode
-You currently have no functions/tools available. Work entirely with basicContext:
+const BASIC_CONTEXT_INSTRUCTIONS = `
+## Working with BasicContext
+You receive basicContext in conversations containing:
 
-### Using basicContext
+### basicContext structure:
 - pantryItems: Array of strings describing supplements/medications
   Example: ["Magnesium 400mg - for sleep", "Vitamin D 2000IU"]
 - activeRoutines: Array of routine objects with:
@@ -58,11 +58,10 @@ You currently have no functions/tools available. Work entirely with basicContext
   - steps: Array of routine steps
 
 ### Guidelines
-- Make recommendations based solely on provided context
+- Use the provided context to understand user's current setup
 - Empty arrays mean user has no items/routines
-- Still provide personalized, high-quality responses
-- Suggest actions (supplements, routines) even without functions
-- Use the context to understand user's current wellness setup`;
+- Make personalized recommendations based on this context
+- Follow all conversation flow rules as normal`;
 
 /**
  * Build complete instructions for an assistant
@@ -83,7 +82,7 @@ export const buildAssistantInstructions = (
   if (functionsEnabled) {
     instructions += FUNCTION_ENABLED_INSTRUCTIONS[role] || '';
   } else {
-    instructions += FUNCTION_FREE_INSTRUCTIONS;
+    instructions += BASIC_CONTEXT_INSTRUCTIONS;
   }
   
   return instructions;
