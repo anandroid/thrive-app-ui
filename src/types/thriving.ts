@@ -12,8 +12,53 @@ export interface JournalEntry {
   painLevel?: number; // 1-10 for pain tracking
   symptoms?: string[];
   gratitude?: string[];
+  customData?: Record<string, unknown>; // Dynamic field values
+  routineVersion?: string; // Track routine changes
+  aiInsights?: string; // Assistant-generated insights
   createdAt: string;
   updatedAt: string;
+}
+
+// Dynamic Journal Field Types
+export interface CustomJournalField {
+  id: string;
+  type: 'mood_scale' | 'pain_scale' | 'energy_level' | 'sleep_quality' | 'symptom_tracker' | 'supplement_effects' | 'custom_metric' | 'time_input' | 'text_area' | 'checkbox_list' | 'rating_scale';
+  label: string;
+  description?: string;
+  required: boolean;
+  options?: string[]; // For dropdowns/checkboxes
+  scale?: { min: number; max: number; labels: Record<number, string> };
+  placeholder?: string;
+  validation?: {
+    min?: number;
+    max?: number;
+    pattern?: string;
+  };
+}
+
+export interface JournalPrompt {
+  id: string;
+  question: string;
+  type: 'reflection' | 'tracking' | 'troubleshooting' | 'celebration';
+  priority: number; // Higher number = higher priority
+  conditions?: {
+    daysCompleted?: number;
+    painLevel?: { min?: number; max?: number };
+    mood?: string[];
+    customField?: { fieldId: string; value: unknown };
+  };
+}
+
+export interface DynamicJournalTemplate {
+  templateId: string;
+  routineId: string;
+  journalType: 'sleep_tracking' | 'pain_monitoring' | 'mood_wellness' | 'stress_management' | 'medication_tracking' | 'general_wellness';
+  customFields: CustomJournalField[];
+  prompts: JournalPrompt[];
+  trackingFocus: string[];
+  visualizations?: ('body_map' | 'mood_chart' | 'energy_timeline' | 'pain_heatmap')[];
+  version: string;
+  createdAt: string;
 }
 
 export interface ThrivingStep {
@@ -37,7 +82,84 @@ export interface ThrivingJournal {
   entries: JournalEntry[];
   lastEntryDate?: string;
   totalEntries: number;
+  template?: DynamicJournalTemplate;
+  insights?: JournalInsights;
   createdAt: string;
+}
+
+// User Learning Profile for AI Personalization
+export interface UserLearningProfile {
+  userId: string;
+  insights: {
+    sleepOptimization: {
+      optimalBedtime?: string;
+      effectiveSupplements: Array<{name: string, effectiveness: number, confidence: number}>;
+      environmentFactors: string[];
+      averageQuality: number;
+      patterns: Record<string, unknown>;
+    };
+    painManagement: {
+      triggers: Array<{trigger: string, frequency: number, confidence: number}>;
+      reliefStrategies: Array<{strategy: string, effectiveness: number, confidence: number}>;
+      optimalExerciseTiming?: string;
+      painPatterns: Record<string, unknown>;
+    };
+    stressManagement: {
+      stressTriggers: string[];
+      effectiveCopingStrategies: Array<{strategy: string, effectiveness: number}>;
+      optimalStressRelieveTiming?: string;
+      stressPatterns: Record<string, unknown>;
+    };
+    routinePersonalization: {
+      preferredTiming: string[];
+      motivationStyle: 'gentle' | 'structured' | 'flexible';
+      successPatterns: string[];
+      completionRates: Record<string, number>;
+    };
+    supplementTracking: {
+      effectiveness: Record<string, {rating: number, sideEffects: string[], timing: string}>;
+      interactions: string[];
+      preferences: string[];
+    };
+  };
+  dataPoints: number; // Number of journal entries analyzed
+  lastUpdated: string;
+  confidenceLevel: number; // 0-1, based on data quantity and consistency
+  version: string;
+}
+
+// Journal Analytics and Insights
+export interface JournalInsights {
+  patterns: {
+    sleepQuality?: {
+      average: number;
+      trend: 'improving' | 'declining' | 'stable';
+      correlations: Array<{factor: string, correlation: number}>;
+    };
+    painLevels?: {
+      average: number;
+      trend: 'improving' | 'declining' | 'stable';
+      triggers: Array<{trigger: string, impact: number}>;
+    };
+    moodPatterns?: {
+      mostCommon: string;
+      trend: 'improving' | 'declining' | 'stable';
+      triggers: string[];
+    };
+    routineAdherence?: {
+      completionRate: number;
+      bestDays: string[];
+      challengingTimes: string[];
+    };
+  };
+  recommendations: Array<{
+    type: 'timing' | 'supplement' | 'activity' | 'environment';
+    suggestion: string;
+    confidence: number;
+    reasoning: string;
+  }>;
+  celebratoryInsights: string[];
+  lastAnalyzed: string;
 }
 
 export interface AdditionalRecommendation {
@@ -64,6 +186,7 @@ export interface Thriving {
   proTips?: string[];
   reminderTimes?: string[];
   journalId?: string; // Reference to attached journal
+  journalTemplate?: DynamicJournalTemplate; // Dynamic journal configuration
   healthConcern?: string;
   customInstructions?: string;
   createdAt: string;
@@ -72,6 +195,7 @@ export interface Thriving {
   isActive: boolean;
   startDate: string;
   endDate?: string;
+  version: string; // Track routine changes for journal insights
 }
 
 // Helper type for creating a new thriving

@@ -616,7 +616,7 @@ export default function ThrivingsPage() {
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-dusty-rose/0 via-dusty-rose/10 to-dusty-rose/0 opacity-0 group-hover:opacity-100 transition-opacity" />
                         <BookOpen className="w-4 h-4 relative z-10" />
-                        <span className="relative z-10">Open Journal</span>
+                        <span className="relative z-10">Smart Journal</span>
                       </button>
                     </div>
                   ))}

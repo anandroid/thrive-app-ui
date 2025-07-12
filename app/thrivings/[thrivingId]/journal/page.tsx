@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { BookOpen, Plus } from 'lucide-react';
+import { BookOpen, Plus, Brain, TrendingUp, Sparkles } from 'lucide-react';
 import { ActionBar } from '@/components/ui/ActionBar';
 import { 
   getThrivingById, 
@@ -11,8 +11,11 @@ import {
   addJournalEntry,
  
 } from '@/src/utils/thrivingStorage';
-import { Thriving, ThrivingJournal, JournalEntry } from '@/src/types/thriving';
+import { Thriving, ThrivingJournal, JournalEntry, UserLearningProfile } from '@/src/types/thriving';
 import { JournalEditor } from '@/components/ui/JournalEditor';
+import { DynamicJournalModal } from '@/components/ui/DynamicJournalModal';
+import { UserLearningProfileManager } from '@/src/lib/userLearningProfile';
+import { JournalInsightsEngine } from '@/src/lib/journalInsights';
 
 const moodOptions = [
   { type: 'great', emoji: '😊', label: 'Great', color: 'text-green-600' },
@@ -28,6 +31,9 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
   const [thriving, setThriving] = useState<Thriving | null>(null);
   const [journal, setJournal] = useState<ThrivingJournal | null>(null);
   const [showNewEntry, setShowNewEntry] = useState(false);
+  const [showDynamicJournal, setShowDynamicJournal] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserLearningProfile | null>(null);
+  const [showInsights, setShowInsights] = useState(false);
   const [newEntry, setNewEntry] = useState({
     mood: '' as JournalEntry['mood'],
     moodEmoji: '',
@@ -54,6 +60,18 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
       journalData = createJournalForThriving(thrivingId);
     }
     setJournal(journalData);
+
+    // Load user learning profile
+    const profile = UserLearningProfileManager.getUserProfile();
+    setUserProfile(profile);
+
+    // Generate insights if we have enough data
+    if (journalData && journalData.entries.length >= 5) {
+      const insights = JournalInsightsEngine.generateJournalInsights(journalData.entries, thrivingData);
+      // Update journal with insights
+      journalData.insights = insights;
+      setJournal({...journalData});
+    }
   }, [thrivingId, router]);
 
   const handleMoodSelect = (mood: typeof moodOptions[number]) => {
@@ -98,9 +116,8 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
       tags: []
     });
 
-    // Refresh journal
-    const updatedJournal = getJournalByThrivingId(thrivingId);
-    setJournal(updatedJournal);
+    // Refresh journal and update learning profile
+    refreshJournalData();
 
     // Reset form
     setNewEntry({
@@ -112,6 +129,33 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
       gratitude: []
     });
     setShowNewEntry(false);
+  };
+
+  const handleDynamicJournalClose = () => {
+    setShowDynamicJournal(false);
+    refreshJournalData();
+  };
+
+  const refreshJournalData = () => {
+    // Refresh journal
+    const updatedJournal = getJournalByThrivingId(thrivingId);
+    setJournal(updatedJournal);
+
+    // Update learning profile
+    if (updatedJournal && thriving) {
+      const updatedProfile = UserLearningProfileManager.updateProfileFromJournalEntries(
+        updatedJournal.entries,
+        [thriving]
+      );
+      setUserProfile(updatedProfile);
+
+      // Generate new insights
+      if (updatedJournal.entries.length >= 5) {
+        const insights = JournalInsightsEngine.generateJournalInsights(updatedJournal.entries, thriving);
+        updatedJournal.insights = insights;
+        setJournal({...updatedJournal});
+      }
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -164,23 +208,59 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="px-4 py-6 space-y-4">
-          {/* Add Entry Button */}
+          {/* Add Entry Buttons */}
           {!showNewEntry && (
-            <button
-              onClick={() => setShowNewEntry(true)}
-              className="w-full rounded-2xl bg-gradient-to-r from-rose/5 via-dusty-rose/5 to-burgundy/5 border border-rose/10 py-3.5 px-6 flex items-center justify-center space-x-3 hover:from-rose/10 hover:via-dusty-rose/10 hover:to-burgundy/10 hover:border-rose/20 transition-all duration-300 group relative"
-            >
-              <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300">
-                    <Plus className="w-4 h-4 text-white group-hover:rotate-90 transition-transform duration-500" />
+            <div className="space-y-3">
+              {/* Smart Journal Button */}
+              <button
+                onClick={() => setShowDynamicJournal(true)}
+                className="w-full rounded-2xl bg-gradient-to-r from-purple/5 via-dusty-rose/5 to-blue/5 border border-purple/10 py-4 px-6 flex items-center justify-between hover:from-purple/10 hover:via-dusty-rose/10 hover:to-blue/10 hover:border-purple/20 transition-all duration-300 group relative"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="relative">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300">
+                      <Brain className="w-5 h-5 text-white" />
+                    </div>
+                    {/* Subtle glow effect */}
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 blur-lg opacity-40 group-hover:opacity-60 transition-opacity duration-300" />
                   </div>
-                  {/* Subtle glow effect */}
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-rose to-burgundy blur-lg opacity-40 group-hover:opacity-60 transition-opacity duration-300" />
+                  <div className="text-left">
+                    <div className="font-semibold text-gray-800 text-[15px] flex items-center space-x-2">
+                      <span>Smart Journal</span>
+                      {userProfile && userProfile.dataPoints > 5 && (
+                        <Sparkles className="w-4 h-4 text-purple-500" />
+                      )}
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      {userProfile && userProfile.dataPoints > 5 
+                        ? `Personalized for you • ${Math.round(userProfile.confidenceLevel * 100)}% insights`
+                        : 'Guided prompts and tracking'
+                      }
+                    </div>
+                  </div>
                 </div>
-                <span className="font-medium text-gray-800 text-[15px]">New Journal Entry</span>
-              </div>
-            </button>
+                <div className="text-gray-400">
+                  <span className="text-xs">Recommended</span>
+                </div>
+              </button>
+
+              {/* Traditional Journal Button */}
+              <button
+                onClick={() => setShowNewEntry(true)}
+                className="w-full rounded-2xl bg-gradient-to-r from-rose/5 via-dusty-rose/5 to-burgundy/5 border border-rose/10 py-3.5 px-6 flex items-center justify-center space-x-3 hover:from-rose/10 hover:via-dusty-rose/10 hover:to-burgundy/10 hover:border-rose/20 transition-all duration-300 group relative"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="relative">
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300">
+                      <Plus className="w-4 h-4 text-white group-hover:rotate-90 transition-transform duration-500" />
+                    </div>
+                    {/* Subtle glow effect */}
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-rose to-burgundy blur-lg opacity-40 group-hover:opacity-60 transition-opacity duration-300" />
+                  </div>
+                  <span className="font-medium text-gray-800 text-[15px]">Quick Entry</span>
+                </div>
+              </button>
+            </div>
           )}
 
           {/* New Entry Form */}
@@ -346,6 +426,57 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
             </div>
           )}
 
+          {/* Insights Section */}
+          {journal.insights && userProfile && userProfile.dataPoints >= 5 && (
+            <div className="rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <TrendingUp className="w-5 h-5 text-emerald-600" />
+                  <h3 className="font-semibold text-emerald-900">Your Progress Insights</h3>
+                </div>
+                <button
+                  onClick={() => setShowInsights(!showInsights)}
+                  className="text-xs text-emerald-700 hover:text-emerald-800"
+                >
+                  {showInsights ? 'Hide' : 'Show'} Details
+                </button>
+              </div>
+              
+              {journal.insights.celebratoryInsights.length > 0 && (
+                <div className="space-y-2">
+                  {journal.insights.celebratoryInsights.slice(0, 2).map((insight, index) => (
+                    <p key={index} className="text-sm text-emerald-800 bg-emerald-50 p-3 rounded-lg">
+                      {insight}
+                    </p>
+                  ))}
+                </div>
+              )}
+
+              {showInsights && journal.insights.recommendations.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  <h4 className="font-medium text-emerald-900 text-sm">Personalized Recommendations:</h4>
+                  {journal.insights.recommendations.slice(0, 3).map((rec, index) => (
+                    <div key={index} className="bg-white/60 p-3 rounded-lg">
+                      <p className="text-sm text-emerald-800 font-medium">{rec.suggestion}</p>
+                      <p className="text-xs text-emerald-600 mt-1">{rec.reasoning}</p>
+                      <div className="flex items-center mt-2">
+                        <div className="w-full bg-emerald-100 rounded-full h-1">
+                          <div 
+                            className="bg-emerald-500 h-1 rounded-full" 
+                            style={{ width: `${rec.confidence * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-emerald-600 ml-2">
+                          {Math.round(rec.confidence * 100)}% confident
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Journal Entries */}
           <div className="space-y-4">
             {recentEntries.map((entry) => (
@@ -415,6 +546,15 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
           </div>
         </div>
       </div>
+
+      {/* Dynamic Journal Modal */}
+      {thriving && (
+        <DynamicJournalModal
+          thriving={thriving}
+          isOpen={showDynamicJournal}
+          onClose={handleDynamicJournalClose}
+        />
+      )}
     </div>
   );
 }

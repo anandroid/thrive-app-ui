@@ -1,0 +1,289 @@
+'use client';
+
+import React, { useState } from 'react';
+import { Info, Clock, Star } from 'lucide-react';
+import { CustomJournalField } from '@/src/types/thriving';
+
+interface DynamicJournalFieldProps {
+  field: CustomJournalField;
+  value: unknown;
+  onChange: (value: unknown) => void;
+}
+
+export function DynamicJournalField({ field, value, onChange }: DynamicJournalFieldProps) {
+  const [showInfo, setShowInfo] = useState(false);
+
+  const renderField = () => {
+    switch (field.type) {
+      case 'rating_scale':
+      case 'pain_scale':
+      case 'energy_level':
+      case 'sleep_quality':
+        return renderRatingScale();
+      
+      case 'time_input':
+        return renderTimeInput();
+      
+      case 'text_area':
+        return renderTextArea();
+      
+      case 'checkbox_list':
+        return renderCheckboxList();
+      
+      case 'custom_metric':
+        return renderCustomMetric();
+      
+      default:
+        return renderTextInput();
+    }
+  };
+
+  const renderRatingScale = () => {
+    const scale = field.scale || { min: 1, max: 10, labels: {} };
+    const steps = [];
+    
+    for (let i = scale.min; i <= scale.max; i++) {
+      steps.push(i);
+    }
+
+    const getColorForValue = (val: number) => {
+      if (field.type === 'pain_scale') {
+        // Pain scale: red for high pain
+        if (val <= 3) return 'from-green-500 to-emerald-500';
+        if (val <= 6) return 'from-yellow-500 to-orange-500';
+        return 'from-red-500 to-red-600';
+      } else {
+        // Quality scales: green for high values
+        if (val <= 3) return 'from-red-500 to-red-600';
+        if (val <= 6) return 'from-yellow-500 to-orange-500';
+        return 'from-green-500 to-emerald-500';
+      }
+    };
+
+    return (
+      <div className="space-y-4">
+        {/* Scale visualization */}
+        <div className="relative">
+          <div className="flex justify-between mb-2">
+            {scale.labels[scale.min] && (
+              <span className="text-xs text-gray-500">{scale.labels[scale.min]}</span>
+            )}
+            {scale.labels[scale.max] && (
+              <span className="text-xs text-gray-500">{scale.labels[scale.max]}</span>
+            )}
+          </div>
+          
+          <div className="flex space-x-2">
+            {steps.map((step) => (
+              <button
+                key={step}
+                onClick={() => onChange(step)}
+                className={`flex-1 h-12 rounded-xl border-2 transition-all ${
+                  value === step
+                    ? `bg-gradient-to-r ${getColorForValue(step)} border-transparent text-white shadow-lg scale-105`
+                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                <div className="text-center">
+                  <div className="font-semibold">{step}</div>
+                  {scale.labels[step] && (
+                    <div className="text-xs opacity-75">{scale.labels[step]}</div>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Current selection display */}
+        {value && (
+          <div className={`text-center p-3 rounded-xl bg-gradient-to-r ${getColorForValue(value)} text-white`}>
+            <div className="font-semibold">
+              {field.type === 'pain_scale' ? 'Pain Level' : 
+               field.type === 'sleep_quality' ? 'Sleep Quality' :
+               field.type === 'energy_level' ? 'Energy Level' : 'Rating'}: {value}/10
+            </div>
+            {scale.labels[value] && (
+              <div className="text-sm opacity-90">{scale.labels[value]}</div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderTimeInput = () => (
+    <div className="relative">
+      <div className="flex items-center space-x-2 p-3 border border-gray-200 rounded-xl focus-within:border-dusty-rose focus-within:ring-2 focus-within:ring-dusty-rose/20">
+        <Clock className="w-5 h-5 text-gray-400" />
+        <input
+          type="time"
+          value={value || ''}
+          onChange={(e) => onChange(e.target.value)}
+          className="flex-1 outline-none bg-transparent"
+          required={field.required}
+        />
+      </div>
+    </div>
+  );
+
+  const renderTextArea = () => (
+    <div className="relative">
+      <textarea
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={field.placeholder || `Enter your ${field.label.toLowerCase()}...`}
+        rows={4}
+        className="w-full p-4 border border-gray-200 rounded-xl focus:border-dusty-rose focus:ring-2 focus:ring-dusty-rose/20 outline-none resize-none"
+        required={field.required}
+      />
+      <div className="absolute bottom-3 right-3 text-xs text-gray-400">
+        {(value || '').length} characters
+      </div>
+    </div>
+  );
+
+  const renderCheckboxList = () => {
+    const selectedValues = Array.isArray(value) ? value : [];
+    
+    const handleToggle = (option: string) => {
+      const newValues = selectedValues.includes(option)
+        ? selectedValues.filter(v => v !== option)
+        : [...selectedValues, option];
+      onChange(newValues);
+    };
+
+    return (
+      <div className="space-y-3">
+        {field.options?.map((option) => (
+          <label
+            key={option}
+            className="flex items-center space-x-3 p-3 rounded-xl border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
+          >
+            <input
+              type="checkbox"
+              checked={selectedValues.includes(option)}
+              onChange={() => handleToggle(option)}
+              className="w-5 h-5 text-dusty-rose border-gray-300 rounded focus:ring-dusty-rose"
+            />
+            <span className="flex-1 text-gray-900">{option}</span>
+          </label>
+        ))}
+        
+        {selectedValues.length > 0 && (
+          <div className="mt-3 p-3 bg-dusty-rose/5 rounded-xl border border-dusty-rose/20">
+            <div className="text-sm font-medium text-dusty-rose mb-1">Selected:</div>
+            <div className="flex flex-wrap gap-2">
+              {selectedValues.map((val) => (
+                <span
+                  key={val}
+                  className="px-2 py-1 bg-dusty-rose/10 text-dusty-rose text-xs rounded-full"
+                >
+                  {val}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderCustomMetric = () => (
+    <div className="relative">
+      <div className="flex items-center space-x-2 p-3 border border-gray-200 rounded-xl focus-within:border-dusty-rose focus-within:ring-2 focus-within:ring-dusty-rose/20">
+        <input
+          type="number"
+          value={value || ''}
+          onChange={(e) => onChange(parseFloat(e.target.value) || undefined)}
+          placeholder={field.placeholder || '0'}
+          min={field.validation?.min}
+          max={field.validation?.max}
+          step="0.1"
+          className="flex-1 outline-none bg-transparent"
+          required={field.required}
+        />
+        <span className="text-sm text-gray-500">
+          {field.label.toLowerCase().includes('hour') ? 'hrs' :
+           field.label.toLowerCase().includes('level') ? '/10' :
+           field.label.toLowerCase().includes('time') ? 'min' : ''}
+        </span>
+      </div>
+      
+      {field.validation && (
+        <div className="mt-1 text-xs text-gray-500">
+          {field.validation.min !== undefined && field.validation.max !== undefined
+            ? `Range: ${field.validation.min} - ${field.validation.max}`
+            : field.validation.min !== undefined
+            ? `Minimum: ${field.validation.min}`
+            : field.validation.max !== undefined
+            ? `Maximum: ${field.validation.max}`
+            : ''
+          }
+        </div>
+      )}
+    </div>
+  );
+
+  const renderTextInput = () => (
+    <div className="relative">
+      <input
+        type="text"
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
+        className="w-full p-3 border border-gray-200 rounded-xl focus:border-dusty-rose focus:ring-2 focus:ring-dusty-rose/20 outline-none"
+        required={field.required}
+        pattern={field.validation?.pattern}
+      />
+    </div>
+  );
+
+  return (
+    <div className="space-y-3">
+      {/* Field Label and Info */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <label className="font-medium text-gray-900">
+            {field.label}
+            {field.required && <span className="text-red-500 ml-1">*</span>}
+          </label>
+          
+          {/* Special indicators */}
+          {field.type === 'rating_scale' && (
+            <Star className="w-4 h-4 text-yellow-500" />
+          )}
+          {field.type === 'time_input' && (
+            <Clock className="w-4 h-4 text-blue-500" />
+          )}
+        </div>
+        
+        {field.description && (
+          <button
+            onClick={() => setShowInfo(!showInfo)}
+            className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+          >
+            <Info className="w-4 h-4 text-gray-400" />
+          </button>
+        )}
+      </div>
+
+      {/* Description */}
+      {showInfo && field.description && (
+        <div className="p-3 bg-blue-50 border border-blue-100 rounded-xl">
+          <p className="text-sm text-blue-800">{field.description}</p>
+        </div>
+      )}
+
+      {/* Field Input */}
+      {renderField()}
+
+      {/* Validation Message */}
+      {field.required && !value && (
+        <div className="text-xs text-red-500">
+          This field is required
+        </div>
+      )}
+    </div>
+  );
+}

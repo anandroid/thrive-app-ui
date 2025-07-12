@@ -5,6 +5,7 @@ import { ServiceWorkerProvider } from "@/src/providers/ServiceWorkerProvider";
 import { OfflineIndicator } from "@/components/ui/OfflineIndicator";
 import { TouchFeedbackProvider } from "@/src/providers/TouchFeedbackProvider";
 import { NotificationProvider } from "@/src/providers/NotificationProvider";
+import { JournalMigrationProvider } from "@/src/providers/JournalMigrationProvider";
 import "@/src/utils/clearCorruptedData";
 import { Toaster } from 'react-hot-toast';
 
@@ -59,9 +60,11 @@ export default function RootLayout({
         <ServiceWorkerProvider>
           <TouchFeedbackProvider>
             <NotificationProvider>
-              <OfflineIndicator />
-              <Toaster position="top-center" />
-              {children}
+              <JournalMigrationProvider>
+                <OfflineIndicator />
+                <Toaster position="top-center" />
+                {children}
+              </JournalMigrationProvider>
             </NotificationProvider>
           </TouchFeedbackProvider>
         </ServiceWorkerProvider>
