@@ -3,6 +3,30 @@
 ## 🚨 VIEWPORT-FIRST DEVELOPMENT RULE
 **This is a MOBILE APP - NEVER use hardcoded pixel values!** Always use viewport units (vw, vh, dvh) with appropriate constraints. This ensures the app scales perfectly on ALL devices from iPhone SE to tablets.
 
+## Universal Mobile Voice Input Solution (2025-07-12)
+
+### ✅ Mobile Voice Input Strategy
+- **Issue**: Web Speech API is unreliable on mobile browsers (Chrome stops after 200ms, iOS Safari has duplicate text bugs)
+- **Root Cause**: Mobile browsers have various implementation issues with the Web Speech API
+- **Solution**: Universal approach - recommend native keyboard voice input for ALL mobile devices
+- **Implementation**:
+  1. **Mobile Detection** (All mobile browsers):
+     - Detects any mobile device (iOS or Android)
+     - Shows helpful toast: "Use the keyboard mic button 🎤"
+     - iOS Safari gets special message: "Tap the mic on your keyboard - iOS dictation works best"
+     - Focuses hidden input field to trigger keyboard appearance
+  2. **Platform-Specific Handling**:
+     - **iOS Safari**: Disabled interim results (prevents duplicate text bug)
+     - **Chrome Mobile**: Auto-restart on timeout (workaround for 200ms bug)
+     - **Other Mobile**: Falls back to standard Web Speech API with mobile optimizations
+  3. **Desktop**: Uses standard Web Speech API without modifications
+- **Why This Works**: 
+  - Mobile keyboard voice input uses native OS speech recognition (not Web Speech API)
+  - iOS uses Siri dictation, Android uses Google voice typing
+  - Much more reliable than browser-based speech recognition
+- **Limitations**: Cannot programmatically trigger keyboard dictation on iOS (Apple restriction)
+- **Testing**: Use `?isDebug=true` to see debug components
+
 ## Recent Performance & AI Improvements (2025-07-10)
 
 ### ✅ Hybrid Context Approach for Performance

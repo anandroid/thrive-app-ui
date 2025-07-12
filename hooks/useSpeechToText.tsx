@@ -35,13 +35,15 @@ interface UseSpeechToTextProps {
   onStartListening?: () => void;
   onStopListening?: () => void;
   continuous?: boolean;  // Keep listening until manually stopped
+  onRestarting?: () => void;  // Called when Chrome mobile is restarting
 }
 
 export const useSpeechToText = ({
   onTranscript,
   onStartListening,
   onStopListening,
-  continuous = false
+  continuous = false,
+  onRestarting
 }: UseSpeechToTextProps) => {
   const [isListening, setIsListening] = useState(false);
   const [isSupported, setIsSupported] = useState(false);
@@ -58,6 +60,11 @@ export const useSpeechToText = ({
   const isMobile = typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   // Check if Chrome on mobile
   const isChromeMobile = isMobile && /Chrome/i.test(navigator.userAgent) && !/Edge/i.test(navigator.userAgent);
+  // Check if iOS Safari
+  const isIOSSafari = typeof window !== 'undefined' && 
+    /iPhone|iPad|iPod/i.test(navigator.userAgent) && 
+    /Safari/i.test(navigator.userAgent) && 
+    !/Chrome|CriOS|FxiOS/i.test(navigator.userAgent);
 
   useEffect(() => {
     // Only run on client side
@@ -75,17 +82,21 @@ export const useSpeechToText = ({
         const recognition = new SpeechRecognition();
       
       // On mobile, use specific settings
-      recognition.continuous = continuous;
+      // IMPORTANT: continuous mode is problematic on mobile browsers
+      recognition.continuous = isMobile ? false : continuous;
       recognition.interimResults = true;
       recognition.lang = 'en-US';
       recognition.maxAlternatives = 1;
       
-      // Chrome mobile specific settings
+      // Mobile specific settings
       if (isChromeMobile) {
-        // Force continuous mode for Chrome mobile
-        recognition.continuous = true;
-        // Try to prevent early termination
-        (recognition as any).serviceURI = '';
+        // Don't use continuous mode - it's broken on Chrome mobile
+        // We'll use manual restart instead
+        mDebug('Chrome mobile: Using discontinuous mode with manual restart');
+      } else if (isIOSSafari) {
+        // iOS Safari has its own issues
+        mDebug('iOS Safari: Speech recognition is unreliable, keyboard dictation recommended');
+        recognition.interimResults = false; // Interim results cause duplicate text on iOS
       }
       
       // Mobile browsers need these for better performance
@@ -152,50 +163,27 @@ export const useSpeechToText = ({
           const duration = Date.now() - (recognitionRef.current as any).startTime;
           mDebug(`Recognition ended after ${duration}ms`);
           
-          // If it ended too quickly on Chrome mobile, switch to MediaRecorder
-          if (isChromeMobile && duration < 500 && !lastTranscriptRef.current && streamRef.current) {
-            mDebug('Chrome mobile early termination detected - switching to MediaRecorder fallback');
+          // If it ended too quickly on Chrome mobile, restart recognition
+          if (isChromeMobile && duration < 500 && !lastTranscriptRef.current) {
+            mDebug('Chrome mobile early termination detected - restarting recognition');
             
-            // Try MediaRecorder as fallback
-            try {
-              const recorder = new MediaRecorder(streamRef.current, {
-                mimeType: 'audio/webm',
-                audioBitsPerSecond: 16000
-              });
-              
-              mediaRecorderRef.current = recorder;
-              audioChunksRef.current = [];
-              
-              recorder.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                  audioChunksRef.current.push(event.data);
+            // Auto-restart recognition for Chrome mobile
+            // This is the recommended workaround for the continuous mode bug
+            if (recognitionRef.current) {
+              onRestarting?.(); // Notify UI that we're restarting
+              setTimeout(() => {
+                try {
+                  mDebug('Restarting speech recognition...');
+                  if (isListening) {
+                    recognitionRef.current.start();
+                  }
+                } catch (e) {
+                  mDebug(`Failed to restart recognition: ${e}`, 'error');
+                  setIsListening(false);
+                  onStopListening?.();
                 }
-              };
-              
-              recorder.onstart = () => {
-                mDebug('MediaRecorder fallback started');
-                setIsListening(true);
-                onStartListening?.();
-              };
-              
-              recorder.onstop = () => {
-                mDebug('MediaRecorder fallback stopped');
-                setIsListening(false);
-                onStopListening?.();
-                
-                if (audioChunksRef.current.length > 0) {
-                  const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-                  mDebug(`Fallback captured ${audioBlob.size} bytes of audio`);
-                  onTranscript('[Voice input recorded - Chrome mobile fallback active]');
-                }
-                
-                audioChunksRef.current = [];
-              };
-              
-              recorder.start(100);
-              return; // Don't complete the onend handler
-            } catch (e) {
-              mDebug(`MediaRecorder fallback failed: ${e}`, 'error');
+              }, 100);
+              return; // Don't complete the onend handler yet
             }
           }
         }
@@ -234,11 +222,45 @@ export const useSpeechToText = ({
         } else if (event.error === 'no-speech') {
           // This is common on mobile - the recognition times out quickly
           mDebug('No speech detected - this is normal');
+          
+          // Auto-restart on Chrome mobile if we're still supposed to be listening
+          if (isChromeMobile && isListening) {
+            mDebug('Chrome mobile: Auto-restarting after no-speech error');
+            onRestarting?.(); // Notify UI
+            setTimeout(() => {
+              if (recognitionRef.current && isListening) {
+                try {
+                  recognitionRef.current.start();
+                } catch (e) {
+                  mDebug(`Failed to restart after no-speech: ${e}`, 'error');
+                  setIsListening(false);
+                  onStopListening?.();
+                }
+              }
+            }, 100);
+          }
         } else if (event.error === 'network') {
           mDebug('Network error - checking connection...', 'error');
           alert('Speech recognition requires an internet connection.');
         } else if (event.error === 'aborted') {
           mDebug('Recognition aborted - possibly by browser');
+          
+          // Try to restart on Chrome mobile if aborted
+          if (isChromeMobile && isListening) {
+            mDebug('Chrome mobile: Auto-restarting after abort');
+            onRestarting?.(); // Notify UI
+            setTimeout(() => {
+              if (recognitionRef.current && isListening) {
+                try {
+                  recognitionRef.current.start();
+                } catch (e) {
+                  mDebug(`Failed to restart after abort: ${e}`, 'error');
+                  setIsListening(false);
+                  onStopListening?.();
+                }
+              }
+            }, 200);
+          }
         } else if (event.error === 'audio-capture') {
           mDebug('Audio capture failed - mic may be in use by another app', 'error');
         } else if (event.error === 'language-not-supported') {
@@ -383,12 +405,12 @@ export const useSpeechToText = ({
             const audioTracks = stream.getAudioTracks();
             mDebug(`Audio tracks: ${audioTracks.length}, Track enabled: ${audioTracks[0]?.enabled}`);
             
-            // For Chrome mobile, keep the stream active but try speech recognition first
+            // For Chrome mobile, we'll use the stream differently
             if (isChromeMobile) {
-              mDebug('Chrome mobile: Keeping stream active as backup');
-              streamRef.current = stream;
-              // Don't return - continue to try speech recognition
-              // We'll use MediaRecorder as fallback if speech recognition fails quickly
+              mDebug('Chrome mobile: Stream obtained, closing it as continuous mode is broken');
+              // Close the stream immediately as we don't need it for speech recognition
+              stream.getTracks().forEach(track => track.stop());
+              // Don't keep the stream - Chrome mobile speech recognition works better without it
             } else if (isMobile && audioContextRef.current) {
               // For non-Chrome mobile, try the audio pipeline approach
               try {
@@ -451,15 +473,17 @@ export const useSpeechToText = ({
   const stopListening = () => {
     mDebug('stopListening called');
     
-    // Stop MediaRecorder if using Chrome mobile fallback
-    if (isChromeMobile && mediaRecorderRef.current) {
-      if (mediaRecorderRef.current.state === 'recording') {
-        mDebug('Stopping MediaRecorder...');
-        mediaRecorderRef.current.stop();
+    // For Chrome mobile, we need to ensure we're not in a restart loop
+    if (isChromeMobile) {
+      setIsListening(false); // Set this first to prevent auto-restart
+    }
+    
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {
+        mDebug(`Error stopping recognition: ${e}`, 'error');
       }
-      mediaRecorderRef.current = null;
-    } else if (recognitionRef.current && isListening) {
-      recognitionRef.current.stop();
     }
     
     // Clean up audio resources

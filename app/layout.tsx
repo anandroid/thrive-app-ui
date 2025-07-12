@@ -9,6 +9,7 @@ import "@/src/utils/clearCorruptedData";
 import { Toaster } from 'react-hot-toast';
 import { MobileDebugConsole } from '@/components/ui/MobileDebugConsole';
 import { MicrophoneTest } from '@/components/ui/MicrophoneTest';
+import { ChromeMicTest } from '@/components/ui/ChromeMicTest';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -67,6 +68,7 @@ export default function RootLayout({
               {/* Mobile debug console */}
               <MobileDebugConsole />
               <MicrophoneTest />
+              <ChromeMicTest />
             </NotificationProvider>
           </TouchFeedbackProvider>
         </ServiceWorkerProvider>

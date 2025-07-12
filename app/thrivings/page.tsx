@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { 
   Clock, 
@@ -134,24 +134,9 @@ export default function ThrivingsPage() {
       if (tutorialCount < 2) {
         // Show tutorial after a delay
         const timer = setTimeout(() => {
-          // First scroll to the adjust button area to center it in viewport
-          if (adjustButtonRef.current) {
-            adjustButtonRef.current.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'center' 
-            });
-            // Wait for scroll to complete before showing tutorial
-            setTimeout(() => {
-              setShowAdjustmentTutorial(true);
-              hasShownTutorialInSession.current = true;
-              // Add a subtle glow to the button area
-              adjustButtonRef.current?.parentElement?.classList.add('ring-2', 'ring-sage/40', 'ring-offset-2');
-            }, 500);
-          } else {
-            // If button ref not available, show tutorial anyway
-            setShowAdjustmentTutorial(true);
-            hasShownTutorialInSession.current = true;
-          }
+          // Show tutorial immediately without scrolling first
+          setShowAdjustmentTutorial(true);
+          hasShownTutorialInSession.current = true;
         }, 3000); // 3 second delay to let the page load
         
         return () => clearTimeout(timer);
@@ -285,70 +270,35 @@ export default function ThrivingsPage() {
     return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
   };
 
-  // Touch handling for swipe gestures
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const [isScrolling, setIsScrolling] = useState(false);
-
-  const minSwipeDistance = 50;
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-    setIsScrolling(false);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+  // Handle scroll selection with proper snap detection
+  const handleScrollSelection = useCallback(() => {
+    if (!scrollContainerRef.current) return;
     
-    // Prevent default scrolling to control the swipe behavior
-    if (touchStart !== null) {
-      const currentTouch = e.targetTouches[0].clientX;
-      const diff = Math.abs(currentTouch - touchStart);
-      
-      // If significant horizontal movement, prevent default scrolling
-      if (diff > 10 && !isScrolling) {
-        e.preventDefault();
-      }
+    const container = scrollContainerRef.current;
+    const scrollLeft = container.scrollLeft;
+    const containerWidth = container.clientWidth;
+    
+    // Calculate card dimensions
+    const firstCard = container.querySelector('.thriving-card') as HTMLElement;
+    if (!firstCard) return;
+    
+    const cardStyle = window.getComputedStyle(firstCard);
+    const cardWidth = firstCard.offsetWidth;
+    const cardMargin = parseInt(cardStyle.marginRight) || 16;
+    const totalCardWidth = cardWidth + cardMargin;
+    
+    // Find which card is currently visible
+    // Add half card width to get the center point
+    const currentIndex = Math.round((scrollLeft + containerWidth / 2 - cardWidth / 2) / totalCardWidth);
+    
+    // Ensure index is within bounds
+    const boundedIndex = Math.max(0, Math.min(currentIndex, thrivings.length - 1));
+    
+    // Update selection if different
+    if (thrivings[boundedIndex] && thrivings[boundedIndex].id !== selectedThriving?.id) {
+      setSelectedThriving(thrivings[boundedIndex]);
     }
-  };
-
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe || isRightSwipe) {
-      const currentIndex = thrivings.findIndex(r => r.id === selectedThriving?.id);
-      let nextIndex = currentIndex;
-      
-      if (isLeftSwipe && currentIndex < thrivings.length - 1) {
-        nextIndex = currentIndex + 1;
-      } else if (isRightSwipe && currentIndex > 0) {
-        nextIndex = currentIndex - 1;
-      }
-      
-      if (nextIndex !== currentIndex) {
-        setSelectedThriving(thrivings[nextIndex]);
-        if (scrollContainerRef.current) {
-          const container = scrollContainerRef.current;
-          const cardElement = container.children[nextIndex] as HTMLElement;
-          
-          if (cardElement) {
-            // Use the card's offset for more accurate positioning
-            container.scrollTo({
-              left: cardElement.offsetLeft - 16, // Subtract padding
-              behavior: 'smooth'
-            });
-          }
-        }
-      }
-    }
-    
-    setIsScrolling(false);
-  };
+  }, [thrivings, selectedThriving]);
 
   // Get the next upcoming step based on current time
   const getNextUpcomingStep = (thriving: Thriving) => {
@@ -400,6 +350,23 @@ export default function ThrivingsPage() {
     
     return stepsWithTimes.length > 0 ? (completedSteps / stepsWithTimes.length) * 100 : 0;
   };
+
+  // Handle scroll end detection
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleScrollEnd = () => {
+      handleScrollSelection();
+    };
+
+    // Also handle when scrolling programmatically settles
+    container.addEventListener('scrollend', handleScrollEnd);
+    
+    return () => {
+      container.removeEventListener('scrollend', handleScrollEnd);
+    };
+  }, [handleScrollSelection]);
 
   // Scroll to active step only when coming from external navigation
   useEffect(() => {
@@ -476,17 +443,30 @@ export default function ThrivingsPage() {
                     <button
                       key={item.id}
                       onClick={() => {
-                        if (scrollContainerRef.current) {
+                        if (scrollContainerRef.current && index < thrivings.length) {
                           const container = scrollContainerRef.current;
-                          const cardWidth = container.offsetWidth - 32; // viewport width - padding
-                          scrollContainerRef.current.scrollTo({
-                            left: index * (cardWidth + 16), // 16px gap
-                            behavior: 'smooth'
-                          });
+                          const cards = container.querySelectorAll('.thriving-card');
+                          const targetCard = cards[index] as HTMLElement;
                           
-                          // Update selection for thrivings (not the add-new card)
-                          if (index < thrivings.length) {
+                          if (targetCard) {
+                            // Scroll to the exact position of the card
+                            container.scrollTo({
+                              left: targetCard.offsetLeft - 16, // Account for padding
+                              behavior: 'smooth'
+                            });
+                            
+                            // Update selection immediately
                             setSelectedThriving(thrivings[index]);
+                          }
+                        } else if (index === thrivings.length) {
+                          // Handle "add new" card
+                          const container = scrollContainerRef.current;
+                          const addNewCard = container?.lastElementChild as HTMLElement;
+                          if (addNewCard) {
+                            container?.scrollTo({
+                              left: addNewCard.offsetLeft - 16,
+                              behavior: 'smooth'
+                            });
                           }
                         }
                       }}
@@ -509,10 +489,7 @@ export default function ThrivingsPage() {
                     scrollBehavior: 'smooth',
                     WebkitOverflowScrolling: 'touch'
                   }}
-                  onTouchStart={onTouchStart}
-                  onTouchMove={onTouchMove}
-                  onTouchEnd={onTouchEnd}
-                  onScroll={(e) => {
+                  onScroll={() => {
                     // Clear any existing timeout
                     if (scrollTimeoutRef.current) {
                       clearTimeout(scrollTimeoutRef.current);
@@ -520,31 +497,7 @@ export default function ThrivingsPage() {
                     
                     // Update selection after scrolling stops
                     scrollTimeoutRef.current = setTimeout(() => {
-                      const container = e.currentTarget;
-                      const scrollPosition = container.scrollLeft;
-                      const containerWidth = container.clientWidth;
-                      
-                      // Find the card that's most centered in view
-                      let closestIndex = 0;
-                      let closestDistance = Infinity;
-                      
-                      Array.from(container.children).forEach((child, index) => {
-                        if (index < thrivings.length) { // Exclude the "add new" card
-                          const cardElement = child as HTMLElement;
-                          const cardCenter = cardElement.offsetLeft + (cardElement.offsetWidth / 2);
-                          const viewCenter = scrollPosition + (containerWidth / 2);
-                          const distance = Math.abs(cardCenter - viewCenter);
-                          
-                          if (distance < closestDistance) {
-                            closestDistance = distance;
-                            closestIndex = index;
-                          }
-                        }
-                      });
-                      
-                      if (thrivings[closestIndex] && thrivings[closestIndex].id !== selectedThriving?.id) {
-                        setSelectedThriving(thrivings[closestIndex]);
-                      }
+                      handleScrollSelection();
                     }, 150); // Wait for scroll to settle
                   }}
                 >
@@ -552,7 +505,7 @@ export default function ThrivingsPage() {
                     <div
                       key={thriving.id}
                       onClick={() => setSelectedThriving(thriving)}
-                      className={`flex-shrink-0 w-[calc(100vw-2rem)] max-w-sm rounded-2xl p-6 cursor-pointer transition-all snap-center snap-always ${
+                      className={`thriving-card flex-shrink-0 w-[calc(100vw-2rem)] max-w-sm rounded-2xl p-6 cursor-pointer transition-all snap-center snap-always ${
                         selectedThriving?.id === thriving.id 
                           ? 'bg-white shadow-xl border-2 border-rose/20' 
                           : 'bg-white hover:shadow-lg border border-gray-200'
@@ -1148,8 +1101,6 @@ export default function ThrivingsPage() {
             setShowAdjustmentTutorial(false);
             const currentCount = parseInt(localStorage.getItem('adjustmentTutorialCount') || '0');
             localStorage.setItem('adjustmentTutorialCount', String(currentCount + 1));
-            // Remove the glow from the button area
-            adjustButtonRef.current?.parentElement?.classList.remove('ring-2', 'ring-sage/40', 'ring-offset-2');
           }}
           onArrowClick={() => {
             // Scroll to the adjust button and click it after 2 seconds

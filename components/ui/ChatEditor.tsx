@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Send, Mic, MicOff } from 'lucide-react';
 import { useSpeechToText } from '@/hooks/useSpeechToText';
+import { VoiceInputField } from './VoiceInputField';
 
 // Inline keyframe style for spinner
 const spinnerStyle = `
@@ -42,6 +43,17 @@ export function ChatEditor({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isFocused, setIsFocused] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [useNativeVoice, setUseNativeVoice] = useState(false);
+  
+  // Check if on mobile (any mobile browser)
+  const isMobile = typeof window !== 'undefined' && 
+    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  
+  // Check if iOS Safari
+  const isIOSSafari = typeof window !== 'undefined' && 
+    /iPhone|iPad|iPod/i.test(navigator.userAgent) && 
+    /Safari/i.test(navigator.userAgent) && 
+    !/Chrome|CriOS|FxiOS/i.test(navigator.userAgent);
   
   // Speech to text integration
   // IMPORTANT: Voice input is treated exactly like keyboard typing
@@ -112,10 +124,45 @@ export function ChatEditor({
     }
   };
 
+  // Custom toggle for mobile devices
+  const handleMicToggle = () => {
+    if (isMobile) {
+      // On any mobile device, suggest using keyboard voice
+      setUseNativeVoice(!useNativeVoice);
+      if (!useNativeVoice) {
+        // Show instruction toast
+        const instruction = document.createElement('div');
+        instruction.className = 'fixed top-20 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in text-center';
+        instruction.innerHTML = isIOSSafari 
+          ? 'Tap the mic on your keyboard 🎤<br><small>iOS dictation works best</small>'
+          : 'Use the keyboard mic button 🎤<br><small>For best results</small>';
+        document.body.appendChild(instruction);
+        setTimeout(() => instruction.remove(), 4000);
+      }
+    } else {
+      // Desktop: Use standard Web Speech API
+      toggleListening();
+    }
+  };
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: spinnerStyle }} />
-      <div ref={containerRef} className={`chat-input-wrapper ${className}`}>
+      <div ref={containerRef} className={`chat-input-wrapper ${className} relative`}>
+        {/* Hidden voice input field for mobile devices */}
+        {isMobile && (
+          <VoiceInputField
+            value={value}
+            onChange={onChange}
+            isActive={useNativeVoice}
+            onBlur={() => {
+              setUseNativeVoice(false);
+              // Refocus main textarea
+              setTimeout(() => textareaRef.current?.focus(), 100);
+            }}
+          />
+        )}
+        
         <div className="px-4 py-3">
           <div className="flex items-start gap-2 bg-gray-50 rounded-2xl p-3 transition-all focus-within:bg-white focus-within:ring-2 focus-within:ring-rose/20">
             <textarea
@@ -128,24 +175,25 @@ export function ChatEditor({
                 onFocus?.();
               }}
               onBlur={() => setIsFocused(false)}
-              placeholder={isListening ? "Listening..." : placeholder}
+              placeholder={(isListening || useNativeVoice) ? "Listening..." : placeholder}
               disabled={isLoading || disabled || isListening}
               rows={1}
               className="flex-1 resize-none bg-transparent text-gray-900 placeholder:text-gray-500 focus:outline-none text-base leading-relaxed min-h-[32px] max-h-[64px] transition-all pt-0"
               style={{ overflow: 'hidden' }}
             />
             {/* Microphone button */}
-            {isSupported && (
+            {(isSupported || isMobile) && (
               <button
-                onClick={toggleListening}
+                onClick={handleMicToggle}
                 disabled={isLoading || disabled}
                 className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all touch-feedback touch-manipulation ${
-                  isListening 
+                  (isListening || useNativeVoice)
                     ? 'bg-red-500 text-white animate-pulse shadow-lg' 
                     : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
+                title={isMobile ? "Use keyboard voice input" : "Start voice input"}
               >
-                {isListening ? (
+                {(isListening || useNativeVoice) ? (
                   <MicOff className="w-5 h-5" />
                 ) : (
                   <Mic className="w-5 h-5" />
