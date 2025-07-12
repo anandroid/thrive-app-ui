@@ -31,6 +31,7 @@ import { PantryItem } from '@/src/types/pantry';
 import { EnhancedQuestions } from './EnhancedQuestions';
 import { ConversationalAnswerFlow } from './ConversationalAnswerFlow';
 import { getBasicContext } from '@/src/utils/contextHelper';
+import { generatePostActionMessage, PostActionMessage } from '@/src/utils/chat/postActionMessages';
 
 interface SmartCardChatProps {
   threadId?: string;
@@ -705,6 +706,18 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       const searchQuery = action.searchQuery || encodeURIComponent(action.productName || action.title);
       const amazonSearchUrl = `https://www.amazon.com/s?k=${searchQuery}`;
       bridge.openExternalUrl(amazonSearchUrl);
+      
+      // Send post-action message to chat
+      const postAction: PostActionMessage = {
+        type: 'buy_clicked',
+        context: {
+          productName: action.productName || action.title,
+          dosage: action.dosage,
+          timing: action.timing
+        }
+      };
+      const postActionMsg = generatePostActionMessage(postAction);
+      handleSendMessage(postActionMsg);
     } else if (action.type === 'add_to_pantry') {
       // Handle add to pantry action
       setPantryItemToAdd(action);
@@ -1283,6 +1296,17 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
             setRoutineData(null);
             // Mark that user has created a thriving
             localStorage.setItem('hasCreatedThriving', 'true');
+            
+            // Send post-action message to chat
+            const postAction: PostActionMessage = {
+              type: 'routine_created',
+              context: {
+                routineName: routine.name,
+                routineType: routine.type
+              }
+            };
+            const postActionMsg = generatePostActionMessage(postAction);
+            handleSendMessage(postActionMsg);
           }}
         />
       )}
@@ -1354,6 +1378,19 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
           onAddItem={async (item: PantryItem) => {
             savePantryItem(item);
             setShowPantryModal(false);
+            
+            // Send post-action message to chat
+            const postAction: PostActionMessage = {
+              type: 'pantry_added',
+              context: {
+                productName: item.name,
+                dosage: pantryItemToAdd?.dosage,
+                timing: pantryItemToAdd?.timing
+              }
+            };
+            const postActionMsg = generatePostActionMessage(postAction);
+            handleSendMessage(postActionMsg);
+            
             setPantryItemToAdd(null);
             
             // Show immediate success message

@@ -40,7 +40,10 @@ const INTENT_PATTERNS = {
       /start.*thriving/i,
       /wellness.*plan/i,
       /daily.*schedule/i,
-      /habit.*formation/i
+      /habit.*formation/i,
+      /suggest.*creating.*routine/i,
+      /add.*to.*routine/i,
+      /routine.*includes/i
     ],
     adjust: [
       /adjust.*routine/i,

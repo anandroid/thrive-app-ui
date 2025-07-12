@@ -8,7 +8,6 @@
 
 import OpenAI from 'openai';
 import { 
-  selectAssistant, 
   getAssistantId, 
   areAllAssistantsConfigured,
   getHandoffMessage,
@@ -58,19 +57,14 @@ export class MultiAssistantService {
   /**
    * Get the appropriate assistant ID for a message
    */
-  private getAssistantForMessage(
-    message: string, 
-    threadId: string
-  ): { assistantId: string; role: AssistantRole; isHandoff: boolean } {
-    const threadState = this.threadStates.get(threadId) || {};
-    
-    // Select appropriate assistant based on message and context
-    const selectedRole = selectAssistant(message, threadState);
+  private getAssistantForMessage(): { assistantId: string; role: AssistantRole; isHandoff: boolean } {
+    // ALWAYS use chat assistant for streaming conversations
+    // Other assistants are only used via direct API endpoints
+    const selectedRole: AssistantRole = 'chat';
     const assistantId = getAssistantId(selectedRole);
 
-    // Check if this is a handoff
-    const isHandoff = !!(threadState.currentAssistant && 
-                        threadState.currentAssistant !== selectedRole);
+    // Check if this is a handoff (not applicable anymore since we always use chat)
+    const isHandoff = false;
 
     if (!assistantId) {
       throw new Error(`No assistant configured for role: ${selectedRole}`);
@@ -122,7 +116,7 @@ export class MultiAssistantService {
     onChunk?: (chunk: {type: string; content?: string; role?: AssistantRole; error?: string; toolCalls?: unknown; runId?: string}) => void
   ): Promise<void> {
     // Determine which assistant to use
-    const { assistantId, role, isHandoff } = this.getAssistantForMessage(message, threadId);
+    const { assistantId, role, isHandoff } = this.getAssistantForMessage();
 
     // Add user message to thread
     await this.openai.beta.threads.messages.create(threadId, {
