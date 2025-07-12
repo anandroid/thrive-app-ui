@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { getRoleFromAssistantId } from '@/src/services/openai/assistant/team/assistantManager';
 
 export async function POST(request: NextRequest) {
   try {
@@ -173,12 +174,12 @@ export async function POST(request: NextRequest) {
               start(controller) {
                 controller.enqueue(
                   encoder.encode(
-                    `data: ${JSON.stringify({ type: 'delta', content: fullContent })}\n\n`
+                    `data: ${JSON.stringify({ type: 'content', content: fullContent, role: getRoleFromAssistantId(updatedRun.assistant_id) || 'assistant' })}\n\n`
                   )
                 );
                 controller.enqueue(
                   encoder.encode(
-                    `data: ${JSON.stringify({ type: 'completed', content: fullContent })}\n\n`
+                    `data: ${JSON.stringify({ type: 'completed', content: fullContent, role: getRoleFromAssistantId(updatedRun.assistant_id) || 'assistant' })}\n\n`
                   )
                 );
                 controller.close();
@@ -206,12 +207,12 @@ export async function POST(request: NextRequest) {
                 start(controller) {
                   controller.enqueue(
                     encoder.encode(
-                      `data: ${JSON.stringify({ type: 'delta', content: fullContent })}\n\n`
+                      `data: ${JSON.stringify({ type: 'content', content: fullContent, role: getRoleFromAssistantId(updatedRun.assistant_id) || 'assistant' })}\n\n`
                     )
                   );
                   controller.enqueue(
                     encoder.encode(
-                      `data: ${JSON.stringify({ type: 'completed', content: fullContent })}\n\n`
+                      `data: ${JSON.stringify({ type: 'completed', content: fullContent, role: getRoleFromAssistantId(updatedRun.assistant_id) || 'assistant' })}\n\n`
                     )
                   );
                   controller.close();
@@ -374,12 +375,12 @@ export async function POST(request: NextRequest) {
                     
                     controller.enqueue(
                       encoder.encode(
-                        `data: ${JSON.stringify({ type: 'delta', content: fullContent })}\n\n`
+                        `data: ${JSON.stringify({ type: 'content', content: fullContent, role: getRoleFromAssistantId(currentRun.assistant_id) || 'assistant' })}\n\n`
                       )
                     );
                     controller.enqueue(
                       encoder.encode(
-                        `data: ${JSON.stringify({ type: 'completed', content: fullContent })}\n\n`
+                        `data: ${JSON.stringify({ type: 'completed', content: fullContent, role: getRoleFromAssistantId(currentRun.assistant_id) || 'assistant' })}\n\n`
                       )
                     );
                   } else {
@@ -393,12 +394,12 @@ export async function POST(request: NextRequest) {
                       
                       controller.enqueue(
                         encoder.encode(
-                          `data: ${JSON.stringify({ type: 'delta', content: fullContent })}\n\n`
+                          `data: ${JSON.stringify({ type: 'content', content: fullContent, role: getRoleFromAssistantId(currentRun.assistant_id) || 'assistant' })}\n\n`
                         )
                       );
                       controller.enqueue(
                         encoder.encode(
-                          `data: ${JSON.stringify({ type: 'completed', content: fullContent })}\n\n`
+                          `data: ${JSON.stringify({ type: 'completed', content: fullContent, role: getRoleFromAssistantId(currentRun.assistant_id) || 'assistant' })}\n\n`
                         )
                       );
                     } else {

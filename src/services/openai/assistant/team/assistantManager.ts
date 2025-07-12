@@ -213,3 +213,17 @@ export const areAllAssistantsConfigured = (): boolean => {
   return Object.values(ASSISTANT_ENV_KEYS).every(key => !!process.env[key]);
 };
 
+/**
+ * Get assistant role from assistant ID
+ * @param {string} assistantId - The assistant ID
+ * @returns {AssistantRole | undefined} Assistant role
+ */
+export const getRoleFromAssistantId = (assistantId: string): AssistantRole | undefined => {
+  for (const [role, envKey] of Object.entries(ASSISTANT_ENV_KEYS)) {
+    if (process.env[envKey] === assistantId) {
+      return role as AssistantRole;
+    }
+  }
+  return undefined;
+};
+

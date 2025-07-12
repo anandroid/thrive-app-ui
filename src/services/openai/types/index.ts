@@ -1,8 +1,15 @@
 export interface StreamEvent {
-  type: 'delta' | 'completed' | 'error';
+  type: 'content' | 'completed' | 'error' | 'thread_created' | 
+        'function_call' | 'status' | 'init' | 'awaiting_function_results';
   content?: string;
+  role?: 'chat' | 'routine' | 'pantry' | 'assistant' | 'user';
   threadId?: string;
+  runId?: string;
+  toolCalls?: unknown[];
   error?: string;
+  message?: string;
+  runStatus?: string;
+  fullContent?: string;
 }
 
 export interface BasicContext {

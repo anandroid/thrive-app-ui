@@ -797,7 +797,7 @@ input[type="range"].slider::-moz-range-thumb:hover {
 }
 
 /* Fade in animation for toast messages */
-@keyframes fade-in {
+@keyframes toast-fade-in {
   from {
     opacity: 0;
     transform: translate(-50%, -10px);
@@ -808,6 +808,6 @@ input[type="range"].slider::-moz-range-thumb:hover {
   }
 }
 
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out;
+.animate-toast-fade-in {
+  animation: toast-fade-in 0.3s ease-out;
 }

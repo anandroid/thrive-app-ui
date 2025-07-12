@@ -1,20 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { OptimizedImage } from '@/components/ui/OptimizedImage';
+import React from 'react';
+import Image from 'next/image';
 
 interface ChatWelcomeProps {
   visible: boolean;
 }
 
 export const ChatWelcome: React.FC<ChatWelcomeProps> = ({ visible }) => {
-  const [hasEverSentMessage, setHasEverSentMessage] = useState(false);
-
-  useEffect(() => {
-    // Check if user has ever sent a message
-    const hasSent = localStorage.getItem('hasEverSentMessage') === 'true';
-    setHasEverSentMessage(hasSent);
-  }, []);
+  // Read localStorage synchronously to avoid re-render
+  const hasEverSentMessage = typeof window !== 'undefined' 
+    ? localStorage.getItem('hasEverSentMessage') === 'true'
+    : false;
 
   // Shows minimal version for returning users
   const showMinimal = hasEverSentMessage;
@@ -23,15 +20,16 @@ export const ChatWelcome: React.FC<ChatWelcomeProps> = ({ visible }) => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 mb-4 text-center animate-fade-in">
-      {/* Companion Illustration */}
-      <div className="relative w-24 h-24 mb-6">
-        <OptimizedImage
+      {/* Companion Illustration - Viewport-based dimensions to prevent layout shift */}
+      <div className="relative mb-6 w-[25vw] h-[25vw] max-w-24 max-h-24">
+        <Image
           src="/illustrations/companion.png"
           alt="Your wellness companion"
           fill
           className="object-contain"
-          sizes="192px"
+          sizes="(max-width: 768px) 25vw, 96px"
           priority
+          placeholder="empty"
         />
       </div>
       
