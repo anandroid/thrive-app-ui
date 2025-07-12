@@ -31,12 +31,6 @@ export function DynamicJournalModal({ thriving, isOpen, onClose }: DynamicJourna
   const [userProfile, setUserProfile] = useState<UserLearningProfile | null>(null);
   const [contextualPrompts, setContextualPrompts] = useState<string[]>([]);
 
-  useEffect(() => {
-    if (isOpen && thriving) {
-      initializeJournal();
-    }
-  }, [isOpen, thriving, initializeJournal]);
-
   const initializeJournal = useCallback(async () => {
     // Get user learning profile
     const profile = UserLearningProfileManager.getUserProfile();
@@ -71,6 +65,12 @@ export function DynamicJournalModal({ thriving, isOpen, onClose }: DynamicJourna
     );
     setSelectedPrompts(personalizedPrompts.slice(0, 3)); // Top 3 prompts
   }, [thriving]);
+
+  useEffect(() => {
+    if (isOpen && thriving) {
+      initializeJournal();
+    }
+  }, [isOpen, thriving, initializeJournal]);
 
   const handleFieldChange = (fieldId: string, value: unknown) => {
     setFieldValues(prev => ({
@@ -127,7 +127,7 @@ export function DynamicJournalModal({ thriving, isOpen, onClose }: DynamicJourna
 
       // Add pain level from field values if present
       if (fieldValues.pain_level) {
-        entry.painLevel = fieldValues.pain_level;
+        entry.painLevel = Number(fieldValues.pain_level);
       }
 
       // Save journal entry
@@ -336,7 +336,7 @@ export function DynamicJournalModal({ thriving, isOpen, onClose }: DynamicJourna
                         <span className="font-medium text-gray-900">
                           {field.type === 'rating_scale' || field.type === 'pain_scale' 
                             ? `${value}/10` 
-                            : value.toString()
+                            : String(value)
                           }
                         </span>
                       </div>

@@ -66,10 +66,10 @@ export function DynamicJournalField({ field, value, onChange }: DynamicJournalFi
         <div className="relative">
           <div className="flex justify-between mb-2">
             {scale.labels[scale.min] && (
-              <span className="text-xs text-gray-500">{scale.labels[scale.min]}</span>
+              <span className="text-xs text-gray-500">{String(scale.labels[scale.min])}</span>
             )}
             {scale.labels[scale.max] && (
-              <span className="text-xs text-gray-500">{scale.labels[scale.max]}</span>
+              <span className="text-xs text-gray-500">{String(scale.labels[scale.max])}</span>
             )}
           </div>
           
@@ -87,7 +87,7 @@ export function DynamicJournalField({ field, value, onChange }: DynamicJournalFi
                 <div className="text-center">
                   <div className="font-semibold">{step}</div>
                   {scale.labels[step] && (
-                    <div className="text-xs opacity-75">{scale.labels[step]}</div>
+                    <div className="text-xs opacity-75">{String(scale.labels[step])}</div>
                   )}
                 </div>
               </button>
@@ -97,14 +97,14 @@ export function DynamicJournalField({ field, value, onChange }: DynamicJournalFi
 
         {/* Current selection display */}
         {value && (
-          <div className={`text-center p-3 rounded-xl bg-gradient-to-r ${getColorForValue(value)} text-white`}>
+          <div className={`text-center p-3 rounded-xl bg-gradient-to-r ${getColorForValue(Number(value))} text-white`}>
             <div className="font-semibold">
               {field.type === 'pain_scale' ? 'Pain Level' : 
                field.type === 'sleep_quality' ? 'Sleep Quality' :
-               field.type === 'energy_level' ? 'Energy Level' : 'Rating'}: {value}/10
+               field.type === 'energy_level' ? 'Energy Level' : 'Rating'}: {Number(value)}/10
             </div>
-            {scale.labels[value] && (
-              <div className="text-sm opacity-90">{scale.labels[value]}</div>
+            {scale.labels[Number(value)] && (
+              <div className="text-sm opacity-90">{String(scale.labels[Number(value)])}</div>
             )}
           </div>
         )}
@@ -118,7 +118,7 @@ export function DynamicJournalField({ field, value, onChange }: DynamicJournalFi
         <Clock className="w-5 h-5 text-gray-400" />
         <input
           type="time"
-          value={value || ''}
+          value={String(value || '')}
           onChange={(e) => onChange(e.target.value)}
           className="flex-1 outline-none bg-transparent"
           required={field.required}
@@ -130,7 +130,7 @@ export function DynamicJournalField({ field, value, onChange }: DynamicJournalFi
   const renderTextArea = () => (
     <div className="relative">
       <textarea
-        value={value || ''}
+        value={String(value || '')}
         onChange={(e) => onChange(e.target.value)}
         placeholder={field.placeholder || `Enter your ${field.label.toLowerCase()}...`}
         rows={4}
@@ -138,7 +138,7 @@ export function DynamicJournalField({ field, value, onChange }: DynamicJournalFi
         required={field.required}
       />
       <div className="absolute bottom-3 right-3 text-xs text-gray-400">
-        {(value || '').length} characters
+        {String(value || '').length} characters
       </div>
     </div>
   );
@@ -194,7 +194,7 @@ export function DynamicJournalField({ field, value, onChange }: DynamicJournalFi
       <div className="flex items-center space-x-2 p-3 border border-gray-200 rounded-xl focus-within:border-dusty-rose focus-within:ring-2 focus-within:ring-dusty-rose/20">
         <input
           type="number"
-          value={value || ''}
+          value={String(value || '')}
           onChange={(e) => onChange(parseFloat(e.target.value) || undefined)}
           placeholder={field.placeholder || '0'}
           min={field.validation?.min}
@@ -229,7 +229,7 @@ export function DynamicJournalField({ field, value, onChange }: DynamicJournalFi
     <div className="relative">
       <input
         type="text"
-        value={value || ''}
+        value={String(value || '')}
         onChange={(e) => onChange(e.target.value)}
         placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
         className="w-full p-3 border border-gray-200 rounded-xl focus:border-dusty-rose focus:ring-2 focus:ring-dusty-rose/20 outline-none"

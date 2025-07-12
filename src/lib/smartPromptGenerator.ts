@@ -418,7 +418,7 @@ export class SmartPromptGenerator {
     ];
   }
 
-  private static getPatternRecognitionPrompts(userProfile: UserLearningProfile): JournalPrompt[] {
+  private static getPatternRecognitionPrompts(_userProfile: UserLearningProfile): JournalPrompt[] { // eslint-disable-line @typescript-eslint/no-unused-vars
     return [
       {
         id: 'pattern_observation',
@@ -435,7 +435,7 @@ export class SmartPromptGenerator {
     ];
   }
 
-  private static getOptimizationPrompts(userProfile: UserLearningProfile): JournalPrompt[] {
+  private static getOptimizationPrompts(_userProfile: UserLearningProfile): JournalPrompt[] { // eslint-disable-line @typescript-eslint/no-unused-vars
     return [
       {
         id: 'optimization_tweaks',
@@ -452,7 +452,7 @@ export class SmartPromptGenerator {
     ];
   }
 
-  private static getMaintenancePrompts(userProfile: UserLearningProfile): JournalPrompt[] {
+  private static getMaintenancePrompts(_userProfile: UserLearningProfile): JournalPrompt[] { // eslint-disable-line @typescript-eslint/no-unused-vars
     return [
       {
         id: 'maintenance_evolution',
@@ -471,7 +471,7 @@ export class SmartPromptGenerator {
 
   // Conditional prompt generators
 
-  private static getBadDayPrompts(context: {
+  private static getBadDayPrompts(_context: { // eslint-disable-line @typescript-eslint/no-unused-vars
     routine: Thriving;
     userProfile: UserLearningProfile;
     recentEntries: JournalEntry[];
@@ -492,7 +492,7 @@ export class SmartPromptGenerator {
     ];
   }
 
-  private static getGreatDayPrompts(context: {
+  private static getGreatDayPrompts(_context: { // eslint-disable-line @typescript-eslint/no-unused-vars
     routine: Thriving;
     userProfile: UserLearningProfile;
     recentEntries: JournalEntry[];
@@ -513,7 +513,7 @@ export class SmartPromptGenerator {
     ];
   }
 
-  private static getMissedRoutinePrompts(context: {
+  private static getMissedRoutinePrompts(_context: { // eslint-disable-line @typescript-eslint/no-unused-vars
     routine: Thriving;
     userProfile: UserLearningProfile;
     recentEntries: JournalEntry[];
@@ -534,7 +534,7 @@ export class SmartPromptGenerator {
     ];
   }
 
-  private static getStreakPrompts(context: {
+  private static getStreakPrompts(_context: { // eslint-disable-line @typescript-eslint/no-unused-vars
     routine: Thriving;
     userProfile: UserLearningProfile;
     recentEntries: JournalEntry[];
@@ -555,7 +555,7 @@ export class SmartPromptGenerator {
     ];
   }
 
-  private static getPlateauPrompts(context: {
+  private static getPlateauPrompts(_context: { // eslint-disable-line @typescript-eslint/no-unused-vars
     routine: Thriving;
     userProfile: UserLearningProfile;
     recentEntries: JournalEntry[];
@@ -592,17 +592,17 @@ export class SmartPromptGenerator {
 
     if (routineType === 'sleep_wellness') {
       recentScore = recent
-        .map(e => e.customData?.sleepQuality || 0)
+        .map(e => Number(e.customData?.sleepQuality) || 0)
         .reduce((sum, val) => sum + val, 0) / recent.length;
       earlierScore = earlier
-        .map(e => e.customData?.sleepQuality || 0)
+        .map(e => Number(e.customData?.sleepQuality) || 0)
         .reduce((sum, val) => sum + val, 0) / earlier.length;
     } else if (routineType === 'pain_management') {
       recentScore = recent
-        .map(e => e.painLevel || e.customData?.painLevel || 0)
+        .map(e => e.painLevel || Number(e.customData?.painLevel) || 0)
         .reduce((sum, val) => sum + val, 0) / recent.length;
       earlierScore = earlier
-        .map(e => e.painLevel || e.customData?.painLevel || 0)
+        .map(e => e.painLevel || Number(e.customData?.painLevel) || 0)
         .reduce((sum, val) => sum + val, 0) / earlier.length;
       // For pain, lower is better
       return earlierScore - recentScore > 1 ? 'improving' : 

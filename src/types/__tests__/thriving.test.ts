@@ -204,7 +204,8 @@ describe('Thriving Model Parsing', () => {
       updatedAt: mockThrivingData.updatedAt,
       completedDates: [],
       isActive: mockThrivingData.isActive,
-      startDate: mockThrivingData.createdAt
+      startDate: mockThrivingData.createdAt,
+      version: '1.0'
     };
 
     // Test main properties

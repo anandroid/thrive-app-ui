@@ -99,7 +99,8 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
                 updatedAt: new Date().toISOString(),
                 completedDates: [],
                 isActive: true,
-                startDate: routine.createdAt instanceof Date ? routine.createdAt.toISOString() : new Date().toISOString()
+                startDate: routine.createdAt instanceof Date ? routine.createdAt.toISOString() : new Date().toISOString(),
+                version: '1.0'
               };
               
               // Save to localStorage using utility function

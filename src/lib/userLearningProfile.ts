@@ -389,7 +389,7 @@ export class UserLearningProfileManager {
 
   private static analyzeRoutinePersonalization(
     entries: JournalEntry[], 
-    routines: Thriving[]
+    _routines: Thriving[] // eslint-disable-line @typescript-eslint/no-unused-vars
   ): UserLearningProfile['insights']['routinePersonalization'] {
     const completionData = entries.filter(entry => 
       entry.customData?.routineCompleted !== undefined
@@ -416,8 +416,8 @@ export class UserLearningProfileManager {
         dayPerformance[dayOfWeek].completed++;
         
         // Track preferred timing
-        if (completionTime && !preferredTiming.includes(completionTime)) {
-          preferredTiming.push(completionTime);
+        if (completionTime && !preferredTiming.includes(String(completionTime))) {
+          preferredTiming.push(String(completionTime));
         }
       }
     });
@@ -439,8 +439,8 @@ export class UserLearningProfileManager {
     // Analyze timing patterns
     const timePerformance: Record<string, number> = {};
     completionData.forEach(entry => {
-      const time = entry.customData?.completionTime;
-      const completed = entry.customData?.routineCompleted;
+      const time = String(entry.customData?.completionTime || '');
+      const completed = Boolean(entry.customData?.routineCompleted);
       
       if (time) {
         if (!timePerformance[time]) timePerformance[time] = 0;
@@ -458,7 +458,7 @@ export class UserLearningProfileManager {
     }
 
     // Determine motivation style based on completion patterns
-    const totalEntries = completionData.length;
+    // const totalEntries = completionData.length;
     const avgCompletionRate = Object.values(completionRates).reduce((sum, rate) => sum + rate, 0) / Object.keys(completionRates).length;
     
     let motivationStyle: 'gentle' | 'structured' | 'flexible' = 'gentle';
@@ -486,17 +486,17 @@ export class UserLearningProfileManager {
     }> = {};
 
     entries.forEach(entry => {
-      const supplements = entry.customData?.supplements || [];
-      const supplementRating = entry.customData?.supplementRating;
-      const sideEffects = entry.customData?.sideEffects || [];
-      const supplementTiming = entry.customData?.supplementTiming;
+      const supplements = (entry.customData?.supplements as string[]) || [];
+      const supplementRating = Number(entry.customData?.supplementRating);
+      const sideEffects = (entry.customData?.sideEffects as string[]) || [];
+      const supplementTiming = String(entry.customData?.supplementTiming || '');
 
       supplements.forEach((supplement: string) => {
         if (!supplementData[supplement]) {
           supplementData[supplement] = { ratings: [], sideEffects: [], timings: [] };
         }
 
-        if (supplementRating) supplementData[supplement].ratings.push(supplementRating);
+        if (!isNaN(supplementRating)) supplementData[supplement].ratings.push(supplementRating);
         if (sideEffects.length > 0) supplementData[supplement].sideEffects.push(...sideEffects);
         if (supplementTiming) supplementData[supplement].timings.push(supplementTiming);
       });
@@ -557,17 +557,17 @@ export class UserLearningProfileManager {
 
     if (routineType === 'sleep_wellness') {
       recentScore = recent
-        .map(e => e.customData?.sleepQuality || 0)
+        .map(e => Number(e.customData?.sleepQuality) || 0)
         .reduce((sum, val) => sum + val, 0) / recent.length;
       earlierScore = earlier
-        .map(e => e.customData?.sleepQuality || 0)
+        .map(e => Number(e.customData?.sleepQuality) || 0)
         .reduce((sum, val) => sum + val, 0) / earlier.length;
     } else if (routineType === 'pain_management') {
       recentScore = recent
-        .map(e => e.painLevel || e.customData?.painLevel || 0)
+        .map(e => e.painLevel || Number(e.customData?.painLevel) || 0)
         .reduce((sum, val) => sum + val, 0) / recent.length;
       earlierScore = earlier
-        .map(e => e.painLevel || e.customData?.painLevel || 0)
+        .map(e => e.painLevel || Number(e.customData?.painLevel) || 0)
         .reduce((sum, val) => sum + val, 0) / earlier.length;
       // For pain, lower is better
       return earlierScore - recentScore > 1;

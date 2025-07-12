@@ -69,10 +69,36 @@ export const HealthInsights: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasPermission, setHasPermission] = useState(false);
   const [selectedTimeRange, setSelectedTimeRange] = useState<'day' | 'week' | 'month'>('week');
+  const [devicePlatform, setDevicePlatform] = useState<'ios' | 'android' | 'web'>('web');
 
   useEffect(() => {
+    detectPlatform();
     checkHealthPermissions();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const detectPlatform = () => {
+    if (typeof window !== 'undefined') {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      
+      // Check if we're in the React Native WebView
+      if (window.ReactNativeBridge) {
+        // Check for iOS indicators
+        if (userAgent.includes('iphone') || userAgent.includes('ipad') || userAgent.includes('ipod')) {
+          setDevicePlatform('ios');
+        } 
+        // Check for Android indicators
+        else if (userAgent.includes('android')) {
+          setDevicePlatform('android');
+        }
+        // Default to web if can't determine
+        else {
+          setDevicePlatform('web');
+        }
+      } else {
+        setDevicePlatform('web');
+      }
+    }
+  };
 
   const checkHealthPermissions = async () => {
     // Check if we have health permissions via the native bridge
@@ -140,14 +166,22 @@ export const HealthInsights: React.FC = () => {
   };
 
   if (!hasPermission) {
+    const healthServiceName = devicePlatform === 'ios' ? 'Apple Health' : 
+                             devicePlatform === 'android' ? 'Google Fit' : 
+                             'Health Data';
+    
+    const healthServiceIcon = devicePlatform === 'ios' ? '🍎' : 
+                             devicePlatform === 'android' ? '🤖' : 
+                             '❤️';
+
     return (
       <div className="mt-8 p-6 rounded-3xl bg-gradient-to-br from-sage-light/20 to-rose/10 border border-sage-light/30">
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/80 flex items-center justify-center">
-            <Heart className="w-8 h-8 text-rose" />
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/80 flex items-center justify-center text-3xl">
+            {healthServiceIcon}
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Connect Your Health Data
+            Connect {healthServiceName}
           </h3>
           <p className="text-sm text-gray-600 mb-6 max-w-md mx-auto">
             See how your wellness thrivings impact your health metrics. 
@@ -157,8 +191,13 @@ export const HealthInsights: React.FC = () => {
             onClick={requestHealthPermission}
             className="px-6 py-3 rounded-full bg-gradient-to-r from-sage to-sage-dark text-white font-medium shadow-lg hover:shadow-xl transition-all"
           >
-            Connect Health App
+            Connect {healthServiceName}
           </button>
+          {devicePlatform === 'web' && (
+            <p className="text-xs text-gray-500 mt-4">
+              Health data is available in the mobile app
+            </p>
+          )}
         </div>
       </div>
     );
@@ -184,6 +223,11 @@ export const HealthInsights: React.FC = () => {
         <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <Sparkles className="w-6 h-6 text-rose" />
           Health Insights
+          {devicePlatform !== 'web' && (
+            <span className="text-sm font-normal text-gray-500">
+              via {devicePlatform === 'ios' ? 'Apple Health' : 'Google Fit'}
+            </span>
+          )}
         </h2>
         <div className="flex gap-2">
           {(['day', 'week', 'month'] as const).map(range => (

@@ -5,7 +5,7 @@
  * Utilities for migrating existing routines to use dynamic journal templates
  */
 
-import { Thriving, DynamicJournalTemplate } from '@/src/types/thriving';
+import { Thriving } from '@/src/types/thriving';
 import { JournalInsightsEngine } from '@/src/lib/journalInsights';
 import { UserLearningProfileManager } from '@/src/lib/userLearningProfile';
 import { getThrivingsFromStorage, updateThrivingInStorage } from './thrivingStorage';
