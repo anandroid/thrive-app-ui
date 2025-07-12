@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Info, Moon, ChevronRight, Plus, Leaf, MessageSquare, Trash2 } from 'lucide-react';
+import { Info, Moon, ChevronRight, Plus, Leaf, MessageSquare, Trash2, Mic, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getTouchClasses } from '@/hooks/useTouchFeedback';
 import { PageLayout } from '@/components/layout/PageLayout';
@@ -10,6 +10,20 @@ import { PageLayout } from '@/components/layout/PageLayout';
 export default function SettingsPage() {
   const router = useRouter();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [voiceInputMethod, setVoiceInputMethod] = useState<'browser' | 'whisper'>('browser');
+
+  useEffect(() => {
+    // Load voice input preference
+    const saved = localStorage.getItem('voiceInputMethod');
+    if (saved === 'whisper') {
+      setVoiceInputMethod('whisper');
+    }
+  }, []);
+
+  const handleVoiceMethodChange = (method: 'browser' | 'whisper') => {
+    setVoiceInputMethod(method);
+    localStorage.setItem('voiceInputMethod', method);
+  };
 
   return (
     <PageLayout
@@ -128,6 +142,71 @@ export default function SettingsPage() {
             {/* Notifications - Hidden for now */}
             
             {/* Privacy & Security - Hidden for now */}
+            
+            {/* Voice Input Settings */}
+            <div className="space-y-3">
+              <h2 className="text-lg font-semibold text-primary-text mb-3">Voice Input</h2>
+              
+              <div className="space-y-2">
+                <button
+                  onClick={() => handleVoiceMethodChange('browser')}
+                  className={getTouchClasses(
+                    `w-full rounded-2xl border p-4 transition-all text-left ${
+                      voiceInputMethod === 'browser'
+                        ? 'bg-gradient-to-br from-rose/10 to-burgundy/5 border-rose/30'
+                        : 'bg-white/80 backdrop-blur-sm border-gray-200'
+                    }`,
+                    { feedback: true }
+                  )}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose to-burgundy flex items-center justify-center">
+                        <Mic className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-primary-text">Browser Voice Input</h3>
+                        <p className="text-sm text-primary-text/60">Fast, works offline on Chrome/Edge</p>
+                      </div>
+                    </div>
+                    {voiceInputMethod === 'browser' && (
+                      <Check className="w-5 h-5 text-rose" />
+                    )}
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => handleVoiceMethodChange('whisper')}
+                  className={getTouchClasses(
+                    `w-full rounded-2xl border p-4 transition-all text-left ${
+                      voiceInputMethod === 'whisper'
+                        ? 'bg-gradient-to-br from-sage/10 to-sage-dark/5 border-sage/30'
+                        : 'bg-white/80 backdrop-blur-sm border-gray-200'
+                    }`,
+                    { feedback: true }
+                  )}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sage to-sage-dark flex items-center justify-center">
+                        <Mic className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-primary-text">OpenAI Whisper</h3>
+                        <p className="text-sm text-primary-text/60">More accurate, works on all browsers</p>
+                      </div>
+                    </div>
+                    {voiceInputMethod === 'whisper' && (
+                      <Check className="w-5 h-5 text-sage" />
+                    )}
+                  </div>
+                </button>
+              </div>
+              
+              <p className="text-xs text-primary-text/50 px-2">
+                Mobile devices will use keyboard voice input for best results
+              </p>
+            </div>
             
             {/* Dark Mode */}
             <div className={getTouchClasses(

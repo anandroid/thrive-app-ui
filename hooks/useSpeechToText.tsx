@@ -60,11 +60,6 @@ export const useSpeechToText = ({
   const isMobile = typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   // Check if Chrome on mobile
   const isChromeMobile = isMobile && /Chrome/i.test(navigator.userAgent) && !/Edge/i.test(navigator.userAgent);
-  // Check if iOS Safari
-  const isIOSSafari = typeof window !== 'undefined' && 
-    /iPhone|iPad|iPod/i.test(navigator.userAgent) && 
-    /Safari/i.test(navigator.userAgent) && 
-    !/Chrome|CriOS|FxiOS/i.test(navigator.userAgent);
 
   useEffect(() => {
     // Only run on client side
@@ -93,7 +88,7 @@ export const useSpeechToText = ({
         // Don't use continuous mode - it's broken on Chrome mobile
         // We'll use manual restart instead
         mDebug('Chrome mobile: Using discontinuous mode with manual restart');
-      } else if (isIOSSafari) {
+      } else if (isMobile && /Safari/i.test(navigator.userAgent) && !/Chrome|CriOS|FxiOS/i.test(navigator.userAgent)) {
         // iOS Safari has its own issues
         mDebug('iOS Safari: Speech recognition is unreliable, keyboard dictation recommended');
         recognition.interimResults = false; // Interim results cause duplicate text on iOS

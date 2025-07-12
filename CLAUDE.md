@@ -52,6 +52,38 @@
 - **Non-Pushy Design** - "I already have it" option appears first, followed by "Where to find it" for convenience
 - **Pantry Integration** - "I already have it" opens PantryAddModal with contextMessage about personalization
 
+## Recent Voice Input Improvements (2025-07-12)
+
+### ✅ Whisper Integration
+- **OpenAI Whisper API** - Added as primary voice transcription method
+- **Fallback System** - Automatically falls back to Web Speech API if Whisper fails
+- **User Choice** - Settings page allows switching between Browser (Web Speech) and Whisper
+- **Mobile Optimization** - Mobile continues to use keyboard voice input for reliability
+
+### ✅ Voice Input Methods
+1. **Browser Voice Input (Web Speech API)**
+   - Fast, works offline on Chrome/Edge
+   - Limited mobile support (200ms bug on Chrome)
+   - Default for desktop users
+   
+2. **OpenAI Whisper**
+   - More accurate transcription
+   - Works on all browsers
+   - Requires internet connection
+   - Handles accents and background noise better
+   
+3. **Keyboard Voice Input (Mobile)**
+   - Most reliable on mobile devices
+   - Uses native OS voice recognition
+   - Enhanced UI guides users to keyboard mic button
+
+### ✅ Implementation Details
+- **API Endpoint** - `/api/voice/transcribe` handles Whisper transcription
+- **Hook** - `useWhisperTranscription` manages recording and transcription
+- **Settings** - Voice input preference saved in localStorage
+- **UI Feedback** - Shows "Transcribing..." state during processing
+- **Error Handling** - Graceful fallback to browser API on Whisper errors
+
 ## Recent Mobile UX Improvements (2025-07-09)
 
 ### ✅ Thriving Tutorial Overlay
