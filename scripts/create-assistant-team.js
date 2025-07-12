@@ -67,6 +67,13 @@ async function extractConfigFromTS(filePath) {
       const tempMatch = configStr.match(/temperature:\s*([\d.]+)/);
       if (tempMatch) config.temperature = parseFloat(tempMatch[1]);
       
+      // Extract response_format if present
+      const responseFormatMatch = configStr.match(/response_format:\s*(\{[\s\S]*?\n\s*\})/);
+      if (responseFormatMatch) {
+        // For now, we'll mark that it exists and handle it specially
+        config.hasResponseFormat = true;
+      }
+      
       return config;
     }
     
@@ -183,6 +190,132 @@ async function createOrUpdateAssistant(role, config) {
   console.log(`\n🤖 Processing ${role} assistant...`);
   
   try {
+    // Define response schemas for each role
+    const responseSchemas = {
+      chat: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'chat_response',
+          schema: {
+            type: 'object',
+            properties: {
+              greeting: { type: 'string' },
+              attentionRequired: { type: ['string', 'null'] },
+              emergencyReasoning: { type: ['string', 'null'] },
+              actionItems: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    title: { type: 'string' },
+                    content: { type: 'string' }
+                  },
+                  required: ['title', 'content'],
+                  additionalProperties: false
+                }
+              },
+              additionalInformation: { type: ['string', 'null'] },
+              actionableItems: { 
+                type: 'array', 
+                items: { 
+                  type: 'object',
+                  additionalProperties: false 
+                } 
+              },
+              questions: { 
+                type: 'array', 
+                items: { 
+                  type: 'object',
+                  additionalProperties: false 
+                } 
+              }
+            },
+            required: ['greeting', 'actionItems', 'actionableItems', 'questions'],
+            additionalProperties: false
+          },
+          strict: true
+        }
+      },
+      routine: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'routine_response',
+          schema: {
+            type: 'object',
+            properties: {
+              greeting: { type: 'string' },
+              attentionRequired: { type: ['string', 'null'] },
+              emergencyReasoning: { type: ['string', 'null'] },
+              actionItems: { 
+                type: 'array', 
+                items: { 
+                  type: 'object',
+                  additionalProperties: false 
+                } 
+              },
+              additionalInformation: { type: ['string', 'null'] },
+              actionableItems: { 
+                type: 'array', 
+                items: { 
+                  type: 'object',
+                  additionalProperties: false 
+                } 
+              },
+              questions: { 
+                type: 'array', 
+                items: { 
+                  type: 'object',
+                  additionalProperties: false 
+                } 
+              }
+            },
+            required: ['greeting', 'actionItems', 'actionableItems', 'questions'],
+            additionalProperties: false
+          },
+          strict: true
+        }
+      },
+      pantry: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'pantry_response',
+          schema: {
+            type: 'object',
+            properties: {
+              greeting: { type: 'string' },
+              attentionRequired: { type: ['string', 'null'] },
+              emergencyReasoning: { type: ['string', 'null'] },
+              actionItems: { 
+                type: 'array', 
+                items: { 
+                  type: 'object',
+                  additionalProperties: false 
+                } 
+              },
+              additionalInformation: { type: ['string', 'null'] },
+              actionableItems: { 
+                type: 'array', 
+                items: { 
+                  type: 'object',
+                  additionalProperties: false 
+                } 
+              },
+              questions: { 
+                type: 'array', 
+                items: { 
+                  type: 'object',
+                  additionalProperties: false 
+                } 
+              }
+            },
+            required: ['greeting', 'actionItems', 'actionableItems', 'questions'],
+            additionalProperties: false
+          },
+          strict: true
+        }
+      }
+    };
+
     const assistantConfig = {
       name: config.name,
       description: config.description,
