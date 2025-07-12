@@ -235,9 +235,9 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
                     {goals.length > 1 && (
                       <button
                         onClick={() => removeGoal(index)}
-                        className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-gray-100 transition-colors"
+                        className="w-[10vw] h-[10vw] max-w-[2.5rem] max-h-[2.5rem] rounded-[3vw] max-rounded-[0.75rem] flex items-center justify-center hover:bg-gray-100 transition-colors"
                       >
-                        <X className="w-4 h-4 text-gray-500" />
+                        <X className="w-[4vw] h-[4vw] max-w-[1rem] max-h-[1rem] text-gray-500" />
                       </button>
                     )}
                   </div>

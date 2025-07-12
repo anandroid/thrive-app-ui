@@ -240,9 +240,9 @@ export function PantryAddModal({ isOpen, onClose, onAddItem, initialData, contex
                       setFormData({ ...formData, imageUrl: undefined });
                       setAnalysis(null);
                     }}
-                    className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-all duration-200 touch-feedback touch-manipulation active:scale-95 active:bg-gray-100"
+                    className="absolute top-[2vw] max-top-[0.5rem] right-[2vw] max-right-[0.5rem] w-[8vw] h-[8vw] max-w-[2rem] max-h-[2rem] rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-all duration-200 touch-feedback touch-manipulation active:scale-95 active:bg-gray-100"
                   >
-                    <X className="w-5 h-5 text-gray-600" />
+                    <X className="w-[5vw] h-[5vw] max-w-[1.25rem] max-h-[1.25rem] text-gray-600" />
                   </button>
                 </div>
               ) : (

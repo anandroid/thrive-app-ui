@@ -52,8 +52,18 @@ export async function POST(request) {
 
 Environment variables are not available during the build process, only at runtime.
 
-## 🚨 VIEWPORT-FIRST DEVELOPMENT RULE
-**This is a MOBILE APP - NEVER use hardcoded pixel values!** Always use viewport units (vw, vh, dvh) with appropriate constraints. This ensures the app scales perfectly on ALL devices from iPhone SE to tablets.
+## 🚨 CRITICAL: VIEWPORT-FIRST DEVELOPMENT RULE - MANDATORY FOR ALL COMPONENTS
+**THIS IS A MOBILE APP - ABSOLUTELY NO HARDCODED PIXEL VALUES ALLOWED!**
+
+### ⛔ VIOLATIONS THAT MUST BE FIXED IMMEDIATELY:
+- Fixed widths like `w-96`, `max-w-[340px]`, `w-64`
+- Fixed heights like `h-96`, `h-[400px]`
+- Fixed text sizes like `text-2xl`, `text-lg` without viewport scaling
+- Fixed paddings/margins like `p-6`, `m-4` without viewport units
+- Modal widths using `max-w-md`, `max-w-lg` without viewport units
+
+### ✅ MANDATORY VIEWPORT APPROACH:
+EVERY component, modal, button, text, and spacing MUST use viewport units (vw, vh, dvh) with appropriate max constraints. This ensures perfect scaling on ALL devices from iPhone SE to tablets.
 
 ## Universal Mobile Voice Input Solution (2025-07-12)
 
@@ -285,23 +295,46 @@ This app is designed as a **mobile-first** application. All development must sta
 - Card padding: `p-4 md:p-6`
 - Never use padding less than `p-3` on mobile
 
-### 🚨 CRITICAL: Viewport-Based Sizing Guidelines
-**NEVER use hardcoded pixel values for mobile-first apps!** Always use viewport units for responsive design:
+### 🚨 VIEWPORT UNITS ARE MANDATORY - NOT OPTIONAL!
+**Every single UI element MUST use viewport units. This is not a suggestion - it's a requirement!**
 
-#### ❌ BAD - Hardcoded pixels:
+#### COMMON VIOLATIONS TO FIX:
+- Modal popup using `max-w-md` → Use `w-[90vw] max-w-[500px]`
+- Button with `px-6` → Use `px-[4vw] max-px-6`
+- Text with `text-lg` → Use `text-[min(5vw,1.125rem)]`
+- Card with `p-4` → Use `p-[4vw] max-p-4`
+- Fixed container widths → Always use `w-[Xvw] max-w-[Ypx]`
+
+#### ❌ ABSOLUTELY FORBIDDEN - These patterns must NEVER appear in code:
 ```jsx
-// Never do this for mobile apps!
-<div className="w-96 h-96" />  // 384px fixed
-<div className="max-w-[340px]" />  // Fixed max-width
-<div className="text-2xl" />  // Fixed font size
+// VIOLATIONS - DO NOT USE ANY OF THESE:
+<div className="w-96 h-96" />  // NO fixed widths/heights
+<div className="max-w-md" />  // NO Tailwind size classes without viewport units
+<div className="text-2xl" />  // NO fixed text sizes
+<div className="p-6" />  // NO fixed padding
+<div className="rounded-2xl" />  // Even border radius should scale!
+<Modal className="max-w-lg" />  // NO fixed modal widths
+<button className="px-4 py-2" />  // NO fixed button padding
 ```
 
-#### ✅ GOOD - Viewport-based units:
+#### ✅ MANDATORY - Every component MUST follow this pattern:
 ```jsx
-// Always use viewport units with constraints
-<div className="w-[80vw] max-w-md h-[40vh]" />
-<div className="text-[min(6vw,2rem)]" />  // Responsive with max
-<div className="p-[5vw] max-p-8" />  // Responsive padding
+// REQUIRED approach for ALL components:
+<div className="w-[80vw] max-w-[400px] h-[40vh] max-h-[300px]" />
+<div className="text-[min(4.5vw,1.125rem)]" />  // Scale with viewport
+<div className="p-[4vw] max-p-[1.5rem]" />  // Viewport padding
+<div className="rounded-[2vw] max-rounded-[1rem]" />  // Even border radius!
+<Modal className="w-[90vw] max-w-[500px] h-[80vh] max-h-[600px]" />
+<button className="px-[5vw] max-px-[2rem] py-[3vw] max-py-[1rem] text-[min(4vw,1rem)]" />
+
+// Modals MUST be viewport-based:
+<div className="fixed inset-0 flex items-center justify-center p-[4vw]">
+  <div className="w-[90vw] max-w-[500px] h-auto max-h-[85vh] overflow-y-auto">
+    <div className="p-[5vw] max-p-[2rem]">
+      <!-- Modal content -->
+    </div>
+  </div>
+</div>
 ```
 
 #### Viewport Unit Guidelines:
@@ -446,25 +479,39 @@ Before committing any changes:
    - [ ] Focus indicators visible
    - [ ] Screen reader compatible
 
-## 🎯 Component-Specific Mobile Guidelines
+## 🎯 Component-Specific VIEWPORT Requirements
+
+### ALL MODALS (RoutineEditModal, PantryAddModal, etc.)
+```jsx
+// ❌ WRONG - Current implementation with fixed sizes
+<div className="max-w-md">
+
+// ✅ CORRECT - Viewport-based modal
+<div className="w-[90vw] max-w-[500px] h-auto max-h-[85vh]">
+  <div className="p-[5vw] max-p-[2rem]">
+    <h2 className="text-[min(6vw,1.5rem)] mb-[3vw]">
+    <button className="w-[12vw] h-[12vw] max-w-[3rem] max-h-[3rem]">
+```
 
 ### SmartCardChat
-- Full-screen height on mobile: `h-screen`
-- Input fixed at bottom with safe area padding
-- Messages scroll independently
-- Virtual keyboard doesn't cover input
+- Full-screen: `h-[100vh] h-[100dvh]`
+- Input padding: `p-[4vw] max-p-[1rem]`
+- Message text: `text-[min(4vw,1rem)]`
+- Button padding: `px-[5vw] max-px-[1.5rem]`
 
-### RoutineCreationModal
-- Full-screen modal on mobile
-- Step indicator at top
-- Large touch targets for navigation
-- Number inputs with number pad
+### RoutineCreationModal & ALL Form Modals
+- Modal width: `w-[95vw] max-w-[600px]`
+- Modal padding: `p-[5vw] max-p-[2rem]`
+- Input height: `h-[12vw] max-h-[3rem] min-h-[44px]`
+- Label text: `text-[min(3.5vw,0.875rem)]`
+- Button text: `text-[min(4vw,1rem)]`
 
-### Routines Page
-- Single column card layout on mobile
-- Horizontal scroll for routine cards
-- Collapsible sections for details
-- Sticky action buttons
+### Thrivings/Routines Page
+- Card width: `w-[90vw] max-w-[400px]`
+- Card padding: `p-[4vw] max-p-[1.5rem]`
+- Title text: `text-[min(5vw,1.25rem)]`
+- Body text: `text-[min(3.5vw,0.875rem)]`
+- Step items: `min-h-[12vw] max-h-[3rem]`
 
 ## 🔧 Development Workflow
 
@@ -483,27 +530,41 @@ Before committing any changes:
    - Use BrowserStack for cross-device testing
    - Pay attention to safe areas (notch, home indicator)
 
-## 📝 Code Review Checklist
+## 📝 MANDATORY Code Review Checklist
 
-- [ ] All new components follow mobile-first approach
-- [ ] Touch targets meet 44px minimum
-- [ ] Text is readable on small screens
-- [ ] Images are optimized for mobile
+### VIEWPORT COMPLIANCE (MUST PASS ALL):
+- [ ] **NO fixed pixel values** - Every width, height, padding uses viewport units
+- [ ] **ALL text uses viewport scaling** - `text-[min(Xvw,Yrem)]` pattern
+- [ ] **Modals use viewport dimensions** - `w-[90vw] max-w-[Xpx]`
+- [ ] **Buttons/inputs use viewport padding** - `px-[Xvw] py-[Yvw]`
+- [ ] **Cards/containers viewport-based** - No `max-w-md`, use `w-[Xvw]`
+- [ ] **Even border-radius scales** - `rounded-[Xvw] max-rounded-[Yrem]`
+
+### Additional Requirements:
+- [ ] Touch targets meet 44px minimum with viewport units
+- [ ] Text readable at `min(3.5vw, 0.875rem)` minimum
 - [ ] No desktop-only interactions
-- [ ] Performance tested on slow connection
-- [ ] Accessibility verified on mobile
+- [ ] Tested on 320px-768px viewports
 
-## 🚨 Common Mobile Pitfalls to Avoid
+## 🚨 CRITICAL VIOLATIONS - FIX IMMEDIATELY IF FOUND
 
-1. **Fixed widths**: Never use fixed pixel widths
-2. **Hover states**: Always provide touch alternatives
-3. **Small text**: Keep minimum 14px on mobile
-4. **Dense layouts**: Add breathing room for fingers
-5. **Heavy animations**: Reduce or disable on mobile
-6. **Horizontal scroll**: Avoid except for intentional carousels
-7. **Pop-ups**: Use full-screen modals instead
+### VIEWPORT VIOLATIONS (HIGHEST PRIORITY):
+1. **ANY fixed width class**: `w-64`, `max-w-md`, `max-w-lg` → MUST use `w-[Xvw] max-w-[Ypx]`
+2. **ANY fixed text size**: `text-lg`, `text-xl` → MUST use `text-[min(Xvw,Yrem)]`
+3. **ANY fixed padding**: `p-4`, `px-6` → MUST use `p-[Xvw] max-p-[Yrem]`
+4. **Modal with Tailwind sizes**: `max-w-md` → MUST use `w-[90vw] max-w-[500px]`
+5. **Button without viewport**: `px-4 py-2` → MUST use `px-[4vw] py-[2vw]`
 
-Remember: **If it doesn't work perfectly on mobile, it doesn't ship!**
+### Other Critical Issues:
+6. **Hover-only interactions**: Provide touch alternatives
+7. **Text below min(3.5vw, 0.875rem)**: Too small for mobile
+8. **Dense touch targets**: Use viewport spacing `space-y-[3vw]`
+9. **Non-viewport modals**: ALL modals must scale with viewport
+
+### THE GOLDEN RULE:
+**EVERY SINGLE DIMENSION, SPACING, AND TEXT SIZE MUST USE VIEWPORT UNITS!**
+
+Remember: **If it uses fixed pixels, it MUST be refactored before shipping!**
 
 ## 🔨 Build Process Instructions
 

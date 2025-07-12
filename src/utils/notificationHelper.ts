@@ -21,11 +21,20 @@ declare global {
   }
 }
 
+import bridge from '@/src/lib/react-native-bridge';
+
 // Check if running in React Native WebView
 export const isReactNative = (): boolean => {
-  return typeof window !== 'undefined' && 
-         window.ReactNativeBridge !== undefined &&
-         window.hasNotificationSupport === true;
+  // Use the centralized bridge detection
+  const result = bridge.isInReactNative();
+  
+  console.log('NotificationHelper isReactNative check:', {
+    hasWindow: typeof window !== 'undefined',
+    bridgeStatus: bridge.getBridgeStatus(),
+    result
+  });
+  
+  return result;
 };
 
 // Notification helper functions for React Native integration
@@ -115,12 +124,42 @@ export const NotificationHelper = {
     bridge?.syncRoutines?.(routines);
   },
 
-  // Send a test notification
-  testNotification: () => {
+  // Send a test notification with a random step
+  testNotification: async () => {
     if (!isReactNative()) return;
     
-    const bridge = window.ReactNativeBridge as NotificationBridge;
-    bridge?.testNotification?.();
+    // Get thrivings from storage
+    const thrivings = JSON.parse(localStorage.getItem('thrive_thrivings') || '[]');
+    if (thrivings.length === 0) {
+      console.log('No thrivings found for test notification');
+      return;
+    }
+    
+    // Pick a random thriving
+    const randomThriving = thrivings[Math.floor(Math.random() * thrivings.length)];
+    if (!randomThriving.steps || randomThriving.steps.length === 0) {
+      console.log('No steps found in thriving for test notification');
+      return;
+    }
+    
+    // Pick a random step
+    const randomStep = randomThriving.steps[Math.floor(Math.random() * randomThriving.steps.length)];
+    
+    // Send notification with step details
+    if (window.ReactNativeBridge?.postMessage) {
+      window.ReactNativeBridge.postMessage({
+        type: 'send_notification',
+        payload: {
+          title: `Time for: ${randomStep.title}`,
+          body: randomStep.description || `It's time for your ${randomThriving.title} routine step`,
+          data: {
+            thrivingId: randomThriving.id,
+            stepId: randomStep.id,
+            type: 'step_reminder'
+          }
+        }
+      });
+    }
   },
 
   // Check if notifications are supported

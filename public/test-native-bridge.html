@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Native Bridge Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .log {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-left: 3px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>React Native Bridge Test</h1>
+        
+        <div id="status" class="status info">Checking bridge status...</div>
+        
+        <div style="margin: 20px 0;">
+            <button onclick="checkBridge()">Check Bridge</button>
+            <button onclick="testNotification()">Test Notification</button>
+            <button onclick="testPostMessage()">Test PostMessage</button>
+            <button onclick="goToApp()">Go to App</button>
+        </div>
+        
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        let logEntries = [];
+        
+        function log(message, data = null) {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = `[${timestamp}] ${message}${data ? ': ' + JSON.stringify(data, null, 2) : ''}`;
+            logEntries.push(entry);
+            
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML = logEntries.map(entry => 
+                `<div class="log-entry">${entry}</div>`
+            ).join('');
+            logDiv.scrollTop = logDiv.scrollHeight;
+            
+            console.log(message, data || '');
+        }
+        
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+        
+        function checkBridge() {
+            log('Checking bridge...');
+            
+            const checks = {
+                hasWindow: typeof window !== 'undefined',
+                hasReactNativeWebView: typeof window !== 'undefined' && !!window.ReactNativeWebView,
+                hasReactNativeBridge: typeof window !== 'undefined' && !!window.ReactNativeBridge,
+                hasPostMessage: typeof window !== 'undefined' && window.ReactNativeWebView && typeof window.ReactNativeWebView.postMessage === 'function',
+                userAgent: navigator.userAgent,
+                isReactNativeInUA: navigator.userAgent.includes('ReactNative'),
+                customProps: {
+                    __REACT_NATIVE_ENV__: window.__REACT_NATIVE_ENV__,
+                    isReactNativeWebView: window.isReactNativeWebView
+                }
+            };
+            
+            log('Bridge check results', checks);
+            
+            if (checks.hasReactNativeWebView || checks.hasReactNativeBridge) {
+                updateStatus('✅ React Native Bridge Detected!', 'success');
+            } else {
+                updateStatus('❌ React Native Bridge Not Found', 'error');
+            }
+            
+            return checks;
+        }
+        
+        function testNotification() {
+            log('Testing notification...');
+            
+            // First try the test_notification type that the native app already supports
+            if (window.ReactNativeBridge && window.ReactNativeBridge.postMessage) {
+                try {
+                    // Try the existing test_notification handler first
+                    window.ReactNativeBridge.postMessage({
+                        type: 'test_notification'
+                    });
+                    log('Test notification request sent (using test_notification type)');
+                    
+                    // Also try send_notification for the new handler
+                    setTimeout(() => {
+                        window.ReactNativeBridge.postMessage({
+                            type: 'send_notification',
+                            payload: {
+                                title: 'Test Notification',
+                                body: 'This is a test notification from the webapp',
+                                data: { test: true }
+                            }
+                        });
+                        log('Notification request sent (using send_notification type)');
+                    }, 1000);
+                } catch (e) {
+                    log('Error sending via ReactNativeBridge', e.message);
+                }
+            } else if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+                try {
+                    // Try test_notification first
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                        type: 'test_notification'
+                    }));
+                    log('Test notification sent via ReactNativeWebView (test_notification)');
+                    
+                    // Then try send_notification
+                    setTimeout(() => {
+                        window.ReactNativeWebView.postMessage(JSON.stringify({
+                            type: 'send_notification',
+                            payload: {
+                                title: 'Test Notification',
+                                body: 'This is a test notification from the webapp',
+                                data: { test: true }
+                            }
+                        }));
+                        log('Notification sent via ReactNativeWebView (send_notification)');
+                    }, 1000);
+                } catch (e) {
+                    log('Error sending via ReactNativeWebView', e.message);
+                }
+            } else {
+                log('No bridge available to send notification');
+                updateStatus('No bridge available', 'error');
+            }
+        }
+        
+        function testPostMessage() {
+            log('Testing postMessage...');
+            
+            const testMessage = {
+                type: 'test',
+                payload: {
+                    message: 'Hello from webapp',
+                    timestamp: new Date().toISOString()
+                }
+            };
+            
+            if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+                try {
+                    window.ReactNativeWebView.postMessage(JSON.stringify(testMessage));
+                    log('Message sent via ReactNativeWebView.postMessage');
+                    updateStatus('Message sent!', 'success');
+                } catch (e) {
+                    log('Error with postMessage', e.message);
+                    updateStatus('Error sending message', 'error');
+                }
+            } else {
+                log('ReactNativeWebView.postMessage not available');
+                updateStatus('postMessage not available', 'error');
+            }
+        }
+        
+        function goToApp() {
+            log('Navigating to app with React Native flag...');
+            window.location.href = '/?reactNative=true';
+        }
+        
+        // Listen for messages from native
+        window.addEventListener('message', (event) => {
+            log('Received message event', event.data);
+        });
+        
+        // Check bridge on load
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(checkBridge, 100);
+        });
+        
+        // Also check after a delay
+        setTimeout(checkBridge, 500);
+    </script>
+</body>
+</html>

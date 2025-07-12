@@ -59,18 +59,95 @@ class ReactNativeBridgeManager {
   private bridgeReadyCallbacks: Array<() => void> = [];
 
   constructor() {
+    // Try immediate detection
     this.detectReactNative();
     this.setupMessageListener();
     this.setupBridgeReadyListener();
+    
+    // Also try detection after a short delay (for cases where bridge is injected late)
+    if (typeof window !== 'undefined') {
+      // Try multiple times with increasing delays
+      [50, 100, 250, 500, 1000].forEach(delay => {
+        setTimeout(() => {
+          if (!this.isReactNative) {
+            this.detectReactNative();
+          }
+        }, delay);
+      });
+      
+      // And after DOM ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+          this.detectReactNative();
+        });
+      }
+      
+      // Listen for custom event from native app
+      window.addEventListener('ReactNativeBridgeReady', () => {
+        console.log('Received ReactNativeBridgeReady event');
+        this.detectReactNative();
+        this.bridgeReadyCallbacks.forEach(callback => callback());
+        this.bridgeReadyCallbacks = [];
+      });
+    }
   }
 
   private detectReactNative() {
     // Check if we're running in React Native WebView
-    this.isReactNative = !!(
+    const hasNativeBridge = !!(
       typeof window !== 'undefined' &&
       window.ReactNativeWebView &&
       window.ReactNativeBridge
     );
+    
+    // Check for ReactNativeWebView only (some implementations only have this)
+    const hasWebViewOnly = !!(
+      typeof window !== 'undefined' &&
+      window.ReactNativeWebView &&
+      !window.ReactNativeBridge
+    );
+    
+    // Also check for URL parameter override for testing
+    const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    const forceReactNative = urlParams?.get('reactNative') === 'true';
+    
+    // Check user agent for React Native
+    const userAgent = typeof window !== 'undefined' ? window.navigator.userAgent : '';
+    const hasReactNativeUserAgent = userAgent.includes('ReactNative') || userAgent.includes('thrive-app');
+    
+    // Check for custom property that native app might set
+    const hasCustomProperty = typeof window !== 'undefined' && 
+      ((window as unknown as { __REACT_NATIVE_ENV__?: boolean }).__REACT_NATIVE_ENV__ === true || 
+       (window as unknown as { isReactNativeWebView?: boolean }).isReactNativeWebView === true);
+    
+    const wasReactNative = this.isReactNative;
+    this.isReactNative = hasNativeBridge || hasWebViewOnly || forceReactNative || hasReactNativeUserAgent || hasCustomProperty;
+    
+    // If status changed, log it
+    if (wasReactNative !== this.isReactNative) {
+      console.log('React Native Bridge status changed:', wasReactNative, '->', this.isReactNative);
+    }
+    
+    // Debug logging
+    if (typeof window !== 'undefined') {
+      console.log('React Native Bridge Detection:', {
+        timestamp: new Date().toISOString(),
+        hasWindow: true,
+        hasReactNativeWebView: !!window.ReactNativeWebView,
+        hasReactNativeBridge: !!window.ReactNativeBridge,
+        hasWebViewOnly,
+        forceReactNative,
+        userAgent,
+        hasReactNativeUserAgent,
+        hasCustomProperty,
+        isReactNative: this.isReactNative,
+        windowKeys: Object.keys(window).filter(k => 
+          k.toLowerCase().includes('react') || 
+          k.toLowerCase().includes('native') ||
+          k.toLowerCase().includes('bridge')
+        )
+      });
+    }
   }
 
   private setupMessageListener() {
@@ -194,6 +271,44 @@ class ReactNativeBridgeManager {
       return localStorage.getItem('fcm_token');
     }
     return null;
+  }
+
+  public sendNotification(title: string, body: string, data?: Record<string, unknown>) {
+    if (this.isReactNative && window.ReactNativeBridge) {
+      window.ReactNativeBridge.postMessage({
+        type: 'send_notification',
+        payload: {
+          title,
+          body,
+          data
+        }
+      });
+    }
+  }
+
+  public postMessage(message: unknown) {
+    if (this.isReactNative && window.ReactNativeBridge) {
+      window.ReactNativeBridge.postMessage(message);
+    }
+  }
+  
+  public forceDetection() {
+    console.log('Forcing React Native bridge detection...');
+    this.detectReactNative();
+    return this.isReactNative;
+  }
+  
+  public getBridgeStatus() {
+    return {
+      isReactNative: this.isReactNative,
+      hasReactNativeWebView: typeof window !== 'undefined' && !!window.ReactNativeWebView,
+      hasReactNativeBridge: typeof window !== 'undefined' && !!window.ReactNativeBridge,
+      userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'N/A',
+      customProperties: {
+        __REACT_NATIVE_ENV__: typeof window !== 'undefined' && (window as unknown as { __REACT_NATIVE_ENV__?: boolean }).__REACT_NATIVE_ENV__,
+        isReactNativeWebView: typeof window !== 'undefined' && (window as unknown as { isReactNativeWebView?: boolean }).isReactNativeWebView
+      }
+    };
   }
 }
 

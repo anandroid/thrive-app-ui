@@ -123,12 +123,25 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
                 sessionStorage.setItem('sessionId', currentSession);
               }
               
+              // Debug logging
+              console.log('Notification Modal Check:', {
+                isInReactNative: bridge.isInReactNative(),
+                notificationPermissionGranted: localStorage.getItem('notificationPermissionGranted'),
+                notificationAskCount,
+                lastAskSession,
+                currentSession,
+                reminderTimes: thriving.reminderTimes,
+                reminderTimesLength: thriving.reminderTimes?.length
+              });
+              
               const shouldShowNotificationModal = 
                 bridge.isInReactNative() && // Running in React Native
                 localStorage.getItem('notificationPermissionGranted') !== 'true' && // Not already granted
                 notificationAskCount < 3 && // Haven't asked 3 times yet
-                lastAskSession !== currentSession && // Different session
+                (notificationAskCount === 0 || lastAskSession !== currentSession) && // First time or different session
                 thriving.reminderTimes && thriving.reminderTimes.length > 0; // Has reminders
+              
+              console.log('Should show notification modal:', shouldShowNotificationModal);
               
               if (shouldShowNotificationModal) {
                 // Update ask count and session

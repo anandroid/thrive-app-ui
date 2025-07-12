@@ -42,13 +42,13 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
         }}
       />
       
-      {/* Modal positioned in center of user's current view */}
+      {/* Modal positioned in center of user's current view - viewport units */}
       <div 
-        className={`absolute left-1/2 -translate-x-1/2 z-[9999] bg-white rounded-3xl shadow-2xl p-[min(6vw,1.5rem)] w-[90vw] max-w-sm transition-all duration-300 ${
+        className={`absolute left-[50vw] -translate-x-1/2 z-[9999] bg-white rounded-[min(6vw,1.5rem)] shadow-2xl p-[min(6vw,1.5rem)] w-[90vw] max-w-[500px] transition-all duration-300 ${
           isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
         }`}
         style={{
-          top: `${scrollPosition + window.innerHeight / 2}px`,
+          top: `${scrollPosition / window.innerHeight * 100 + 50}vh`,
           transform: 'translateX(-50%) translateY(-50%)'
         }}
         onClick={(e) => e.stopPropagation()}
@@ -80,25 +80,25 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
             <div className="w-[min(12vw,3rem)] h-[min(12vw,3rem)] mx-auto mb-[min(2vw,0.5rem)] rounded-xl bg-gradient-to-br from-sage-light/30 to-sage/20 flex items-center justify-center">
               <Plus className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-sage-dark" />
             </div>
-            <p className="text-xs text-gray-700">Add Steps</p>
+            <p className="text-[min(3vw,0.75rem)] text-gray-700">Add Steps</p>
           </div>
           <div className="text-center">
             <div className="w-[min(12vw,3rem)] h-[min(12vw,3rem)] mx-auto mb-[min(2vw,0.5rem)] rounded-xl bg-gradient-to-br from-rose/20 to-dusty-rose/15 flex items-center justify-center">
               <Minus className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-rose" />
             </div>
-            <p className="text-xs text-gray-700">Remove Steps</p>
+            <p className="text-[min(3vw,0.75rem)] text-gray-700">Remove Steps</p>
           </div>
           <div className="text-center">
             <div className="w-[min(12vw,3rem)] h-[min(12vw,3rem)] mx-auto mb-[min(2vw,0.5rem)] rounded-xl bg-gradient-to-br from-slate-300/30 to-slate-400/20 flex items-center justify-center">
               <Clock className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-slate-700" />
             </div>
-            <p className="text-xs text-gray-700">Change Times</p>
+            <p className="text-[min(3vw,0.75rem)] text-gray-700">Change Times</p>
           </div>
           <div className="text-center">
             <div className="w-[min(12vw,3rem)] h-[min(12vw,3rem)] mx-auto mb-[min(2vw,0.5rem)] rounded-xl bg-gradient-to-br from-lavender/25 to-dusty-rose/20 flex items-center justify-center">
               <Edit2 className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-purple-600" />
             </div>
-            <p className="text-xs text-gray-700">Edit Details</p>
+            <p className="text-[min(3vw,0.75rem)] text-gray-700">Edit Details</p>
           </div>
         </div>
         
@@ -129,10 +129,10 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
                 <div className="absolute inset-0 w-[min(10vw,2.5rem)] h-[min(10vw,2.5rem)] bg-gradient-to-br from-sage-light to-sage rounded-full shadow-lg group-hover:shadow-xl transition-shadow animate-pulse" />
                 <ArrowDown className="relative w-[min(10vw,2.5rem)] h-[min(10vw,2.5rem)] text-white p-[min(2vw,0.5rem)] animate-bounce z-10" />
               </div>
-              <p className="text-base font-medium text-sage-dark">
+              <p className="text-[min(4vw,1rem)] font-medium text-sage-dark">
                 Adjust Routine
               </p>
-              <p className="text-xs text-secondary-text-thin">
+              <p className="text-[min(3vw,0.75rem)] text-secondary-text-thin">
                 Click to see how it works!
               </p>
             </div>

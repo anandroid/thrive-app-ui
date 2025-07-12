@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Bell, BellOff, TestTube } from 'lucide-react';
 import { NotificationHelper } from '@/src/utils/notificationHelper';
+import bridge from '@/src/lib/react-native-bridge';
 import { WellnessRoutine } from '@/src/services/openai/types';
 import { Thriving } from '@/src/types/thriving';
 import toast from 'react-hot-toast';
@@ -32,7 +33,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
 
   useEffect(() => {
     // Check if notifications are supported and enabled for this item
-    if (NotificationHelper.isSupported() && item) {
+    if (bridge.isInReactNative() && item) {
       setIsEnabled(isActive && reminderTimes.length > 0);
       checkPermission();
     }
@@ -44,8 +45,8 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
   };
 
   const handleToggle = async () => {
-    if (!NotificationHelper.isSupported()) {
-      toast.error('Notifications are not available in your browser');
+    if (!bridge.isInReactNative()) {
+      toast.error('Notifications are only available in the mobile app');
       return;
     }
 
@@ -116,17 +117,37 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
     }
   };
 
-  const handleTestNotification = () => {
-    if (!NotificationHelper.isSupported()) {
-      toast.error('Notifications are not available in your browser');
+  const handleTestNotification = async () => {
+    if (!bridge.isInReactNative()) {
+      toast.error('Notifications are only available in the mobile app');
       return;
     }
     
-    NotificationHelper.testNotification();
-    toast.success('Test notification sent!');
+    // Get the current thriving's steps for a more relevant test
+    if (thriving && thriving.steps && thriving.steps.length > 0) {
+      // Pick a random step from current thriving
+      const randomStep = thriving.steps[Math.floor(Math.random() * thriving.steps.length)];
+      
+      // Send notification with step details using bridge
+      bridge.sendNotification(
+        `Time for: ${randomStep.title}`,
+        randomStep.description || `It's time for your ${thriving.title} routine step`,
+        {
+          thrivingId: thriving.id,
+          stepId: randomStep.id,
+          type: 'step_reminder'
+        }
+      );
+      
+      toast.success(`Test notification sent for: ${randomStep.title}`);
+    } else {
+      // Fallback to generic test notification
+      await NotificationHelper.testNotification();
+      toast.success('Test notification sent!');
+    }
   };
 
-  if (!NotificationHelper.isSupported()) {
+  if (!bridge.isInReactNative()) {
     return null;
   }
 

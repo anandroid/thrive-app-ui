@@ -8,12 +8,14 @@ import { getTouchClasses } from '@/hooks/useTouchFeedback';
 import { PageLayout } from '@/components/layout/PageLayout';
 import bridge from '@/src/lib/react-native-bridge';
 import { NotificationHelper } from '@/src/utils/notificationHelper';
+import { NotificationPermissionModal } from '@/components/features/NotificationPermissionModal';
 
 export default function SettingsPage() {
   const router = useRouter();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [notificationStatus, setNotificationStatus] = useState<'unknown' | 'enabled' | 'disabled'>('unknown');
   const [isRequestingPermission, setIsRequestingPermission] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
 
   useEffect(() => {
     checkNotificationStatus();
@@ -185,13 +187,21 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   {notificationStatus === 'disabled' && (
-                    <button
-                      onClick={handleEnableNotifications}
-                      disabled={isRequestingPermission}
-                      className="px-4 py-2 bg-rose text-white rounded-full text-sm font-medium hover:bg-burgundy transition-colors disabled:opacity-50"
-                    >
-                      {isRequestingPermission ? 'Requesting...' : 'Enable'}
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setShowNotificationModal(true)}
+                        className="px-3 py-2 bg-dusty-rose text-white rounded-full text-sm font-medium hover:bg-burgundy transition-colors"
+                      >
+                        Modal
+                      </button>
+                      <button
+                        onClick={handleEnableNotifications}
+                        disabled={isRequestingPermission}
+                        className="px-4 py-2 bg-rose text-white rounded-full text-sm font-medium hover:bg-burgundy transition-colors disabled:opacity-50"
+                      >
+                        {isRequestingPermission ? 'Requesting...' : 'Enable'}
+                      </button>
+                    </div>
                   )}
                   {notificationStatus === 'enabled' && (
                     <span className="text-sm text-sage-dark">✓</span>
@@ -321,6 +331,22 @@ export default function SettingsPage() {
           </div>
         </div>
       )}
+      
+      {/* Notification Permission Modal */}
+      <NotificationPermissionModal
+        isOpen={showNotificationModal}
+        onClose={() => {
+          setShowNotificationModal(false);
+          checkNotificationStatus(); // Refresh status after modal closes
+        }}
+        onPermissionGranted={() => {
+          // Schedule notifications for existing thrivings
+          const thrivings = JSON.parse(localStorage.getItem('thrive_thrivings') || '[]');
+          if (thrivings.length > 0) {
+            NotificationHelper.scheduleRoutineReminders(thrivings);
+          }
+        }}
+      />
     </PageLayout>
   );
 }

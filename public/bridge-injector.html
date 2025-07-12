@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bridge Injector</title>
+    <script>
+        // This script helps inject the React Native bridge before the webapp loads
+        
+        // Method 1: Define the bridge if not already present
+        if (!window.ReactNativeBridge) {
+            console.log('Bridge Injector: Creating placeholder bridge');
+            window.ReactNativeBridge = {
+                postMessage: function(message) {
+                    // If ReactNativeWebView exists, use it
+                    if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+                        window.ReactNativeWebView.postMessage(JSON.stringify(message));
+                    } else {
+                        console.log('Bridge message queued:', message);
+                        // Queue messages until real bridge is available
+                        window.__bridgeMessageQueue = window.__bridgeMessageQueue || [];
+                        window.__bridgeMessageQueue.push(message);
+                    }
+                },
+                // Add other methods as needed
+                requestNotificationPermission: function() {
+                    this.postMessage({ type: 'requestNotificationPermission' });
+                },
+                requestCameraPermission: function() {
+                    this.postMessage({ type: 'requestCameraPermission' });
+                },
+                notifyThrivingCreated: function() {
+                    this.postMessage({ type: 'notifyThrivingCreated' });
+                },
+                openExternalUrl: function(url) {
+                    this.postMessage({ type: 'openExternalUrl', payload: { url } });
+                }
+            };
+        }
+        
+        // Method 2: Set custom properties
+        window.__REACT_NATIVE_ENV__ = true;
+        window.isReactNativeWebView = true;
+        
+        // Method 3: Dispatch ready event after a delay
+        setTimeout(function() {
+            window.dispatchEvent(new Event('ReactNativeBridgeReady'));
+        }, 100);
+        
+        // Method 4: If the native app updates the bridge later, process queued messages
+        const originalBridge = window.ReactNativeBridge;
+        Object.defineProperty(window, 'ReactNativeBridge', {
+            get: function() { return originalBridge; },
+            set: function(newBridge) {
+                console.log('Bridge Injector: Native bridge set');
+                // Process queued messages
+                if (window.__bridgeMessageQueue && window.__bridgeMessageQueue.length > 0) {
+                    console.log('Processing', window.__bridgeMessageQueue.length, 'queued messages');
+                    window.__bridgeMessageQueue.forEach(function(msg) {
+                        newBridge.postMessage(msg);
+                    });
+                    window.__bridgeMessageQueue = [];
+                }
+                originalBridge = newBridge;
+                // Dispatch event
+                window.dispatchEvent(new Event('ReactNativeBridgeReady'));
+            }
+        });
+        
+        console.log('Bridge Injector: Setup complete');
+    </script>
+</head>
+<body>
+    <p>Bridge injector loaded. Redirecting to app...</p>
+    <script>
+        // Redirect to the main app after bridge setup
+        setTimeout(function() {
+            window.location.href = '/?reactNative=true';
+        }, 200);
+    </script>
+</body>
+</html>

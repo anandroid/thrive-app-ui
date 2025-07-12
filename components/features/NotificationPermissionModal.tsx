@@ -73,53 +73,53 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
       <div className="fixed inset-0 bg-black/50 z-50 animate-fade-in" onClick={handleNotNow} />
       
       {/* Modal */}
-      <div className="fixed inset-x-4 top-1/2 -translate-y-1/2 max-w-md mx-auto z-50 animate-scale-in">
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+      <div className="fixed inset-x-[4vw] max-inset-x-[1rem] top-1/2 -translate-y-1/2 w-[90vw] max-w-[400px] mx-auto z-50 animate-scale-in">
+        <div className="bg-white rounded-[6vw] max-rounded-[1.5rem] shadow-2xl overflow-hidden">
           {/* Header with gradient background */}
-          <div className="relative bg-gradient-to-br from-rose/20 via-dusty-rose/15 to-soft-lavender/20 p-6 pb-8">
+          <div className="relative bg-gradient-to-br from-rose/20 via-dusty-rose/15 to-soft-lavender/20 p-[6vw] max-p-[1.5rem] pb-[8vw] max-pb-[2rem]">
             <button
               onClick={handleNotNow}
-              className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/50 transition-colors"
+              className="absolute top-[4vw] max-top-[1rem] right-[4vw] max-right-[1rem] p-[2vw] max-p-[0.5rem] rounded-full hover:bg-white/50 transition-colors"
               aria-label="Close"
             >
-              <X className="w-5 h-5 text-gray-600" />
+              <X className="w-[5vw] h-[5vw] max-w-[1.25rem] max-h-[1.25rem] text-gray-600" />
             </button>
             
             {/* Icon */}
-            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-rose to-burgundy rounded-2xl flex items-center justify-center shadow-lg">
-              <Bell className="w-8 h-8 text-white" />
+            <div className="w-[16vw] h-[16vw] max-w-[4rem] max-h-[4rem] mx-auto mb-[4vw] max-mb-[1rem] bg-gradient-to-br from-rose to-burgundy rounded-[4vw] max-rounded-[1rem] flex items-center justify-center shadow-lg">
+              <Bell className="w-[8vw] h-[8vw] max-w-[2rem] max-h-[2rem] text-white" />
             </div>
             
             {/* Title */}
-            <h2 className="text-2xl font-bold text-center text-gray-900">
+            <h2 className="text-[min(6vw,1.5rem)] font-bold text-center text-gray-900">
               Never Miss a Step
             </h2>
-            <p className="text-center text-gray-600 mt-2">
+            <p className="text-center text-[min(4vw,1rem)] text-gray-600 mt-[2vw] max-mt-[0.5rem]">
               Get gentle reminders for {routineName}
             </p>
           </div>
           
           {/* Benefits */}
-          <div className="p-6 space-y-4">
-            <div className="flex items-start space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-sage-light/20 flex items-center justify-center flex-shrink-0">
-                <Clock className="w-5 h-5 text-sage-dark" />
+          <div className="p-[6vw] max-p-[1.5rem] space-y-[4vw] max-space-y-[1rem]">
+            <div className="flex items-start space-x-[3vw] max-space-x-[0.75rem]">
+              <div className="w-[10vw] h-[10vw] max-w-[2.5rem] max-h-[2.5rem] rounded-[3vw] max-rounded-[0.75rem] bg-sage-light/20 flex items-center justify-center flex-shrink-0">
+                <Clock className="w-[5vw] h-[5vw] max-w-[1.25rem] max-h-[1.25rem] text-sage-dark" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Timely Reminders</h3>
-                <p className="text-sm text-gray-600 mt-0.5">
+                <h3 className="font-semibold text-gray-900 text-[min(4vw,1rem)]">Timely Reminders</h3>
+                <p className="text-[min(3.5vw,0.875rem)] text-gray-600 mt-0.5">
                   Stay on track with your wellness goals
                 </p>
               </div>
             </div>
             
-            <div className="flex items-start space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-dusty-rose/20 flex items-center justify-center flex-shrink-0">
-                <Sparkles className="w-5 h-5 text-dusty-rose" />
+            <div className="flex items-start space-x-[3vw] max-space-x-[0.75rem]">
+              <div className="w-[10vw] h-[10vw] max-w-[2.5rem] max-h-[2.5rem] rounded-[3vw] max-rounded-[0.75rem] bg-dusty-rose/20 flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-[5vw] h-[5vw] max-w-[1.25rem] max-h-[1.25rem] text-dusty-rose" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Build Healthy Habits</h3>
-                <p className="text-sm text-gray-600 mt-0.5">
+                <h3 className="font-semibold text-gray-900 text-[min(4vw,1rem)]">Build Healthy Habits</h3>
+                <p className="text-[min(3.5vw,0.875rem)] text-gray-600 mt-0.5">
                   Consistency is key to lasting wellness
                 </p>
               </div>
@@ -127,16 +127,16 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
           </div>
           
           {/* Actions */}
-          <div className="p-6 pt-2 space-y-3">
+          <div className="p-[6vw] max-p-[1.5rem] pt-[2vw] max-pt-[0.5rem] space-y-[3vw] max-space-y-[0.75rem]">
             <button
               onClick={handleEnableNotifications}
               disabled={isRequesting}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-rose to-burgundy text-white font-semibold 
+              className="w-full py-[4vw] max-py-[1rem] rounded-[4vw] max-rounded-[1rem] bg-gradient-to-r from-rose to-burgundy text-white text-[min(4vw,1rem)] font-semibold 
                        hover:shadow-lg transition-all disabled:opacity-70 touch-feedback touch-manipulation"
             >
               {isRequesting ? (
-                <span className="flex items-center justify-center space-x-2">
-                  <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+                <span className="flex items-center justify-center space-x-[2vw] max-space-x-[0.5rem]">
+                  <span className="animate-spin rounded-full h-[4vw] w-[4vw] max-h-[1rem] max-w-[1rem] border-b-2 border-white"></span>
                   <span>Requesting...</span>
                 </span>
               ) : (
@@ -146,7 +146,7 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
             
             <button
               onClick={handleNotNow}
-              className="w-full py-3 rounded-2xl text-gray-600 font-medium hover:bg-gray-50 transition-colors touch-feedback touch-manipulation"
+              className="w-full py-[3vw] max-py-[0.75rem] rounded-[4vw] max-rounded-[1rem] text-[min(4vw,1rem)] text-gray-600 font-medium hover:bg-gray-50 transition-colors touch-feedback touch-manipulation"
             >
               Not Now
             </button>
