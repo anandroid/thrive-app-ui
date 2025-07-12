@@ -61,16 +61,26 @@ export const ASSISTANT_RESPONSE_KEYS: (keyof AssistantResponse)[] = [
   'questions',
 ];
 
+/**
+ * Educational/informational content displayed as static cards
+ * These provide health insights, remedy explanations, and general advice
+ * NOT interactive - just for reading/learning
+ */
 export interface ActionItem {
   title: string;
-  content: string;
+  content: string;  // HTML formatted educational content
   description?: string;
 }
 
+/**
+ * Interactive items that trigger specific actions when clicked
+ * These are buttons/cards that open modals, navigate, or perform actions
+ * Examples: Create routine, add to pantry, buy supplement, book appointment
+ */
 export interface ActionableItem {
   type: 'appointment' | 'medicine' | 'routine' | 'create_routine' | 'prescription' | 'resource' | 'link' | 'start_journey' | 'continue_journey' | 'buy' | 'add_to_pantry' | 'already_have' | 'adjust_routine' | 'supplement_choice' | string;
   title: string;
-  description: string;
+  description: string;  // Explains why this action would benefit the user
   details?: string;
   category?: string;
   link?: string;

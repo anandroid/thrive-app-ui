@@ -15,6 +15,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { AdjustmentTutorial } from '@/components/features/AdjustmentTutorial';
 import { LoadingButton } from '@/components/ui/LoadingButton';
 import { NotificationSettings } from '@/components/features/NotificationSettings';
+import { HealthInsights } from '@/components/features/HealthInsights';
 
 export default function ThrivingsPage() {
   const [thrivings, setThrivings] = useState<Thriving[]>([]);
@@ -1124,6 +1125,11 @@ export default function ThrivingsPage() {
                 </div>
               )}
             </>
+          )}
+          
+          {/* Health Insights Section */}
+          {thrivings.length > 0 && (
+            <HealthInsights />
           )}
         </div>
       
