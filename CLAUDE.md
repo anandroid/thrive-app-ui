@@ -31,6 +31,27 @@ THRIVE_PANTRY_ASSISTANT_ID=asst_...  # Pantry analysis assistant
 # - Grants Cloud Run service access to all secrets
 ```
 
+### Important: API Route Environment Variables
+When using environment variables in Next.js API routes, **NEVER** access them at module level:
+
+```typescript
+// ❌ BAD - This will fail during build
+import OpenAI from 'openai';
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+export async function POST(request) {
+  // ...
+}
+
+// ✅ GOOD - Initialize inside the handler
+export async function POST(request) {
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  // ...
+}
+```
+
+Environment variables are not available during the build process, only at runtime.
+
 ## 🚨 VIEWPORT-FIRST DEVELOPMENT RULE
 **This is a MOBILE APP - NEVER use hardcoded pixel values!** Always use viewport units (vw, vh, dvh) with appropriate constraints. This ensures the app scales perfectly on ALL devices from iPhone SE to tablets.
 
