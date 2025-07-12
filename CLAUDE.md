@@ -622,3 +622,57 @@ import { LoadingButton } from '@/components/ui/LoadingButton';
 ### Used In
 - **RoutineCreationModal** - Creating wellness routines with personalized messages
 - **JourneyCreationModal** - Creating thriving journals with context-aware messages
+
+## 💡 Core Business Model & Chat Assistant Workflow (2025-07-12)
+
+### Business Model Overview
+**Revenue**: Supplement affiliate commissions (Amazon)
+**Retention**: Daily routine reminders bring users back
+**Trust**: Non-pushy approach with "I already have it" option first
+
+### Chat Assistant Conversation Flow
+The chat assistant follows a 5-stage progression to maximize both user value and business outcomes:
+
+1. **Build Trust** → Ask questions, understand needs (NO solutions yet)
+2. **Educate** → Explain why their issue happens  
+3. **Recommend** → Offer supplements AND/OR routines based on preference
+4. **Implement** → Drive routine creation immediately after any action
+5. **Track** → Follow up on effectiveness
+
+### Key Principles for AI Implementation
+
+#### Stage-Based Responses
+- **First mention of health concern**: Questions ONLY, no actionableItems
+- **After context gathered**: Education + solutions (supplements/routines)
+- **After any user action**: Push routine creation for retention
+- **No action but continued chat**: Address their message first, then alternatives
+
+#### Post-Action Strategies
+- **Pantry Addition**: "Perfect! Let's create a routine with optimal timing for daily reminders"
+- **Buy Click**: "While that ships, here's techniques you can try tonight + routine"
+- **Routine Created**: User redirected to /thrivings page (no follow-up needed)
+- **Journey Created**: User redirected to journal page (no follow-up needed)
+
+#### Routine-First Mindset
+Remember: **Supplements are the hook, but routines are the retention engine**
+- Every conversation path should lead to routine creation
+- Routines work with OR without supplements
+- Daily reminder notifications = daily app opens = retention
+
+#### Smart Adaptations
+- User anti-supplement? → Technique-based routine
+- User overwhelmed? → Simple 5-minute routine  
+- User cost-conscious? → Zero-cost routine
+- User ignores suggestions? → Address their actual message first
+
+#### Question Strategy by Context
+- **With supplement recommendations**: Experience/preference questions
+- **After pantry addition**: Skip questions, go straight to routine
+- **After buy click**: "What would help most right now?"
+- **No action taken**: "What would you prefer to try first?"
+
+### Implementation Notes
+- Assistant uses `supplement_choice` type which auto-generates both buttons
+- Response parser ensures "I already have it" always appears first
+- Post-action messages are supplement-specific (see postActionMessages.ts)
+- Routines handle all timing/scheduling (don't ask about it in chat)
