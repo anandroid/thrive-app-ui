@@ -316,12 +316,15 @@ async function createOrUpdateAssistant(role, config) {
       }
     };
 
+    // Check if functions should be enabled
+    const enableFunctions = process.env.ENABLE_ASSISTANT_FUNCTIONS === 'true';
+    
     const assistantConfig = {
       name: config.name,
       description: config.description,
       model: config.model,
       instructions: config.instructions,
-      tools: config.functions.map(func => ({ type: 'function', function: func })),
+      tools: enableFunctions ? config.functions.map(func => ({ type: 'function', function: func })) : [],
       response_format: { type: 'json_object' },
       temperature: config.temperature,
       metadata: {
@@ -400,6 +403,9 @@ async function updateEnvFile(assistants) {
  */
 async function main() {
   console.log('🚀 Thrive AI Assistant Team Setup (Dynamic Version)\n');
+  
+  const enableFunctions = process.env.ENABLE_ASSISTANT_FUNCTIONS === 'true';
+  console.log(`📋 Assistant Functions: ${enableFunctions ? '✅ Enabled' : '❌ Disabled'}\n`);
   
   if (!process.env.THRIVE_OPENAI_API_KEY) {
     console.error('❌ Error: THRIVE_OPENAI_API_KEY not found in .env.local');
