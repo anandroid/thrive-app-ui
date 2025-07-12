@@ -1,15 +1,56 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Info, Moon, ChevronRight, Plus, Leaf, MessageSquare, Trash2 } from 'lucide-react';
+import { Info, Moon, ChevronRight, Plus, Leaf, MessageSquare, Trash2, Bell } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getTouchClasses } from '@/hooks/useTouchFeedback';
 import { PageLayout } from '@/components/layout/PageLayout';
+import bridge from '@/src/lib/react-native-bridge';
+import { NotificationHelper } from '@/src/utils/notificationHelper';
 
 export default function SettingsPage() {
   const router = useRouter();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [notificationStatus, setNotificationStatus] = useState<'unknown' | 'enabled' | 'disabled'>('unknown');
+  const [isRequestingPermission, setIsRequestingPermission] = useState(false);
+
+  useEffect(() => {
+    checkNotificationStatus();
+  }, []);
+
+  const checkNotificationStatus = () => {
+    // Check if in React Native and if permissions were granted
+    if (bridge.isInReactNative()) {
+      const granted = localStorage.getItem('notificationPermissionGranted') === 'true';
+      setNotificationStatus(granted ? 'enabled' : 'disabled');
+    }
+  };
+
+  const handleEnableNotifications = async () => {
+    setIsRequestingPermission(true);
+    try {
+      const granted = await bridge.requestNotificationPermission();
+      if (granted) {
+        localStorage.setItem('notificationPermissionGranted', 'true');
+        localStorage.setItem('notificationAskCount', '0'); // Reset ask count
+        setNotificationStatus('enabled');
+        
+        // Schedule notifications for existing thrivings
+        const thrivings = JSON.parse(localStorage.getItem('thrive_thrivings') || '[]');
+        if (thrivings.length > 0) {
+          await NotificationHelper.scheduleRoutineReminders(thrivings);
+        }
+      } else {
+        localStorage.setItem('notificationPermissionGranted', 'false');
+        setNotificationStatus('disabled');
+      }
+    } catch (error) {
+      console.error('Error requesting notification permission:', error);
+    } finally {
+      setIsRequestingPermission(false);
+    }
+  };
 
   return (
     <PageLayout
@@ -125,7 +166,39 @@ export default function SettingsPage() {
 
             {/* Wellness Profile - Hidden for now */}
             
-            {/* Notifications - Hidden for now */}
+            {/* Notifications */}
+            {bridge.isInReactNative() && (
+              <div className={getTouchClasses(
+                "rounded-2xl bg-white/80 backdrop-blur-sm border border-rose/20 p-4 shadow-sm",
+                { feedback: true }
+              )}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose to-burgundy flex items-center justify-center">
+                      <Bell className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-primary-text">Notifications</h3>
+                      <p className="text-sm text-primary-text/60">
+                        {notificationStatus === 'enabled' ? 'Enabled' : 'Disabled'}
+                      </p>
+                    </div>
+                  </div>
+                  {notificationStatus === 'disabled' && (
+                    <button
+                      onClick={handleEnableNotifications}
+                      disabled={isRequestingPermission}
+                      className="px-4 py-2 bg-rose text-white rounded-full text-sm font-medium hover:bg-burgundy transition-colors disabled:opacity-50"
+                    >
+                      {isRequestingPermission ? 'Requesting...' : 'Enable'}
+                    </button>
+                  )}
+                  {notificationStatus === 'enabled' && (
+                    <span className="text-sm text-sage-dark">✓</span>
+                  )}
+                </div>
+              </div>
+            )}
             
             {/* Privacy & Security - Hidden for now */}
             

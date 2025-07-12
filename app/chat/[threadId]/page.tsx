@@ -10,6 +10,7 @@ import { saveJourneyToStorage } from '@/src/utils/journeyStorage';
 import { Thriving, AdditionalRecommendation } from '@/src/types/thriving';
 import { NotificationPermissionModal } from '@/components/features/NotificationPermissionModal';
 import { NotificationHelper } from '@/src/utils/notificationHelper';
+import bridge from '@/src/lib/react-native-bridge';
 
 export default function ChatPage({ params }: { params: Promise<{ threadId: string }> }) {
   const router = useRouter();
@@ -123,7 +124,7 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
               }
               
               const shouldShowNotificationModal = 
-                NotificationHelper.isSupported() && // Running in React Native
+                bridge.isInReactNative() && // Running in React Native
                 localStorage.getItem('notificationPermissionGranted') !== 'true' && // Not already granted
                 notificationAskCount < 3 && // Haven't asked 3 times yet
                 lastAskSession !== currentSession && // Different session

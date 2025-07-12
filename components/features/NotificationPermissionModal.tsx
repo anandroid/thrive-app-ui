@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Bell, X, Sparkles, Clock } from 'lucide-react';
 import { NotificationHelper } from '@/src/utils/notificationHelper';
+import bridge from '@/src/lib/react-native-bridge';
 
 interface NotificationPermissionModalProps {
   isOpen: boolean;
@@ -23,13 +24,20 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
     setIsRequesting(true);
     
     try {
-      const granted = await NotificationHelper.requestPermission();
+      // Use the React Native bridge directly for proper iOS/Android permission
+      const granted = await bridge.requestNotificationPermission();
       
       if (granted) {
         // Mark that permission was granted
         localStorage.setItem('notificationPermissionGranted', 'true');
         // Reset ask count since they granted permission
         localStorage.setItem('notificationAskCount', '0');
+        
+        // Schedule notifications for existing thrivings
+        const thrivings = JSON.parse(localStorage.getItem('thrive_thrivings') || '[]');
+        if (thrivings.length > 0) {
+          await NotificationHelper.scheduleRoutineReminders(thrivings);
+        }
         
         if (onPermissionGranted) {
           onPermissionGranted();

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { NotificationHelper } from '@/src/utils/notificationHelper';
+import bridge from '@/src/lib/react-native-bridge';
 
 export const NotificationPermissionBanner: React.FC = () => {
   const [showBanner, setShowBanner] = useState(false);
@@ -14,7 +15,7 @@ export const NotificationPermissionBanner: React.FC = () => {
   }, []);
 
   const checkNotificationStatus = async () => {
-    if (!NotificationHelper.isSupported()) {
+    if (!bridge.isInReactNative()) {
       setShowBanner(false);
       return;
     }
@@ -92,22 +93,20 @@ export const NotificationPermissionBanner: React.FC = () => {
           <div className="flex gap-2">
             <button
               onClick={async () => {
-                // Request notification permission first
-                if (NotificationHelper.isSupported()) {
-                  const granted = await NotificationHelper.requestPermission();
-                  if (granted) {
-                    localStorage.setItem('notificationPermissionGranted', 'true');
-                    // Reset ask count since they granted permission
-                    localStorage.setItem('notificationAskCount', '0');
-                    // Schedule notifications for existing thrivings
-                    const thrivings = JSON.parse(localStorage.getItem('thrive_thrivings') || '[]');
-                    if (thrivings.length > 0) {
-                      await NotificationHelper.scheduleRoutineReminders(thrivings);
-                    }
-                  } else {
-                    // Still update the ask count
-                    handleDismiss();
+                // Request notification permission using React Native bridge
+                const granted = await bridge.requestNotificationPermission();
+                if (granted) {
+                  localStorage.setItem('notificationPermissionGranted', 'true');
+                  // Reset ask count since they granted permission
+                  localStorage.setItem('notificationAskCount', '0');
+                  // Schedule notifications for existing thrivings
+                  const thrivings = JSON.parse(localStorage.getItem('thrive_thrivings') || '[]');
+                  if (thrivings.length > 0) {
+                    await NotificationHelper.scheduleRoutineReminders(thrivings);
                   }
+                } else {
+                  // Still update the ask count
+                  handleDismiss();
                 }
                 router.push('/thrivings');
               }}
