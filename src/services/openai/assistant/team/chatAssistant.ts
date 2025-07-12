@@ -7,7 +7,7 @@
  */
 
 import { COMMON_TEAM_INSTRUCTIONS } from './commonInstructions';
-import { CHAT_RESPONSE_SCHEMA } from '../schemas/chatResponseSchema';
+// import { CHAT_RESPONSE_SCHEMA } from '../schemas/chatResponseSchema'; // Not used with json_object format
 
 export const CHAT_ASSISTANT_INSTRUCTIONS = `${COMMON_TEAM_INSTRUCTIONS}
 
@@ -315,7 +315,20 @@ export const CHAT_ASSISTANT_CONFIG = {
   temperature: 0.7,
   instructions: CHAT_ASSISTANT_INSTRUCTIONS,
   response_format: {
-    type: 'json_schema' as const,
-    json_schema: CHAT_RESPONSE_SCHEMA
+    type: 'json_object' as const  // Changed from json_schema due to GPT-4.1-nano limitations
   }
 };
+
+/**
+ * Known Issues with GPT-4.1-nano (2025):
+ * 1. json_schema response_format shows 'Unsupported model' errors on GPT-4.1 models
+ * 2. Response format not enforced after tool outputs submission
+ * 
+ * Workarounds implemented:
+ * 1. Using json_object instead of json_schema for response_format
+ * 2. Explicit JSON structure in CHAT_ASSISTANT_INSTRUCTIONS with examples
+ * 3. Fallback parser in responseParser.ts to handle plain text responses
+ * 4. Instructions emphasize JSON requirements multiple times
+ * 
+ * See: https://community.openai.com/t/clarity-on-gpt-4-1-and-o4-mini-structured-output-support/1230973
+ */

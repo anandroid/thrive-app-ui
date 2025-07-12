@@ -7,7 +7,7 @@
  */
 
 import { COMMON_TEAM_INSTRUCTIONS } from './commonInstructions';
-import { PANTRY_RESPONSE_SCHEMA } from '../schemas/pantryResponseSchema';
+// import { PANTRY_RESPONSE_SCHEMA } from '../schemas/pantryResponseSchema'; // Not used with json_object format
 
 export const PANTRY_ASSISTANT_INSTRUCTIONS = `${COMMON_TEAM_INSTRUCTIONS}
 
@@ -158,7 +158,6 @@ export const PANTRY_ASSISTANT_CONFIG = {
   temperature: 0.5,
   instructions: PANTRY_ASSISTANT_INSTRUCTIONS,
   response_format: {
-    type: 'json_schema' as const,
-    json_schema: PANTRY_RESPONSE_SCHEMA
+    type: 'json_object' as const  // Changed from json_schema due to GPT-4.1-nano limitations
   }
 };

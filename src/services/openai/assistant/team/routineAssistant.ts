@@ -7,7 +7,7 @@
  */
 
 import { COMMON_TEAM_INSTRUCTIONS } from './commonInstructions';
-import { ROUTINE_RESPONSE_SCHEMA } from '../schemas/routineResponseSchema';
+// import { ROUTINE_RESPONSE_SCHEMA } from '../schemas/routineResponseSchema'; // Not used with json_object format
 
 export const ROUTINE_ASSISTANT_INSTRUCTIONS = `${COMMON_TEAM_INSTRUCTIONS}
 
@@ -192,7 +192,6 @@ export const ROUTINE_ASSISTANT_CONFIG = {
   temperature: 0.6,
   instructions: ROUTINE_ASSISTANT_INSTRUCTIONS,
   response_format: {
-    type: 'json_schema' as const,
-    json_schema: ROUTINE_RESPONSE_SCHEMA
+    type: 'json_object' as const  // Changed from json_schema due to GPT-4.1-nano limitations
   }
 };
