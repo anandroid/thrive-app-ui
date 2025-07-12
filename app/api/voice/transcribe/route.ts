@@ -4,23 +4,22 @@ import OpenAI from 'openai';
 export const runtime = 'nodejs';
 export const maxDuration = 30; // 30 seconds max for voice transcription
 
-// Check for API key
-if (!process.env.THRIVE_OPENAI_API_KEY) {
-  console.error('THRIVE_OPENAI_API_KEY is not set in environment variables');
-}
-
-const openai = new OpenAI({
-  apiKey: process.env.THRIVE_OPENAI_API_KEY!,
-});
-
 export async function POST(request: NextRequest) {
   // Check API key at runtime
-  if (!process.env.THRIVE_OPENAI_API_KEY) {
+  const apiKey = process.env.THRIVE_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
+  
+  if (!apiKey) {
+    console.error('Neither THRIVE_OPENAI_API_KEY nor OPENAI_API_KEY is set in environment variables');
     return NextResponse.json(
-      { error: 'OpenAI API key not configured (THRIVE_OPENAI_API_KEY)' },
+      { error: 'OpenAI API key not configured (THRIVE_OPENAI_API_KEY or OPENAI_API_KEY)' },
       { status: 500 }
     );
   }
+
+  // Initialize OpenAI client inside the handler
+  const openai = new OpenAI({
+    apiKey: apiKey,
+  });
 
   try {
     // Get the audio blob from the request
