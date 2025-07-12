@@ -450,11 +450,23 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                   const lastMessage = updated[updated.length - 1];
                   if (lastMessage.role === 'assistant') {
                     lastMessage.content = fullContent;
-                    // Try to parse partial content for progressive rendering
-                    const partialParsed = parsePartialAssistantResponse(fullContent);
-                    if (partialParsed) {
-                      lastMessage.parsedContent = partialParsed;
+                    // Only try to parse if it looks like complete JSON or plain text
+                    // Check if we have a complete JSON object (starts with { and ends with })
+                    const trimmed = fullContent.trim();
+                    if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+                      // Looks like complete JSON, try to parse
+                      const parsed = parseAssistantResponse(fullContent);
+                      if (parsed) {
+                        lastMessage.parsedContent = parsed;
+                      }
+                    } else if (!trimmed.startsWith('{')) {
+                      // Not JSON at all, might be plain text fallback
+                      const partialParsed = parsePartialAssistantResponse(fullContent);
+                      if (partialParsed) {
+                        lastMessage.parsedContent = partialParsed;
+                      }
                     }
+                    // Otherwise, it's incomplete JSON - wait for completion
                   }
                   return updated;
                 });
@@ -606,7 +618,9 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
               }
 
               if (data.type === 'completed' || data.type === 'done') {
-                const parsedResponse = parseAssistantResponse(fullContent);
+                // Use data.fullContent if available (from done event), otherwise use accumulated fullContent
+                const finalContent = data.fullContent || fullContent;
+                const parsedResponse = parseAssistantResponse(finalContent);
                 
                 // Store questions if available
                 if (parsedResponse?.questions && parsedResponse.questions.length > 0) {
@@ -617,7 +631,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                   const updated = [...prev];
                   const lastMessage = updated[updated.length - 1];
                   if (lastMessage.role === 'assistant') {
-                    lastMessage.content = fullContent;
+                    lastMessage.content = finalContent;
                     lastMessage.parsedContent = parsedResponse;
                     lastMessage.isStreaming = false;
                   }
