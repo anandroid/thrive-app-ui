@@ -15,49 +15,42 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
 
   useEffect(() => {
     setMounted(true);
-    // Prevent body scroll when modal is open
-    document.body.style.overflow = 'hidden';
-    
     // Delay to ensure smooth transition
     setTimeout(() => setIsVisible(true), 100);
-    
-    // Cleanup function to restore body scroll
-    return () => {
-      document.body.style.overflow = '';
-    };
   }, []);
 
   const handleClose = () => {
     setIsVisible(false);
-    document.body.style.overflow = '';
     setTimeout(onClose, 300);
   };
 
   if (!mounted) return null;
 
   const modalContent = (
-    <div 
-      className={`fixed inset-0 z-[9998] flex items-center justify-center p-[5vw] transition-opacity duration-300 ${
-        isVisible ? 'opacity-100' : 'opacity-0'
-      }`}
-    >
-      {/* Dark overlay */}
+    <>
+      {/* Dark overlay - fixed positioning */}
       <div 
-        className="absolute inset-0 bg-black/60"
+        className={`fixed inset-0 z-[9998] bg-black/60 transition-opacity duration-300 ${
+          isVisible ? 'opacity-100' : 'opacity-0'
+        }`}
         onClick={handleClose}
       />
       
-      {/* Tutorial content - centered in viewport */}
+      {/* Modal container - also fixed but separate from overlay */}
       <div 
-        className={`relative bg-white rounded-3xl shadow-2xl p-[min(6vw,1.5rem)] w-[90vw] max-w-sm transition-all duration-300 ${
-          isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+        className={`fixed inset-0 z-[9999] pointer-events-none overflow-y-auto ${
+          isVisible ? 'opacity-100' : 'opacity-0'
         }`}
-        style={{
-          maxHeight: '80vh',
-          overflowY: 'auto'
-        }}
-        onClick={(e) => e.stopPropagation()}
       >
+        {/* Inner container for centering - this allows scroll if needed */}
+        <div className="min-h-full flex items-center justify-center p-[5vw] pointer-events-auto">
+          {/* Tutorial content */}
+          <div 
+            className={`relative bg-white rounded-3xl shadow-2xl p-[min(6vw,1.5rem)] w-[90vw] max-w-sm transition-all duration-300 pointer-events-auto ${
+              isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
         {/* Close button */}
         <button
           onClick={handleClose}
@@ -142,8 +135,10 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
             (Last time we&apos;ll show this tip)
           </p>
         )}
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 
   return ReactDOM.createPortal(modalContent, document.body);
