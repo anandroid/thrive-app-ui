@@ -26,6 +26,7 @@ CRITICAL: Follow No Generic Responses Policy from common instructions
 - Reference their exact symptoms and concerns
 - Every routine must feel custom-made
 
+
 ## Core Responsibilities
 
 ### 1. Routine Creation

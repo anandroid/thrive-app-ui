@@ -7,9 +7,6 @@ import { TouchFeedbackProvider } from "@/src/providers/TouchFeedbackProvider";
 import { NotificationProvider } from "@/src/providers/NotificationProvider";
 import "@/src/utils/clearCorruptedData";
 import { Toaster } from 'react-hot-toast';
-import { MobileDebugConsole } from '@/components/ui/MobileDebugConsole';
-import { MicrophoneTest } from '@/components/ui/MicrophoneTest';
-import { ChromeMicTest } from '@/components/ui/ChromeMicTest';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -55,8 +52,6 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="mobile-web-app-capable" content="yes" />
-        {/* Preload critical images */}
-        <link rel="preload" as="image" href="/illustrations/companion.png" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen overscroll-none`}
@@ -67,10 +62,6 @@ export default function RootLayout({
               <OfflineIndicator />
               <Toaster position="top-center" />
               {children}
-              {/* Mobile debug console */}
-              <MobileDebugConsole />
-              <MicrophoneTest />
-              <ChromeMicTest />
             </NotificationProvider>
           </TouchFeedbackProvider>
         </ServiceWorkerProvider>

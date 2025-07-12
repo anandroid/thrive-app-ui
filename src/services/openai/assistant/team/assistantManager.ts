@@ -9,6 +9,8 @@ import { CHAT_ASSISTANT_CONFIG } from './chatAssistant';
 import { ROUTINE_ASSISTANT_CONFIG } from './routineAssistant';
 import { PANTRY_ASSISTANT_CONFIG } from './pantryAssistant';
 import { getFunctionsForRole } from './sharedFunctions';
+import { isFeatureEnabled } from '@/src/config/features';
+import { buildAssistantInstructions } from './instructionBuilder';
 import { checkForEmergency } from './commonInstructions';
 
 /**
@@ -148,20 +150,28 @@ export const getAssistantConfig = (role: AssistantRole) => {
  */
 export const createAssistantConfiguration = (role: AssistantRole) => {
   const config = getAssistantConfig(role);
-  const functions = getFunctionsForRole(role);
+  
+  // Conditionally include functions based on feature flag
+  const tools = isFeatureEnabled('assistantFunctions') 
+    ? getFunctionsForRole(role).map(func => ({ type: 'function' as const, function: func }))
+    : [];
+
+  // Build instructions dynamically based on feature flags
+  const instructions = buildAssistantInstructions(config.instructions, role);
 
   return {
     name: config.name,
     description: config.description,
     model: config.model,
-    instructions: config.instructions,
-    tools: functions.map(func => ({ type: 'function' as const, function: func })),
+    instructions,
+    tools,
     response_format: config.response_format,
     temperature: config.temperature,
     metadata: {
       role,
       version: '2.0',
-      team: 'thrive-wellness'
+      team: 'thrive-wellness',
+      functionsEnabled: isFeatureEnabled('assistantFunctions') ? 'true' : 'false'
     }
   };
 };
