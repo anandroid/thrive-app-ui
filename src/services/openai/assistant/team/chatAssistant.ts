@@ -13,6 +13,14 @@ export const CHAT_ASSISTANT_INSTRUCTIONS = `${COMMON_TEAM_INSTRUCTIONS}
 
 # Chat Specialist Role
 
+## CRITICAL JSON RESPONSE REQUIREMENT
+You MUST ALWAYS respond with valid JSON that matches the response schema.
+This applies to:
+- Initial responses
+- Responses after function calls
+- All interactions with the user
+
+NEVER respond with plain text. ALWAYS use the structured format with ALL required fields.
 
 ## CRITICAL: Smart Context Usage
 When you receive basicContext in the conversation:
@@ -262,7 +270,28 @@ Follow handoff protocol from common instructions:
 - When you decide to call a function, you'll first emit a function call request (not the final response)
 - After receiving function results, THEN generate the final structured response
 - Include supplement_choice items when recommending supplements
-- Never respond with plain text - the response_format enforces JSON structure for the final response
+- CRITICAL: Your response after function calls MUST be valid JSON matching the response schema
+- The response MUST include ALL required fields: greeting, actionItems, actionableItems, questions
+- Example after get_pantry_recommendations:
+  {
+    "greeting": "Since your pantry is empty, I recommend considering Magnesium Glycinate...",
+    "attentionRequired": null,
+    "emergencyReasoning": null,
+    "actionItems": [],
+    "additionalInformation": null,
+    "actionableItems": [
+      {
+        "type": "supplement_choice",
+        "title": "Consider Magnesium Glycinate",
+        "description": "Helps with sleep quality and muscle relaxation",
+        "productName": "Magnesium Glycinate",
+        "dosage": "200-400mg",
+        "timing": "30 minutes before bed",
+        "searchQuery": "magnesium+glycinate"
+      }
+    ],
+    "questions": []
+  }
 
 **When Context Shows Data**:
 - basicContext already provides activeRoutines with names, types, and reminder times

@@ -30,6 +30,7 @@ import {
  */
 export const parseAssistantResponse = (content: string): AssistantResponse | undefined => {
   try {
+    // First try to parse as JSON
     const parsed = JSON.parse(content);
     if (parsed && typeof parsed === 'object') {
       // Post-process actionableItems to ensure both buy and already_have options exist for supplements
@@ -70,6 +71,64 @@ export const parseAssistantResponse = (content: string): AssistantResponse | und
     }
     return undefined;
   } catch {
+    // If JSON parsing fails, check if it's plain text
+    if (typeof content === 'string' && content.trim().length > 0) {
+      // This is a fallback for when the assistant returns plain text instead of JSON
+      // Convert plain text to proper JSON structure
+      console.warn('Assistant returned plain text instead of JSON:', content);
+      
+      // Check if it's a supplement recommendation
+      const hasSupplementMention = /magnesium|vitamin|melatonin|supplement|before bed|dosage|mg/i.test(content);
+      
+      const fallbackResponse: AssistantResponse = {
+        greeting: content,
+        attentionRequired: null,
+        emergencyReasoning: null,
+        actionItems: [],
+        additionalInformation: '',
+        actionableItems: [],
+        questions: []
+      };
+      
+      // If it mentions supplements, try to extract and create actionableItems
+      if (hasSupplementMention) {
+        // Try to extract supplement info from the text
+        const magnesiumMatch = content.match(/magnesium\s*(?:glycinate)?/i);
+        const dosageMatch = content.match(/(\d+[-–]\d+|\d+)\s*mg/i);
+        const timingMatch = content.match(/before bed|minutes before|at bedtime/i);
+        
+        if (magnesiumMatch) {
+          const productName = "Magnesium Glycinate";
+          const dosage = dosageMatch ? dosageMatch[0] : "200-400mg";
+          const timing = timingMatch ? "30 minutes before bed" : "before bed";
+          
+          // Add both already_have and buy options
+          fallbackResponse.actionableItems = [
+            {
+              type: 'already_have',
+              title: 'I already have',
+              description: 'Track in pantry',
+              productName: productName,
+              suggestedNotes: `${dosage}, ${timing}`,
+              contextMessage: 'Great! Tracking this helps me personalize your wellness routines',
+              dosage: dosage,
+              timing: timing
+            },
+            {
+              type: 'supplement_choice',
+              title: `Consider ${productName}`,
+              description: 'Helps with sleep quality and muscle relaxation',
+              productName: productName,
+              dosage: dosage,
+              timing: timing,
+              searchQuery: 'magnesium+glycinate'
+            }
+          ];
+        }
+      }
+      
+      return fallbackResponse;
+    }
     return undefined;
   }
 };
