@@ -450,23 +450,11 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                   const lastMessage = updated[updated.length - 1];
                   if (lastMessage.role === 'assistant') {
                     lastMessage.content = fullContent;
-                    // Only try to parse if it looks like complete JSON or plain text
-                    // Check if we have a complete JSON object (starts with { and ends with })
-                    const trimmed = fullContent.trim();
-                    if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
-                      // Looks like complete JSON, try to parse
-                      const parsed = parseAssistantResponse(fullContent);
-                      if (parsed) {
-                        lastMessage.parsedContent = parsed;
-                      }
-                    } else if (!trimmed.startsWith('{')) {
-                      // Not JSON at all, might be plain text fallback
-                      const partialParsed = parsePartialAssistantResponse(fullContent);
-                      if (partialParsed) {
-                        lastMessage.parsedContent = partialParsed;
-                      }
+                    // Try to parse partial content for progressive rendering
+                    const partialParsed = parsePartialAssistantResponse(fullContent);
+                    if (partialParsed) {
+                      lastMessage.parsedContent = partialParsed;
                     }
-                    // Otherwise, it's incomplete JSON - wait for completion
                   }
                   return updated;
                 });
