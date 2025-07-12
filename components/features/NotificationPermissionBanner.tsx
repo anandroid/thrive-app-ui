@@ -71,13 +71,25 @@ export const NotificationPermissionBanner: React.FC = () => {
           
           <div className="flex gap-2">
             <button
-              onClick={() => {
+              onClick={async () => {
                 handleDismiss();
+                // Request notification permission
+                if (NotificationHelper.isSupported()) {
+                  const granted = await NotificationHelper.requestPermission();
+                  if (granted) {
+                    localStorage.setItem('notificationPermissionGranted', 'true');
+                    // Schedule notifications for existing thrivings
+                    const thrivings = JSON.parse(localStorage.getItem('thrive_thrivings') || '[]');
+                    if (thrivings.length > 0) {
+                      await NotificationHelper.scheduleRoutineReminders(thrivings);
+                    }
+                  }
+                }
                 router.push('/thrivings');
               }}
               className="px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-full hover:bg-blue-700 transition-colors"
             >
-              Go to Thrivings
+              Enable & View Thrivings
             </button>
             <button
               onClick={handleDismiss}

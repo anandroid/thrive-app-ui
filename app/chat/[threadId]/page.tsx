@@ -8,6 +8,8 @@ import { SmartCardChat } from '@/components/features/SmartCardChat';
 import { saveThrivingToStorage } from '@/src/utils/thrivingStorage';
 import { saveJourneyToStorage } from '@/src/utils/journeyStorage';
 import { Thriving, AdditionalRecommendation } from '@/src/types/thriving';
+import { NotificationPermissionModal } from '@/components/features/NotificationPermissionModal';
+import { NotificationHelper } from '@/src/utils/notificationHelper';
 
 export default function ChatPage({ params }: { params: Promise<{ threadId: string }> }) {
   const router = useRouter();
@@ -15,6 +17,8 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
   const { threadId } = use(params);
   const [initialMessage, setInitialMessage] = useState<string>('');
   const [currentThreadId, setCurrentThreadId] = useState<string>(threadId);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [createdThriving, setCreatedThriving] = useState<Thriving | null>(null);
   
   // Get intent from URL parameters
   const chatIntent = searchParams?.get('intent') || null;
@@ -29,7 +33,8 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
   }, []);
 
   return (
-    <SmartCardChat
+    <>
+      <SmartCardChat
           threadId={currentThreadId === 'new' ? undefined : currentThreadId}
           chatIntent={chatIntent}
           onThreadCreated={(newThreadId) => {
@@ -107,8 +112,20 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
               saveThrivingToStorage(thriving);
               console.log('Thriving saved to localStorage successfully');
               
-              // Redirect to the thriving page with the newly created thriving
-              router.push(`/thrivings?id=${thriving.id}`);
+              // Check if we should show notification permission modal
+              const shouldShowNotificationModal = 
+                NotificationHelper.isSupported() && // Running in React Native
+                localStorage.getItem('notificationPermissionAsked') !== 'true' && // Haven't asked before
+                thriving.reminderTimes && thriving.reminderTimes.length > 0; // Has reminders
+              
+              if (shouldShowNotificationModal) {
+                // Store the thriving for later navigation
+                setCreatedThriving(thriving);
+                setShowNotificationModal(true);
+              } else {
+                // Redirect to the thriving page with the newly created thriving
+                router.push(`/thrivings?id=${thriving.id}`);
+              }
             } catch (error) {
               console.error('Failed to save thriving:', error);
               // toast.error('Failed to save thriving. Please try again.');
@@ -170,5 +187,25 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
             </>
           )}
         />
+        
+        <NotificationPermissionModal
+          isOpen={showNotificationModal}
+          onClose={() => {
+            setShowNotificationModal(false);
+            // Navigate to thrivings page after modal closes
+            if (createdThriving) {
+              router.push(`/thrivings?id=${createdThriving.id}`);
+            }
+          }}
+          onPermissionGranted={() => {
+            // Schedule notifications for the created thriving
+            if (createdThriving && window.ReactNativeBridge) {
+              const thrivings = JSON.parse(localStorage.getItem('thrive_thrivings') || '[]');
+              NotificationHelper.scheduleRoutineReminders(thrivings);
+            }
+          }}
+          routineName={createdThriving?.title}
+        />
+    </>
   );
 }
