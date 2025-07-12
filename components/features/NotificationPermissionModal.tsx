@@ -26,9 +26,10 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
       const granted = await NotificationHelper.requestPermission();
       
       if (granted) {
-        // Mark that we've asked for permission
-        localStorage.setItem('notificationPermissionAsked', 'true');
+        // Mark that permission was granted
         localStorage.setItem('notificationPermissionGranted', 'true');
+        // Reset ask count since they granted permission
+        localStorage.setItem('notificationAskCount', '0');
         
         if (onPermissionGranted) {
           onPermissionGranted();
@@ -39,8 +40,7 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
           onClose();
         }, 500);
       } else {
-        // Still mark that we asked
-        localStorage.setItem('notificationPermissionAsked', 'true');
+        // Permission denied
         localStorage.setItem('notificationPermissionGranted', 'false');
         onClose();
       }
@@ -53,9 +53,7 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
   };
 
   const handleNotNow = () => {
-    // Mark that we've asked but user declined
-    localStorage.setItem('notificationPermissionAsked', 'true');
-    localStorage.setItem('notificationPermissionDeclined', 'true');
+    // Just close the modal - we've already tracked the ask count
     onClose();
   };
 
@@ -146,7 +144,14 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
             </button>
             
             <p className="text-xs text-center text-gray-500 mt-4">
-              You can always enable notifications later in Settings
+              {(() => {
+                const askCount = parseInt(localStorage.getItem('notificationAskCount') || '1');
+                if (askCount < 3) {
+                  return `You can enable notifications later (${3 - askCount} more ${3 - askCount === 1 ? 'reminder' : 'reminders'})`;
+                } else {
+                  return 'You can always enable notifications later in Settings';
+                }
+              })()}
             </p>
           </div>
         </div>

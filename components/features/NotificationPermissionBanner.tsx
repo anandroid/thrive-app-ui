@@ -19,9 +19,24 @@ export const NotificationPermissionBanner: React.FC = () => {
       return;
     }
 
-    // Check if we've already asked for permission
-    const permissionAsked = localStorage.getItem('notificationPermissionAsked');
-    if (permissionAsked === 'true') {
+    // Check if permission already granted
+    if (localStorage.getItem('notificationPermissionGranted') === 'true') {
+      setShowBanner(false);
+      return;
+    }
+
+    // Check ask count and session
+    const notificationAskCount = parseInt(localStorage.getItem('notificationAskCount') || '0');
+    const lastAskSession = localStorage.getItem('notificationLastAskSession');
+    const currentSession = sessionStorage.getItem('sessionId') || Date.now().toString();
+    
+    // Set session ID if not exists
+    if (!sessionStorage.getItem('sessionId')) {
+      sessionStorage.setItem('sessionId', currentSession);
+    }
+
+    // Don't show if we've asked 3 times or in the same session
+    if (notificationAskCount >= 3 || lastAskSession === currentSession) {
       setShowBanner(false);
       return;
     }
@@ -33,12 +48,17 @@ export const NotificationPermissionBanner: React.FC = () => {
       return;
     }
 
-    // Show banner if we haven't asked and have routines
+    // Show banner if conditions are met
     setShowBanner(true);
   };
 
   const handleDismiss = () => {
-    localStorage.setItem('notificationPermissionAsked', 'true');
+    // Update ask count and session when banner is dismissed
+    const currentSession = sessionStorage.getItem('sessionId') || Date.now().toString();
+    const notificationAskCount = parseInt(localStorage.getItem('notificationAskCount') || '0');
+    
+    localStorage.setItem('notificationAskCount', (notificationAskCount + 1).toString());
+    localStorage.setItem('notificationLastAskSession', currentSession);
     setShowBanner(false);
   };
 
@@ -72,17 +92,21 @@ export const NotificationPermissionBanner: React.FC = () => {
           <div className="flex gap-2">
             <button
               onClick={async () => {
-                handleDismiss();
-                // Request notification permission
+                // Request notification permission first
                 if (NotificationHelper.isSupported()) {
                   const granted = await NotificationHelper.requestPermission();
                   if (granted) {
                     localStorage.setItem('notificationPermissionGranted', 'true');
+                    // Reset ask count since they granted permission
+                    localStorage.setItem('notificationAskCount', '0');
                     // Schedule notifications for existing thrivings
                     const thrivings = JSON.parse(localStorage.getItem('thrive_thrivings') || '[]');
                     if (thrivings.length > 0) {
                       await NotificationHelper.scheduleRoutineReminders(thrivings);
                     }
+                  } else {
+                    // Still update the ask count
+                    handleDismiss();
                   }
                 }
                 router.push('/thrivings');
