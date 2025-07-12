@@ -27,20 +27,40 @@ export const generatePostActionMessage = (action: PostActionMessage): string => 
   switch (type) {
     case 'buy_clicked':
       return `I clicked on "Where to find ${context.productName || 'the supplement'}". ` +
-             `Should I order it now or would you like to suggest other options first?`;
+             `While I'm checking it out, what techniques can I try tonight for immediate relief?`;
     
     case 'pantry_added':
-      return `I just added ${context.productName || 'the supplement'} ` +
-             `${context.dosage ? `(${context.dosage})` : ''} to my pantry. ` +
-             `What's the best way to incorporate it into my routine?`;
+      // More specific messages based on supplement type
+      const productName = context.productName || 'the supplement';
+      const supplementMessages: Record<string, string> = {
+        'Magnesium': `I added ${productName} to my pantry. Since this helps with sleep, should I take it every night or just when I'm having trouble?`,
+        'Melatonin': `I added ${productName} to my pantry. Should I take this every night or only occasionally?`,
+        'Vitamin D': `I added ${productName} to my pantry. What's the best time of day to take this for energy?`,
+        'Ashwagandha': `I added ${productName} to my pantry. How long before I might notice stress reduction benefits?`,
+        'L-Theanine': `I added ${productName} to my pantry. Can I take this daily or should I cycle it?`,
+        'Omega-3': `I added ${productName} to my pantry. Should I take this with food or on an empty stomach?`,
+        'Probiotics': `I added ${productName} to my pantry. When's the best time to take this for gut health?`,
+      };
+      
+      // Find matching supplement type
+      const supplementKey = Object.keys(supplementMessages).find(key => 
+        productName.toLowerCase().includes(key.toLowerCase())
+      );
+      
+      if (supplementKey) {
+        return supplementMessages[supplementKey];
+      }
+      
+      return `I added ${productName} ${context.dosage ? `(${context.dosage})` : ''} to my pantry. ` +
+             `When would be the best time to start taking it?`;
     
     case 'routine_created':
       return `I created the ${context.routineName || 'wellness routine'}! ` +
-             `Any tips for sticking with it?`;
+             `I'm excited to start. Will you help me track my progress?`;
     
     case 'routine_adjusted':
       return `I updated my ${context.routineName || 'routine'} as suggested. ` +
-             `Is there anything else I should consider?`;
+             `Should I start with the new changes today?`;
     
     default:
       return 'I completed the action you suggested. What should I do next?';
