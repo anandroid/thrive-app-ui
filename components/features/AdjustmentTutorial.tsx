@@ -49,8 +49,16 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
       >
         {/* Close button */}
         <button
-          onClick={handleClose}
-          className="absolute top-[min(4vw,1rem)] right-[min(4vw,1rem)] w-[min(10vw,2.5rem)] h-[min(10vw,2.5rem)] rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-all duration-200 touch-feedback touch-manipulation cursor-pointer active:scale-95 active:bg-gray-300"
+          type="button"
+          aria-label="Close tutorial"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Close button clicked'); // Debug log
+            handleClose();
+          }}
+          className="absolute top-[min(4vw,1rem)] right-[min(4vw,1rem)] w-[min(10vw,2.5rem)] h-[min(10vw,2.5rem)] rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-all duration-200 touch-feedback touch-manipulation cursor-pointer active:scale-95 active:bg-gray-300 z-10"
+          style={{ pointerEvents: 'auto' }}
         >
           <X className="w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)] text-gray-600" />
         </button>
