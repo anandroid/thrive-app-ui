@@ -28,29 +28,25 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
 
   const modalContent = (
     <>
-      {/* Dark overlay - fixed positioning */}
+      {/* Dark overlay - prevents interaction with background */}
       <div 
         className={`fixed inset-0 z-[9998] bg-black/60 transition-opacity duration-300 ${
           isVisible ? 'opacity-100' : 'opacity-0'
         }`}
         onClick={handleClose}
+        style={{ 
+          touchAction: 'none',
+          overscrollBehavior: 'none'
+        }}
       />
       
-      {/* Modal container - also fixed but separate from overlay */}
+      {/* Modal positioned in center of current viewport */}
       <div 
-        className={`fixed inset-0 z-[9999] pointer-events-none overflow-y-auto ${
-          isVisible ? 'opacity-100' : 'opacity-0'
+        className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[9999] bg-white rounded-3xl shadow-2xl p-[min(6vw,1.5rem)] w-[90vw] max-w-sm transition-all duration-300 ${
+          isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
         }`}
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Inner container for centering - this allows scroll if needed */}
-        <div className="min-h-full flex items-center justify-center p-[5vw] pointer-events-auto">
-          {/* Tutorial content */}
-          <div 
-            className={`relative bg-white rounded-3xl shadow-2xl p-[min(6vw,1.5rem)] w-[90vw] max-w-sm transition-all duration-300 pointer-events-auto ${
-              isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-            }`}
-            onClick={(e) => e.stopPropagation()}
-          >
         {/* Close button */}
         <button
           onClick={handleClose}
@@ -135,8 +131,6 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
             (Last time we&apos;ll show this tip)
           </p>
         )}
-          </div>
-        </div>
       </div>
     </>
   );
