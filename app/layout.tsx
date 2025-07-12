@@ -8,6 +8,7 @@ import { NotificationProvider } from "@/src/providers/NotificationProvider";
 import { JournalMigrationProvider } from "@/src/providers/JournalMigrationProvider";
 import "@/src/utils/clearCorruptedData";
 import { Toaster } from 'react-hot-toast';
+import { SessionInitializer } from '@/components/features/SessionInitializer';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -61,6 +62,7 @@ export default function RootLayout({
           <TouchFeedbackProvider>
             <NotificationProvider>
               <JournalMigrationProvider>
+                <SessionInitializer />
                 <OfflineIndicator />
                 <Toaster position="top-center" />
                 {children}

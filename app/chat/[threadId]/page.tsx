@@ -113,12 +113,27 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
               console.log('Thriving saved to localStorage successfully');
               
               // Check if we should show notification permission modal
+              const notificationAskCount = parseInt(localStorage.getItem('notificationAskCount') || '0');
+              const lastAskSession = localStorage.getItem('notificationLastAskSession');
+              const currentSession = sessionStorage.getItem('sessionId') || Date.now().toString();
+              
+              // Set session ID if not exists
+              if (!sessionStorage.getItem('sessionId')) {
+                sessionStorage.setItem('sessionId', currentSession);
+              }
+              
               const shouldShowNotificationModal = 
                 NotificationHelper.isSupported() && // Running in React Native
-                localStorage.getItem('notificationPermissionAsked') !== 'true' && // Haven't asked before
+                localStorage.getItem('notificationPermissionGranted') !== 'true' && // Not already granted
+                notificationAskCount < 3 && // Haven't asked 3 times yet
+                lastAskSession !== currentSession && // Different session
                 thriving.reminderTimes && thriving.reminderTimes.length > 0; // Has reminders
               
               if (shouldShowNotificationModal) {
+                // Update ask count and session
+                localStorage.setItem('notificationAskCount', (notificationAskCount + 1).toString());
+                localStorage.setItem('notificationLastAskSession', currentSession);
+                
                 // Store the thriving for later navigation
                 setCreatedThriving(thriving);
                 setShowNotificationModal(true);
