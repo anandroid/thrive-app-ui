@@ -63,10 +63,10 @@ echo "✅ All secrets uploaded successfully!"
 echo "🔧 Granting Cloud Run service access to secrets..."
 
 # Get all THRIVE_ secrets and OPENAI_API_KEY
-for secret in $(gcloud secrets list --filter="name:THRIVE_ OR name:OPENAI_API_KEY" --format="value(name)" --project="thrive-465618"); do
+for secret in $(gcloud secrets list --filter="name ~ ^THRIVE_ OR name = OPENAI_API_KEY" --format="value(name)" --project="thrive-465618"); do
     echo "🔓 Granting access to: $secret"
     gcloud secrets add-iam-policy-binding "$secret" \
-        --member="serviceAccount:465618-compute@developer.gserviceaccount.com" \
+        --member="serviceAccount:689752906332-compute@developer.gserviceaccount.com" \
         --role="roles/secretmanager.secretAccessor" \
         --project="thrive-465618" >/dev/null 2>&1
 done
