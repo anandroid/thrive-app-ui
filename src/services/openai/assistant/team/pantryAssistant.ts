@@ -7,6 +7,7 @@
  */
 
 import { COMMON_TEAM_INSTRUCTIONS } from './commonInstructions';
+import { PANTRY_RESPONSE_SCHEMA } from '../schemas/pantryResponseSchema';
 
 export const PANTRY_ASSISTANT_INSTRUCTIONS = `${COMMON_TEAM_INSTRUCTIONS}
 
@@ -40,51 +41,12 @@ You are the Pantry Specialist of the Thrive AI Wellness Team. Your expertise inc
 
 ## Response Structure
 
-CRITICAL: For supplement recommendations, ALWAYS use supplement_choice format:
-
-{
-  "greeting": "Let me help you find the right supplements for your needs 🌿",
-  "attentionRequired": null,
-  "emergencyReasoning": null,
-  "actionItems": [
-    {
-      "title": "Understanding [Supplement] 💊",
-      "content": "<p>Detailed explanation of <strong>how it works</strong> and <em>what to expect</em>.</p>"
-    }
-  ],
-  "additionalInformation": "<p><em>Important considerations about timing, food interactions, etc.</em></p>",
-  "actionableItems": [
-    {
-      "type": "supplement_choice",
-      "title": "Consider Magnesium for Better Sleep 🌙",
-      "description": "Magnesium glycinate promotes relaxation and improves sleep quality",
-      "productName": "Magnesium Glycinate 400mg",
-      "dosage": "400mg",
-      "timing": "30 minutes before bed",
-      "searchQuery": "magnesium glycinate 400mg capsules",
-      "suggestedNotes": "400mg, 30 minutes before bed with water"
-    },
-    {
-      "type": "supplement_choice",
-      "title": "Consider Melatonin for Sleep Support 😴",
-      "description": "Melatonin helps regulate your sleep-wake cycle",
-      "productName": "Melatonin 3mg",
-      "dosage": "3mg",
-      "timing": "1 hour before bed",
-      "searchQuery": "melatonin 3mg tablets",
-      "suggestedNotes": "3mg, 1 hour before intended sleep time"
-    }
-  ],
-  "questions": [
-    {
-      "id": "current_meds",
-      "type": "text_input",
-      "prompt": "Are you taking any medications or other supplements?",
-      "userVoice": "I'm currently taking",
-      "placeholder": "e.g., blood pressure medication, vitamin D..."
-    }
-  ]
-}
+For supplement recommendations:
+- greeting: Acknowledge their needs
+- actionItems: Educational content about supplements (HTML format)
+- additionalInformation: Important considerations (timing, interactions)
+- actionableItems: Use supplement_choice type for each recommendation
+- questions: Ask about medications or current supplements
 
 ## Supplement Categories
 
@@ -195,5 +157,8 @@ export const PANTRY_ASSISTANT_CONFIG = {
   description: 'Supplement recommendations and pantry management',
   temperature: 0.5,
   instructions: PANTRY_ASSISTANT_INSTRUCTIONS,
-  response_format: { type: 'json_object' as const }
+  response_format: {
+    type: 'json_schema' as const,
+    json_schema: PANTRY_RESPONSE_SCHEMA
+  }
 };

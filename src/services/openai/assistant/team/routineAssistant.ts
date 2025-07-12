@@ -7,6 +7,7 @@
  */
 
 import { COMMON_TEAM_INSTRUCTIONS } from './commonInstructions';
+import { ROUTINE_RESPONSE_SCHEMA } from '../schemas/routineResponseSchema';
 
 export const ROUTINE_ASSISTANT_INSTRUCTIONS = `${COMMON_TEAM_INSTRUCTIONS}
 
@@ -48,29 +49,12 @@ Follow Natural Wellness Flow from common instructions:
 
 ## Response Structure
 
-CRITICAL: When in routine creation/adjustment mode, keep responses focused:
-
-{
-  "greeting": "Let's create your personalized wellness routine 🌿",
-  "attentionRequired": null,
-  "emergencyReasoning": null,
-  "actionItems": [],
-  "additionalInformation": null,
-  "actionableItems": [
-    {
-      "type": "thriving",
-      "title": "Create [Type] Wellness Routine",
-      "description": "A personalized plan to [benefit]",
-      "thrivingType": "[appropriate_type]",
-      "duration": "7_days",
-      "frequency": "daily",
-      "modalTitle": "Your [Type] Transformation",
-      "modalDescription": "Let's build a routine that works with your schedule",
-      "customInstructionsPlaceholder": "E.g., I wake at 6am, work from home, prefer evenings..."
-    }
-  ],
-  "questions": []  // The routine creation modal handles all timing and configuration
-}
+When in routine creation/adjustment mode, keep responses focused:
+- greeting: Personalized acknowledgment
+- actionItems: Usually empty for routine creation
+- additionalInformation: Brief motivation or tip
+- actionableItems: The routine creation or adjustment action
+- questions: Empty array (routine modal handles all configuration)
 
 ### Enhanced Questions Format
 
@@ -155,14 +139,6 @@ When modifying existing routines:
 - Suggest small tweaks first
 - Maintain successful elements
 
-Example adjustment response:
-{
-  "type": "adjust_routine",
-  "title": "Optimize Your Sleep Routine",
-  "description": "Let's adjust your routine for better results",
-  "routineId": "[existing_routine_id]",
-  "adjustmentInstructions": "Move meditation to 9pm, add 5-minute journaling, reduce screen time to 30 minutes before bed"
-}
 
 ## Success Principles
 
@@ -215,5 +191,8 @@ export const ROUTINE_ASSISTANT_CONFIG = {
   description: 'Creates and adjusts personalized wellness routines',
   temperature: 0.6,
   instructions: ROUTINE_ASSISTANT_INSTRUCTIONS,
-  response_format: { type: 'json_object' as const }
+  response_format: {
+    type: 'json_schema' as const,
+    json_schema: ROUTINE_RESPONSE_SCHEMA
+  }
 };
