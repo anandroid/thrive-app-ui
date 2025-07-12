@@ -13,7 +13,7 @@ interface DynamicJournalFieldProps {
 export function DynamicJournalField({ field, value, onChange }: DynamicJournalFieldProps) {
   const [showInfo, setShowInfo] = useState(false);
 
-  const renderField = () => {
+  const renderField = (): React.ReactNode => {
     switch (field.type) {
       case 'rating_scale':
       case 'pain_scale':
@@ -66,10 +66,10 @@ export function DynamicJournalField({ field, value, onChange }: DynamicJournalFi
         <div className="relative">
           <div className="flex justify-between mb-2">
             {scale.labels && scale.labels[scale.min] && (
-              <span className="text-xs text-gray-500">{scale.labels[scale.min]}</span>
+              <span className="text-xs text-gray-500">{String(scale.labels[scale.min])}</span>
             )}
             {scale.labels && scale.labels[scale.max] && (
-              <span className="text-xs text-gray-500">{scale.labels[scale.max]}</span>
+              <span className="text-xs text-gray-500">{String(scale.labels[scale.max])}</span>
             )}
           </div>
           
@@ -112,7 +112,7 @@ export function DynamicJournalField({ field, value, onChange }: DynamicJournalFi
     );
   };
 
-  const renderTimeInput = () => (
+  const renderTimeInput = (): React.ReactNode => (
     <div className="relative">
       <div className="flex items-center space-x-2 p-3 border border-gray-200 rounded-xl focus-within:border-dusty-rose focus-within:ring-2 focus-within:ring-dusty-rose/20">
         <Clock className="w-5 h-5 text-gray-400" />
@@ -127,7 +127,7 @@ export function DynamicJournalField({ field, value, onChange }: DynamicJournalFi
     </div>
   );
 
-  const renderTextArea = () => (
+  const renderTextArea = (): React.ReactNode => (
     <div className="relative">
       <textarea
         value={String(value || '')}
@@ -143,7 +143,7 @@ export function DynamicJournalField({ field, value, onChange }: DynamicJournalFi
     </div>
   );
 
-  const renderCheckboxList = () => {
+  const renderCheckboxList = (): React.ReactNode => {
     const selectedValues = Array.isArray(value) ? value : [];
     
     const handleToggle = (option: string) => {
@@ -189,7 +189,7 @@ export function DynamicJournalField({ field, value, onChange }: DynamicJournalFi
     );
   };
 
-  const renderCustomMetric = () => (
+  const renderCustomMetric = (): React.ReactNode => (
     <div className="relative">
       <div className="flex items-center space-x-2 p-3 border border-gray-200 rounded-xl focus-within:border-dusty-rose focus-within:ring-2 focus-within:ring-dusty-rose/20">
         <input
@@ -225,7 +225,7 @@ export function DynamicJournalField({ field, value, onChange }: DynamicJournalFi
     </div>
   );
 
-  const renderTextInput = () => (
+  const renderTextInput = (): React.ReactNode => (
     <div className="relative">
       <input
         type="text"

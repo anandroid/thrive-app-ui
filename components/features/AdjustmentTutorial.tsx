@@ -15,12 +15,21 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
 
   useEffect(() => {
     setMounted(true);
+    // Prevent body scroll when modal is open
+    document.body.style.overflow = 'hidden';
+    
     // Delay to ensure smooth transition
     setTimeout(() => setIsVisible(true), 100);
+    
+    // Cleanup function to restore body scroll
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, []);
 
   const handleClose = () => {
     setIsVisible(false);
+    document.body.style.overflow = '';
     setTimeout(onClose, 300);
   };
 
@@ -28,43 +37,24 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
 
   const modalContent = (
     <div 
-      className={`fixed inset-0 z-[9998] transition-opacity duration-300 ${
+      className={`fixed inset-0 z-[9998] flex items-center justify-center p-4 transition-opacity duration-300 ${
         isVisible ? 'opacity-100' : 'opacity-0'
       }`}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0
-      }}
     >
       {/* Dark overlay */}
       <div 
-        className="fixed inset-0 bg-black/60"
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0
-        }}
+        className="absolute inset-0 bg-black/60"
         onClick={handleClose}
       />
       
       {/* Tutorial content - centered in viewport */}
       <div 
-        className={`fixed bg-white rounded-3xl shadow-2xl p-6 max-w-sm w-[90%] transition-all duration-300 ${
+        className={`relative bg-white rounded-3xl shadow-2xl p-6 max-w-sm w-full transition-all duration-300 ${
           isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
         }`}
         style={{
-          position: 'fixed',
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          zIndex: 9999
+          maxHeight: '80vh',
+          overflowY: 'auto'
         }}
         onClick={(e) => e.stopPropagation()}
       >
