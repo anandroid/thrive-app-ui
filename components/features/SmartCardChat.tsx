@@ -285,9 +285,30 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       // This is an answer to the current question, not a regular message
       setSubmittedAnswer(messageToSend);
       setInput('');
+      
+      // For text input questions or custom answers to multiple choice, handle immediately
+      handleAnswerStaged(currentQuestion.prompt, messageToSend);
+      
+      // Move to next question or complete
+      const currentQuestionIndex = lastAssistantQuestions.findIndex(q => q.id === currentQuestion.id);
+      if (currentQuestionIndex < lastAssistantQuestions.length - 1) {
+        // There are more questions
+        setCurrentQuestion(lastAssistantQuestions[currentQuestionIndex + 1]);
+      } else {
+        // This was the last question
+        setCurrentQuestion(null);
+        // Trigger immediate send of staged answers (including the one we just added)
+        setTimeout(() => {
+          if (stagedAnswers.length > 0 || messageToSend) {
+            setIsUserTyping(true);
+            setTimeout(() => setIsUserTyping(false), 100);
+          }
+        }, 100); // Small delay to ensure state update
+      }
+      
       // Reset submitted answer after a short delay
       setTimeout(() => setSubmittedAnswer(''), 100);
-      return;  // The answer will be handled by the userAnswer prop in EnhancedQuestions
+      return;
     }
     
     // Use separate display and API messages if provided

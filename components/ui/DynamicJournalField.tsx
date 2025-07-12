@@ -65,11 +65,11 @@ export function DynamicJournalField({ field, value, onChange }: DynamicJournalFi
         {/* Scale visualization */}
         <div className="relative">
           <div className="flex justify-between mb-2">
-            {scale.labels[scale.min] && (
-              <span className="text-xs text-gray-500">{String(scale.labels[scale.min])}</span>
+            {scale.labels && scale.labels[scale.min] && (
+              <span className="text-xs text-gray-500">{scale.labels[scale.min]}</span>
             )}
-            {scale.labels[scale.max] && (
-              <span className="text-xs text-gray-500">{String(scale.labels[scale.max])}</span>
+            {scale.labels && scale.labels[scale.max] && (
+              <span className="text-xs text-gray-500">{scale.labels[scale.max]}</span>
             )}
           </div>
           
