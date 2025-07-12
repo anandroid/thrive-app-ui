@@ -12,12 +12,9 @@ interface AdjustmentTutorialProps {
 export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose, onArrowClick }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [scrollPosition, setScrollPosition] = useState(0);
 
   useEffect(() => {
     setMounted(true);
-    // Capture current scroll position
-    setScrollPosition(window.scrollY);
     // Delay to ensure smooth transition
     setTimeout(() => setIsVisible(true), 100);
   }, []);
@@ -42,17 +39,19 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
         }}
       />
       
-      {/* Modal positioned in center of user's current view - viewport units */}
+      {/* Modal container - fixed position ensures it's always in viewport */}
       <div 
-        className={`absolute left-[50vw] -translate-x-1/2 z-[9999] bg-white rounded-[min(6vw,1.5rem)] shadow-2xl p-[min(6vw,1.5rem)] w-[90vw] max-w-[500px] transition-all duration-300 ${
-          isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+        className={`fixed inset-0 z-[9999] flex items-center justify-center p-[5vw] pointer-events-none transition-opacity duration-300 ${
+          isVisible ? 'opacity-100' : 'opacity-0'
         }`}
-        style={{
-          top: `${scrollPosition / window.innerHeight * 100 + 50}vh`,
-          transform: 'translateX(-50%) translateY(-50%)'
-        }}
-        onClick={(e) => e.stopPropagation()}
       >
+        {/* Modal content - centered within fixed container */}
+        <div 
+          className={`relative bg-white rounded-[min(6vw,1.5rem)] shadow-2xl p-[min(6vw,1.5rem)] w-[90vw] max-w-[500px] pointer-events-auto transition-all duration-300 ${
+            isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+          }`}
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Close button */}
         <button
           type="button"
@@ -145,6 +144,7 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
             (Last time we&apos;ll show this tip)
           </p>
         )}
+        </div>
       </div>
     </>
   );
