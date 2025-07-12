@@ -70,6 +70,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   const abortControllerRef = useRef<AbortController | null>(null);
   const [chatThreadId, setChatThreadId] = useState<string | null>(null);
   const hasScrolledToStreamRef = useRef<Set<number>>(new Set());
+  const streamingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { messagesEndRef, chatContainerRef, scrollToBottom } = useKeyboardAwareChat();
   const [showThrivingTutorial, setShowThrivingTutorial] = useState(false);
   const [tutorialActionableText, setTutorialActionableText] = useState<string>('');
@@ -389,6 +390,24 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     setTimeout(() => {
       scrollToBottom();
     }, 100);
+    
+    // Safety timeout to clear ONLY the typing indicator visual after 60 seconds
+    // This does NOT interrupt the actual streaming - just removes the dots
+    if (streamingTimeoutRef.current) {
+      clearTimeout(streamingTimeoutRef.current);
+    }
+    streamingTimeoutRef.current = setTimeout(() => {
+      console.warn('Typing indicator timeout reached (60s) - clearing visual indicator only');
+      setMessages(prev => {
+        const updated = [...prev];
+        const lastMessage = updated[updated.length - 1];
+        if (lastMessage.role === 'assistant' && lastMessage.isStreaming) {
+          lastMessage.isStreaming = false;
+          console.log('Cleared typing indicator after 60s timeout - streaming continues in background');
+        }
+        return updated;
+      });
+    }, 60000); // 60 second timeout for typing indicator only
 
     try {
       abortControllerRef.current = new AbortController();
@@ -574,6 +593,13 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                           
                           if (submitData.type === 'completed') {
                             console.log('Submit stream completed, final content length:', fullContent.length);
+                            
+                            // Clear the typing indicator timeout
+                            if (streamingTimeoutRef.current) {
+                              clearTimeout(streamingTimeoutRef.current);
+                              streamingTimeoutRef.current = null;
+                            }
+                            
                             // Mark the message as complete
                             setMessages(prev => {
                               const updated = [...prev];
@@ -628,6 +654,12 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
               }
 
               if (data.type === 'completed' || data.type === 'done') {
+                // Clear the streaming timeout
+                if (streamingTimeoutRef.current) {
+                  clearTimeout(streamingTimeoutRef.current);
+                  streamingTimeoutRef.current = null;
+                }
+                
                 // Use data.fullContent if available (from done event), otherwise use accumulated fullContent
                 const finalContent = data.fullContent || fullContent;
                 const parsedResponse = parseAssistantResponse(finalContent);
@@ -656,6 +688,12 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
               }
 
               if (data.type === 'error') {
+                // Clear the typing indicator timeout on error
+                if (streamingTimeoutRef.current) {
+                  clearTimeout(streamingTimeoutRef.current);
+                  streamingTimeoutRef.current = null;
+                }
+                
                 setMessages(prev => {
                   const updated = [...prev];
                   const lastMessage = updated[updated.length - 1];
@@ -676,6 +714,13 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     } catch (error) {
       if ((error as Error).name !== 'AbortError') {
         console.error('Error sending message:', error);
+        
+        // Clear the typing indicator timeout on error
+        if (streamingTimeoutRef.current) {
+          clearTimeout(streamingTimeoutRef.current);
+          streamingTimeoutRef.current = null;
+        }
+        
         setMessages(prev => {
           const updated = [...prev];
           const lastMessage = updated[updated.length - 1];
@@ -1485,6 +1530,12 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                               return updated;
                             });
                           } else if (data.type === 'completed') {
+                            // Clear the typing indicator timeout
+                            if (streamingTimeoutRef.current) {
+                              clearTimeout(streamingTimeoutRef.current);
+                              streamingTimeoutRef.current = null;
+                            }
+                            
                             const assistantContent = fullContent.substring(immediateMessage.content.length + 2);
                             const parsedResponse = parseAssistantResponse(assistantContent);
                             
