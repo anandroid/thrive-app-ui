@@ -10,6 +10,7 @@ import { GetStarted } from '@/components/features/GetStarted';
 import { ChatEditor } from '@/components/ui/ChatEditor';
 import { PrivacySection } from '@/components/features/PrivacySection';
 import { NotificationPermissionBanner } from '@/components/features/NotificationPermissionBanner';
+import { HealthConnectModal } from '@/components/features/HealthConnectModal';
 // import { PrivacySection2 } from '@/components/features/PrivacySection2';
 // import { PrivacySection3 } from '@/components/features/PrivacySection3';
 
@@ -111,6 +112,7 @@ export default function HomePage() {
     }
     return false;
   });
+  const [showHealthConnectModal, setShowHealthConnectModal] = useState(false);
 
   useEffect(() => {
     // Initialize showGetStarted after mount to prevent hydration mismatch
@@ -124,7 +126,25 @@ export default function HomePage() {
       setShowMenuSparkle(true);
     }
     
-  }, []);
+    // Check if should show health connect modal
+    checkHealthConnectModal();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const checkHealthConnectModal = () => {
+    // Only show if we're in the React Native app
+    if (!window.ReactNativeBridge) return;
+    
+    // Check if user has created a thriving
+    const hasCreatedThriving = localStorage.getItem('hasCreatedThriving');
+    const hasSeenHealthConnect = localStorage.getItem('hasSeenHealthConnect');
+    
+    if (hasCreatedThriving && !hasSeenHealthConnect && thrivings.length > 0) {
+      // Show modal after a short delay to let the page load
+      setTimeout(() => {
+        setShowHealthConnectModal(true);
+      }, 1500);
+    }
+  };
 
   const handleGetStartedComplete = () => {
     // The GetStarted component handles the fade-out animation
@@ -355,6 +375,19 @@ export default function HomePage() {
       
       {/* Notification Permission Banner */}
       <NotificationPermissionBanner />
+      
+      {/* Health Connect Modal */}
+      <HealthConnectModal
+        isOpen={showHealthConnectModal}
+        onClose={() => {
+          setShowHealthConnectModal(false);
+          localStorage.setItem('hasSeenHealthConnect', 'true');
+        }}
+        onConnect={() => {
+          // Navigate to thrivings page to show health insights
+          router.push('/thrivings#health-insights');
+        }}
+      />
     </>
   );
 }

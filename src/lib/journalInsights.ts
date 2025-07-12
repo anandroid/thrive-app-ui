@@ -265,15 +265,16 @@ export class JournalInsightsEngine {
     
     entries.forEach(entry => {
       if (entry.customData?.supplements && entry.customData[targetMetric]) {
-        const supplements = Array.isArray(entry.customData.supplements) 
-          ? entry.customData.supplements 
-          : [entry.customData.supplements];
+        const customData = entry.customData; // Store reference to satisfy TypeScript
+        const supplements = Array.isArray(customData.supplements) 
+          ? customData.supplements 
+          : [customData.supplements];
         
         supplements.forEach((supplement: string) => {
           if (!supplementData[supplement]) {
             supplementData[supplement] = { values: [], dates: [] };
           }
-          supplementData[supplement].values.push(Number(entry.customData[targetMetric]));
+          supplementData[supplement].values.push(Number(customData[targetMetric]));
           supplementData[supplement].dates.push(entry.date);
         });
       }
@@ -613,7 +614,7 @@ export class JournalInsightsEngine {
       else if (hour >= 17 && hour < 22) period = 'evening';
       else period = 'night';
 
-      patterns[period].push(stressLevel);
+      patterns[period].push(Number(stressLevel));
     });
 
     const result: Record<string, number> = {};
@@ -631,9 +632,11 @@ export class JournalInsightsEngine {
 
     entries.forEach(entry => {
       const triggers = entry.customData?.stressTriggers || [];
-      triggers.forEach((trigger: string) => {
-        triggerCounts[trigger] = (triggerCounts[trigger] || 0) + 1;
-      });
+      if (Array.isArray(triggers)) {
+        triggers.forEach((trigger: string) => {
+          triggerCounts[trigger] = (triggerCounts[trigger] || 0) + 1;
+        });
+      }
     });
 
     return triggerCounts;
@@ -644,14 +647,16 @@ export class JournalInsightsEngine {
 
     entries.forEach(entry => {
       const strategies = entry.customData?.copingStrategies || [];
-      const effectiveness = entry.customData?.copingEffectiveness || 0;
+      const effectiveness = Number(entry.customData?.copingEffectiveness) || 0;
 
-      strategies.forEach((strategy: string) => {
-        if (!strategyEffectiveness[strategy]) {
-          strategyEffectiveness[strategy] = [];
-        }
-        strategyEffectiveness[strategy].push(effectiveness);
-      });
+      if (Array.isArray(strategies)) {
+        strategies.forEach((strategy: string) => {
+          if (!strategyEffectiveness[strategy]) {
+            strategyEffectiveness[strategy] = [];
+          }
+          strategyEffectiveness[strategy].push(effectiveness);
+        });
+      }
     });
 
     const result: Record<string, number> = {};
@@ -666,7 +671,7 @@ export class JournalInsightsEngine {
 
   private static analyzeSleepQualityTrends(entries: JournalEntry[]): NonNullable<JournalInsights['patterns']['sleepQuality']> {
     const sleepQualities = entries
-      .map(entry => entry.customData?.sleepQuality || 0)
+      .map(entry => Number(entry.customData?.sleepQuality) || 0)
       .filter(quality => quality > 0);
 
     if (sleepQualities.length === 0) {
@@ -686,7 +691,7 @@ export class JournalInsightsEngine {
 
   private static analyzePainLevelTrends(entries: JournalEntry[]): NonNullable<JournalInsights['patterns']['painLevels']> {
     const painLevels = entries
-      .map(entry => entry.painLevel || entry.customData?.painLevel || 0)
+      .map(entry => entry.painLevel || Number(entry.customData?.painLevel) || 0)
       .filter(pain => pain > 0);
 
     if (painLevels.length === 0) {

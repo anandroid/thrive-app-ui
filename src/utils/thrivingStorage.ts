@@ -15,6 +15,9 @@ export const saveThrivingToStorage = async (thriving: Thriving): Promise<void> =
   const updatedThrivings = [...thrivings, thriving];
   localStorage.setItem(THRIVINGS_STORAGE_KEY, JSON.stringify(updatedThrivings));
   
+  // Set flag that user has created a thriving
+  localStorage.setItem('hasCreatedThriving', 'true');
+  
   // Note: Thrivings are different from routines. 
   // If you need to sync routine notifications, use the routine storage utilities instead.
 };
