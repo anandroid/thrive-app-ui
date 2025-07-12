@@ -1,5 +1,36 @@
 # Thrive App - Mobile-First Development Guidelines
 
+## 🔐 Environment Variables
+
+### Required Environment Variables
+```bash
+# OpenAI Configuration
+THRIVE_OPENAI_API_KEY=sk-...        # Your OpenAI API key
+OPENAI_API_KEY=sk-...               # Same value as above (required by OpenAI SDK)
+THRIVE_OPENAI_ASSISTANT_ID=asst_... # Main assistant ID
+
+# Optional Multi-Assistant Configuration
+THRIVE_CHAT_ASSISTANT_ID=asst_...    # Chat-specific assistant
+THRIVE_ROUTINE_ASSISTANT_ID=asst_... # Routine creation assistant
+THRIVE_PANTRY_ASSISTANT_ID=asst_...  # Pantry analysis assistant
+```
+
+### Local Development
+1. Copy `.env.example` to `.env.local`
+2. Add your API keys to `.env.local`
+3. Set `OPENAI_API_KEY` to the same value as `THRIVE_OPENAI_API_KEY`
+
+### Deployment to Google Cloud
+```bash
+# Upload all secrets from .env.local
+./scripts/upload-secrets.sh
+
+# The script automatically:
+# - Uploads THRIVE_* prefixed variables
+# - Uploads OPENAI_API_KEY without prefix (for SDK compatibility)
+# - Grants Cloud Run service access to all secrets
+```
+
 ## 🚨 VIEWPORT-FIRST DEVELOPMENT RULE
 **This is a MOBILE APP - NEVER use hardcoded pixel values!** Always use viewport units (vw, vh, dvh) with appropriate constraints. This ensures the app scales perfectly on ALL devices from iPhone SE to tablets.
 

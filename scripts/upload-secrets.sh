@@ -43,7 +43,10 @@ while IFS='=' read -r key value; do
     value="${value#\'}"
     
     # Convert to THRIVE_ prefix if not already present
-    if [[ ! "$key" =~ ^THRIVE_ ]]; then
+    # Exception: OPENAI_API_KEY should be kept as-is for SDK compatibility
+    if [[ "$key" == "OPENAI_API_KEY" ]]; then
+        new_key="$key"
+    elif [[ ! "$key" =~ ^THRIVE_ ]]; then
         new_key="THRIVE_$key"
     else
         new_key="$key"
@@ -59,8 +62,8 @@ echo "✅ All secrets uploaded successfully!"
 # Grant Cloud Run service access to secrets
 echo "🔧 Granting Cloud Run service access to secrets..."
 
-# Get all THRIVE_ secrets
-for secret in $(gcloud secrets list --filter="name:THRIVE_" --format="value(name)" --project="thrive-465618"); do
+# Get all THRIVE_ secrets and OPENAI_API_KEY
+for secret in $(gcloud secrets list --filter="name:THRIVE_ OR name:OPENAI_API_KEY" --format="value(name)" --project="thrive-465618"); do
     echo "🔓 Granting access to: $secret"
     gcloud secrets add-iam-policy-binding "$secret" \
         --member="serviceAccount:465618-compute@developer.gserviceaccount.com" \
@@ -73,6 +76,7 @@ echo ""
 echo "📌 To use these secrets in Cloud Run, update your service with:"
 echo "   gcloud run services update thrive-app-ui \\"
 echo "     --update-secrets=THRIVE_OPENAI_API_KEY=THRIVE_OPENAI_API_KEY:latest,\\"
+echo "       OPENAI_API_KEY=OPENAI_API_KEY:latest,\\"
 echo "       THRIVE_CHAT_ASSISTANT_ID=THRIVE_CHAT_ASSISTANT_ID:latest,\\"
 echo "       THRIVE_ROUTINE_ASSISTANT_ID=THRIVE_ROUTINE_ASSISTANT_ID:latest,\\"
 echo "       THRIVE_PANTRY_ASSISTANT_ID=THRIVE_PANTRY_ASSISTANT_ID:latest \\"
