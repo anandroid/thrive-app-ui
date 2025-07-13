@@ -78,6 +78,9 @@ export const EnhancedQuestions: React.FC<EnhancedQuestionsProps> = ({
         );
         if (matchedOption) {
           handleQuickReply(currentQuestion, matchedOption);
+        } else {
+          // Accept custom answer even for quick reply questions
+          handleTextAnswer(currentQuestion, userAnswer);
         }
       } else {
         // For other types, accept any text answer
