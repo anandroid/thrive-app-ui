@@ -68,7 +68,8 @@ export interface ThrivingStep {
   time?: string;
   icon?: string;
   completed?: boolean;
-  reminderEnabled?: boolean;
+  reminderEnabled?: boolean; // Individual step notification toggle
+  reminderText?: string; // AI-generated notification message
   order: number;
   tips?: string[];
   duration?: number;
@@ -172,6 +173,30 @@ export interface AdditionalRecommendation {
   will_video_tutorial_help?: boolean;
 }
 
+// Notification settings for thrivings
+export interface NotificationSettings {
+  enabledWeekdays: boolean; // Monday-Friday
+  enabledWeekends: boolean; // Saturday & Sunday
+  stepNotifications?: Record<string, boolean>; // stepId -> enabled/disabled
+}
+
+// Origin tracking for thrivings created from chat
+export interface ThrivingOrigin {
+  threadId?: string;
+  messageId?: string;
+  context?: string;
+  createdFrom: 'chat' | 'manual' | 'template' | 'expert_recommendation';
+  consultationId?: string; // Link to expert consultation if created from one
+}
+
+// Expert notes for thrivings reviewed by experts
+export interface ExpertNotes {
+  consultationId: string;
+  expertName?: string;
+  recommendations: string[];
+  lastReviewedAt: string;
+}
+
 export interface Thriving {
   id: string;
   title: string;
@@ -184,7 +209,8 @@ export interface Thriving {
   steps: ThrivingStep[];
   additionalRecommendations?: (string | AdditionalRecommendation)[];
   proTips?: string[];
-  reminderTimes?: string[];
+  reminderTimes?: string[]; // For display only - shows summary of step times
+  notificationSettings?: NotificationSettings; // Weekday and per-step notification toggles
   journalId?: string; // Reference to attached journal
   journalTemplate?: DynamicJournalTemplate; // Dynamic journal configuration
   healthConcern?: string;
@@ -196,6 +222,8 @@ export interface Thriving {
   startDate: string;
   endDate?: string;
   version: string; // Track routine changes for journal insights
+  origin?: ThrivingOrigin; // Track where the thriving was created from
+  expertNotes?: ExpertNotes; // Expert consultation notes if any
 }
 
 // Helper type for creating a new thriving
@@ -211,4 +239,5 @@ export interface CreateThrivingInput {
   additionalRecommendations?: string[];
   proTips?: string[];
   reminderTimes?: string[];
+  origin?: ThrivingOrigin; // Track origin when creating
 }

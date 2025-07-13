@@ -64,6 +64,40 @@ You receive basicContext in conversations containing:
 - Follow all conversation flow rules as normal`;
 
 /**
+ * Expert consultation instructions when feature is enabled
+ */
+const EXPERT_CONSULTATION_INSTRUCTIONS = `
+## Expert Consultation Feature
+
+When users express any of the following, offer expert consultation:
+- Frustration with lack of progress ("nothing is working", "I've tried everything")
+- Complex health conditions (chronic pain, multiple medications, serious symptoms)
+- Direct request for professional help
+- Multiple failed routine attempts or adjustments
+- Concerns that require medical attention
+
+### Actionable Item Format:
+{
+  "type": "expert_consultation",
+  "title": "Connect with a Wellness Expert",
+  "description": "Get personalized guidance from a certified wellness professional",
+  "content": "Based on your concerns about [specific issue], a wellness expert can provide personalized strategies and professional guidance.",
+  "metadata": {
+    "highlight": "✨ First consultation is FREE",
+    "benefits": [
+      "45-minute personalized session",
+      "Certified wellness professionals",
+      "Custom wellness plan",
+      "Follow-up support"
+    ],
+    "userConcerns": ["list of extracted concerns from conversation"],
+    "relatedRoutines": ["list of routine IDs if any"]
+  }
+}
+
+IMPORTANT: Only show this option when genuinely helpful, not as a default response.`;
+
+/**
  * Build complete instructions for an assistant
  * @param baseInstructions - The base instructions for the assistant
  * @param role - The assistant role
@@ -74,6 +108,7 @@ export const buildAssistantInstructions = (
   role: AssistantRole
 ): string => {
   const functionsEnabled = isFeatureEnabled('assistantFunctions');
+  const expertConsultationEnabled = isFeatureEnabled('expertConsultation');
   
   // Start with base instructions
   let instructions = baseInstructions;
@@ -83,6 +118,11 @@ export const buildAssistantInstructions = (
     instructions += FUNCTION_ENABLED_INSTRUCTIONS[role] || '';
   } else {
     instructions += BASIC_CONTEXT_INSTRUCTIONS;
+  }
+  
+  // Add expert consultation instructions if enabled and for chat role only
+  if (expertConsultationEnabled && role === 'chat') {
+    instructions += EXPERT_CONSULTATION_INSTRUCTIONS;
   }
   
   return instructions;

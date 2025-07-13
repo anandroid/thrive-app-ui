@@ -11,6 +11,18 @@ declare global {
       requestNotificationPermission: () => void;
       notifyThrivingCreated: () => void;
       openExternalUrl: (url: string) => void;
+      scheduleStepReminders: (stepNotifications: Array<{
+        id: string;
+        routineId: string;
+        routineName: string;
+        title: string;
+        time: string;
+        reminderText?: string;
+        frequency: string;
+        enabledWeekdays: boolean;
+        enabledWeekends: boolean;
+      }>) => void;
+      cancelStepReminders: (routineId: string) => void;
       checkHealthPermission?: () => Promise<boolean>;
       requestHealthPermission?: () => Promise<boolean>;
       getHealthData?: (params: {
@@ -321,6 +333,53 @@ class ReactNativeBridgeManager {
   public postMessage(message: unknown) {
     if (this.isReactNative && window.ReactNativeBridge) {
       window.ReactNativeBridge.postMessage(message);
+    }
+  }
+
+  public async scheduleStepReminders(stepNotifications: Array<{
+    id: string;
+    routineId: string;
+    routineName: string;
+    title: string;
+    time: string;
+    reminderText?: string;
+    frequency: string;
+    enabledWeekdays: boolean;
+    enabledWeekends: boolean;
+  }>): Promise<boolean> {
+    console.log('[Bridge] scheduleStepReminders called with', stepNotifications.length, 'steps');
+    
+    if (!this.isReactNative || !window.ReactNativeBridge) {
+      console.log('[Bridge] Not in React Native, cannot schedule step reminders');
+      return false;
+    }
+
+    return new Promise((resolve) => {
+      // Set up one-time handler for result
+      const handler = (payload: unknown) => {
+        console.log('[Bridge] Received step_reminders_scheduled:', payload);
+        const result = payload as { success: boolean; notificationIds?: string[] };
+        this.messageHandlers.delete('step_reminders_scheduled');
+        resolve(result.success);
+      };
+      
+      this.onMessage('step_reminders_scheduled', handler);
+      window.ReactNativeBridge?.scheduleStepReminders(stepNotifications);
+      
+      // Timeout after 5 seconds
+      setTimeout(() => {
+        console.log('[Bridge] Step reminders scheduling timed out after 5s');
+        this.messageHandlers.delete('step_reminders_scheduled');
+        resolve(false);
+      }, 5000);
+    });
+  }
+
+  public cancelStepReminders(routineId: string) {
+    console.log('[Bridge] cancelStepReminders called for routine:', routineId);
+    
+    if (this.isReactNative && window.ReactNativeBridge) {
+      window.ReactNativeBridge.cancelStepReminders(routineId);
     }
   }
   

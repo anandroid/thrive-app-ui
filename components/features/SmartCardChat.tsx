@@ -34,6 +34,7 @@ import { EnhancedQuestions } from './EnhancedQuestions';
 import { ConversationalAnswerFlow } from './ConversationalAnswerFlow';
 import { getBasicContext } from '@/src/utils/contextHelper';
 import { generatePostActionMessage, PostActionMessage } from '@/src/utils/chat/postActionMessages';
+import { ExpertConsultationCard } from './ExpertConsultationCard';
 
 interface SmartCardChatProps {
   threadId?: string;
@@ -799,6 +800,10 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
         contextMessage: action.contextMessage || "Great! Tracking this helps me personalize your wellness routines"
       });
       setShowPantryModal(true);
+    } else if (action.type === 'expert_consultation') {
+      // Handle expert consultation action
+      // This will be rendered as ExpertConsultationCard, no modal needed
+      console.log('Expert consultation action clicked', action);
     } else if (action.type === 'adjust_routine') {
       // Navigate to thrivings page with adjustment instructions
       if (action.routineId) {
@@ -1073,6 +1078,22 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                           // Render single item (non-supplement actions)
                           const singleItem = itemOrGroup;
                           const idx = groupIdx;
+                          
+                          // Special handling for expert consultation
+                          if (singleItem.type === 'expert_consultation') {
+                            return (
+                              <ExpertConsultationCard
+                                key={idx}
+                                title={singleItem.title}
+                                description={singleItem.description || ''}
+                                content={singleItem.content}
+                                metadata={singleItem.metadata}
+                                threadId={threadId || ''}
+                                messageId={`msg_${Date.now()}`}
+                              />
+                            );
+                          }
+                          
                           let Icon = Heart;
                           let gradientClass = "";
                           let iconColorClass = "";
@@ -1358,7 +1379,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
             if (webViewKeyboard.isInWebView && textarea) {
               webViewKeyboard.scrollToInput(textarea);
             } else if (isInWebView && textarea) {
-              adjustForKeyboard(textarea);
+              adjustForKeyboard();
             } else {
               // Regular scroll for non-WebView environments
               setTimeout(() => {

@@ -1,36 +1,38 @@
 'use client';
 
-import React from 'react';
-import { KeyboardAvoidingView } from '@/components/ui/KeyboardAvoidingView';
+import React, { ReactNode, useEffect } from 'react';
+import { useKeyboardAwareLayout } from '@/hooks/useKeyboardAwareLayout';
 
 interface KeyboardAwareLayoutProps {
-  children: React.ReactNode;
-  className?: string;
-  behavior?: 'padding' | 'height' | 'position';
-  enabled?: boolean;
+  children: ReactNode;
 }
 
 /**
- * A layout wrapper that provides keyboard avoidance for all screens
- * Automatically detects WebView environment and applies appropriate keyboard handling
+ * KeyboardAwareLayout Component
+ * 
+ * Wraps the app to handle keyboard visibility in WebView.
+ * When keyboard appears, it shifts main content up while keeping
+ * the action bar fixed at the top.
  */
-export function KeyboardAwareLayout({
-  children,
-  className = '',
-  behavior = 'padding',
-  enabled = true
-}: KeyboardAwareLayoutProps) {
-  if (!enabled) {
-    return <>{children}</>;
-  }
+export function KeyboardAwareLayout({ children }: KeyboardAwareLayoutProps) {
+  const { keyboardStyle } = useKeyboardAwareLayout();
+
+  // Add keyboard-aware attributes to help CSS targeting
+  useEffect(() => {
+    // Mark action bars as fixed (should not move)
+    document.querySelectorAll('.action-bar').forEach(el => {
+      el.setAttribute('data-keyboard-fixed', 'true');
+    });
+
+    // Mark main content as shiftable
+    document.querySelectorAll('.page-content, main').forEach(el => {
+      el.setAttribute('data-keyboard-shift', 'true');
+    });
+  }, []);
 
   return (
-    <KeyboardAvoidingView
-      className={`flex flex-col min-h-screen ${className}`}
-      behavior={behavior}
-      useWebViewDetection={true}
-    >
+    <div className="keyboard-aware-wrapper" style={keyboardStyle}>
       {children}
-    </KeyboardAvoidingView>
+    </div>
   );
 }

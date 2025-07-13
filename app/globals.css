@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "../styles/touch-feedback.css";
+@import "../styles/keyboard-layout.css";
 @import "./action-bar.css";
 @import "./chat-simple.css";
 @import "./page-simple.css";

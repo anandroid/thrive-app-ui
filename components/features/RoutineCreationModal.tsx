@@ -83,7 +83,12 @@ export const RoutineCreationModal: React.FC<RoutineCreationModalProps> = ({
               wakeTime: wakeTime
             },
             availableTime: selectedDuration === '7_days' ? 20 : 30
-          }
+          },
+          origin: threadId ? {
+            threadId,
+            createdFrom: 'chat' as const,
+            context: healthConcern || routineData.description
+          } : undefined
         })
       });
 

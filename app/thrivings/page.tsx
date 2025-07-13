@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 import { 
   Clock, 
   Bell, Edit2, Trash2,
@@ -15,7 +16,9 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { AdjustmentTutorial } from '@/components/features/AdjustmentTutorial';
 import { LoadingButton } from '@/components/ui/LoadingButton';
 import { NotificationSettingsCard } from '@/components/features/NotificationSettingsCard';
+import { ThrivingNotificationCard } from '@/components/features/ThrivingNotificationCard';
 import { HealthInsights } from '@/components/features/HealthInsights';
+import { ThrivingExpertHelp } from '@/components/features/ThrivingExpertHelp';
 
 export default function ThrivingsPage() {
   // Initialize with data from localStorage to prevent empty state flash
@@ -1063,13 +1066,43 @@ export default function ThrivingsPage() {
                             ))}
                           </div>
                           
-                          {/* Notification Settings - Keeping the test notification functionality */}
+                          {/* Thriving-specific Notification Settings */}
+                          <div className="mt-4">
+                            <ThrivingNotificationCard 
+                              thriving={selectedThriving}
+                              onSettingsUpdate={async (settings) => {
+                                // Update the thriving with new notification settings
+                                await updateThrivingInStorage(selectedThriving.id, {
+                                  notificationSettings: settings
+                                });
+                                
+                                // Update local state
+                                setThrivings(prev => prev.map(t => 
+                                  t.id === selectedThriving.id 
+                                    ? { ...t, notificationSettings: settings }
+                                    : t
+                                ));
+                                setSelectedThriving(prev => 
+                                  prev?.id === selectedThriving.id 
+                                    ? { ...prev, notificationSettings: settings }
+                                    : prev
+                                );
+                                
+                                toast.success('Notification settings updated');
+                              }}
+                            />
+                          </div>
+                          
+                          {/* General Notification Settings - Test notification functionality */}
                           <div className="mt-4">
                             <NotificationSettingsCard />
                           </div>
                         </div>
                       </div>
                     )}
+                    
+                    {/* Expert Help Section */}
+                    <ThrivingExpertHelp thriving={selectedThriving} />
                   </div>
                 </div>
               )}

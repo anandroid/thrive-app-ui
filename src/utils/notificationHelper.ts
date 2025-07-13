@@ -1,4 +1,5 @@
 import { WellnessRoutine } from '@/src/services/openai/types';
+import { Thriving } from '@/src/types/thriving';
 
 // Type for notification-specific methods
 interface NotificationBridge {
@@ -12,6 +13,18 @@ interface NotificationBridge {
   updateRoutine?: (routine: WellnessRoutine) => void;
   syncRoutines?: (routines: WellnessRoutine[]) => void;
   testNotification?: () => void;
+  scheduleStepReminders?: (stepNotifications: Array<{
+    id: string;
+    routineId: string;
+    routineName: string;
+    title: string;
+    time: string;
+    reminderText?: string;
+    frequency: string;
+    enabledWeekdays: boolean;
+    enabledWeekends: boolean;
+  }>) => void;
+  cancelStepReminders?: (routineId: string) => void;
 }
 
 // Extend window interface for notification support flag
@@ -124,6 +137,111 @@ export const NotificationHelper = {
     bridge?.syncRoutines?.(routines);
   },
 
+  // NEW: Schedule step notifications for a thriving
+  scheduleStepNotifications: async (thriving: Thriving): Promise<{ success: boolean; count?: number; error?: string }> => {
+    console.log('[NotificationHelper] scheduleStepNotifications called for:', thriving.title);
+    
+    if (!isReactNative()) {
+      console.log('[NotificationHelper] Not in React Native, skipping step notifications');
+      return { success: false, error: 'Not in React Native environment' };
+    }
+
+    // Get notification settings with defaults
+    const settings = thriving.notificationSettings || {
+      enabledWeekdays: true,
+      enabledWeekends: true,
+      stepNotifications: {}
+    };
+
+    // Extract step notifications from thriving
+    const stepNotifications = thriving.steps
+      .filter(step => {
+        // Must have time set
+        if (!step.time) return false;
+        
+        // Check if step notifications are enabled (default to true if not specified)
+        const stepEnabled = step.reminderEnabled !== false;
+        
+        // Check if this specific step is enabled in settings (default to true)
+        const settingsEnabled = settings.stepNotifications?.[step.id] !== false;
+        
+        return stepEnabled && settingsEnabled;
+      })
+      .map(step => ({
+        id: step.id,
+        routineId: thriving.id,
+        routineName: thriving.title,
+        title: step.title,
+        time: step.time!,
+        reminderText: step.reminderText,
+        frequency: thriving.frequency,
+        enabledWeekdays: settings.enabledWeekdays,
+        enabledWeekends: settings.enabledWeekends,
+      }));
+
+    console.log(`[NotificationHelper] Found ${stepNotifications.length} enabled steps with time for notifications`);
+
+    if (stepNotifications.length === 0) {
+      return { success: true, count: 0 };
+    }
+
+    // Use the bridge to schedule step notifications
+    const success = await bridge.scheduleStepReminders(stepNotifications);
+    
+    return { 
+      success, 
+      count: stepNotifications.length,
+      error: success ? undefined : 'Failed to schedule step notifications'
+    };
+  },
+
+  // NEW: Cancel all step notifications for a thriving
+  cancelStepNotifications: async (thrivingId: string): Promise<void> => {
+    console.log('[NotificationHelper] cancelStepNotifications called for:', thrivingId);
+    
+    if (!isReactNative()) return;
+    
+    bridge.cancelStepReminders(thrivingId);
+  },
+
+  // NEW: Schedule all notifications for a thriving (step-level only)
+  scheduleAllNotifications: async (thriving: Thriving): Promise<{ 
+    success: boolean; 
+    stepCount: number;
+    errors: string[];
+  }> => {
+    console.log('[NotificationHelper] scheduleAllNotifications called for:', thriving.title);
+    
+    const errors: string[] = [];
+    let success = true;
+    let stepCount = 0;
+
+    // Schedule step-level notifications only
+    try {
+      const stepResult = await NotificationHelper.scheduleStepNotifications(thriving);
+      success = stepResult.success;
+      stepCount = stepResult.count || 0;
+      if (!success && stepResult.error) {
+        errors.push(`Step notifications: ${stepResult.error}`);
+      }
+    } catch (error) {
+      success = false;
+      errors.push(`Step notifications: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    console.log('[NotificationHelper] Step notifications scheduled:', {
+      success,
+      stepCount,
+      errors
+    });
+
+    return {
+      success,
+      stepCount,
+      errors
+    };
+  },
+
   // Send a test notification with a random step
   testNotification: async () => {
     if (!isReactNative()) return;
@@ -150,8 +268,8 @@ export const NotificationHelper = {
       window.ReactNativeBridge.postMessage({
         type: 'send_notification',
         payload: {
-          title: `Time for: ${randomStep.title}`,
-          body: randomStep.description || `It's time for your ${randomThriving.title} routine step`,
+          title: randomThriving.title,
+          body: randomStep.reminderText || `Time for: ${randomStep.title}`,
           data: {
             thrivingId: randomThriving.id,
             stepId: randomStep.id,

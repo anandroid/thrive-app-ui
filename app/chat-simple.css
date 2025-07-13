@@ -12,6 +12,8 @@
   height: 100vh;
   height: 100dvh; /* Dynamic viewport height */
   background: #f9fafb;
+  /* Ensure smooth transition for keyboard handling */
+  transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Fixed header */

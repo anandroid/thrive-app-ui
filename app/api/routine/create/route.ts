@@ -11,7 +11,8 @@ export async function POST(request: NextRequest) {
       frequency, 
       duration,
       userPreferences,
-      threadId 
+      threadId,
+      origin 
     } = await request.json();
 
     if (!healthConcern) {
@@ -167,7 +168,12 @@ CRITICAL INSTRUCTIONS:
       routineDescription: routine.routineDescription,
       totalSteps: routine.totalSteps || routine.steps?.length || 0,
       reminderFrequency: routine.reminderFrequency || 'daily',
-      additionalSteps: routine.additionalSteps
+      additionalSteps: routine.additionalSteps,
+      origin: origin || (threadId ? {
+        threadId,
+        createdFrom: 'chat' as const,
+        context: healthConcern
+      } : undefined)
     };
 
     return NextResponse.json(transformedRoutine);

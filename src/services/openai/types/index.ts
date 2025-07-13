@@ -85,10 +85,18 @@ export interface ActionItem {
  * Examples: Create routine, add to pantry, buy supplement, book appointment
  */
 export interface ActionableItem {
-  type: 'appointment' | 'medicine' | 'routine' | 'create_routine' | 'prescription' | 'resource' | 'link' | 'start_journey' | 'continue_journey' | 'buy' | 'add_to_pantry' | 'already_have' | 'adjust_routine' | 'supplement_choice' | string;
+  type: 'appointment' | 'medicine' | 'routine' | 'create_routine' | 'prescription' | 'resource' | 'link' | 'start_journey' | 'continue_journey' | 'buy' | 'add_to_pantry' | 'already_have' | 'adjust_routine' | 'supplement_choice' | 'expert_consultation' | string;
   title: string;
   description: string;  // Explains why this action would benefit the user
   details?: string;
+  content?: string;  // Additional content for display
+  metadata?: {
+    highlight?: string;
+    benefits?: string[];
+    userConcerns?: string[];
+    relatedRoutines?: string[];
+    [key: string]: unknown;
+  };  // Additional metadata for special action types
   category?: string;
   link?: string;
   pharmacy_link?: string;

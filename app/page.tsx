@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Menu, Sparkles, Weight, Pill, Brain, Activity, Heart, Moon, Leaf, ChevronRight, BookOpen } from 'lucide-react';
+import { Menu, Sparkles, Weight, Pill, Brain, Activity, Heart, Moon, Leaf, ChevronRight, BookOpen, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Thriving } from '@/src/types/thriving';
 import { getThrivingsFromStorage, migrateRoutinesToThrivings } from '@/src/utils/thrivingStorage';
+import { getChatHistory } from '@/src/utils/chatStorage';
+import { ChatHistoryItem } from '@/src/types/chat';
 import { GetStarted } from '@/components/features/GetStarted';
 import { ChatEditor } from '@/components/ui/ChatEditor';
 import { PrivacySection } from '@/components/features/PrivacySection';
@@ -113,11 +115,18 @@ export default function HomePage() {
     return false;
   });
   const [showHealthConnectModal, setShowHealthConnectModal] = useState(false);
+  const [latestChat, setLatestChat] = useState<ChatHistoryItem | null>(null);
 
   useEffect(() => {
     // Initialize showGetStarted after mount to prevent hydration mismatch
     const hasSeenGetStarted = localStorage.getItem('hasSeenGetStarted');
     setShowGetStarted(!hasSeenGetStarted);
+    
+    // Get latest chat
+    const chatHistory = getChatHistory();
+    if (chatHistory.length > 0) {
+      setLatestChat(chatHistory[0]);
+    }
     
     // Check if should show menu sparkle
     const hasUsedChat = localStorage.getItem('hasUsedChat');
@@ -327,6 +336,57 @@ export default function HomePage() {
 
             {/* Privacy Section - Only show if no thrivings */}
             <PrivacySection visible={thrivings.length === 0} />
+
+            {/* Continue with Previous Chat - Only show if there's a latest chat */}
+            {latestChat && (
+              <div className="content-padding py-6">
+                <h3 className="text-[min(4.5vw,1.125rem)] font-semibold text-gray-700 mb-3">Pick up where you left off</h3>
+                <button
+                  onClick={() => router.push(`/chat/${latestChat.threadId}`)}
+                  className="w-full p-[5vw] max-p-[1.5rem] rounded-[5vw] max-rounded-[1.25rem] bg-white shadow-md hover:shadow-lg active:scale-[0.98] transition-all border border-gray-100 text-left group touch-feedback touch-manipulation"
+                >
+                  <div className="flex items-start space-x-[4vw] max-space-x-4">
+                    <div className="w-[12vw] h-[12vw] max-w-[3rem] max-h-[3rem] rounded-[3vw] max-rounded-[0.75rem] bg-gradient-to-br from-rose/20 to-burgundy/15 flex items-center justify-center flex-shrink-0 group-hover:from-rose/30 group-hover:to-burgundy/25 transition-colors">
+                      <MessageCircle className="w-[6vw] h-[6vw] max-w-[1.5rem] max-h-[1.5rem] text-burgundy" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-[min(4vw,1rem)] font-semibold text-gray-900 mb-[1vw] truncate">
+                        {latestChat.title === 'New Conversation' && latestChat.lastMessage 
+                          ? latestChat.lastMessage.length > 40 
+                            ? latestChat.lastMessage.substring(0, 40) + '...'
+                            : latestChat.lastMessage
+                          : latestChat.title}
+                      </h4>
+                      <p className="text-[min(3.5vw,0.875rem)] text-gray-600 line-clamp-2">
+                        {latestChat.lastMessage}
+                      </p>
+                      <div className="flex items-center justify-between mt-[2vw]">
+                        <span className="text-[min(3vw,0.75rem)] text-gray-500">
+                          {latestChat.messageCount} {latestChat.messageCount === 1 ? 'message' : 'messages'}
+                        </span>
+                        <span className="text-[min(3vw,0.75rem)] text-gray-500">
+                          {(() => {
+                            const updatedDate = new Date(latestChat.updatedAt);
+                            const today = new Date();
+                            const yesterday = new Date(today);
+                            yesterday.setDate(yesterday.getDate() - 1);
+                            
+                            if (updatedDate.toDateString() === today.toDateString()) {
+                              return 'Today';
+                            } else if (updatedDate.toDateString() === yesterday.toDateString()) {
+                              return 'Yesterday';
+                            } else {
+                              return updatedDate.toLocaleDateString();
+                            }
+                          })()}
+                        </span>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-[5vw] h-[5vw] max-w-[1.25rem] max-h-[1.25rem] text-gray-400 group-hover:text-gray-600 flex-shrink-0" />
+                  </div>
+                </button>
+              </div>
+            )}
 
             {/* Prompt Templates */}
             <div className={`content-padding py-8 space-y-3 bg-gradient-to-br from-sage-light/10 to-sage/10 backdrop-blur-sm ${

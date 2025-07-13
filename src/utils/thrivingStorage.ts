@@ -21,23 +21,24 @@ export const saveThrivingToStorage = async (thriving: Thriving): Promise<void> =
   // Set flag that user has created a thriving
   localStorage.setItem('hasCreatedThriving', 'true');
   
-  // Schedule notifications if in React Native and thriving is active
-  if (NotificationHelper.isSupported() && thriving.isActive && thriving.reminderTimes && thriving.reminderTimes.length > 0) {
-    console.log('[ThrivingStorage] Scheduling notifications for new thriving:', thriving.id);
+  // Schedule ALL notifications (routine + steps) if in React Native and thriving is active
+  if (NotificationHelper.isSupported() && thriving.isActive) {
+    console.log('[ThrivingStorage] Scheduling comprehensive notifications for new thriving:', thriving.id);
     try {
-      // Convert thriving to routine format for notification scheduling
-      const routineData = {
-        ...thriving,
-        name: thriving.title,
-        steps: thriving.steps || []
-      };
-      await NotificationHelper.scheduleRoutineReminders([prepareRoutineForNotification({
-        ...routineData,
-        expectedOutcomes: [],
-        safetyNotes: []
-      } as unknown as WellnessRoutine)]);
+      const result = await NotificationHelper.scheduleAllNotifications(thriving);
+      console.log('[ThrivingStorage] Notification scheduling result:', {
+        success: result.success,
+        stepCount: result.stepCount,
+        errors: result.errors
+      });
+      
+      if (result.errors.length > 0) {
+        console.warn('[ThrivingStorage] Some notifications failed to schedule:', result.errors);
+      } else {
+        console.log(`[ThrivingStorage] Successfully scheduled ${result.stepCount} step notifications`);
+      }
     } catch (error) {
-      console.error('[ThrivingStorage] Error scheduling notifications:', error);
+      console.error('[ThrivingStorage] Error scheduling comprehensive notifications:', error);
     }
   }
 };
@@ -49,30 +50,27 @@ export const updateThrivingInStorage = async (thrivingId: string, updates: Parti
   );
   localStorage.setItem(THRIVINGS_STORAGE_KEY, JSON.stringify(updatedThrivings));
   
-  // Handle notification updates if in React Native
+  // Handle comprehensive notification updates if in React Native
   if (NotificationHelper.isSupported()) {
     const updatedThriving = updatedThrivings.find(t => t.id === thrivingId);
     if (updatedThriving) {
-      console.log('[ThrivingStorage] Updating notifications for thriving:', thrivingId);
+      console.log('[ThrivingStorage] Updating comprehensive notifications for thriving:', thrivingId);
       
-      // Cancel existing notifications
+      // Cancel ALL existing notifications (routine + steps)
       await NotificationHelper.cancelRoutineReminders(thrivingId);
+      await NotificationHelper.cancelStepNotifications(thrivingId);
       
-      // Reschedule if still active with reminders
-      if (updatedThriving.isActive && updatedThriving.reminderTimes && updatedThriving.reminderTimes.length > 0) {
+      // Reschedule if still active
+      if (updatedThriving.isActive) {
         try {
-          const routineData = {
-            ...updatedThriving,
-            name: updatedThriving.title,
-            steps: updatedThriving.steps || []
-          };
-          await NotificationHelper.scheduleRoutineReminders([prepareRoutineForNotification({
-        ...routineData,
-        expectedOutcomes: [],
-        safetyNotes: []
-      } as unknown as WellnessRoutine)]);
+          const result = await NotificationHelper.scheduleAllNotifications(updatedThriving);
+          console.log('[ThrivingStorage] Notification rescheduling result:', {
+            success: result.success,
+            stepCount: result.stepCount,
+            errors: result.errors
+          });
         } catch (error) {
-          console.error('[ThrivingStorage] Error rescheduling notifications:', error);
+          console.error('[ThrivingStorage] Error rescheduling comprehensive notifications:', error);
         }
       }
     }
@@ -84,10 +82,11 @@ export const deleteThrivingFromStorage = async (thrivingId: string): Promise<voi
   const filteredThrivings = thrivings.filter(t => t.id !== thrivingId);
   localStorage.setItem(THRIVINGS_STORAGE_KEY, JSON.stringify(filteredThrivings));
   
-  // Cancel any scheduled notifications
+  // Cancel ALL scheduled notifications (routine + steps)
   if (NotificationHelper.isSupported()) {
-    console.log('[ThrivingStorage] Canceling notifications for deleted thriving:', thrivingId);
+    console.log('[ThrivingStorage] Canceling all notifications for deleted thriving:', thrivingId);
     await NotificationHelper.cancelRoutineReminders(thrivingId);
+    await NotificationHelper.cancelStepNotifications(thrivingId);
   }
   
   // Also delete associated journal
