@@ -1,0 +1,84 @@
+/* WebView Keyboard Fix - Specific styles for React Native WebView */
+
+/* When keyboard is visible in WebView */
+.chat-container[data-keyboard-visible="true"] {
+  /* Use fixed height set by JavaScript instead of viewport units */
+  transition: height 0.2s ease-out;
+  /* Override any viewport height settings */
+  height: auto !important;
+  min-height: auto !important;
+  max-height: none !important;
+}
+
+/* Ensure input area stays at bottom when keyboard is visible */
+.chat-container[data-keyboard-visible="true"] .chat-input-area {
+  position: relative;
+  bottom: 0;
+  /* Remove any transform that might push it up */
+  transform: none;
+}
+
+/* Messages area should shrink to accommodate keyboard */
+.chat-container[data-keyboard-visible="true"] .chat-messages {
+  /* Messages will naturally shrink due to flex layout */
+  padding-bottom: 1rem;
+}
+
+/* Prevent iOS WebView from adding extra padding */
+.chat-input-area textarea,
+.chat-input-area input {
+  /* Ensure font size is at least 16px to prevent zoom on iOS */
+  font-size: max(16px, 1rem);
+  /* Reset any transforms */
+  transform: translate3d(0, 0, 0);
+}
+
+/* Fix for Android WebView where adjustResize might not work perfectly */
+@supports (-webkit-appearance: none) {
+  .chat-container {
+    /* Use available height instead of viewport height */
+    height: 100%;
+    max-height: 100vh;
+  }
+}
+
+/* Additional fix for input staying visible */
+.chat-input-area {
+  /* Ensure input area is always visible */
+  position: relative;
+  z-index: 100;
+  background: white;
+  /* Add shadow to make it stand out */
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* When keyboard is visible, ensure proper spacing */
+.chat-container[data-keyboard-visible="true"] .chat-input-area {
+  /* Input should stick to keyboard top */
+  margin-bottom: 0;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Ensure smooth transitions */
+.chat-container,
+.chat-messages,
+.chat-input-area {
+  /* Hardware acceleration for smooth animations */
+  will-change: transform, height;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* Debug helper for WebView (remove in production) */
+.webview-debug::before {
+  content: attr(data-height);
+  position: fixed;
+  top: 50%;
+  right: 10px;
+  background: rgba(255, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  z-index: 9999;
+}

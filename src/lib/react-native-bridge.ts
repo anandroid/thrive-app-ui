@@ -153,12 +153,33 @@ class ReactNativeBridgeManager {
   private setupMessageListener() {
     if (typeof window !== 'undefined') {
       window.onReactNativeMessage = (message: unknown) => {
+        console.log('[Bridge] onReactNativeMessage received:', message);
         const msg = message as ReactNativeMessage;
         const handler = this.messageHandlers.get(msg.type);
         if (handler) {
+          console.log('[Bridge] Found handler for message type:', msg.type);
           handler(msg.payload);
+        } else {
+          console.log('[Bridge] No handler for message type:', msg.type);
         }
       };
+      
+      // Also listen for regular message events
+      window.addEventListener('message', (event) => {
+        try {
+          const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+          if (data && typeof data === 'object' && 'type' in data) {
+            console.log('[Bridge] Message event received:', data);
+            const handler = this.messageHandlers.get(data.type);
+            if (handler) {
+              console.log('[Bridge] Found handler for message type:', data.type);
+              handler(data.payload);
+            }
+          }
+        } catch {
+          // Not a JSON message, ignore
+        }
+      });
     }
   }
 
@@ -215,7 +236,12 @@ class ReactNativeBridgeManager {
   }
 
   public async requestNotificationPermission(): Promise<boolean> {
+    console.log('[Bridge] requestNotificationPermission called');
+    console.log('[Bridge] isReactNative:', this.isReactNative);
+    console.log('[Bridge] ReactNativeBridge exists:', !!window.ReactNativeBridge);
+    
     if (!this.isReactNative || !window.ReactNativeBridge) {
+      console.log('[Bridge] Not in React Native, using fallback');
       // Fallback for web - use browser notification API
       if ('Notification' in window) {
         const permission = await Notification.requestPermission();
@@ -225,18 +251,24 @@ class ReactNativeBridgeManager {
     }
 
     return new Promise((resolve) => {
+      console.log('[Bridge] Setting up notification permission handler');
+      
       // Set up one-time handler for permission result
       const handler = (payload: unknown) => {
+        console.log('[Bridge] Received notification_permission_result:', payload);
         const result = payload as { granted: boolean };
         this.messageHandlers.delete('notification_permission_result');
         resolve(result.granted);
       };
       
       this.onMessage('notification_permission_result', handler);
+      
+      console.log('[Bridge] Calling ReactNativeBridge.requestNotificationPermission()');
       window.ReactNativeBridge?.requestNotificationPermission();
       
       // Timeout after 10 seconds
       setTimeout(() => {
+        console.log('[Bridge] Notification permission request timed out after 10s');
         this.messageHandlers.delete('notification_permission_result');
         resolve(false);
       }, 10000);

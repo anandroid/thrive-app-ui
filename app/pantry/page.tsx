@@ -35,8 +35,23 @@ const categoryColors = {
 };
 
 export default function PantryPage() {
-  const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
-  const [recommendations, setRecommendations] = useState<RecommendedSupplement[]>([]);
+  // Initialize with data from localStorage to prevent empty state flash
+  const [pantryItems, setPantryItems] = useState<PantryItem[]>(() => {
+    if (typeof window !== 'undefined') {
+      return getPantryItems();
+    }
+    return [];
+  });
+  const [recommendations, setRecommendations] = useState<RecommendedSupplement[]>(() => {
+    if (typeof window !== 'undefined') {
+      const existingRecs = getRecommendedSupplements();
+      const pantryItemNames = getPantryItems().map(item => item.name.toLowerCase());
+      return existingRecs.filter(rec => 
+        !pantryItemNames.includes(rec.name.toLowerCase())
+      );
+    }
+    return [];
+  });
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string>('all');
@@ -46,37 +61,28 @@ export default function PantryPage() {
   const { onPantryChange } = useThreadMetadata();
 
   useEffect(() => {
-    const items = getPantryItems();
-    setPantryItems(items);
-    
-    // Load existing recommendations
-    const existingRecs = getRecommendedSupplements();
-    
-    // Generate new recommendations if none exist
-    if (existingRecs.length === 0) {
-      generateSupplementRecommendations().then(newRecs => {
-        // Clear any existing recommendations first to prevent duplicates
-        localStorage.setItem('thrive_recommended_supplements', '[]');
-        
-        // Save new recommendations
-        newRecs.forEach(rec => saveRecommendedSupplement(rec));
-        
-        // Filter out items already in pantry
-        const pantryItemNames = items.map(item => item.name.toLowerCase());
-        const filteredRecs = newRecs.filter(rec => 
-          !pantryItemNames.includes(rec.name.toLowerCase())
-        );
-        setRecommendations(filteredRecs);
-      });
-    } else {
-      // Filter out items already in pantry
-      const pantryItemNames = items.map(item => item.name.toLowerCase());
-      const filteredRecs = existingRecs.filter(rec => 
-        !pantryItemNames.includes(rec.name.toLowerCase())
-      );
-      setRecommendations(filteredRecs);
+    // Only generate recommendations if none exist
+    if (recommendations.length === 0 && typeof window !== 'undefined') {
+      const existingRecs = getRecommendedSupplements();
+      
+      if (existingRecs.length === 0) {
+        generateSupplementRecommendations().then(newRecs => {
+          // Clear any existing recommendations first to prevent duplicates
+          localStorage.setItem('thrive_recommended_supplements', '[]');
+          
+          // Save new recommendations
+          newRecs.forEach(rec => saveRecommendedSupplement(rec));
+          
+          // Filter out items already in pantry
+          const pantryItemNames = pantryItems.map(item => item.name.toLowerCase());
+          const filteredRecs = newRecs.filter(rec => 
+            !pantryItemNames.includes(rec.name.toLowerCase())
+          );
+          setRecommendations(filteredRecs);
+        });
+      }
     }
-  }, []);
+  }, [recommendations.length, pantryItems]);
 
   const handleAddItem = async (item: PantryItem) => {
     savePantryItem(item);

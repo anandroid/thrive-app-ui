@@ -1,0 +1,58 @@
+/* Critical WebView Input Fix - Ensures input is never covered by keyboard */
+
+/* Force chat container to use available space when keyboard is visible */
+.chat-container[data-keyboard-visible="true"] {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  /* Height will be set dynamically by JavaScript */
+  overflow: hidden !important;
+}
+
+/* Ensure messages area can scroll */
+.chat-container[data-keyboard-visible="true"] .chat-messages {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  /* Add extra padding at bottom for better UX */
+  padding-bottom: 2rem !important;
+}
+
+/* Keep input area at the very bottom */
+.chat-container[data-keyboard-visible="true"] .chat-input-area {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  background: white !important;
+  z-index: 1000 !important;
+  /* Remove any transforms or margins that might offset it */
+  transform: none !important;
+  margin: 0 !important;
+}
+
+/* Ensure textarea/input has proper styling */
+.chat-input-area textarea,
+.chat-input-area input {
+  /* Minimum 16px to prevent iOS zoom */
+  font-size: 16px !important;
+  /* Ensure it's fully clickable */
+  position: relative !important;
+  z-index: 1001 !important;
+}
+
+/* Android-specific fixes */
+@media screen and (max-width: 768px) {
+  /* When keyboard is visible, use absolute positioning */
+  .chat-container[data-keyboard-visible="true"] {
+    height: 100% !important;
+  }
+  
+  /* Ensure input area is always accessible */
+  .chat-container[data-keyboard-visible="true"] .chat-input-area {
+    position: fixed !important;
+    bottom: 0 !important;
+    /* Add safe area for devices with home indicator */
+    padding-bottom: env(safe-area-inset-bottom, 0) !important;
+  }
+}

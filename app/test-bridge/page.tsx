@@ -58,6 +58,7 @@ export default function TestBridgePage() {
       timers.forEach(timer => clearTimeout(timer));
       window.removeEventListener('ReactNativeBridgeReady', handleBridgeReady);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
   const testNotification = async () => {

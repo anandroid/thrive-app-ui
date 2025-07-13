@@ -1,11 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "./webview-keyboard-fix.css";
+import "./webview-keyboard-complete.css";
 import { ServiceWorkerProvider } from "@/src/providers/ServiceWorkerProvider";
 import { OfflineIndicator } from "@/components/ui/OfflineIndicator";
 import { TouchFeedbackProvider } from "@/src/providers/TouchFeedbackProvider";
 import { NotificationProvider } from "@/src/providers/NotificationProvider";
 import { JournalMigrationProvider } from "@/src/providers/JournalMigrationProvider";
+import { NotificationSyncProvider } from "@/src/providers/NotificationSyncProvider";
 import "@/src/utils/clearCorruptedData";
 import { Toaster } from 'react-hot-toast';
 import { SessionInitializer } from '@/components/features/SessionInitializer';
@@ -62,10 +65,12 @@ export default function RootLayout({
           <TouchFeedbackProvider>
             <NotificationProvider>
               <JournalMigrationProvider>
-                <SessionInitializer />
-                <OfflineIndicator />
-                <Toaster position="top-center" />
-                {children}
+                <NotificationSyncProvider>
+                  <SessionInitializer />
+                  <OfflineIndicator />
+                  <Toaster position="top-center" />
+                  {children}
+                </NotificationSyncProvider>
               </JournalMigrationProvider>
             </NotificationProvider>
           </TouchFeedbackProvider>

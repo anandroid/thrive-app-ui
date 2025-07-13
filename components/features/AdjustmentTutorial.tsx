@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
 import { X, ArrowDown, Edit2, Plus, Minus, Clock } from 'lucide-react';
+import { ModalPortal } from '@/components/ui/ModalPortal';
 
 interface AdjustmentTutorialProps {
   onClose: () => void;
@@ -11,12 +11,11 @@ interface AdjustmentTutorialProps {
 
 export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose, onArrowClick }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    // Delay to ensure smooth transition
-    setTimeout(() => setIsVisible(true), 100);
+    // Small delay to ensure smooth transition
+    const timer = setTimeout(() => setIsVisible(true), 10);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleClose = () => {
@@ -24,34 +23,34 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
     setTimeout(onClose, 300);
   };
 
-  if (!mounted) return null;
-
-  const modalContent = (
-    <>
-      {/* Dark overlay - prevents interaction with background, NO dismiss on click */}
-      <div 
-        className={`fixed inset-0 z-[9998] bg-black/60 transition-opacity duration-300 ${
-          isVisible ? 'opacity-100' : 'opacity-0'
-        }`}
-        style={{ 
-          touchAction: 'none',
-          overscrollBehavior: 'none'
-        }}
-      />
-      
-      {/* Modal container - fixed position ensures it's always in viewport */}
-      <div 
-        className={`fixed inset-0 z-[9999] flex items-center justify-center p-[5vw] pointer-events-none transition-opacity duration-300 ${
-          isVisible ? 'opacity-100' : 'opacity-0'
-        }`}
-      >
-        {/* Modal content - centered within fixed container */}
+  return (
+    <ModalPortal>
+      {/* Modal wrapper - this ensures proper stacking context */}
+      <div style={{ position: 'relative', width: '100%', height: '100%', pointerEvents: 'auto' }}>
+        {/* Dark overlay */}
         <div 
-          className={`relative bg-white rounded-[min(6vw,1.5rem)] shadow-2xl p-[min(6vw,1.5rem)] w-[90vw] max-w-[500px] pointer-events-auto transition-all duration-300 ${
-            isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+          className={`absolute inset-0 bg-black/60 transition-opacity duration-300 ${
+            isVisible ? 'opacity-100' : 'opacity-0'
           }`}
-          onClick={(e) => e.stopPropagation()}
+          style={{ 
+            touchAction: 'none',
+            WebkitOverflowScrolling: 'touch'
+          }}
+        />
+        
+        {/* Modal container - centers content */}
+        <div 
+          className={`absolute inset-0 flex items-center justify-center p-[5vw] transition-opacity duration-300 ${
+            isVisible ? 'opacity-100' : 'opacity-0'
+          }`}
         >
+          {/* Modal content */}
+          <div 
+            className={`relative bg-white rounded-[min(6vw,1.5rem)] shadow-2xl p-[min(6vw,1.5rem)] w-[90vw] max-w-[500px] transition-all duration-300 ${
+              isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
         {/* Close button */}
         <button
           type="button"
@@ -144,10 +143,9 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
             (Last time we&apos;ll show this tip)
           </p>
         )}
+          </div>
         </div>
       </div>
-    </>
+    </ModalPortal>
   );
-
-  return ReactDOM.createPortal(modalContent, document.body);
 };

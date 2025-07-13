@@ -5,6 +5,7 @@ import { X, Edit3, AlertCircle, Target, BookOpen } from 'lucide-react';
 import { ActionableItem } from '@/src/services/openai/types';
 import { WellnessJourney, JourneyType } from '@/src/services/openai/types/journey';
 import { LoadingButton } from '@/components/ui/LoadingButton';
+import { TouchCloseButton } from '@/components/ui/TouchCloseButton';
 import bridge from '@/src/lib/react-native-bridge';
 
 interface JourneyCreationModalProps {
@@ -117,18 +118,7 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
       <div className="relative max-w-lg w-full bg-white rounded-3xl shadow-2xl overflow-hidden">
         {/* Fixed close button */}
         <div className="absolute top-0 right-0 p-4 z-10">
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onClose();
-            }}
-            className="w-8 h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center hover:bg-white transition-all duration-200 shadow-lg touch-feedback touch-manipulation cursor-pointer active:scale-95 active:bg-gray-100"
-            aria-label="Close modal"
-            type="button"
-          >
-            <X className="w-5 h-5 text-gray-700" />
-          </button>
+          <TouchCloseButton onClose={onClose} size="sm" variant="light" />
         </div>
         
         {/* Modal content */}

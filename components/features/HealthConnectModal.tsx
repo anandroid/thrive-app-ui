@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Heart, TrendingUp, Sparkles } from 'lucide-react';
+import { Heart, TrendingUp, Sparkles } from 'lucide-react';
+import { TouchCloseButton } from '@/components/ui/TouchCloseButton';
 
 interface HealthConnectModalProps {
   isOpen: boolean;
@@ -58,15 +59,11 @@ export const HealthConnectModal: React.FC<HealthConnectModalProps> = ({
       
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full animate-slide-up">
+        <div className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full animate-slide-up">
           {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
-            aria-label="Close"
-          >
-            <X className="w-5 h-5 text-gray-400" />
-          </button>
+          <div className="absolute top-4 right-4">
+            <TouchCloseButton onClose={onClose} size="sm" />
+          </div>
           
           {/* Content */}
           <div className="p-8 text-center">

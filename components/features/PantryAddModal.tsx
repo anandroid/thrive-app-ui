@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Upload, Loader2, Sparkles, AlertCircle, Scan } from 'lucide-react';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
+import { TouchCloseButton } from '@/components/ui/TouchCloseButton';
 import { CameraScanner } from './CameraScanner';
 import { PantryItem } from '@/src/types/pantry';
 import { imageToBase64 } from '@/src/utils/pantryStorage';
@@ -188,12 +189,7 @@ export function PantryAddModal({ isOpen, onClose, onAddItem, initialData, contex
         {/* Header */}
         <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
           <h2 className="text-xl font-semibold text-primary-text">Add to Pantry</h2>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 touch-feedback"
-          >
-            <X className="w-5 h-5 text-gray-600" />
-          </button>
+          <TouchCloseButton onClose={onClose} size="sm" />
         </div>
 
         {/* Scrollable Content */}

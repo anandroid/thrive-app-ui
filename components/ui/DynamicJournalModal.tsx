@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, Brain, TrendingUp, Calendar } from 'lucide-react';
+import { Brain, TrendingUp, Calendar } from 'lucide-react';
 import { 
   DynamicJournalTemplate, 
   JournalEntry, 
@@ -13,6 +13,7 @@ import { JournalInsightsEngine } from '@/src/lib/journalInsights';
 import { UserLearningProfileManager } from '@/src/lib/userLearningProfile';
 import { DynamicJournalField } from './DynamicJournalField';
 import { JournalPromptCard } from './JournalPromptCard';
+import { TouchCloseButton } from './TouchCloseButton';
 import { addJournalEntry, getJournalByThrivingId } from '@/src/utils/thrivingStorage';
 
 interface DynamicJournalModalProps {
@@ -182,12 +183,9 @@ export function DynamicJournalModal({ thriving, isOpen, onClose }: DynamicJourna
         
         {/* Header */}
         <div className="relative bg-gradient-to-r from-dusty-rose/10 to-rose/10 p-6 border-b border-gray-100">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/80 transition-colors"
-          >
-            <X className="w-5 h-5 text-gray-600" />
-          </button>
+          <div className="absolute top-4 right-4">
+            <TouchCloseButton onClose={onClose} />
+          </div>
           
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-dusty-rose to-rose flex items-center justify-center">

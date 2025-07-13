@@ -14,11 +14,17 @@ import { CelebrationShower } from '@/components/ui/CelebrationShower';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { AdjustmentTutorial } from '@/components/features/AdjustmentTutorial';
 import { LoadingButton } from '@/components/ui/LoadingButton';
-import { NotificationSettings } from '@/components/features/NotificationSettings';
+import { NotificationSettingsCard } from '@/components/features/NotificationSettingsCard';
 import { HealthInsights } from '@/components/features/HealthInsights';
 
 export default function ThrivingsPage() {
-  const [thrivings, setThrivings] = useState<Thriving[]>([]);
+  // Initialize with data from localStorage to prevent empty state flash
+  const [thrivings, setThrivings] = useState<Thriving[]>(() => {
+    if (typeof window !== 'undefined') {
+      return getThrivingsFromStorage();
+    }
+    return [];
+  });
   const [selectedThriving, setSelectedThriving] = useState<Thriving | null>(null);
   const [expandedTips, setExpandedTips] = useState<Set<number>>(new Set());
   const [isRecommendationsCollapsed, setIsRecommendationsCollapsed] = useState(false);
@@ -36,10 +42,6 @@ export default function ThrivingsPage() {
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Load thrivings from localStorage
-    const savedThrivings = getThrivingsFromStorage();
-    setThrivings(savedThrivings);
-    
     // Check if there's a specific thriving to show from query params
     const urlParams = new URLSearchParams(window.location.search);
     const thrivingId = urlParams.get('id');
@@ -54,8 +56,8 @@ export default function ThrivingsPage() {
     // Clear the flag after checking
     sessionStorage.removeItem('navigateFromHome');
     
-    if (thrivingId && savedThrivings.length > 0) {
-      const thriving = savedThrivings.find(t => t.id === thrivingId);
+    if (thrivingId && thrivings.length > 0) {
+      const thriving = thrivings.find(t => t.id === thrivingId);
       if (thriving) {
         setSelectedThriving(thriving);
         // Set active step if provided
@@ -63,10 +65,10 @@ export default function ThrivingsPage() {
           setActiveStep(parseInt(stepIndex));
         }
       } else {
-        setSelectedThriving(savedThrivings[0]);
+        setSelectedThriving(thrivings[0]);
       }
-    } else if (savedThrivings.length > 0) {
-      setSelectedThriving(savedThrivings[0]);
+    } else if (thrivings.length > 0) {
+      setSelectedThriving(thrivings[0]);
     }
     
     // Load recommendations collapsed state from localStorage
@@ -87,7 +89,7 @@ export default function ThrivingsPage() {
             
             // Find and select the thriving after a delay
             setTimeout(() => {
-              const targetThriving = savedThrivings.find(t => t.id === thrivingId);
+              const targetThriving = thrivings.find(t => t.id === thrivingId);
               if (targetThriving) {
                 setSelectedThriving(targetThriving);
                 
@@ -120,7 +122,7 @@ export default function ThrivingsPage() {
         }
       }
     }
-  }, []);
+  }, [thrivings]); // Add thrivings as dependency since we reference it
 
   // Show adjustment tutorial when appropriate
   useEffect(() => {
@@ -1061,15 +1063,9 @@ export default function ThrivingsPage() {
                             ))}
                           </div>
                           
-                          {/* Notification Settings */}
+                          {/* Notification Settings - Keeping the test notification functionality */}
                           <div className="mt-4">
-                            <NotificationSettings 
-                              thriving={selectedThriving}
-                              onToggle={(enabled) => {
-                                // Update the thriving's active state if needed
-                                console.log('Notifications', enabled ? 'enabled' : 'disabled', 'for', selectedThriving.title);
-                              }}
-                            />
+                            <NotificationSettingsCard />
                           </div>
                         </div>
                       </div>

@@ -77,6 +77,13 @@ body {
   user-select: none;
 }
 
+/* Ensure modal portal is always on top and isolated from page scroll */
+#modal-portal {
+  isolation: isolate;
+  position: fixed;
+  z-index: 10000;
+}
+
 /* Enable text selection only where needed */
 input, textarea, [contenteditable] {
   -webkit-user-select: text;

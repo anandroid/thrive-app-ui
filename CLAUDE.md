@@ -1,5 +1,66 @@
 # Thrive App - Mobile-First Development Guidelines
 
+## 🎯 WebView Keyboard Handling Solution
+
+### The Problem
+WebView environments (React Native WebView) have persistent issues with keyboard handling where:
+- Input fields get covered by the keyboard
+- Standard solutions like `visualViewport` API don't work reliably
+- CSS viewport units behave differently
+- Each platform (iOS/Android) has different quirks
+
+### The Solution: Use Our Custom Input Components
+We've created keyboard-aware Input and Textarea components that automatically handle all keyboard issues in WebView.
+
+#### For ALL Text Inputs in the App:
+```typescript
+// ❌ DON'T use regular inputs
+<input type="text" value={value} onChange={...} />
+<textarea value={value} onChange={...} />
+
+// ✅ DO use our keyboard-aware components
+import { Input, Textarea } from '@/components/ui/form-inputs';
+
+<Input 
+  value={value} 
+  onChange={(e) => setValue(e.target.value)}
+  label="Name"
+  placeholder="Enter name..."
+  error={errors.name}
+/>
+
+<Textarea 
+  value={notes} 
+  onChange={(e) => setNotes(e.target.value)}
+  label="Notes"
+  rows={4}
+/>
+```
+
+#### Features:
+- **Automatic keyboard handling** - Works in both WebView and regular browsers
+- **Consistent styling** - Uses viewport units for mobile-first design
+- **Built-in validation** - Error and helper text support
+- **Type safety** - Full TypeScript support
+- **No manual setup** - Just import and use
+
+#### Creating New Forms:
+When creating new forms or modals with text inputs:
+1. Always import from `@/components/ui/form-inputs`
+2. Use `Input` for single-line text fields
+3. Use `Textarea` for multi-line text fields
+4. These components handle ALL keyboard issues automatically
+
+#### For Special Cases (Chat, Editors):
+If you need custom input behavior (like ChatEditor), use the hook directly:
+```typescript
+import { useKeyboardAwareInput } from '@/hooks/useKeyboardAwareInput';
+
+const { handleFocus } = useKeyboardAwareInput();
+
+<input onFocus={handleFocus} />
+```
+
 ## 🔐 Environment Variables
 
 ### Required Environment Variables
@@ -683,6 +744,82 @@ import { LoadingButton } from '@/components/ui/LoadingButton';
 ### Used In
 - **RoutineCreationModal** - Creating wellness routines with personalized messages
 - **JourneyCreationModal** - Creating thriving journals with context-aware messages
+
+## 🔄 TouchCloseButton Component
+
+### Overview
+A mobile-optimized close button component (`/components/ui/TouchCloseButton.tsx`) that provides proper touch feedback, haptic feedback, and mobile-first interactions for all modal close actions.
+
+### Features
+- **Mobile-First Touch Targets** - Minimum 44x44px touch areas per Apple HIG
+- **Haptic Feedback** - Subtle vibration on tap for mobile devices
+- **Proper Event Handling** - Includes `stopPropagation()` and `preventDefault()`
+- **Responsive Sizing** - Three sizes (sm, md, lg) with viewport-based constraints
+- **Multiple Variants** - Default, dark, light variants for different backgrounds
+- **Touch Optimizations** - Hardware acceleration, touch-action manipulation
+- **Accessibility** - Proper ARIA labels and focus indicators
+
+### Usage Example
+```jsx
+import { TouchCloseButton } from '@/components/ui/TouchCloseButton';
+
+// Basic usage
+<TouchCloseButton onClose={onClose} />
+
+// With size and variant options
+<TouchCloseButton 
+  onClose={onClose} 
+  size="sm"           // sm, md (default), lg
+  variant="light"     // default, dark, light
+  className="custom-styles"
+/>
+```
+
+### MANDATORY: Use in ALL Modals
+**NEVER create custom close buttons in modals.** Always use TouchCloseButton for:
+- Consistent mobile touch experience
+- Proper event handling (stopPropagation, preventDefault)
+- Haptic feedback on mobile devices
+- Accessibility compliance
+- Touch target size compliance (min 44px)
+
+### Implementation Pattern
+```jsx
+// ✅ CORRECT - Always use TouchCloseButton
+<div className="absolute top-4 right-4">
+  <TouchCloseButton onClose={onClose} size="sm" />
+</div>
+
+// ❌ WRONG - Never create custom close buttons
+<button onClick={onClose} className="...">
+  <X className="w-5 h-5" />
+</button>
+```
+
+### Size Guidelines
+- **sm** (40x40px): Use in compact modals, notification modals
+- **md** (44x44px): Default size, use in most modals  
+- **lg** (48x48px): Use in large modals, important actions
+
+### Variant Guidelines
+- **default**: Use on white/light backgrounds
+- **light**: Use on gradient/colored backgrounds
+- **dark**: Use on dark backgrounds
+
+### Applied To
+- **DynamicJournalModal** - Smart journal modal
+- **PantryAddModal** - Add to pantry modal
+- **RoutineCreationModal** - Routine creation flow
+- **JourneyCreationModal** - Journey creation flow
+- **HealthConnectModal** - Health data connection
+- **NotificationPermissionModal** - Permission requests
+
+### New Modal Requirements
+When creating new modals, ALWAYS:
+1. Import TouchCloseButton: `import { TouchCloseButton } from '@/components/ui/TouchCloseButton'`
+2. Position absolutely: `<div className="absolute top-4 right-4">`
+3. Choose appropriate size and variant
+4. Never create custom close buttons
 
 ## 💡 Core Business Model & Chat Assistant Workflow (2025-07-12)
 

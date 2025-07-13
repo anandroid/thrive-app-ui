@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { MessageSquare, Search, Clock, Trash2, Plus } from 'lucide-react';
@@ -10,19 +10,19 @@ import { ChatHistoryItem } from '@/src/types/chat';
 
 export default function ChatHistoryPage() {
   const router = useRouter();
-  const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([]);
+  // Initialize with data from localStorage to prevent empty state flash
+  const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>(() => {
+    if (typeof window !== 'undefined') {
+      return getChatHistory();
+    }
+    return [];
+  });
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    loadChatHistory();
-  }, []);
+  const [isLoading] = useState(false);
 
   const loadChatHistory = () => {
-    setIsLoading(true);
     const history = getChatHistory();
     setChatHistory(history);
-    setIsLoading(false);
   };
 
   const handleSearch = (query: string) => {

@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Bell, X, Sparkles, Clock } from 'lucide-react';
+import { Bell, Sparkles, Clock } from 'lucide-react';
+import { TouchCloseButton } from '@/components/ui/TouchCloseButton';
 import { NotificationHelper } from '@/src/utils/notificationHelper';
 import bridge from '@/src/lib/react-native-bridge';
 
@@ -21,39 +22,50 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
   const [isRequesting, setIsRequesting] = useState(false);
 
   const handleEnableNotifications = async () => {
+    console.log('[NotificationModal] Starting notification permission request');
     setIsRequesting(true);
     
     try {
       // Use the React Native bridge directly for proper iOS/Android permission
+      console.log('[NotificationModal] Calling bridge.requestNotificationPermission()');
       const granted = await bridge.requestNotificationPermission();
+      console.log('[NotificationModal] Permission result:', granted);
       
       if (granted) {
         // Mark that permission was granted
         localStorage.setItem('notificationPermissionGranted', 'true');
         // Reset ask count since they granted permission
         localStorage.setItem('notificationAskCount', '0');
+        console.log('[NotificationModal] Permission granted, saved to localStorage');
         
         // Schedule notifications for existing thrivings
         const thrivings = JSON.parse(localStorage.getItem('thrive_thrivings') || '[]');
+        console.log('[NotificationModal] Found', thrivings.length, 'thrivings to schedule');
+        
         if (thrivings.length > 0) {
-          await NotificationHelper.scheduleRoutineReminders(thrivings);
+          console.log('[NotificationModal] Scheduling routine reminders...');
+          const result = await NotificationHelper.scheduleRoutineReminders(thrivings);
+          console.log('[NotificationModal] Schedule result:', result);
         }
         
         if (onPermissionGranted) {
+          console.log('[NotificationModal] Calling onPermissionGranted callback');
           onPermissionGranted();
         }
         
         // Close modal after a short delay to show success
+        console.log('[NotificationModal] Closing modal in 500ms');
         setTimeout(() => {
           onClose();
         }, 500);
       } else {
         // Permission denied
+        console.log('[NotificationModal] Permission denied by user');
         localStorage.setItem('notificationPermissionGranted', 'false');
         onClose();
       }
     } catch (error) {
-      console.error('Error requesting notification permission:', error);
+      console.error('[NotificationModal] Error requesting notification permission:', error);
       onClose();
     } finally {
       setIsRequesting(false);
@@ -77,13 +89,9 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
         <div className="bg-white rounded-[6vw] max-rounded-[1.5rem] shadow-2xl overflow-hidden">
           {/* Header with gradient background */}
           <div className="relative bg-gradient-to-br from-rose/20 via-dusty-rose/15 to-soft-lavender/20 p-[6vw] max-p-[1.5rem] pb-[8vw] max-pb-[2rem]">
-            <button
-              onClick={handleNotNow}
-              className="absolute top-[4vw] max-top-[1rem] right-[4vw] max-right-[1rem] p-[2vw] max-p-[0.5rem] rounded-full hover:bg-white/50 transition-colors"
-              aria-label="Close"
-            >
-              <X className="w-[5vw] h-[5vw] max-w-[1.25rem] max-h-[1.25rem] text-gray-600" />
-            </button>
+            <div className="absolute top-[4vw] max-top-[1rem] right-[4vw] max-right-[1rem]">
+              <TouchCloseButton onClose={handleNotNow} size="sm" variant="light" />
+            </div>
             
             {/* Icon */}
             <div className="w-[16vw] h-[16vw] max-w-[4rem] max-h-[4rem] mx-auto mb-[4vw] max-mb-[1rem] bg-gradient-to-br from-rose to-burgundy rounded-[4vw] max-rounded-[1rem] flex items-center justify-center shadow-lg">

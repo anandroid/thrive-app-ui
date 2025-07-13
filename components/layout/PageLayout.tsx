@@ -3,6 +3,39 @@
 import React, { ReactNode } from 'react';
 import { ActionBar } from '@/components/ui/ActionBar';
 
+/**
+ * PageLayout Component
+ * 
+ * Standard layout wrapper for all pages in the app.
+ * Provides consistent header, content area, and optional action bar.
+ * 
+ * IMPORTANT: Data Loading Best Practice
+ * =====================================
+ * To prevent flash of empty state when navigating between pages:
+ * 
+ * 1. Initialize state with data from localStorage/storage:
+ *    ```tsx
+ *    const [items, setItems] = useState<Item[]>(() => {
+ *      if (typeof window !== 'undefined') {
+ *        return getItemsFromStorage();
+ *      }
+ *      return [];
+ *    });
+ *    ```
+ * 
+ * 2. Or use the custom hook:
+ *    ```tsx
+ *    import { useLocalStorageState } from '@/src/hooks/useLocalStorageState';
+ *    
+ *    const [items, setItems, reloadItems] = useLocalStorageState(
+ *      'items_key',
+ *      [],
+ *      getItemsFromStorage
+ *    );
+ *    ```
+ * 
+ * This ensures data is available immediately on render, preventing UI flicker.
+ */
 interface PageLayoutProps {
   children: ReactNode;
   header?: {

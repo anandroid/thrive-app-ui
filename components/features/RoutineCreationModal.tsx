@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Sparkles, Moon, Sun, Info } from 'lucide-react';
+import { Sparkles, Moon, Sun, Info } from 'lucide-react';
 import { ActionableItem, WellnessRoutine } from '@/src/services/openai/types';
 import { LoadingButton } from '@/components/ui/LoadingButton';
+import { TouchCloseButton } from '@/components/ui/TouchCloseButton';
 import bridge from '@/src/lib/react-native-bridge';
 import { NotificationHelper } from '@/src/utils/notificationHelper';
 
@@ -343,18 +344,7 @@ export const RoutineCreationModal: React.FC<RoutineCreationModalProps> = ({
       <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
         {/* Fixed header with close button */}
         <div className="absolute top-0 right-0 p-4 z-10">
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onClose();
-            }}
-            className="w-8 h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center hover:bg-white transition-all duration-200 shadow-lg touch-feedback touch-manipulation cursor-pointer active:scale-95 active:bg-gray-100"
-            aria-label="Close modal"
-            type="button"
-          >
-            <X className="w-5 h-5 text-gray-700" />
-          </button>
+          <TouchCloseButton onClose={onClose} size="sm" variant="light" />
         </div>
         
         {/* Modal content */}
