@@ -73,7 +73,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   const [chatThreadId, setChatThreadId] = useState<string | null>(null);
   const hasScrolledToStreamRef = useRef<Set<number>>(new Set());
   const streamingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { messagesEndRef, chatContainerRef, scrollToBottom } = useKeyboardAwareChat();
+  const { messagesEndRef, scrollToBottom } = useKeyboardAwareChat();
   const [showThrivingTutorial, setShowThrivingTutorial] = useState(false);
   const [tutorialActionableText, setTutorialActionableText] = useState<string>('');
   const hasShownTutorialInSession = useRef(false);
@@ -88,6 +88,17 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);  // Detects when user stops typing
   const [currentQuestion, setCurrentQuestion] = useState<EnhancedQuestion | null>(null);  // Track current question for unified input
   const [submittedAnswer, setSubmittedAnswer] = useState<string>('');  // Answer submitted through main chat input
+
+  // WebView detection logging (temporary for debugging)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      console.log('User Agent:', navigator.userAgent);
+      console.log('Is WebView:', /wv|WebView/.test(navigator.userAgent));
+      console.log('Is Android:', /android/i.test(navigator.userAgent));
+      console.log('Window height:', window.innerHeight);
+      console.log('Screen height:', window.screen.height);
+    }
+  }, []);
 
   // Load existing messages if threadId is provided
   useEffect(() => {
@@ -1335,10 +1346,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   };
 
   return (
-    <div 
-      className="chat-container" 
-      ref={chatContainerRef}
-    >
+    <div className="chat-container">
       {/* Header - only render if provided */}
       {renderHeader && (
         <div className="chat-header safe-top">

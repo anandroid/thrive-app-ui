@@ -195,6 +195,91 @@ import { Input, Textarea } from '@/components/ui/form-inputs';
 - `.chat-input-container` - For chat-style inputs
 - Content automatically has padding-bottom to prevent overlap
 
+## 📱 React Native WebView Integration
+
+### Overview
+The app is designed to work seamlessly inside a React Native WebView with proper keyboard handling and native-like behavior.
+
+### WebView Implementation (React Native Side)
+```tsx
+// ChatWebView.tsx
+import { KeyboardAwareWebView } from 'react-native-webview-keyboard-handler';
+
+export default function ChatWebView() {
+  return (
+    <KeyboardAwareWebView
+      source={{ uri: 'https://your-domain.com' }}
+      originWhitelist={['*']}
+      // Keyboard & focus settings
+      keyboardDisplayRequiresUserAction={false}  // iOS: auto-focus shows keyboard
+      androidLayerType="hardware"               // Android: avoids flicker
+      // Web features
+      allowsInlineMediaPlayback
+      mediaPlaybackRequiresUserAction={false}
+      javaScriptEnabled
+      domStorageEnabled
+      startInLoadingState
+      onMessage={handleMessage}  // For bridge communication
+    />
+  );
+}
+```
+
+### Android Configuration
+**AndroidManifest.xml** (`android/app/src/main/AndroidManifest.xml`):
+```xml
+<manifest>
+  <!-- Required permissions -->
+  <uses-permission android:name="android.permission.INTERNET"/>
+  
+  <application
+    android:usesCleartextTraffic="true">  <!-- Dev only for http:// -->
+    <activity
+      android:name=".MainActivity"
+      android:windowSoftInputMode="adjustResize"  <!-- KEY: Resize WebView for keyboard -->
+      android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+      android:hardwareAccelerated="true"
+      android:exported="true">
+    </activity>
+  </application>
+</manifest>
+```
+
+### iOS Configuration
+**Info.plist** (`ios/YourApp/Info.plist`):
+```xml
+<!-- Allow loading from dev server -->
+<key>NSAppTransportSecurity</key>
+<dict>
+  <key>NSAllowsArbitraryLoads</key><true/>
+</dict>
+
+<!-- Auto-focus inputs without extra tap -->
+<key>KeyboardDisplayRequiresUserAction</key><false/>
+
+<!-- Allow inline media playback -->
+<key>AllowsInlineMediaPlayback</key><true/>
+```
+
+### Web App Configuration (Already Implemented)
+1. **Viewport Meta Tag**: ✅ Set via Next.js viewport export with `viewport-fit: "cover"`
+2. **CSS Architecture**: ✅ Sticky positioning for headers and inputs
+3. **Safe Areas**: ✅ Using `env(safe-area-inset-*)` throughout
+4. **Keyboard Handling**: ✅ Pure CSS approach, no JavaScript hacks
+
+### Key Benefits
+- **Seamless Keyboard Experience**: The sticky bottom pattern works identically in browser and WebView
+- **No JavaScript Conflicts**: CSS-only approach prevents WebView/Native keyboard conflicts  
+- **Performance**: No resize observers or DOM manipulation
+- **Consistent Behavior**: Same experience across iOS Safari, Android Chrome, and WebView
+
+### Testing Checklist
+- [ ] Keyboard slides up without covering input
+- [ ] Header stays visible when keyboard appears
+- [ ] Content scrolls naturally with keyboard open
+- [ ] No blank space when keyboard dismisses
+- [ ] Safe areas respected on notched devices
+
 ## 🔐 Environment Variables
 
 ### Required Environment Variables

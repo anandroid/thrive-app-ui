@@ -54,7 +54,6 @@ jest.mock('@/src/utils/chatStorage', () => ({
 jest.mock('@/hooks/useKeyboardAwareChat', () => ({
   useKeyboardAwareChat: () => ({
     messagesEndRef: { current: null },
-    chatContainerRef: { current: null },
     scrollToBottom: jest.fn(),
   }),
 }));
