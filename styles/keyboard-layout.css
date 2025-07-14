@@ -1,101 +1,42 @@
-/* Keyboard-aware layout for WebView */
+/* Simplified keyboard layout for natural scroll behavior */
 
 :root {
   --keyboard-height: 0px;
 }
 
-/* Ensure action bar stays fixed at top */
+/* Ensure fixed headers stay in place */
 .action-bar,
-.fixed-header,
-.chat-header,
-header,
-[data-keyboard-fixed="true"] {
+.app-header,
+.fixed-header {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
   right: 0 !important;
   z-index: 100 !important;
-  /* Ensure it doesn't move with transforms */
   transform: none !important;
 }
 
-/* Chat header specific - ensure it stays at top of chat container */
-.chat-container .chat-header {
-  position: sticky !important;
-  top: 0 !important;
+/* When keyboard is visible, we rely on natural browser behavior */
+/* The browser will automatically scroll inputs into view */
+/* No complex transforms needed */
+
+/* Ensure proper z-index hierarchy */
+.app-header {
+  z-index: 100;
 }
 
-/* Main content that should shift */
-.main-content,
-.page-content,
-.page-layout > :not(.action-bar),
-main,
-[data-keyboard-shift="true"] {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
+.app-content {
+  z-index: 1;
 }
 
-/* Special handling for chat container which uses position: fixed */
-/* For fixed containers, we need to adjust the bottom position instead of padding */
-body.keyboard-visible .chat-container {
-  /* Move the entire container up by keyboard height */
-  bottom: var(--keyboard-height) !important;
-  transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Modal adjustments remain simple */
+body.keyboard-visible .modal-backdrop {
+  /* Let modals handle their own positioning */
+  position: fixed;
+  inset: 0;
 }
 
-/* Ensure the flex layout adjusts properly */
-body.keyboard-visible .chat-messages {
-  /* Messages area should shrink to accommodate keyboard */
-  flex: 1 1 auto;
-  min-height: 0; /* Important for flex shrinking */
-  /* Add scroll padding to ensure last message is visible */
-  scroll-padding-bottom: 1rem;
-}
-
-/* Ensure input area is always visible above keyboard */
-body.keyboard-visible .chat-input-area {
-  /* Input area stays at bottom of shifted container */
-  position: relative;
-  z-index: 10;
-}
-
-/* When keyboard is visible, shift content up */
-body.keyboard-visible .main-content,
-body.keyboard-visible .page-content,
-body.keyboard-visible .page-layout > :not(.action-bar),
-body.keyboard-visible main,
-body.keyboard-visible [data-keyboard-shift="true"] {
-  transform: translateY(calc(-1 * var(--keyboard-height)));
-  /* Add padding at bottom so content is still scrollable */
-  padding-bottom: var(--keyboard-height) !important;
-}
-
-/* Ensure modals also shift appropriately */
-body.keyboard-visible .modal-content,
-body.keyboard-visible [role="dialog"] > div {
-  transform: translateY(calc(-1 * var(--keyboard-height) * 0.5));
-}
-
-/* Prevent fixed elements from shifting */
-body.keyboard-visible .fixed,
-body.keyboard-visible [data-keyboard-fixed="true"] {
-  transform: none !important;
-}
-
-/* Chat-specific adjustments */
-body.keyboard-visible .chat-messages {
-  /* Ensure messages are scrollable and don't overflow */
-  max-height: calc(100% - 140px); /* Reserve space for header + input */
-  overflow-y: auto;
-}
-
-/* Ensure chat editor is always visible when keyboard is shown */
-body.keyboard-visible .chat-input-wrapper {
-  /* Add extra bottom margin to ensure it's not cut off */
-  margin-bottom: env(safe-area-inset-bottom, 0);
-}
-
-/* Smooth transitions for all shifting elements */
+/* Smooth transitions for any adjustments */
 .keyboard-transition {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }

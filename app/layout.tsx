@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import "./webview-keyboard-fix.css";
-import "./webview-keyboard-complete.css";
 import { ServiceWorkerProvider } from "@/src/providers/ServiceWorkerProvider";
 import { OfflineIndicator } from "@/components/ui/OfflineIndicator";
 import { TouchFeedbackProvider } from "@/src/providers/TouchFeedbackProvider";

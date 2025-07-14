@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import bridge from '@/src/lib/react-native-bridge';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 export default function TestNotificationsPage() {
   const [logs, setLogs] = useState<string[]>([]);
@@ -89,9 +90,15 @@ export default function TestNotificationsPage() {
   const clearLogs = () => setLogs([]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Notification Test Page</h1>
+    <AppLayout
+      header={{
+        title: 'Notification Test',
+        showBackButton: true,
+        backHref: '/'
+      }}
+    >
+      <div className="min-h-full bg-gray-50 p-4">
+        <div className="max-w-4xl mx-auto">
         
         {/* Bridge Status */}
         <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
@@ -149,7 +156,8 @@ export default function TestNotificationsPage() {
             )}
           </div>
         </div>
+        </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }

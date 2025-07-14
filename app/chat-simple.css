@@ -9,8 +9,9 @@
   bottom: 0;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  height: 100dvh; /* Dynamic viewport height */
+  /* Remove fixed height to allow container to resize properly */
+  /* height: 100vh; */
+  /* height: 100dvh; */
   background: #f9fafb;
   /* Ensure smooth transition for keyboard handling */
   transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -18,6 +19,8 @@
 
 /* Fixed header */
 .chat-header {
+  position: sticky;
+  top: 0;
   flex-shrink: 0;
   background: white;
   border-bottom: 1px solid #e5e7eb;
@@ -58,11 +61,42 @@
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
-/* When using visualViewport API (optional enhancement) */
-.chat-container[data-keyboard-visible="true"] .chat-messages {
-  /* Messages area shrinks when keyboard is visible */
-  transition: all 0.3s ease-out;
+/* When chat components are used inside AppLayout */
+.app-layout .chat-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #f9fafb;
 }
+
+.app-layout .chat-header {
+  display: none; /* Hide since AppLayout provides header */
+}
+
+.app-layout .chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-layout .chat-messages-content {
+  margin-top: auto;
+  padding: 1rem;
+}
+
+.app-layout .chat-input-area {
+  flex-shrink: 0;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Messages area naturally adjusts with flexbox */
 
 /* Ensure smooth scrolling */
 .smooth-scroll {

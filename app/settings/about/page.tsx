@@ -1,12 +1,12 @@
 'use client';
 
 import React from 'react';
-import { PageLayout } from '@/components/layout/PageLayout';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { AboutSection } from '@/components/features/AboutSection';
 
 export default function AboutPage() {
   return (
-    <PageLayout
+    <AppLayout
       header={{
         showBackButton: true,
         backHref: '/settings',
@@ -16,6 +16,6 @@ export default function AboutPage() {
       <div className="px-4 py-6">
         <AboutSection />
       </div>
-    </PageLayout>
+    </AppLayout>
   );
 }

@@ -28,6 +28,8 @@
   overscroll-behavior: contain;
   min-height: 0; /* Important for flex children */
   position: relative;
+  /* Add top padding to account for sticky header */
+  padding-top: calc(3.5rem + env(safe-area-inset-top, 0));
 }
 
 /* Header padding helper */

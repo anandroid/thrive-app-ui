@@ -1,8 +1,8 @@
 'use client';
 
 import React, { ReactNode } from 'react';
-import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { TouchLink } from './TouchLink';
 
 interface ActionBarProps {
   title?: string | ReactNode;
@@ -42,13 +42,18 @@ export function ActionBar({
         {/* Left: Back Button */}
         <div className="action-bar-left">
           {showBackButton ? (
-            <Link 
+            <TouchLink 
               href={backHref}
               onClick={handleBackClick}
-              className="action-bar-button touch-feedback touch-manipulation"
+              className="action-bar-button"
+              variant="icon"
+              haptic="medium"
+              scale={0.9}
+              shadow="sm"
+              cardGlow
             >
               <ArrowLeft className="w-5 h-5" />
-            </Link>
+            </TouchLink>
           ) : (
             <div className="w-11" />
           )}

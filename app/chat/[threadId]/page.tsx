@@ -1,16 +1,17 @@
 'use client';
 
 import React, { useState, useEffect, use } from 'react';
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Heart } from 'lucide-react';
 import { SmartCardChat } from '@/components/features/SmartCardChat';
+import { TouchLink } from '@/components/ui/TouchLink';
 import { saveThrivingToStorage } from '@/src/utils/thrivingStorage';
 import { saveJourneyToStorage } from '@/src/utils/journeyStorage';
 import { Thriving, AdditionalRecommendation } from '@/src/types/thriving';
 import { NotificationPermissionModal } from '@/components/features/NotificationPermissionModal';
 import { NotificationHelper } from '@/src/utils/notificationHelper';
 import bridge from '@/src/lib/react-native-bridge';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 export default function ChatPage({ params }: { params: Promise<{ threadId: string }> }) {
   const router = useRouter();
@@ -35,7 +36,45 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
 
   return (
     <>
-      <SmartCardChat
+      <AppLayout
+        customHeader={
+          <>
+            <div className="action-bar-content">
+              <div className="action-bar-left">
+                <TouchLink 
+                  href="/"
+                  className="action-bar-button"
+                  variant="icon"
+                  haptic="medium"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </TouchLink>
+              </div>
+              <div className="action-bar-center">
+                <div className="flex items-center space-x-2">
+                  <h1 className="action-bar-title">Companion</h1>
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose/20 to-dusty-rose/30 flex items-center justify-center">
+                    <Heart className="w-4 h-4 text-rose fill-rose/30" />
+                  </div>
+                </div>
+              </div>
+              <div className="action-bar-right">
+                <div className="w-11" />
+              </div>
+            </div>
+            {chatIntent === 'create_thriving' && (
+              <div className="flex justify-center py-2 bg-white/80">
+                <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-rose to-burgundy text-white px-4 py-1.5 rounded-full text-sm shadow-lg">
+                  <span>🌿</span>
+                  <span className="font-medium">Thriving Creation Mode</span>
+                </div>
+              </div>
+            )}
+          </>
+        }
+        className="chat-layout"
+      >
+        <SmartCardChat
           threadId={currentThreadId === 'new' ? undefined : currentThreadId}
           chatIntent={chatIntent}
           onThreadCreated={(newThreadId) => {
@@ -182,59 +221,27 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
             router.push('/journeys');
           }}
           selectedPrompt={initialMessage}
-          renderHeader={() => (
-            <>
-              <div className="action-bar-content">
-                <div className="action-bar-left">
-                  <Link 
-                    href="/"
-                    className="action-bar-button touch-feedback touch-manipulation"
-                  >
-                    <ArrowLeft className="w-5 h-5" />
-                  </Link>
-                </div>
-                <div className="action-bar-center">
-                  <div className="flex items-center space-x-2">
-                    <h1 className="action-bar-title">Companion</h1>
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose/20 to-dusty-rose/30 flex items-center justify-center">
-                      <Heart className="w-4 h-4 text-rose fill-rose/30" />
-                    </div>
-                  </div>
-                </div>
-                <div className="action-bar-right">
-                  <div className="w-11" />
-                </div>
-              </div>
-              {chatIntent === 'create_thriving' && (
-                <div className="flex justify-center py-2 bg-white/80">
-                  <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-rose to-burgundy text-white px-4 py-1.5 rounded-full text-sm shadow-lg">
-                    <span>🌿</span>
-                    <span className="font-medium">Thriving Creation Mode</span>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
         />
+      </AppLayout>
         
-        <NotificationPermissionModal
-          isOpen={showNotificationModal}
-          onClose={() => {
-            setShowNotificationModal(false);
-            // Navigate to thrivings page after modal closes
-            if (createdThriving) {
-              router.push(`/thrivings?id=${createdThriving.id}`);
-            }
-          }}
-          onPermissionGranted={() => {
-            // Schedule notifications for the created thriving
-            if (createdThriving && window.ReactNativeBridge) {
-              const thrivings = JSON.parse(localStorage.getItem('thrive_thrivings') || '[]');
-              NotificationHelper.scheduleRoutineReminders(thrivings);
-            }
-          }}
-          routineName={createdThriving?.title}
-        />
+      <NotificationPermissionModal
+        isOpen={showNotificationModal}
+        onClose={() => {
+          setShowNotificationModal(false);
+          // Navigate to thrivings page after modal closes
+          if (createdThriving) {
+            router.push(`/thrivings?id=${createdThriving.id}`);
+          }
+        }}
+        onPermissionGranted={() => {
+          // Schedule notifications for the created thriving
+          if (createdThriving && window.ReactNativeBridge) {
+            const thrivings = JSON.parse(localStorage.getItem('thrive_thrivings') || '[]');
+            NotificationHelper.scheduleRoutineReminders(thrivings);
+          }
+        }}
+        routineName={createdThriving?.title}
+      />
     </>
   );
 }

@@ -1,0 +1,105 @@
+/* Enhanced Button Animations and Effects */
+
+/* Active state gradient changes for Tailwind dynamic classes */
+.bg-gradient-to-r.active\:from-sage-light\/40:active {
+  --tw-gradient-from: rgb(163 191 160 / 0.4);
+  --tw-gradient-to: rgb(163 191 160 / 0);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.bg-gradient-to-r.active\:to-sage\/30:active {
+  --tw-gradient-to: rgb(135 168 120 / 0.3);
+}
+
+.bg-gradient-to-r.active\:from-dusty-rose\/30:active {
+  --tw-gradient-from: rgb(218 160 169 / 0.3);
+  --tw-gradient-to: rgb(218 160 169 / 0);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.bg-gradient-to-r.active\:to-rose\/30:active {
+  --tw-gradient-to: rgb(251 113 133 / 0.3);
+}
+
+/* Enhanced gradient overlay effect */
+.group:active .group-active\:opacity-100 {
+  opacity: 1;
+}
+
+/* Smooth rounded corners inheritance */
+.rounded-inherit {
+  border-radius: inherit;
+}
+
+/* Enhanced touch feedback with gradient background */
+.touch-feedback-enhanced {
+  position: relative;
+  overflow: hidden;
+}
+
+.touch-feedback-enhanced::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--touch-x, 50%) var(--touch-y, 50%), 
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.1) 40%,
+    transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.touch-feedback-enhanced:active::before {
+  opacity: 1;
+  transition: opacity 0.1s ease;
+}
+
+/* Blue gradient flash on press (like iOS) */
+.touch-feedback-blue::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, 
+    transparent 0%,
+    rgba(59, 130, 246, 0.1) 50%,
+    transparent 100%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.touch-feedback-blue:active::after {
+  opacity: 1;
+  transition: opacity 0.05s ease;
+}
+
+/* Enhanced spring animation with more bounce */
+.touch-feedback-spring-enhanced {
+  transition: transform 500ms cubic-bezier(0.68, -0.6, 0.265, 1.6);
+}
+
+.touch-feedback-spring-enhanced:active {
+  transform: scale(0.92);
+  transition: transform 80ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* Premium button press with shadow and transform */
+.button-press-premium {
+  transform: translateY(0) scale(1);
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    inset 0 0 0 0 rgba(0, 0, 0, 0);
+  transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.button-press-premium:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 
+    0 1px 2px 0 rgba(0, 0, 0, 0.08),
+    0 0 0 0 rgba(0, 0, 0, 0),
+    inset 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  transition-duration: 50ms;
+}

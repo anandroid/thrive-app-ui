@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Native Keyboard Test</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    :root {
+      --keyboard-height: 0px;
+    }
+    
+    body {
+      font-family: -apple-system, system-ui, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    /* Debug info overlay */
+    .debug-overlay {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      z-index: 10000;
+      font-family: monospace;
+    }
+    
+    .debug-overlay div {
+      margin: 4px 0;
+    }
+    
+    /* Chat container - exactly like production */
+    .chat-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      background: #f9fafb;
+      transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Apply keyboard adjustment */
+    body.keyboard-visible .chat-container {
+      bottom: calc(var(--keyboard-height) + 20px) !important;
+    }
+    
+    .chat-header {
+      flex-shrink: 0;
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 16px;
+      background: #f9fafb;
+    }
+    
+    .message {
+      background: white;
+      padding: 12px 16px;
+      margin: 8px 0;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .chat-input-area {
+      flex-shrink: 0;
+      background: white;
+      border-top: 1px solid #e5e7eb;
+      padding: 16px;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    body.keyboard-visible .chat-input-area {
+      padding-bottom: calc(16px + env(safe-area-inset-bottom, 0));
+    }
+    
+    .input-wrapper {
+      position: relative;
+    }
+    
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #e5e7eb;
+      border-radius: 24px;
+      font-size: 16px;
+      outline: none;
+      background: #f9fafb;
+    }
+    
+    input:focus {
+      border-color: #4f46e5;
+      background: white;
+    }
+    
+    /* Test buttons */
+    .test-buttons {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      z-index: 10000;
+      display: flex;
+      gap: 8px;
+    }
+    
+    .test-buttons button {
+      padding: 8px 12px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    
+    /* Visual indicators */
+    .height-indicator {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(79, 70, 229, 0.2);
+      border-top: 2px solid #4f46e5;
+      height: var(--keyboard-height);
+      pointer-events: none;
+      transition: height 0.3s;
+      z-index: 9999;
+    }
+    
+    .height-label {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #4f46e5;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <!-- Debug Overlay -->
+  <div class="debug-overlay">
+    <div><strong>Debug Info</strong></div>
+    <div>Keyboard Height: <span id="debugHeight">0px</span></div>
+    <div>Body Class: <span id="debugClass">none</span></div>
+    <div>Container Bottom: <span id="debugBottom">0px</span></div>
+    <div>Input Visible: <span id="debugVisible">yes</span></div>
+    <div>Messages: <span id="debugMessages">0</span></div>
+  </div>
+  
+  <!-- Height Indicator -->
+  <div class="height-indicator">
+    <div class="height-label">Keyboard: <span id="heightLabel">0px</span></div>
+  </div>
+  
+  <!-- Chat Container -->
+  <div class="chat-container" id="chatContainer">
+    <div class="chat-header">
+      <h3>Chat Keyboard Test</h3>
+      <p style="font-size: 12px; color: #666; margin-top: 4px;">Test keyboard behavior in WebView</p>
+    </div>
+    
+    <div class="chat-messages">
+      <div class="message">Welcome! This tests the keyboard behavior.</div>
+      <div class="message">Tap the input below to trigger the keyboard.</div>
+      <div class="message">The chat should move up when keyboard appears.</div>
+      <div class="message">The input should be visible above the keyboard.</div>
+      <div class="message">Use the test buttons to simulate different heights.</div>
+      <div class="message">Message 6</div>
+      <div class="message">Message 7</div>
+      <div class="message">Message 8</div>
+      <div class="message">Message 9</div>
+      <div class="message">Last message</div>
+    </div>
+    
+    <div class="chat-input-area">
+      <div class="input-wrapper">
+        <input type="text" placeholder="Type a message..." id="chatInput" />
+      </div>
+    </div>
+  </div>
+  
+  <!-- Test Buttons -->
+  <div class="test-buttons">
+    <button onclick="simulateKeyboard(300)">300px</button>
+    <button onclick="simulateKeyboard(350)">350px</button>
+    <button onclick="simulateKeyboard(400)">400px</button>
+    <button onclick="simulateKeyboard(0)">Hide</button>
+  </div>
+  
+  <script>
+    let messageCount = 0;
+    
+    // Update debug info
+    function updateDebug() {
+      const height = getComputedStyle(document.documentElement).getPropertyValue('--keyboard-height');
+      const hasClass = document.body.classList.contains('keyboard-visible');
+      const container = document.getElementById('chatContainer');
+      const containerBottom = getComputedStyle(container).bottom;
+      const input = document.getElementById('chatInput');
+      const inputRect = input.getBoundingClientRect();
+      const isVisible = inputRect.bottom <= window.innerHeight && inputRect.top >= 0;
+      
+      document.getElementById('debugHeight').textContent = height || '0px';
+      document.getElementById('debugClass').textContent = hasClass ? 'keyboard-visible' : 'none';
+      document.getElementById('debugBottom').textContent = containerBottom;
+      document.getElementById('debugVisible').textContent = isVisible ? 'yes' : 'no';
+      document.getElementById('debugMessages').textContent = messageCount;
+      document.getElementById('heightLabel').textContent = height || '0px';
+    }
+    
+    // Simulate keyboard
+    function simulateKeyboard(height) {
+      console.log('Simulating keyboard:', height);
+      
+      // Set CSS variable
+      document.documentElement.style.setProperty('--keyboard-height', `${height}px`);
+      
+      // Toggle body class
+      if (height > 0) {
+        document.body.classList.add('keyboard-visible');
+      } else {
+        document.body.classList.remove('keyboard-visible');
+      }
+      
+      // Simulate native message
+      window.postMessage(JSON.stringify({
+        type: 'keyboard_height_changed',
+        payload: {
+          height: height,
+          visible: height > 0,
+          duration: 250
+        }
+      }), '*');
+      
+      updateDebug();
+    }
+    
+    // Listen for messages (from native app)
+    window.addEventListener('message', (event) => {
+      try {
+        if (typeof event.data === 'string') {
+          const data = JSON.parse(event.data);
+          if (data.type === 'keyboard_height_changed') {
+            messageCount++;
+            const { height, visible } = data.payload;
+            
+            console.log('Received keyboard message:', data.payload);
+            
+            // Apply changes (simulating the hook)
+            document.documentElement.style.setProperty('--keyboard-height', `${height || 0}px`);
+            
+            if (visible && height > 0) {
+              document.body.classList.add('keyboard-visible');
+            } else {
+              document.body.classList.remove('keyboard-visible');
+            }
+            
+            updateDebug();
+          }
+        }
+      } catch (e) {
+        // Ignore parse errors
+      }
+    });
+    
+    // Input focus handler
+    document.getElementById('chatInput').addEventListener('focus', () => {
+      console.log('Input focused - keyboard should appear');
+      // In real WebView, this would trigger native keyboard
+    });
+    
+    document.getElementById('chatInput').addEventListener('blur', () => {
+      console.log('Input blurred - keyboard should hide');
+    });
+    
+    // Update debug info regularly
+    setInterval(updateDebug, 500);
+    
+    // Initial update
+    updateDebug();
+    
+    // Log initial state
+    console.log('Test page loaded');
+    console.log('Container:', document.getElementById('chatContainer'));
+    console.log('Initial bottom:', getComputedStyle(document.getElementById('chatContainer')).bottom);
+  </script>
+</body>
+</html>

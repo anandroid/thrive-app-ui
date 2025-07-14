@@ -1,0 +1,52 @@
+/* Chat Content Styles - Works inside AppLayout */
+
+.chat-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: #f9fafb;
+}
+
+/* Messages area - grows to fill space */
+.chat-messages-area {
+  flex: 1;
+  padding: 1rem;
+  /* Add some bottom padding so last message isn't too close to input */
+  padding-bottom: 2rem;
+}
+
+/* Input container - stays at bottom */
+.chat-input-container {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  /* Shadow for depth */
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  /* Safe area for devices with home indicator */
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Ensure input is never hidden by keyboard */
+.chat-input-container:focus-within {
+  /* Browser will automatically scroll this into view */
+  position: sticky;
+  bottom: 0;
+}
+
+/* Welcome placeholder */
+.chat-welcome-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  color: #6b7280;
+  font-size: 1.125rem;
+}
+
+/* Message styles remain the same */
+.chat-message {
+  margin-bottom: 1rem;
+}
+
+/* Natural scroll behavior - no special keyboard handling needed */

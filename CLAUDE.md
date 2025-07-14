@@ -1,5 +1,111 @@
 # Thrive App - Mobile-First Development Guidelines
 
+## 🤖 AI AGENT MANDATORY RULES - READ FIRST!
+
+### RULE #1: Touch Feedback is NOT Optional
+**EVERY clickable element MUST use our premium touch components with ALL features enabled:**
+
+```jsx
+// ❌ NEVER create buttons like this:
+<button>Click</button>
+
+// ✅ ALWAYS create buttons like this:
+<Button springAnimation gradientOverlay cardGlow haptic="medium">
+  Click
+</Button>
+```
+
+### RULE #2: Pre-configured Components Have Premium Features Built-in
+Use these components - they already include all premium effects:
+- `MenuButton` - For settings/menu buttons
+- `CardButton` - For card-style interactive elements  
+- `SoftButton` - For subtle gradient buttons
+- `ConsultationButton` - For CTA buttons
+- `IconButton` - For icon-only buttons
+
+### RULE #3: Copy These Templates
+```jsx
+// Primary action button
+<Button 
+  variant="gradient"
+  springAnimation
+  gradientOverlay
+  cardGlow
+  haptic="medium"
+  gradient={{
+    from: 'rose', to: 'burgundy',
+    activeFrom: 'rose/40', activeTo: 'burgundy/30'
+  }}
+>
+  Save
+</Button>
+
+// Navigation link
+<TouchLink href="/page" variant="icon" haptic="medium" cardGlow scale={0.9}>
+  <Icon />
+</TouchLink>
+
+// Card interaction
+<CardButton onClick={...}>{content}</CardButton>
+```
+
+**Remember: Premium touch feedback is MANDATORY, not optional!**
+
+## 🏗️ Page Layout Architecture (MANDATORY)
+
+### ALL page.tsx files MUST use AppLayout
+Every page in the app MUST use the standardized AppLayout component for consistency:
+
+```tsx
+// ✅ CORRECT - All pages must follow this pattern
+import { AppLayout } from '@/components/layout/AppLayout';
+
+export default function MyPage() {
+  return (
+    <AppLayout
+      header={{
+        title: "Page Title",
+        showBackButton: true,
+        backHref: "/",
+        rightElement: <CustomButton />
+      }}
+    >
+      {/* Your page content */}
+    </AppLayout>
+  );
+}
+
+// ❌ WRONG - Never use these patterns
+<div className="app-screen">...</div>  // Legacy pattern
+<PageLayout>...</PageLayout>           // Removed component
+Custom layout structures               // Not allowed
+```
+
+### AppLayout Features
+- **Fixed header** that stays at top while content scrolls
+- **Natural scroll behavior** - no complex CSS transforms
+- **Automatic safe area handling** for notch devices
+- **Consistent spacing** across all pages
+- **Mobile-first architecture**
+
+### Exception: Pages with Special Requirements
+Only these pages may use custom layouts:
+- **Home page** (`/page.tsx`) - Has drawer navigation
+- **Chat** (`/chat/[threadId]/page.tsx`) - Uses SmartCardChat component
+- Pages that directly use **ActionBar** with legacy `app-screen` pattern (being phased out)
+
+### CSS Classes Provided
+The AppLayout automatically applies these classes:
+- `.app-layout` - Main container
+- `.app-header` - Fixed header container
+- `.app-content` - Scrollable content area
+
+### Important Notes
+1. The ActionBar inside AppLayout has `padding-top: 0` to prevent double padding
+2. Content area automatically has proper `padding-top` for the fixed header
+3. No manual keyboard handling needed - browser handles it naturally
+4. Always test on mobile devices to ensure proper scrolling behavior
+
 ## 🎯 WebView Keyboard Handling Solution
 
 ### The Problem
@@ -820,6 +926,547 @@ When creating new modals, ALWAYS:
 2. Position absolutely: `<div className="absolute top-4 right-4">`
 3. Choose appropriate size and variant
 4. Never create custom close buttons
+
+## 🎯 Standardized Modal Component
+
+### Overview
+A standardized modal component (`/components/ui/Modal.tsx`) that ALL modals in the app MUST use for consistency, accessibility, and mobile optimization.
+
+### Features
+- **Consistent UX** - All modals have the same behavior and styling
+- **Built-in Accessibility** - Escape key handling, ARIA attributes, focus management
+- **Body Scroll Prevention** - Automatically prevents body scroll when open
+- **TouchCloseButton Integration** - Built-in support for mobile-optimized close button
+- **Flexible Layout** - Supports custom header and footer components
+- **Size Variants** - sm, md, lg, xl, full sizes available
+- **Smooth Animations** - Consistent fade-in and scale animations
+- **Proper Centering** - Uses flexbox for perfect centering across all devices
+
+### MANDATORY: All New Modals MUST Use This Component
+**NEVER create custom modal implementations.** Always use the Modal component:
+
+```jsx
+import { Modal } from '@/components/ui/Modal';
+
+// Basic usage
+<Modal
+  isOpen={isOpen}
+  onClose={onClose}
+  title="Modal Title"
+>
+  {/* Modal content */}
+</Modal>
+
+// With custom header and footer
+<Modal
+  isOpen={isOpen}
+  onClose={onClose}
+  header={customHeaderComponent}
+  footer={customFooterComponent}
+  size="lg"
+  className="max-w-lg"
+>
+  {/* Modal content */}
+</Modal>
+```
+
+### Size Guidelines
+- **sm**: Max width 384px - Use for simple confirmations, small forms
+- **md**: Max width 448px (default) - Use for most modals
+- **lg**: Max width 512px - Use for complex forms, multi-step flows
+- **xl**: Max width 576px - Use for large content areas
+- **full**: Max width 95vw - Use for full-screen experiences
+
+### Implementation Pattern
+```jsx
+// ✅ CORRECT - Always use Modal component
+import { Modal } from '@/components/ui/Modal';
+
+export function MyNewModal({ isOpen, onClose }) {
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="My Modal"
+      size="md"
+    >
+      <div className="space-y-4">
+        {/* Your modal content */}
+      </div>
+    </Modal>
+  );
+}
+
+// ❌ WRONG - Never create custom modal structure
+export function MyNewModal({ isOpen, onClose }) {
+  if (!isOpen) return null;
+  
+  return (
+    <div className="fixed inset-0 z-50">
+      <div className="bg-black/50" onClick={onClose} />
+      <div className="modal-content">
+        {/* Custom implementation */}
+      </div>
+    </div>
+  );
+}
+```
+
+### Props
+- `isOpen` (required): Boolean to control modal visibility
+- `onClose` (required): Function called when modal should close
+- `title`: String title for the modal header
+- `children`: Modal content
+- `header`: Custom ReactNode for header (overrides title)
+- `footer`: Custom ReactNode for footer
+- `size`: Size variant (sm, md, lg, xl, full)
+- `className`: Additional CSS classes
+- `showCloseButton`: Whether to show close button (default: true)
+- `closeOnBackdrop`: Whether clicking backdrop closes modal (default: true)
+
+### Applied To (All Modals Updated)
+- **HealthConnectModal** - Health data connection flow
+- **JourneyCreationModal** - Journey creation with custom header/footer
+- **PantryAddModal** - Pantry item addition
+- **RoutineCreationModal** - Multi-step routine creation
+- **DynamicJournalModal** - Smart journal with progress bar
+- **NotificationPermissionModal** - Permission request flow
+- **NotificationSettingsModal** - Settings management
+
+### Benefits
+1. **Consistency** - Users get the same experience across all modals
+2. **Accessibility** - Built-in keyboard navigation and screen reader support
+3. **Performance** - Single implementation to optimize
+4. **Maintenance** - Fix bugs or add features in one place
+5. **Mobile-First** - Designed for touch interactions from the start
+
+### localStorage and SSR Considerations
+When using localStorage in modals, always check if window is defined:
+```jsx
+useEffect(() => {
+  if (typeof window !== 'undefined') {
+    const value = localStorage.getItem('key');
+    // Use value
+  }
+}, []);
+```
+
+Never access localStorage during render or at module level to avoid SSR errors.
+
+## 📱 Universal Touch Feedback System (REQUIRED FOR ALL INTERACTIVE ELEMENTS)
+
+### 🤖 ATTENTION AI AGENTS - READ THIS FIRST!
+**When creating ANY button, link, or clickable element, you MUST:**
+1. Use our touch components (Button, TouchLink, Touchable) - NEVER raw HTML
+2. Enable `springAnimation` for bouncy feel (0.93 scale)
+3. Enable `gradientOverlay` for hover shimmer effects  
+4. Enable `cardGlow` for soft shadow depth
+5. Include active gradient states (`activeFrom`/`activeTo`)
+6. Set `haptic="medium"` for tactile feedback
+
+**Example - EVERY button should look like this:**
+```jsx
+<Button 
+  springAnimation
+  gradientOverlay
+  cardGlow
+  haptic="medium"
+  gradient={{
+    from: 'rose',
+    to: 'burgundy', 
+    activeFrom: 'rose/40',
+    activeTo: 'burgundy/30'
+  }}
+>
+  Click Me
+</Button>
+```
+
+### Overview
+A comprehensive touch feedback system that provides native app-like interactions with haptic feedback, smooth animations, and proper debouncing. **ALL clickable elements in the app MUST use one of these components** to ensure consistent, premium touch experience.
+
+### THE UNIVERSAL RULE:
+**"I still wish we have one component that any click throughout the app can experience that"** - This has been achieved! Use these components for EVERY interactive element.
+
+### Core Components (USE THESE, NOT RAW HTML ELEMENTS)
+
+#### 1. **Button Component** - For ALL button actions
+```jsx
+import Button, { 
+  MenuButton,    // Settings/menu buttons
+  CardButton,    // Card-style buttons (prompt templates)
+  NativeButton,  // Native app feel buttons
+  ConsultationButton, // Expert consultation CTAs
+  SoftButton,    // Soft gradient buttons (journal)
+  IconButton,    // Icon-only buttons
+  FAB           // Floating action buttons
+} from '@/components/ui/Button';
+
+// Basic button with all premium features
+<Button 
+  variant="primary"    // primary, secondary, ghost, danger, gradient, soft, outline
+  haptic="medium"      // light, medium, heavy
+  cardGlow              // Soft glow effect
+  nativePress           // Native app press effect
+  gradientOverlay       // Gradient shine on hover
+  hoverScale={1.02}     // Scale on hover
+  shadow="lg"          // none, sm, md, lg, xl
+>
+  Click Me
+</Button>
+
+// Pre-configured variants
+<MenuButton>Settings</MenuButton>
+<CardButton>Prompt Template</CardButton>
+<NativeButton>Native Feel</NativeButton>
+```
+
+#### 2. **TouchLink Component** - For ALL navigation links
+```jsx
+import { TouchLink } from '@/components/ui/TouchLink';
+
+// Navigation with haptic feedback
+<TouchLink 
+  href="/page"
+  variant="icon"       // default, subtle, icon, button, card
+  haptic="medium"      // light, medium, heavy
+  cardGlow             // Soft glow effect
+  shadow="md"          // boolean or sm, md, lg, xl
+  hoverScale={1.02}    // Scale on hover
+  nativePress          // Native press effect
+>
+  <ArrowLeft className="w-5 h-5" />
+</TouchLink>
+```
+
+#### 3. **Touchable Component** - For custom touchable wrappers
+```jsx
+import { Touchable } from '@/components/ui/Touchable';
+
+// Make custom elements touchable
+<Touchable
+  variant="card"      // default, subtle, icon, card, gradient
+  haptic="medium"     // light, medium, heavy
+  gradient={{          // Optional gradient
+    from: 'rose',
+    to: 'burgundy'
+  }}
+  shadow="lg"         // none, sm, md, lg, xl
+  scale={0.98}        // Active scale
+  onClick={handleClick}
+>
+  {/* Any content */}
+</Touchable>
+```
+
+#### 4. **TouchCloseButton Component**
+Specialized close button for modals with built-in haptic feedback.
+
+#### 5. **useTouchFeedback Hook**
+Low-level hook for custom touch interactions:
+```jsx
+import { useTouchFeedback } from '@/hooks/useTouchFeedback';
+
+const { touchHandlers, triggerHaptic } = useTouchFeedback({
+  hapticStyle: 'medium',
+  preventDoubleTap: true
+});
+
+<div {...touchHandlers} onClick={triggerHaptic}>
+  Custom Touch Element
+</div>
+```
+
+### Premium Features (Available in ALL Components)
+- **Haptic Feedback** - Native vibration on supported devices
+- **iOS Haptics API** - Uses native iOS haptic engine when available
+- **Double-Tap Prevention** - Prevents accidental zoom on mobile
+- **60 FPS Animations** - Hardware-accelerated transforms
+- **Natural Debouncing** - Prevents accidental double-clicks
+- **Spring Physics** - iOS-style bounce animations
+- **Card Glow Effect** - Soft shadow glow (`cardGlow` prop)
+- **Gradient Overlay** - Shimmer effect on hover (`gradientOverlay` prop)
+- **Native Press** - iOS/Android native button feel (`nativePress` prop)
+- **Hover Scale** - Smooth scale on hover (`hoverScale` prop)
+- **Touch Ripple** - Material Design ripple (`ripple` prop)
+
+### 🚨 MANDATORY Usage Guidelines for AI Agents
+
+#### CRITICAL RULE FOR ALL AI AGENTS:
+When creating ANY interactive element (button, link, clickable div), you MUST use our touch feedback components with ALL premium features enabled. This is NOT optional - it's a core requirement for consistent user experience.
+
+#### ❌ NEVER use raw HTML elements:
+```jsx
+// WRONG - Never do this!
+<button onClick={...}>Click</button>
+<a href="...">Link</a>
+<div onClick={...}>Clickable</div>
+```
+
+#### ✅ ALWAYS use touch components with premium features:
+```jsx
+// CORRECT - Always include these premium features!
+<Button 
+  onClick={...}
+  springAnimation     // MANDATORY for bouncy feel
+  gradientOverlay     // MANDATORY for hover effects
+  cardGlow           // MANDATORY for soft glow
+>
+  Click Me
+</Button>
+
+<TouchLink 
+  href="..."
+  variant="icon"
+  haptic="medium"    // MANDATORY haptic feedback
+  cardGlow           // MANDATORY for premium feel
+  scale={0.9}        // Appropriate scale for the variant
+>
+  Navigate
+</TouchLink>
+```
+
+#### Component Selection Guide with MANDATORY Premium Features:
+
+##### For Primary Actions (Submit, Save, Create):
+```jsx
+<Button 
+  variant="gradient"
+  springAnimation
+  gradientOverlay
+  gradient={{
+    from: 'rose',
+    to: 'burgundy',
+    hoverFrom: 'burgundy',
+    hoverTo: 'burgundy',
+    activeFrom: 'rose/40',      // Active state gradients
+    activeTo: 'burgundy/30'
+  }}
+>
+  Save Changes
+</Button>
+```
+
+##### For Cards and Prompt Templates:
+```jsx
+<CardButton 
+  onClick={handleClick}
+  className="p-5"
+  // CardButton already includes:
+  // - springAnimation ✓
+  // - gradientOverlay ✓ 
+  // - cardGlow ✓
+  // - hoverScale={1.01} ✓
+>
+  {content}
+</CardButton>
+```
+
+##### For Navigation Links:
+```jsx
+<TouchLink 
+  href="/page"
+  variant="icon"      // or "card" for card-like links
+  haptic="medium"
+  cardGlow
+  shadow="sm"
+  scale={0.9}         // Icon buttons need smaller scale
+>
+  <ArrowLeft className="w-5 h-5" />
+</TouchLink>
+```
+
+##### For Secondary Actions (Cancel, Back):
+```jsx
+<SoftButton
+  onClick={handleCancel}
+  fullWidth
+  // SoftButton includes spring animation and gradients
+>
+  Cancel
+</SoftButton>
+```
+
+##### For Settings/Menu Buttons:
+```jsx
+<MenuButton
+  onClick={() => router.push('/settings')}
+  className="w-11 h-11"
+  // MenuButton includes all premium effects
+>
+  <Menu className="w-5 h-5" />
+</MenuButton>
+```
+
+### Implementation Guidelines
+
+1. **Always use touch components for primary interactions**
+   - Navigation: TouchLink
+   - Actions: TouchButton
+   - Close/Dismiss: TouchCloseButton
+
+2. **Choose appropriate haptic level**
+   - `light`: Subtle interactions, frequent taps
+   - `medium`: Standard buttons, navigation (default)
+   - `heavy`: Important actions, confirmations
+
+3. **Use correct variant**
+   - `touch-feedback`: Standard buttons
+   - `touch-feedback-icon`: Icon-only buttons
+   - `touch-feedback-subtle`: Secondary elements
+   - `native-press`: Primary CTAs
+
+4. **Combine with visual feedback**
+   - Always include hover states
+   - Use focus indicators for accessibility
+   - Consider loading states for async actions
+
+### Example: Updated ActionBar
+```jsx
+// Now uses TouchLink for haptic feedback
+<TouchLink 
+  href={backHref}
+  onClick={handleBackClick}
+  className="action-bar-button"
+  variant="icon"
+  haptic="medium"
+>
+  <ArrowLeft className="w-5 h-5" />
+</TouchLink>
+```
+
+### 🎯 AI Agent Implementation Checklist
+
+When creating ANY new interactive element, ensure:
+
+1. **✓ Spring Animation**: Add `springAnimation` prop for bouncy feel
+2. **✓ Gradient Overlay**: Add `gradientOverlay` for hover shimmer
+3. **✓ Card Glow**: Add `cardGlow` for soft shadow effects
+4. **✓ Active Gradients**: Include `activeFrom/activeTo` in gradient config
+5. **✓ Haptic Feedback**: Set appropriate `haptic` level (light/medium/heavy)
+6. **✓ Proper Scale**: Use variant-appropriate scale (0.93 for spring, 0.98 default)
+7. **✓ Shadow Transitions**: Include shadow prop for depth
+
+### Default Props AI Agents Should ALWAYS Use:
+
+```jsx
+// For ANY new button:
+<Button
+  springAnimation      // ALWAYS include
+  gradientOverlay      // ALWAYS include
+  cardGlow            // ALWAYS include for premium feel
+  haptic="medium"     // Default to medium
+  shadow="md"         // Default shadow
+  gradient={{         // If using gradient variant
+    from: 'color1',
+    to: 'color2',
+    hoverFrom: 'color1-dark',
+    hoverTo: 'color2-dark',
+    activeFrom: 'color1/40',   // MUST include active states
+    activeTo: 'color2/30'
+  }}
+>
+  Button Text
+</Button>
+
+// For ANY new link:
+<TouchLink
+  haptic="medium"     // ALWAYS include
+  cardGlow            // ALWAYS include
+  variant="..."       // Choose appropriate variant
+  scale={...}         // Variant-specific scale
+>
+  Link Content
+</TouchLink>
+```
+
+### Real-World Implementation Examples
+
+#### Settings Menu Button (from home page):
+```jsx
+<MenuButton
+  onClick={() => router.push('/settings')}
+  className="w-11 h-11"
+>
+  <Menu className="w-5 h-5 text-burgundy" />
+</MenuButton>
+```
+
+#### Prompt Template Cards:
+```jsx
+<CardButton
+  onClick={() => handlePromptClick(template.text)}
+  className="p-5"
+>
+  <div className="flex items-center space-x-4">
+    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-rose to-burgundy">
+      <Icon className="w-6 h-6 text-white" />
+    </div>
+    <span className="text-gray-800">{template.text}</span>
+  </div>
+</CardButton>
+```
+
+#### ActionBar Back Button:
+```jsx
+<TouchLink 
+  href={backHref}
+  onClick={handleBackClick}
+  variant="icon"
+  haptic="medium"
+  scale={0.9}
+  shadow="sm"
+  cardGlow
+>
+  <ArrowLeft className="w-5 h-5" />
+</TouchLink>
+```
+
+#### Expert Consultation CTA:
+```jsx
+<ConsultationButton
+  onClick={handleBookConsultation}
+  className="w-full"
+>
+  Book Free Consultation
+</ConsultationButton>
+```
+
+### Performance Notes
+- CSS transforms are GPU-accelerated
+- Haptic feedback is non-blocking
+- Animations use `will-change` for optimization
+- Touch events are properly throttled
+- All components include `touch-manipulation` to eliminate tap delay
+- Spring animations use optimal cubic-bezier curves for 60fps
+
+### 🤖 AI Agent Quick Reference
+
+**EVERY button/link you create MUST have:**
+1. Touch feedback component (Button/TouchLink/Touchable)
+2. Spring animation or native press effect
+3. Gradient overlay for shimmer
+4. Card glow for depth
+5. Haptic feedback (default: medium)
+6. Active state gradients for color changes
+7. Proper shadow transitions
+
+**Copy-paste templates for common scenarios:**
+```jsx
+// Primary CTA
+<Button variant="gradient" springAnimation gradientOverlay cardGlow haptic="medium" shadow="lg">
+
+// Secondary button  
+<SoftButton fullWidth icon={<Icon />}>
+
+// Navigation
+<TouchLink href="..." variant="icon" haptic="medium" cardGlow scale={0.9}>
+
+// Card interaction
+<CardButton onClick={...} className="p-5">
+```
+
+**Remember: If it's clickable, it MUST have premium touch feedback!**
 
 ## 💡 Core Business Model & Chat Assistant Workflow (2025-07-12)
 

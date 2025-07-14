@@ -3,7 +3,7 @@
 import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { BookOpen, Plus, Brain, TrendingUp, Sparkles } from 'lucide-react';
-import { ActionBar } from '@/components/ui/ActionBar';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { 
   getThrivingById, 
   getJournalByThrivingId, 
@@ -185,20 +185,20 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
   );
 
   return (
-    <div className="app-screen bg-gray-50">
-      {/* Header */}
-      <ActionBar
-        title={
+    <AppLayout
+      header={{
+        title: (
           <div className="flex items-center space-x-2">
             <BookOpen className="w-5 h-5 text-dusty-rose" />
             <span>Journal</span>
           </div>
-        }
-        showBackButton={true}
-        backHref={`/thrivings?id=${thrivingId}`}
-        variant="blur"
-      />
-
+        ),
+        showBackButton: true,
+        backHref: `/thrivings?id=${thrivingId}`,
+        variant: 'blur'
+      }}
+      className="bg-gray-50"
+    >
       {/* Thriving Info */}
       <div className="px-4 py-4 bg-white border-b border-gray-100">
         <h2 className="text-lg font-semibold text-primary-text">{thriving.title}</h2>
@@ -206,7 +206,6 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto">
         <div className="px-4 py-6 space-y-4">
           {/* Add Entry Buttons */}
           {!showNewEntry && (
@@ -545,7 +544,6 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
             )}
           </div>
         </div>
-      </div>
 
       {/* Dynamic Journal Modal */}
       {thriving && (
@@ -555,6 +553,6 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
           onClose={handleDynamicJournalClose}
         />
       )}
-    </div>
+    </AppLayout>
   );
 }

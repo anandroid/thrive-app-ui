@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 export default function TestContextPage() {
   const [threadId] = useState(`test-thread-${Date.now()}`);
@@ -102,10 +103,16 @@ export default function TestContextPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-warm-beige to-dusty-rose/20 p-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-soft p-6">
-          <h1 className="text-2xl font-semibold text-burgundy mb-4">Test Context Window</h1>
+    <AppLayout
+      header={{
+        title: 'Test Context Window',
+        showBackButton: true,
+        backHref: '/'
+      }}
+    >
+      <div className="min-h-full bg-gradient-to-br from-warm-beige to-dusty-rose/20 p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-soft p-6">
           
           <div className="mb-4 p-4 bg-blue-50 rounded-lg">
             <p className="text-sm text-gray-700 mb-2">
@@ -175,8 +182,9 @@ export default function TestContextPage() {
               <li>Checking if it remembers the last 10 messages but not older ones</li>
             </ul>
           </div>
+          </div>
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }

@@ -1334,7 +1334,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       />
 
       {/* Input - stays at bottom */}
-      <div className="chat-input-area safe-bottom">
+      <div className="chat-input-area">
         <ChatEditor
           value={input}
           onChange={(value) => {

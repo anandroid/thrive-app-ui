@@ -5,7 +5,7 @@ import { X, Edit3, AlertCircle, Target, BookOpen } from 'lucide-react';
 import { ActionableItem } from '@/src/services/openai/types';
 import { WellnessJourney, JourneyType } from '@/src/services/openai/types/journey';
 import { LoadingButton } from '@/components/ui/LoadingButton';
-import { TouchCloseButton } from '@/components/ui/TouchCloseButton';
+import { Modal } from '@/components/ui/Modal';
 import bridge from '@/src/lib/react-native-bridge';
 
 interface JourneyCreationModalProps {
@@ -54,8 +54,6 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
   const [goals, setGoals] = useState<string[]>(['']);
   const [specificCondition, setSpecificCondition] = useState('');
   const [painIntensity, setPainIntensity] = useState(5); // For pain journey
-
-  if (!isOpen) return null;
 
   // Determine journey type from actionable item
   const journeyTypeKey = journeyData.journey_type || 'wellness_journey';
@@ -109,36 +107,57 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
     setGoals(goals.filter((_, i) => i !== index));
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div 
-        className="absolute inset-0 bg-black/50"
-        onClick={onClose}
-      />
-      <div className="relative max-w-lg w-full bg-white rounded-3xl shadow-2xl overflow-hidden">
-        {/* Fixed close button */}
-        <div className="absolute top-0 right-0 p-4 z-10">
-          <TouchCloseButton onClose={onClose} size="sm" variant="light" />
-        </div>
-        
-        {/* Modal content */}
-        <div className="max-h-[90vh] overflow-hidden flex flex-col">
-          {/* Header */}
-          <div className="relative p-6 pb-4 border-b border-gray-100">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sage-light to-sage flex items-center justify-center">
-                <Edit3 className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-primary-text">Create a Journey</h2>
-                <p className="text-sm text-secondary-text-thin">Your wellness journal</p>
-              </div>
-            </div>
-          </div>
+  const modalHeader = (
+    <div className="flex items-center space-x-3">
+      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sage-light to-sage flex items-center justify-center">
+        <Edit3 className="w-6 h-6 text-white" />
+      </div>
+      <div>
+        <h2 className="text-2xl font-bold text-primary-text">Create a Journey</h2>
+        <p className="text-sm text-secondary-text-thin">Your wellness journal</p>
+      </div>
+    </div>
+  );
 
-        {/* Content */}
-        <div className="overflow-y-auto max-h-[calc(90vh-200px)]">
-          <div className="p-6 space-y-6">
+  const modalFooter = (
+    <div className="space-y-3">
+      <LoadingButton
+        onClick={handleCreateJourney}
+        isLoading={isCreating}
+        disabled={isCreating}
+        className="w-full py-4 rounded-2xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all touch-feedback touch-manipulation"
+        loadingMessages={[
+          'Creating Journal...',
+          'Setting up your wellness space...',
+          'Preparing tracking tools...',
+          'Adding insights features...',
+          'Personalizing experience...',
+          'Almost ready...'
+        ]}
+        messageInterval={2500}
+      >
+        Create My Journal
+      </LoadingButton>
+      
+      <button
+        onClick={onClose}
+        className="w-full py-3 rounded-2xl text-secondary-text hover:bg-gray-50 transition-colors touch-feedback touch-manipulation"
+      >
+        Cancel
+      </button>
+    </div>
+  );
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      header={modalHeader}
+      footer={modalFooter}
+      size="lg"
+      className="max-w-lg"
+    >
+      <div className="space-y-6">
             {/* Journey Type Info */}
             <div className="rounded-2xl bg-gradient-to-br from-sage-light/10 to-sage/5 p-5 border border-sage/20">
               <div className="flex items-start space-x-4">
@@ -225,9 +244,9 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
                     {goals.length > 1 && (
                       <button
                         onClick={() => removeGoal(index)}
-                        className="w-[10vw] h-[10vw] max-w-[2.5rem] max-h-[2.5rem] rounded-[3vw] max-rounded-[0.75rem] flex items-center justify-center hover:bg-gray-100 transition-colors"
+                        className="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors touch-feedback touch-manipulation"
                       >
-                        <X className="w-[4vw] h-[4vw] max-w-[1rem] max-h-[1rem] text-gray-500" />
+                        <X className="w-4 h-4 text-gray-500" />
                       </button>
                     )}
                   </div>
@@ -260,38 +279,7 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
                  'This journey will help you track your progress, identify patterns, and work towards better health outcomes.'}
               </p>
             </div>
-          </div>
-        </div>
-
-          {/* Footer */}
-          <div className="border-t border-gray-100 p-6 space-y-3">
-            <LoadingButton
-              onClick={handleCreateJourney}
-              isLoading={isCreating}
-              disabled={isCreating}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all"
-              loadingMessages={[
-                'Creating Journal...',
-                'Setting up your wellness space...',
-                'Preparing tracking tools...',
-                'Adding insights features...',
-                'Personalizing experience...',
-                'Almost ready...'
-              ]}
-              messageInterval={2500}
-            >
-              Create My Journal
-            </LoadingButton>
-            
-            <button
-              onClick={onClose}
-              className="w-full py-3 rounded-2xl text-secondary-text hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
       </div>
-    </div>
+    </Modal>
   );
 };

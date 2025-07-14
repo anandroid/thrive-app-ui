@@ -13,7 +13,7 @@ import { JournalInsightsEngine } from '@/src/lib/journalInsights';
 import { UserLearningProfileManager } from '@/src/lib/userLearningProfile';
 import { DynamicJournalField } from './DynamicJournalField';
 import { JournalPromptCard } from './JournalPromptCard';
-import { TouchCloseButton } from './TouchCloseButton';
+import { Modal } from './Modal';
 import { addJournalEntry, getJournalByThrivingId } from '@/src/utils/thrivingStorage';
 
 interface DynamicJournalModalProps {
@@ -175,55 +175,86 @@ export function DynamicJournalModal({ thriving, isOpen, onClose }: DynamicJourna
     return ((currentIndex + 1) / steps.length) * 100;
   };
 
-  if (!isOpen || !journalTemplate) return null;
+  const modalHeader = (
+    <div className="bg-gradient-to-r from-dusty-rose/10 to-rose/10 -m-6 p-6 mb-6">
+      <div className="flex items-center space-x-3">
+        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-dusty-rose to-rose flex items-center justify-center">
+          <Brain className="w-5 h-5 text-white" />
+        </div>
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">Smart Journal</h2>
+          <p className="text-sm text-gray-600">{thriving.title}</p>
+        </div>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="mt-4">
+        <div className="flex justify-between text-xs text-gray-500 mb-2">
+          <span className={currentStep === 'fields' ? 'text-dusty-rose font-medium' : ''}>
+            Track Progress
+          </span>
+          <span className={currentStep === 'prompts' ? 'text-dusty-rose font-medium' : ''}>
+            Reflect
+          </span>
+          <span className={currentStep === 'insights' ? 'text-dusty-rose font-medium' : ''}>
+            Insights
+          </span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div 
+            className="bg-gradient-to-r from-dusty-rose to-rose h-2 rounded-full transition-all duration-500"
+            style={{ width: `${getStepProgress()}%` }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+
+  const modalFooter = (
+    <div className="flex space-x-3">
+      {currentStep !== 'fields' && (
+        <button
+          onClick={handleBack}
+          className="flex-1 py-3 px-4 rounded-2xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors touch-feedback touch-manipulation"
+        >
+          Back
+        </button>
+      )}
+      
+      {currentStep !== 'insights' ? (
+        <button
+          onClick={handleNext}
+          disabled={!isStepComplete()}
+          className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-dusty-rose to-rose text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all touch-feedback touch-manipulation"
+        >
+          {currentStep === 'fields' ? 'Continue' : 'Next'}
+        </button>
+      ) : (
+        <button
+          onClick={handleSubmit}
+          disabled={isSubmitting || !isStepComplete()}
+          className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all touch-feedback touch-manipulation"
+        >
+          {isSubmitting ? 'Saving...' : 'Save Entry'}
+        </button>
+      )}
+    </div>
+  );
+
+  if (!journalTemplate) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden">
-        
-        {/* Header */}
-        <div className="relative bg-gradient-to-r from-dusty-rose/10 to-rose/10 p-6 border-b border-gray-100">
-          <div className="absolute top-4 right-4">
-            <TouchCloseButton onClose={onClose} />
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-dusty-rose to-rose flex items-center justify-center">
-              <Brain className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">Smart Journal</h2>
-              <p className="text-sm text-gray-600">{thriving.title}</p>
-            </div>
-          </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      header={modalHeader}
+      footer={modalFooter}
+      size="lg"
+      className="max-w-lg"
+    >
 
-          {/* Progress Bar */}
-          <div className="mt-4">
-            <div className="flex justify-between text-xs text-gray-500 mb-2">
-              <span className={currentStep === 'fields' ? 'text-dusty-rose font-medium' : ''}>
-                Track Progress
-              </span>
-              <span className={currentStep === 'prompts' ? 'text-dusty-rose font-medium' : ''}>
-                Reflect
-              </span>
-              <span className={currentStep === 'insights' ? 'text-dusty-rose font-medium' : ''}>
-                Insights
-              </span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-gradient-to-r from-dusty-rose to-rose h-2 rounded-full transition-all duration-500"
-                style={{ width: `${getStepProgress()}%` }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          
-          {/* Fields Step */}
-          {currentStep === 'fields' && (
+      {/* Fields Step */}
+      {currentStep === 'fields' && (
             <div className="space-y-6">
               <div className="text-center mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -356,42 +387,8 @@ export function DynamicJournalModal({ thriving, isOpen, onClose }: DynamicJourna
                   </p>
                 </div>
               )}
-            </div>
-          )}
         </div>
-
-        {/* Footer */}
-        <div className="border-t border-gray-100 p-4">
-          <div className="flex space-x-3">
-            {currentStep !== 'fields' && (
-              <button
-                onClick={handleBack}
-                className="flex-1 py-3 px-4 rounded-2xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-              >
-                Back
-              </button>
-            )}
-            
-            {currentStep !== 'insights' ? (
-              <button
-                onClick={handleNext}
-                disabled={!isStepComplete()}
-                className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-dusty-rose to-rose text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all"
-              >
-                {currentStep === 'fields' ? 'Continue' : 'Next'}
-              </button>
-            ) : (
-              <button
-                onClick={handleSubmit}
-                disabled={isSubmitting || !isStepComplete()}
-                className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all"
-              >
-                {isSubmitting ? 'Saving...' : 'Save Entry'}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+      )}
+    </Modal>
   );
 }

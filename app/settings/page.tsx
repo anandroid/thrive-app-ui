@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Info, Moon, ChevronRight, Plus, Leaf, MessageSquare, Trash2, Bell } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getTouchClasses } from '@/hooks/useTouchFeedback';
-import { PageLayout } from '@/components/layout/PageLayout';
+import { AppLayout } from '@/components/layout/AppLayout';
 import bridge from '@/src/lib/react-native-bridge';
 import { NotificationHelper } from '@/src/utils/notificationHelper';
 import { NotificationPermissionModal } from '@/components/features/NotificationPermissionModal';
@@ -55,13 +55,14 @@ export default function SettingsPage() {
   };
 
   return (
-    <PageLayout
-      header={{
-        showBackButton: true,
-        backHref: "/",
-        title: "Settings"
-      }}
-    >
+    <>
+      <AppLayout
+        header={{
+          showBackButton: true,
+          backHref: "/",
+          title: "Settings"
+        }}
+      >
       <div className="relative min-h-full">
         {/* Background Gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-soft-blush via-white to-soft-lavender/20 -z-10" />
@@ -333,20 +334,21 @@ export default function SettingsPage() {
       )}
       
       {/* Notification Permission Modal */}
-      <NotificationPermissionModal
-        isOpen={showNotificationModal}
-        onClose={() => {
-          setShowNotificationModal(false);
-          checkNotificationStatus(); // Refresh status after modal closes
-        }}
-        onPermissionGranted={() => {
-          // Schedule notifications for existing thrivings
-          const thrivings = JSON.parse(localStorage.getItem('thrive_thrivings') || '[]');
-          if (thrivings.length > 0) {
-            NotificationHelper.scheduleRoutineReminders(thrivings);
-          }
-        }}
-      />
-    </PageLayout>
+        <NotificationPermissionModal
+          isOpen={showNotificationModal}
+          onClose={() => {
+            setShowNotificationModal(false);
+            checkNotificationStatus(); // Refresh status after modal closes
+          }}
+          onPermissionGranted={() => {
+            // Schedule notifications for existing thrivings
+            const thrivings = JSON.parse(localStorage.getItem('thrive_thrivings') || '[]');
+            if (thrivings.length > 0) {
+              NotificationHelper.scheduleRoutineReminders(thrivings);
+            }
+          }}
+        />
+      </AppLayout>
+    </>
   );
 }

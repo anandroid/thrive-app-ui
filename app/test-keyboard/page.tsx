@@ -1,6 +1,6 @@
 'use client';
 
-import { PageLayout } from '@/components/layout/PageLayout';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { useState } from 'react';
 
 export default function TestKeyboardPage() {
@@ -16,10 +16,11 @@ export default function TestKeyboardPage() {
   };
 
   return (
-    <PageLayout
+    <AppLayout
       header={{
         title: 'Keyboard Test',
         showBackButton: true,
+        backHref: '/'
       }}
     >
       <div className="p-4 space-y-4">
@@ -76,6 +77,6 @@ export default function TestKeyboardPage() {
           />
         </div>
       </div>
-    </PageLayout>
+    </AppLayout>
   );
 }

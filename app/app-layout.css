@@ -1,0 +1,84 @@
+/* Universal App Layout System */
+
+/* Main container - full viewport */
+.app-layout {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Prevent body scroll */
+}
+
+/* Fixed header container */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100; /* Above content */
+  background: white;
+  /* Safe area for notch devices */
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+/* Override action bar behavior inside app-header */
+.app-header .action-bar {
+  position: relative !important; /* Override sticky since parent is already fixed */
+  top: auto !important;
+  padding-top: 0 !important; /* Remove double padding - parent already has safe area */
+  min-height: 3.5rem; /* 56px standard height */
+}
+
+/* Scrollable content area */
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch; /* Smooth iOS scrolling */
+  overscroll-behavior-y: contain; /* Prevent pull-to-refresh */
+  
+  /* Account for fixed header */
+  padding-top: calc(3.5rem + env(safe-area-inset-top, 0));
+  
+  /* Safe area bottom for home indicator */
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  
+  /* Ensure content is scrollable */
+  min-height: 0;
+}
+
+/* Chat-specific adjustments */
+.app-layout.chat-layout .app-content {
+  /* Remove padding for chat since it manages its own layout */
+  padding: 0;
+  padding-top: calc(3.5rem + env(safe-area-inset-top, 0));
+}
+
+/* Chat simple layout (home page) specific adjustments */
+.app-layout.chat-simple-layout .app-content {
+  padding: 0;
+  padding-top: calc(3.5rem + env(safe-area-inset-top, 0));
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure smooth keyboard behavior */
+.app-content:focus-within {
+  /* When input is focused, browser will handle scroll automatically */
+  scroll-behavior: smooth;
+}
+
+/* Natural scroll behavior - browser handles keyboard automatically */
+
+/* Debug helpers */
+.app-layout.debug .app-header {
+  background: rgba(255, 0, 0, 0.1);
+  border: 2px solid red;
+}
+
+.app-layout.debug .app-content {
+  background: rgba(0, 255, 0, 0.1);
+  border: 2px solid green;
+}

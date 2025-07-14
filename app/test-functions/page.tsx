@@ -3,6 +3,7 @@
 import { useState } from 'react';
 // import { db } from '@/lib/db/client';
 import { LoadingButton } from '@/components/ui/LoadingButton';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 export default function TestFunctionsPage() {
   const [results, setResults] = useState<Record<string, unknown>>({});
@@ -192,9 +193,15 @@ export default function TestFunctionsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Assistant Function Testing</h1>
+    <AppLayout
+      header={{
+        title: 'Assistant Function Testing',
+        showBackButton: true,
+        backHref: '/'
+      }}
+    >
+      <div className="min-h-full bg-gray-50 p-4">
+        <div className="max-w-4xl mx-auto">
         
         {/* Setup Button */}
         <div className="mb-8">
@@ -265,7 +272,8 @@ export default function TestFunctionsPage() {
             {JSON.stringify(results, null, 2)}
           </pre>
         </div>
+        </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }

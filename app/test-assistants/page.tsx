@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 const TEST_MESSAGES = [
   { role: 'Chat', message: 'I have trouble sleeping', color: 'bg-blue-500' },
@@ -61,9 +62,15 @@ export default function TestAssistants() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Multi-Assistant Test Page</h1>
+    <AppLayout
+      header={{
+        title: 'Multi-Assistant Test',
+        showBackButton: true,
+        backHref: '/'
+      }}
+    >
+      <div className="min-h-full bg-gray-50 p-8">
+        <div className="max-w-6xl mx-auto">
         
         <div className="grid md:grid-cols-3 gap-6">
           {TEST_MESSAGES.map((test) => (
@@ -100,7 +107,8 @@ export default function TestAssistants() {
             <li>Responses are streamed in real-time</li>
           </ol>
         </div>
+        </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }

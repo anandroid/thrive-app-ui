@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Menu, Sparkles, Weight, Pill, Brain, Activity, Heart, Moon, Leaf, ChevronRight, BookOpen, MessageCircle } from 'lucide-react';
-import Link from 'next/link';
 import { Thriving } from '@/src/types/thriving';
+import { TouchLink } from '@/components/ui/TouchLink';
+import { MenuButton, CardButton, SoftButton } from '@/components/ui/Button';
 import { getThrivingsFromStorage, migrateRoutinesToThrivings } from '@/src/utils/thrivingStorage';
 import { getChatHistory } from '@/src/utils/chatStorage';
 import { ChatHistoryItem } from '@/src/types/chat';
@@ -13,6 +14,7 @@ import { ChatEditor } from '@/components/ui/ChatEditor';
 import { PrivacySection } from '@/components/features/PrivacySection';
 import { NotificationPermissionBanner } from '@/components/features/NotificationPermissionBanner';
 import { HealthConnectModal } from '@/components/features/HealthConnectModal';
+import { AppLayout } from '@/components/layout/AppLayout';
 // import { PrivacySection2 } from '@/components/features/PrivacySection2';
 // import { PrivacySection3 } from '@/components/features/PrivacySection3';
 
@@ -203,50 +205,51 @@ export default function HomePage() {
       
       {/* Main app content - Only render when ready */}
       {showMainContent && (
-        <div className="chat-container">
-        {/* Header - stays at top */}
-        <div className="chat-header safe-top">
-          <div className="flex items-center justify-between content-padding h-14">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center">
-                <Leaf className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-burgundy to-rose bg-clip-text text-transparent">Thrive</h1>
-            </div>
-            <Link 
-              href="/settings"
-              onClick={() => {
-                localStorage.setItem('hasClickedMenu', 'true');
-                setShowMenuSparkle(false);
-              }}
-              className="w-11 h-11 rounded-2xl flex items-center justify-center bg-white/60 hover:bg-white/90 native-transition shadow-lg hover:shadow-xl relative overflow-hidden touch-feedback touch-manipulation"
-            >
-              <Menu className="w-5 h-5 text-burgundy" />
-              {showMenuSparkle && (
-                <div className="absolute -top-0.5 -right-0.5 w-4 h-4 flex items-center justify-center">
-                  <div className="absolute inset-0 bg-gradient-to-br from-rose to-burgundy rounded-full" />
-                  <Sparkles className="w-2.5 h-2.5 text-white relative z-10 animate-pulse" />
+        <AppLayout
+          customHeader={
+            <div className="flex items-center justify-between content-padding h-14 bg-white border-b border-gray-200">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center">
+                  <Leaf className="w-6 h-6 text-white" />
                 </div>
-              )}
-            </Link>
-          </div>
-        </div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-burgundy to-rose bg-clip-text text-transparent">Thrive</h1>
+              </div>
+              <MenuButton
+                onClick={() => {
+                  localStorage.setItem('hasClickedMenu', 'true');
+                  setShowMenuSparkle(false);
+                  router.push('/settings');
+                }}
+                className="w-11 h-11"
+              >
+                <Menu className="w-5 h-5 text-burgundy" />
+                {showMenuSparkle && (
+                  <div className="absolute -top-0.5 -right-0.5 w-4 h-4 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-gradient-to-br from-rose to-burgundy rounded-full" />
+                    <Sparkles className="w-2.5 h-2.5 text-white relative z-10 animate-pulse" />
+                  </div>
+                )}
+              </MenuButton>
+            </div>
+          }
+          className="chat-simple-layout"
+        >
 
-        {/* Main Content - Scrollable */}
-        <div className="chat-messages">
+          {/* Main Content */}
           <div className="chat-messages-content">
             {/* Thrivings Section - Only show if thrivings exist */}
             {thrivings.length > 0 && (
               <div className="content-padding py-6 bg-gray-50">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-2xl font-bold text-primary-text">Your Thrivings</h2>
-                  <Link 
+                  <TouchLink 
                     href="/thrivings"
+                    variant="subtle"
                     className="flex items-center space-x-1 text-sm font-medium text-secondary-text hover:text-primary-text transition-colors"
                   >
                     <span>See all</span>
                     <ChevronRight className="w-4 h-4" />
-                  </Link>
+                  </TouchLink>
                 </div>
                 
                 {/* Horizontal Scroll Container */}
@@ -316,17 +319,19 @@ export default function HomePage() {
                         })()}
                         
                         {/* Journal Button */}
-                        <button
+                        <SoftButton
                           onClick={(e) => {
                             e.stopPropagation();
                             router.push(`/thrivings/${thriving.id}/journal`);
                           }}
-                          className="w-full mt-3 py-3 rounded-2xl bg-gradient-to-r from-dusty-rose/15 to-rose/15 border border-dusty-rose/20 text-dusty-rose font-medium text-sm hover:from-dusty-rose/25 hover:to-rose/25 hover:border-dusty-rose/30 hover:shadow-md transition-all flex items-center justify-center space-x-2 touch-feedback touch-manipulation group relative overflow-hidden"
+                          size="sm"
+                          fullWidth
+                          className="mt-3 text-dusty-rose relative overflow-hidden"
+                          icon={<BookOpen className="w-4 h-4" />}
+                          gradientOverlay
                         >
-                          <div className="absolute inset-0 bg-gradient-to-r from-dusty-rose/0 via-dusty-rose/10 to-dusty-rose/0 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          <BookOpen className="w-4 h-4 relative z-10" />
-                          <span className="relative z-10">Open Journal</span>
-                        </button>
+                          Open Journal
+                        </SoftButton>
                       </div>
                     ))}
                   </div>
@@ -400,12 +405,11 @@ export default function HomePage() {
                 {promptTemplates.map((template, index) => {
                   const Icon = template.icon;
                   return (
-                    <button
+                    <CardButton
                       key={index}
                       onClick={() => handlePromptClick(template.text)}
-                      className="relative flex items-center space-x-4 p-5 rounded-3xl bg-white/90 backdrop-blur-sm hover:bg-white native-transition text-left group card-soft-glow hover:scale-[1.01] overflow-hidden touch-feedback touch-manipulation"
+                      className="p-5"
                     >
-                      
                       <div className="flex items-center space-x-4 w-full">
                         <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${template.iconGradient} flex items-center justify-center flex-shrink-0 shadow-lg`}>
                           <Icon className="w-6 h-6 text-white" />
@@ -414,23 +418,22 @@ export default function HomePage() {
                           {template.text}
                         </span>
                       </div>
-                    </button>
+                    </CardButton>
                   );
                 })}
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Input Area - Fixed at Bottom */}
-        <div className="chat-input-area safe-bottom">
-          <ChatEditor
-            value={input}
-            onChange={setInput}
-            onSubmit={handleSendMessage}
-          />
-        </div>
-      </div>
+          {/* Input Area - Fixed at Bottom */}
+          <div className="chat-input-area safe-bottom">
+            <ChatEditor
+              value={input}
+              onChange={setInput}
+              onSubmit={handleSendMessage}
+            />
+          </div>
+        </AppLayout>
       )}
       
       {/* Notification Permission Banner */}

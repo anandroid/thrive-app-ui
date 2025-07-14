@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import bridge from '@/src/lib/react-native-bridge';
-import { PageLayout } from '@/components/layout/PageLayout';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 export default function TestBridgePage() {
   const [bridgeInfo, setBridgeInfo] = useState<Record<string, unknown>>({});
@@ -96,7 +96,7 @@ export default function TestBridgePage() {
   };
 
   return (
-    <PageLayout
+    <AppLayout
       header={{
         showBackButton: true,
         backHref: "/settings",
@@ -168,6 +168,6 @@ export default function TestBridgePage() {
           </ul>
         </div>
       </div>
-    </PageLayout>
+    </AppLayout>
   );
 }

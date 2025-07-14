@@ -12,10 +12,9 @@ import {
 import { Thriving } from '@/src/types/thriving';
 import { getThrivingsFromStorage, updateThrivingInStorage, deleteThrivingFromStorage } from '@/src/utils/thrivingStorage';
 import { CelebrationShower } from '@/components/ui/CelebrationShower';
-import { PageLayout } from '@/components/layout/PageLayout';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { AdjustmentTutorial } from '@/components/features/AdjustmentTutorial';
 import { LoadingButton } from '@/components/ui/LoadingButton';
-import { NotificationSettingsCard } from '@/components/features/NotificationSettingsCard';
 import { ThrivingNotificationCard } from '@/components/features/ThrivingNotificationCard';
 import { HealthInsights } from '@/components/features/HealthInsights';
 import { ThrivingExpertHelp } from '@/components/features/ThrivingExpertHelp';
@@ -404,13 +403,13 @@ export default function ThrivingsPage() {
 
 
   return (
-    <PageLayout
+    <AppLayout
       header={{
         showBackButton: true,
         backHref: '/',
-        centerElement: (
+        title: (
           <div className="flex items-center space-x-2">
-            <h1 className="text-xl font-bold text-gray-800">Thrivings</h1>
+            <span>Thrivings</span>
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-sage-light/30 to-sage/20 flex items-center justify-center">
               <Heart className="w-4 h-4 text-sage-dark fill-sage-light/30" />
             </div>
@@ -1042,63 +1041,31 @@ export default function ThrivingsPage() {
                       </div>
                     )}
                     
-                    {/* Reminder Schedule */}
+                    {/* Notification Settings */}
                     {selectedThriving.reminderTimes && selectedThriving.reminderTimes.length > 0 && (
-                      <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                          <Bell className="w-5 h-5 mr-2 text-blue-500" />
-                          Reminder Schedule
-                        </h3>
-                        
-                        <div className="space-y-2">
-                          <p className="text-sm text-gray-600 mb-3">
-                            Daily reminders are set for the following times:
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {selectedThriving.reminderTimes.map((time, index) => (
-                              <span 
-                                key={index}
-                                className="inline-flex items-center px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-sm font-medium"
-                              >
-                                <Clock className="w-3.5 h-3.5 mr-1.5" />
-                                {formatReminderTime(time)}
-                              </span>
-                            ))}
-                          </div>
+                      <ThrivingNotificationCard 
+                        thriving={selectedThriving}
+                        onSettingsUpdate={async (settings) => {
+                          // Update the thriving with new notification settings
+                          await updateThrivingInStorage(selectedThriving.id, {
+                            notificationSettings: settings
+                          });
                           
-                          {/* Thriving-specific Notification Settings */}
-                          <div className="mt-4">
-                            <ThrivingNotificationCard 
-                              thriving={selectedThriving}
-                              onSettingsUpdate={async (settings) => {
-                                // Update the thriving with new notification settings
-                                await updateThrivingInStorage(selectedThriving.id, {
-                                  notificationSettings: settings
-                                });
-                                
-                                // Update local state
-                                setThrivings(prev => prev.map(t => 
-                                  t.id === selectedThriving.id 
-                                    ? { ...t, notificationSettings: settings }
-                                    : t
-                                ));
-                                setSelectedThriving(prev => 
-                                  prev?.id === selectedThriving.id 
-                                    ? { ...prev, notificationSettings: settings }
-                                    : prev
-                                );
-                                
-                                toast.success('Notification settings updated');
-                              }}
-                            />
-                          </div>
+                          // Update local state
+                          setThrivings(prev => prev.map(t => 
+                            t.id === selectedThriving.id 
+                              ? { ...t, notificationSettings: settings }
+                              : t
+                          ));
+                          setSelectedThriving(prev => 
+                            prev?.id === selectedThriving.id 
+                              ? { ...prev, notificationSettings: settings }
+                              : prev
+                          );
                           
-                          {/* General Notification Settings - Test notification functionality */}
-                          <div className="mt-4">
-                            <NotificationSettingsCard />
-                          </div>
-                        </div>
-                      </div>
+                          toast.success('Notification settings updated');
+                        }}
+                      />
                     )}
                     
                     {/* Expert Help Section */}
@@ -1154,6 +1121,6 @@ export default function ThrivingsPage() {
           }}
         />
       )}
-    </PageLayout>
+    </AppLayout>
   );
 }

@@ -44,7 +44,7 @@ export class RoutineCreationService {
     });
 
     const completion = await this.openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini-2025-04-14',
       messages: [
         {
           role: 'system',

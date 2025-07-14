@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { MessageSquare, Search, Clock, Trash2, Plus } from 'lucide-react';
-import { ActionBar } from '@/components/ui/ActionBar';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { getChatHistory, deleteChatThread, searchChatHistory } from '@/src/utils/chatStorage';
 import { ChatHistoryItem } from '@/src/types/chat';
 
@@ -66,19 +66,19 @@ export default function ChatHistoryPage() {
   };
 
   return (
-    <div className="app-screen bg-gray-50">
-      {/* Header */}
-      <ActionBar
-        title={
+    <AppLayout
+      header={{
+        title: (
           <div className="flex items-center space-x-2">
             <MessageSquare className="w-5 h-5 text-sage-dark" />
             <span>Chat History</span>
           </div>
-        }
-        showBackButton={true}
-        backHref="/settings"
-      />
-
+        ),
+        showBackButton: true,
+        backHref: "/settings"
+      }}
+      className="bg-gray-50"
+    >
       {/* Search Bar */}
       <div className="px-4 py-4 bg-white border-b border-gray-100">
         <div className="relative">
@@ -94,7 +94,6 @@ export default function ChatHistoryPage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
@@ -163,7 +162,6 @@ export default function ChatHistoryPage() {
             ))}
           </div>
         )}
-      </div>
 
       {/* Floating Action Button */}
       {chatHistory.length > 0 && (
@@ -174,6 +172,6 @@ export default function ChatHistoryPage() {
           <Plus className="w-6 h-6 text-white group-hover:rotate-90 transition-transform duration-300" />
         </Link>
       )}
-    </div>
+    </AppLayout>
   );
 }

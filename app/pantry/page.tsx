@@ -6,7 +6,7 @@ import {
   Search, Shield, Sparkles,
   Pill, Apple, Heart
 } from 'lucide-react';
-import { ActionBar } from '@/components/ui/ActionBar';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { PantryAddModal } from '@/components/features/PantryAddModal';
 import { PantryItem, RecommendedSupplement } from '@/src/types/pantry';
@@ -147,24 +147,22 @@ export default function PantryPage() {
   const allTags = Array.from(new Set(pantryItems.flatMap(item => item.tags || [])));
 
   return (
-    <div className="app-screen bg-gray-50">
-      {/* Header */}
-      <ActionBar
-        title="My Pantry"
-        showBackButton={true}
-        backHref="/settings"
-        rightElement={
+    <AppLayout
+      header={{
+        title: "My Pantry",
+        showBackButton: true,
+        backHref: "/settings",
+        rightElement: (
           <button
             onClick={() => setShowAddModal(true)}
             className="action-bar-button bg-gradient-to-r from-rose to-burgundy text-white touch-feedback touch-manipulation"
           >
             <Plus className="w-5 h-5" />
           </button>
-        }
-      />
-
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto">
+        )
+      }}
+      className="bg-gray-50"
+    >
         <div className="px-4 py-6 space-y-6">
           {/* Privacy Notice - Only show when no items */}
           {pantryItems.length === 0 && (
@@ -411,7 +409,6 @@ export default function PantryPage() {
             </div>
           )}
         </div>
-      </div>
 
       {/* Add Item Modal */}
       <PantryAddModal
@@ -419,6 +416,6 @@ export default function PantryPage() {
         onClose={() => setShowAddModal(false)}
         onAddItem={handleAddItem}
       />
-    </div>
+    </AppLayout>
   );
 }

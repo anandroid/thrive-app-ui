@@ -1,9 +1,12 @@
 @import "tailwindcss";
 @import "../styles/touch-feedback.css";
+@import "../styles/button-enhancements.css";
 @import "../styles/keyboard-layout.css";
 @import "./action-bar.css";
 @import "./chat-simple.css";
 @import "./page-simple.css";
+@import "./app-layout.css";
+@import "./chat-content.css";
 
 :root {
   /* Base Colors */
@@ -310,6 +313,13 @@ input, textarea, [contenteditable] {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  position: relative;
+}
+
+/* When using app-screen with sticky ActionBar, add padding to next element */
+.app-screen > .action-bar + * {
+  /* Account for sticky ActionBar height */
+  padding-top: calc(3.5rem + env(safe-area-inset-top, 0));
 }
 
 .app-header {

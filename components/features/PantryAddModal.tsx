@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Upload, Loader2, Sparkles, AlertCircle, Scan } from 'lucide-react';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
-import { TouchCloseButton } from '@/components/ui/TouchCloseButton';
+import { Modal } from '@/components/ui/Modal';
 import { CameraScanner } from './CameraScanner';
 import { PantryItem } from '@/src/types/pantry';
 import { imageToBase64 } from '@/src/utils/pantryStorage';
@@ -165,8 +165,6 @@ export function PantryAddModal({ isOpen, onClose, onAddItem, initialData, contex
     onClose();
   };
 
-  if (!isOpen) return null;
-
   // Show camera scanner
   if (showCamera) {
     return (
@@ -179,24 +177,33 @@ export function PantryAddModal({ isOpen, onClose, onAddItem, initialData, contex
     );
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
-      <div 
-        className="absolute inset-0 bg-black/50"
-        onClick={onClose}
-      />
-      <div className="relative w-full max-w-lg bg-white rounded-t-3xl animate-slide-up max-h-[90vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
-          <h2 className="text-xl font-semibold text-primary-text">Add to Pantry</h2>
-          <TouchCloseButton onClose={onClose} size="sm" />
-        </div>
+  const modalHeader = (
+    <h2 className="text-xl font-semibold text-primary-text">Add to Pantry</h2>
+  );
 
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto px-6 pb-6 overscroll-none">
-          {/* Context Message */}
-          {contextMessage && (
-            <div className="mt-4 p-4 bg-sage-light/20 rounded-xl border border-sage/20">
+  const modalFooter = (
+    <button
+      onClick={handleSubmit}
+      disabled={!formData.name?.trim() || isAnalyzing}
+      className="w-full py-3 rounded-2xl bg-gradient-to-r from-rose to-burgundy text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed touch-feedback touch-manipulation"
+    >
+      {isAnalyzing ? 'Analyzing...' : 'Add to Pantry'}
+    </button>
+  );
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      header={modalHeader}
+      footer={modalFooter}
+      size="lg"
+      className="max-w-lg"
+    >
+
+      {/* Context Message */}
+      {contextMessage && (
+        <div className="mb-4 p-4 bg-sage-light/20 rounded-xl border border-sage/20">
               <p className="text-sm text-gray-700 leading-relaxed flex items-start">
                 <Sparkles className="w-4 h-4 text-sage-dark mr-2 mt-0.5 flex-shrink-0" />
                 {contextMessage}
@@ -236,9 +243,9 @@ export function PantryAddModal({ isOpen, onClose, onAddItem, initialData, contex
                       setFormData({ ...formData, imageUrl: undefined });
                       setAnalysis(null);
                     }}
-                    className="absolute top-[2vw] max-top-[0.5rem] right-[2vw] max-right-[0.5rem] w-[8vw] h-[8vw] max-w-[2rem] max-h-[2rem] rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-all duration-200 touch-feedback touch-manipulation active:scale-95 active:bg-gray-100"
+                    className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-all duration-200 touch-feedback touch-manipulation active:scale-95 active:bg-gray-100"
                   >
-                    <X className="w-[5vw] h-[5vw] max-w-[1.25rem] max-h-[1.25rem] text-gray-600" />
+                    <X className="w-5 h-5 text-gray-600" />
                   </button>
                 </div>
               ) : (
@@ -403,20 +410,7 @@ export function PantryAddModal({ isOpen, onClose, onAddItem, initialData, contex
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose/30 resize-none"
               />
             </div>
-          </div>
-        </div>
-
-        {/* Submit Button */}
-        <div className="p-6 pt-4 border-t border-gray-100 bg-white safe-area-bottom">
-          <button
-            onClick={handleSubmit}
-            disabled={!formData.name?.trim() || isAnalyzing}
-            className="w-full py-3 rounded-2xl bg-gradient-to-r from-rose to-burgundy text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed touch-feedback"
-          >
-            {isAnalyzing ? 'Analyzing...' : 'Add to Pantry'}
-          </button>
-        </div>
       </div>
-    </div>
+    </Modal>
   );
 }

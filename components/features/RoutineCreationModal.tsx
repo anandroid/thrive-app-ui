@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Sparkles, Moon, Sun, Info } from 'lucide-react';
 import { ActionableItem, WellnessRoutine } from '@/src/services/openai/types';
 import { LoadingButton } from '@/components/ui/LoadingButton';
-import { TouchCloseButton } from '@/components/ui/TouchCloseButton';
+import { Modal } from '@/components/ui/Modal';
 import bridge from '@/src/lib/react-native-bridge';
 import { NotificationHelper } from '@/src/utils/notificationHelper';
 
@@ -60,8 +60,6 @@ export const RoutineCreationModal: React.FC<RoutineCreationModalProps> = ({
       setCustomInstructions('');
     }
   }, [isOpen]);
-
-  if (!isOpen) return null;
 
   const handleCreate = async () => {
     setIsCreating(true);
@@ -340,23 +338,14 @@ export const RoutineCreationModal: React.FC<RoutineCreationModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div 
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      
-      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
-        {/* Fixed header with close button */}
-        <div className="absolute top-0 right-0 p-4 z-10">
-          <TouchCloseButton onClose={onClose} size="sm" variant="light" />
-        </div>
-        
-        {/* Modal content */}
-        <div className="max-h-[90vh] overflow-y-auto p-6">
-          {renderStepContent()}
-        </div>
-      </div>
-    </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      showCloseButton={true}
+      size="md"
+      className="max-w-md"
+    >
+      {renderStepContent()}
+    </Modal>
   );
 };
