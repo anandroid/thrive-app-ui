@@ -1,7 +1,6 @@
 'use client';
 
 import React, { forwardRef } from 'react';
-import { useKeyboardAwareInput } from '@/hooks/useKeyboardAwareInput';
 import { cn } from '@/lib/utils';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -11,15 +10,7 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, helperText, onFocus, ...props }, ref) => {
-    const { handleFocus } = useKeyboardAwareInput();
-    
-    const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-      // Call our keyboard handling
-      handleFocus(e);
-      // Call any existing onFocus handler
-      onFocus?.(e);
-    };
+  ({ className, label, error, helperText, ...props }, ref) => {
     
     return (
       <div className="w-full">
@@ -30,7 +21,6 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         )}
         <input
           ref={ref}
-          onFocus={handleInputFocus}
           className={cn(
             "w-full px-4 py-3",
             "rounded-xl border border-gray-200",

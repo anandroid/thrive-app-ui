@@ -2,7 +2,8 @@
 
 import React, { ReactNode } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { TouchLink } from './TouchLink';
+import { IconButton } from './Button';
+import { useRouter } from 'next/navigation';
 
 interface ActionBarProps {
   title?: string | ReactNode;
@@ -23,6 +24,7 @@ export function ActionBar({
   className = '',
   variant = 'default'
 }: ActionBarProps) {
+  const router = useRouter();
   const variantClasses = {
     default: 'bg-white border-b border-gray-200',
     transparent: 'bg-transparent',
@@ -30,9 +32,11 @@ export function ActionBar({
   };
 
   const handleBackClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     if (onBackClick) {
-      e.preventDefault();
       onBackClick();
+    } else if (backHref) {
+      router.push(backHref);
     }
   };
 
@@ -42,19 +46,17 @@ export function ActionBar({
         {/* Left: Back Button */}
         <div className="action-bar-left">
           {showBackButton ? (
-            <TouchLink 
-              href={backHref}
+            <IconButton
               onClick={handleBackClick}
-              className="action-bar-button touch-feedback-spring"
-              variant="icon"
-              haptic="medium"
-              scale={0.93}
-              shadow="md"
+              variant="ghost"
+              springAnimation
+              gradientOverlay
               cardGlow
-              hoverScale={1.02}
+              haptic="medium"
+              className="hover:bg-gray-100 text-gray-700"
             >
               <ArrowLeft className="w-5 h-5" />
-            </TouchLink>
+            </IconButton>
           ) : (
             <div className="w-11" />
           )}

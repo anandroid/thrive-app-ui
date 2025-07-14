@@ -6,7 +6,7 @@ export function useKeyboardAwareChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to bottom when keyboard appears or new messages
+  // Scroll to bottom when needed
   const scrollToBottom = (smooth = true) => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ 
@@ -16,27 +16,16 @@ export function useKeyboardAwareChat() {
     }
   };
 
-  // Optional: Use visualViewport API for enhanced experience
+  // Optional: Auto-scroll when visualViewport changes
   useEffect(() => {
     if (typeof window !== 'undefined' && 'visualViewport' in window) {
-      const handleViewportChange = () => {
-        // When keyboard appears, the viewport height decreases
-        if (chatContainerRef.current) {
-          const isKeyboardVisible = window.visualViewport!.height < window.innerHeight * 0.75;
-          chatContainerRef.current.setAttribute('data-keyboard-visible', isKeyboardVisible.toString());
-          
-          // Scroll to bottom when keyboard appears
-          if (isKeyboardVisible) {
-            setTimeout(() => scrollToBottom(false), 100);
-          }
-        }
+      const handleResize = () => {
+        // Simple debounced scroll on viewport change
+        setTimeout(() => scrollToBottom(false), 60);
       };
 
-      window.visualViewport!.addEventListener('resize', handleViewportChange);
-      
-      return () => {
-        window.visualViewport!.removeEventListener('resize', handleViewportChange);
-      };
+      window.visualViewport!.addEventListener('resize', handleResize);
+      return () => window.visualViewport!.removeEventListener('resize', handleResize);
     }
   }, []);
 

@@ -74,7 +74,7 @@ export function Modal({
         />
         
         {/* Modal Container - Centers the modal */}
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-[min(5vw,1.25rem)] pointer-events-none">
           {/* Modal Content */}
           <div 
             className={`
@@ -90,7 +90,7 @@ export function Modal({
           >
             {/* Header */}
             {(header || title || showCloseButton) && (
-              <div className="relative flex items-center justify-between p-6 border-b border-gray-100">
+              <div className="relative flex items-center justify-between p-[min(5vw,1.5rem)] border-b border-gray-100 overflow-hidden">
                 {header || (
                   title && (
                     <h2 id="modal-title" className="text-xl font-semibold text-primary-text pr-8">
@@ -100,7 +100,7 @@ export function Modal({
                 )}
                 
                 {showCloseButton && (
-                  <div className="absolute top-4 right-4">
+                  <div className="absolute top-[min(5vw,1rem)] right-[min(5vw,1rem)] z-20">
                     <TouchCloseButton 
                       onClose={onClose}
                       size="md"
@@ -113,14 +113,14 @@ export function Modal({
             
             {/* Body - Scrollable */}
             <div className="flex-1 overflow-y-auto overscroll-contain">
-              <div className="p-6">
+              <div className="p-[min(5vw,1.5rem)]">
                 {children}
               </div>
             </div>
             
             {/* Footer */}
             {footer && (
-              <div className="border-t border-gray-100 p-6">
+              <div className="border-t border-gray-100 p-[min(5vw,1.5rem)]">
                 {footer}
               </div>
             )}

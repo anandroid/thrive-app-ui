@@ -1,7 +1,6 @@
 'use client';
 
 import React, { forwardRef } from 'react';
-import { useKeyboardAwareInput } from '@/hooks/useKeyboardAwareInput';
 import { cn } from '@/lib/utils';
 
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -11,15 +10,7 @@ export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextArea
 }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, label, error, helperText, onFocus, rows = 3, ...props }, ref) => {
-    const { handleFocus } = useKeyboardAwareInput();
-    
-    const handleTextareaFocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
-      // Call our keyboard handling
-      handleFocus(e);
-      // Call any existing onFocus handler
-      onFocus?.(e);
-    };
+  ({ className, label, error, helperText, rows = 3, ...props }, ref) => {
     
     return (
       <div className="w-full">
@@ -31,7 +22,6 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         <textarea
           ref={ref}
           rows={rows}
-          onFocus={handleTextareaFocus}
           className={cn(
             "w-full px-4 py-3",
             "rounded-xl border border-gray-200",

@@ -10,7 +10,6 @@ import { NotificationSyncProvider } from "@/src/providers/NotificationSyncProvid
 import "@/src/utils/clearCorruptedData";
 import { Toaster } from 'react-hot-toast';
 import { SessionInitializer } from '@/components/features/SessionInitializer';
-import { KeyboardAwareLayout } from '@/components/layout/KeyboardAwareLayout';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -65,12 +64,10 @@ export default function RootLayout({
             <NotificationProvider>
               <JournalMigrationProvider>
                 <NotificationSyncProvider>
-                  <KeyboardAwareLayout>
-                    <SessionInitializer />
-                    <OfflineIndicator />
-                    <Toaster position="top-center" />
-                    {children}
-                  </KeyboardAwareLayout>
+                  <SessionInitializer />
+                  <OfflineIndicator />
+                  <Toaster position="top-center" />
+                  {children}
                 </NotificationSyncProvider>
               </JournalMigrationProvider>
             </NotificationProvider>

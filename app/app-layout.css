@@ -8,15 +8,23 @@
   height: 100dvh; /* Dynamic viewport height */
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Prevent body scroll */
+  overflow: hidden; /* Prevent double scrollbars */
 }
 
-/* Fixed header container */
+/* WebView specific adjustments */
+@supports (-webkit-touch-callout: none) {
+  .app-layout {
+    /* Use available height in WebView to account for keyboard */
+    height: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+}
+
+/* Sticky header container */
 .app-header {
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
   z-index: 100; /* Above content */
   background: white;
   /* Safe area for notch devices */
@@ -25,44 +33,65 @@
 
 /* Override action bar behavior inside app-header */
 .app-header .action-bar {
-  position: relative !important; /* Override sticky since parent is already fixed */
+  position: relative !important; /* Override sticky since parent is already sticky */
   top: auto !important;
   padding-top: 0 !important; /* Remove double padding - parent already has safe area */
   min-height: 3.5rem; /* 56px standard height */
 }
 
-/* Scrollable content area */
+/* Content area - the main scrollable container */
 .app-content {
-  flex: 1;
+  flex: 1 1 auto;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch; /* Smooth iOS scrolling */
   overscroll-behavior-y: contain; /* Prevent pull-to-refresh */
-  
-  /* Account for fixed header */
-  padding-top: calc(3.5rem + env(safe-area-inset-top, 0));
+  position: relative; /* For sticky children */
   
   /* Safe area bottom for home indicator */
   padding-bottom: env(safe-area-inset-bottom, 0);
-  
-  /* Ensure content is scrollable */
-  min-height: 0;
 }
 
 /* Chat-specific adjustments */
 .app-layout.chat-layout .app-content {
   /* Remove padding for chat since it manages its own layout */
   padding: 0;
-  padding-top: calc(3.5rem + env(safe-area-inset-top, 0));
 }
 
 /* Chat simple layout (home page) specific adjustments */
 .app-layout.chat-simple-layout .app-content {
   padding: 0;
-  padding-top: calc(3.5rem + env(safe-area-inset-top, 0));
+  min-height: calc(100vh - 3.5rem - env(safe-area-inset-top, 0));
   display: flex;
   flex-direction: column;
 }
+
+/* Keyboard handling for chat layouts - ensure proper height */
+.app-layout.chat-layout {
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* Sticky bottom element (inputs, buttons, etc) */
+.app-sticky-bottom {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  padding: 0.5rem 1rem;
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0));
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
+  z-index: 10;
+}
+
+/* Chat-specific sticky bottom (no border/shadow for seamless look) */
+.app-layout.chat-layout .app-sticky-bottom,
+.app-layout.chat-simple-layout .app-sticky-bottom {
+  border-top: none;
+  box-shadow: none;
+  padding: 0;
+}
+
 
 /* Ensure smooth keyboard behavior */
 .app-content:focus-within {

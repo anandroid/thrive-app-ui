@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @import "../styles/touch-feedback.css";
 @import "../styles/button-enhancements.css";
-@import "../styles/keyboard-layout.css";
 @import "./action-bar.css";
 @import "./chat-simple.css";
 @import "./page-simple.css";
@@ -93,6 +92,17 @@ input, textarea, [contenteditable] {
   -webkit-user-select: text;
   user-select: text;
 }
+
+/* WebView and Keyboard Handling */
+@supports (-webkit-touch-callout: none) {
+  /* iOS/WebView specific adjustments */
+  html, body {
+    /* Allow body to shrink when keyboard appears */
+    height: 100%;
+    min-height: 100%;
+  }
+}
+
 
 /* Hide scrollbar for horizontal scroll */
 .scrollbar-hide {

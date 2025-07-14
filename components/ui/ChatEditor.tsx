@@ -58,12 +58,40 @@ export function ChatEditor({
     }
   }, [value, isFocused]);
 
-  // Simple focus tracking for styling
+  // Simple focus tracking for input visibility
   useEffect(() => {
-    if (isFocused) {
-      document.body.classList.add('keyboard-visible');
-    } else {
-      document.body.classList.remove('keyboard-visible');
+    if (isFocused && containerRef.current) {
+      // For WebView: ensure input is visible when keyboard appears
+      if (window.visualViewport) {
+        // Use visualViewport API for better keyboard handling
+        const scrollIntoView = () => {
+          containerRef.current?.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'nearest',
+            inline: 'nearest' 
+          });
+        };
+        
+        // Small delay to let keyboard animation start
+        setTimeout(scrollIntoView, 100);
+        
+        // Also listen for viewport changes
+        const handleViewportChange = () => scrollIntoView();
+        window.visualViewport.addEventListener('resize', handleViewportChange);
+        
+        return () => {
+          window.visualViewport?.removeEventListener('resize', handleViewportChange);
+        };
+      } else {
+        // Fallback for browsers without visualViewport
+        setTimeout(() => {
+          containerRef.current?.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'nearest',
+            inline: 'nearest' 
+          });
+        }, 100);
+      }
     }
   }, [isFocused]);
 

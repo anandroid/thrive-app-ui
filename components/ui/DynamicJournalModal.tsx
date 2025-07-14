@@ -176,35 +176,41 @@ export function DynamicJournalModal({ thriving, isOpen, onClose }: DynamicJourna
   };
 
   const modalHeader = (
-    <div className="bg-gradient-to-r from-dusty-rose/10 to-rose/10 -m-6 p-6 mb-6">
-      <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-dusty-rose to-rose flex items-center justify-center">
-          <Brain className="w-5 h-5 text-white" />
+    <div className="w-full">
+      {/* Gradient background that extends to edges */}
+      <div className="absolute inset-x-0 top-0 h-[min(35vw,8.75rem)] bg-gradient-to-r from-dusty-rose/10 to-rose/10 rounded-t-2xl" />
+      
+      {/* Content */}
+      <div className="relative z-10">
+        <div className="flex items-center space-x-[min(3vw,0.75rem)]">
+          <div className="w-[min(10vw,2.5rem)] h-[min(10vw,2.5rem)] rounded-2xl bg-gradient-to-br from-dusty-rose to-rose flex items-center justify-center">
+            <Brain className="w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)] text-white" />
+          </div>
+          <div>
+            <h2 className="text-[min(5vw,1.25rem)] font-semibold text-gray-900">Smart Journal</h2>
+            <p className="text-[min(3.5vw,0.875rem)] text-gray-600">{thriving.title}</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">Smart Journal</h2>
-          <p className="text-sm text-gray-600">{thriving.title}</p>
-        </div>
-      </div>
 
-      {/* Progress Bar */}
-      <div className="mt-4">
-        <div className="flex justify-between text-xs text-gray-500 mb-2">
-          <span className={currentStep === 'fields' ? 'text-dusty-rose font-medium' : ''}>
-            Track Progress
-          </span>
-          <span className={currentStep === 'prompts' ? 'text-dusty-rose font-medium' : ''}>
-            Reflect
-          </span>
-          <span className={currentStep === 'insights' ? 'text-dusty-rose font-medium' : ''}>
-            Insights
-          </span>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div 
-            className="bg-gradient-to-r from-dusty-rose to-rose h-2 rounded-full transition-all duration-500"
-            style={{ width: `${getStepProgress()}%` }}
-          />
+        {/* Progress Bar */}
+        <div className="mt-[min(4vw,1rem)]">
+          <div className="flex justify-between text-[min(3vw,0.75rem)] text-gray-500 mb-[min(2vw,0.5rem)]">
+            <span className={currentStep === 'fields' ? 'text-dusty-rose font-medium' : ''}>
+              Track Progress
+            </span>
+            <span className={currentStep === 'prompts' ? 'text-dusty-rose font-medium' : ''}>
+              Reflect
+            </span>
+            <span className={currentStep === 'insights' ? 'text-dusty-rose font-medium' : ''}>
+              Insights
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-[min(2vw,0.5rem)]">
+            <div 
+              className="bg-gradient-to-r from-dusty-rose to-rose h-full rounded-full transition-all duration-500"
+              style={{ width: `${getStepProgress()}%` }}
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -215,7 +221,7 @@ export function DynamicJournalModal({ thriving, isOpen, onClose }: DynamicJourna
       {currentStep !== 'fields' && (
         <button
           onClick={handleBack}
-          className="flex-1 py-3 px-4 rounded-2xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors touch-feedback touch-manipulation"
+          className="flex-1 py-[min(3vw,0.75rem)] px-[min(5vw,1rem)] rounded-2xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors touch-feedback touch-manipulation"
         >
           Back
         </button>
@@ -225,7 +231,7 @@ export function DynamicJournalModal({ thriving, isOpen, onClose }: DynamicJourna
         <button
           onClick={handleNext}
           disabled={!isStepComplete()}
-          className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-dusty-rose to-rose text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all touch-feedback touch-manipulation"
+          className="flex-1 py-[min(3vw,0.75rem)] px-[min(5vw,1rem)] rounded-2xl bg-gradient-to-r from-dusty-rose to-rose text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all touch-feedback touch-manipulation"
         >
           {currentStep === 'fields' ? 'Continue' : 'Next'}
         </button>
@@ -233,7 +239,7 @@ export function DynamicJournalModal({ thriving, isOpen, onClose }: DynamicJourna
         <button
           onClick={handleSubmit}
           disabled={isSubmitting || !isStepComplete()}
-          className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all touch-feedback touch-manipulation"
+          className="flex-1 py-[min(3vw,0.75rem)] px-[min(5vw,1rem)] rounded-2xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all touch-feedback touch-manipulation"
         >
           {isSubmitting ? 'Saving...' : 'Save Entry'}
         </button>
@@ -276,7 +282,7 @@ export function DynamicJournalModal({ thriving, isOpen, onClose }: DynamicJourna
 
               {/* Show contextual hints based on user patterns */}
               {userProfile && userProfile.dataPoints > 10 && (
-                <div className="mt-6 p-4 bg-gradient-to-r from-sage-light/10 to-sage/5 rounded-2xl border border-sage-light/20">
+                <div className="mt-6 p-[min(5vw,1rem)] bg-gradient-to-r from-sage-light/10 to-sage/5 rounded-2xl border border-sage-light/20">
                   <div className="flex items-start space-x-3">
                     <TrendingUp className="w-5 h-5 text-sage-dark mt-0.5 flex-shrink-0" />
                     <div>
@@ -318,14 +324,14 @@ export function DynamicJournalModal({ thriving, isOpen, onClose }: DynamicJourna
 
               {/* Show contextual prompts from learning */}
               {contextualPrompts.length > 0 && (
-                <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100">
+                <div className="mt-6 p-[min(5vw,1rem)] bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100">
                   <h4 className="font-medium text-blue-900 text-sm mb-2 flex items-center">
                     <Brain className="w-4 h-4 mr-2" />
                     Smart Suggestions
                   </h4>
                   <div className="space-y-2">
                     {contextualPrompts.slice(0, 2).map((prompt, index) => (
-                      <p key={index} className="text-xs text-blue-700 bg-blue-50 p-2 rounded-lg">
+                      <p key={index} className="text-xs text-blue-700 bg-blue-50 p-[min(3vw,0.5rem)] rounded-lg">
                         💡 {prompt}
                       </p>
                     ))}
@@ -348,7 +354,7 @@ export function DynamicJournalModal({ thriving, isOpen, onClose }: DynamicJourna
               </div>
 
               {/* Summary of what was tracked */}
-              <div className="bg-gray-50 rounded-2xl p-4">
+              <div className="bg-gray-50 rounded-2xl p-[min(5vw,1rem)]">
                 <h4 className="font-medium text-gray-900 mb-3 flex items-center">
                   <Calendar className="w-4 h-4 mr-2" />
                   Today&apos;s Entry Summary
@@ -376,7 +382,7 @@ export function DynamicJournalModal({ thriving, isOpen, onClose }: DynamicJourna
 
               {/* Show learning preview if enough data */}
               {userProfile && userProfile.dataPoints >= 5 && (
-                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-4 border border-emerald-100">
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-[min(5vw,1rem)] border border-emerald-100">
                   <h4 className="font-medium text-emerald-900 mb-2 flex items-center">
                     <TrendingUp className="w-4 h-4 mr-2" />
                     Your Progress Insights

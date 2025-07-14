@@ -11,8 +11,8 @@
 .chat-messages-area {
   flex: 1;
   padding: 1rem;
-  /* Add some bottom padding so last message isn't too close to input */
-  padding-bottom: 2rem;
+  /* Add bottom padding equal to input height so last message is visible */
+  padding-bottom: 5.5rem;
 }
 
 /* Input container - stays at bottom */

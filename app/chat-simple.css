@@ -2,37 +2,22 @@
 
 /* Chat container using flexbox approach from best practices */
 .chat-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
   display: flex;
   flex-direction: column;
-  /* Remove fixed height to allow container to resize properly */
-  /* height: 100vh; */
-  /* height: 100dvh; */
+  height: 100%;
   background: #f9fafb;
-  /* Ensure smooth transition for keyboard handling */
-  transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Fixed header */
+/* Chat header - only used when SmartCardChat provides custom header */
 .chat-header {
-  position: sticky;
-  top: 0;
   flex-shrink: 0;
   background: white;
   border-bottom: 1px solid #e5e7eb;
-  z-index: 50;
 }
 
-/* Messages area - key is flex: 1 and overflow handling */
+/* Messages area - not separately scrollable anymore */
 .chat-messages {
-  flex: 1; /* This is crucial - allows the message area to expand/shrink */
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
+  flex: 1 0 auto;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -42,6 +27,8 @@
 .chat-messages-content {
   margin-top: auto; /* Pushes content to bottom without justify-content issues */
   padding: 1rem;
+  /* Add bottom padding to ensure last message is visible above input */
+  padding-bottom: 5.5rem;
 }
 
 /* Input area - flex-shrink: 0 keeps it from compressing */
@@ -69,6 +56,8 @@
   display: flex;
   flex-direction: column;
   background: #f9fafb;
+  /* Ensure container can shrink when keyboard appears */
+  min-height: 0;
 }
 
 .app-layout .chat-header {
@@ -103,10 +92,10 @@
   scroll-behavior: smooth;
 }
 
-/* Content padding helper */
+/* Content padding helper - viewport based */
 .content-padding {
-  padding-left: 1rem;
-  padding-right: 1rem;
+  padding-left: min(4vw, 1rem);
+  padding-right: min(4vw, 1rem);
 }
 
 /* Debug helper (remove in production) */

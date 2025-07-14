@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { Info, Moon, ChevronRight, Plus, Leaf, MessageSquare, Trash2, Bell } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { getTouchClasses } from '@/hooks/useTouchFeedback';
 import { TouchLink } from '@/components/ui/TouchLink';
 import { AppLayout } from '@/components/layout/AppLayout';
 import bridge from '@/src/lib/react-native-bridge';
@@ -73,7 +72,7 @@ export default function SettingsPage() {
         <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-gradient-to-tr from-rose/10 to-burgundy/10 blur-3xl" />
         
         {/* Settings Content */}
-        <div className="px-4 py-6 pb-20 relative">
+        <div className="px-[min(5vw,1.25rem)] py-[min(4vw,1.5rem)] pb-20 relative">
           {/* Bottom fade gradient */}
           <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-transparent via-transparent to-white pointer-events-none" />
           <div className="space-y-4">
@@ -81,40 +80,38 @@ export default function SettingsPage() {
             <div className="mb-6">
               <h2 className="text-lg font-semibold text-primary-text mb-3">Quick Actions</h2>
               <div className="space-y-3">
-                {/* First Row */}
-                <div className="flex gap-3">
-                  <Button
-                    onClick={() => {
-                      sessionStorage.setItem('initialMessage', 'Create a wellness thriving for me');
-                      router.push('/chat/new?intent=create_thriving');
-                    }}
-                    variant="gradient"
-                    gradient={{
-                      from: 'rose/10',
-                      to: 'burgundy/5',
-                      hoverFrom: 'rose/20',
-                      hoverTo: 'burgundy/10',
-                      activeFrom: 'rose/30',
-                      activeTo: 'burgundy/15'
-                    }}
-                    springAnimation
-                    gradientOverlay
-                    cardGlow
-                    haptic="medium"
-                    className="flex-1 rounded-2xl border border-rose/20 p-4"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose to-burgundy flex items-center justify-center flex-shrink-0">
-                        <Plus className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="text-left">
-                        <h3 className="font-medium text-primary-text text-sm">Create Thriving</h3>
-                        <p className="text-xs text-primary-text/60">New wellness plan</p>
-                      </div>
+                {/* Create Thriving */}
+                <Button
+                  onClick={() => {
+                    sessionStorage.setItem('initialMessage', 'Create a wellness thriving for me');
+                    router.push('/chat/new?intent=create_thriving');
+                  }}
+                  variant="gradient"
+                  gradient={{
+                    from: 'white/80',
+                    to: 'white/80',
+                    hoverFrom: 'rose/10',
+                    hoverTo: 'burgundy/5',
+                    activeFrom: 'rose/20',
+                    activeTo: 'burgundy/10'
+                  }}
+                  springAnimation
+                  gradientOverlay
+                  cardGlow
+                  haptic="medium"
+                  shadow="sm"
+                  className="w-full rounded-2xl backdrop-blur-sm border border-rose/20 p-[min(5vw,1.25rem)] text-left"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose to-burgundy flex items-center justify-center flex-shrink-0">
+                      <Plus className="w-5 h-5 text-white" strokeWidth={2} />
                     </div>
-                  </Button>
-                  
-                </div>
+                    <div className="text-left">
+                      <h3 className="font-medium text-primary-text text-sm">Create Thriving</h3>
+                      <p className="text-xs text-primary-text/60">New wellness plan</p>
+                    </div>
+                  </div>
+                </Button>
 
                 {/* Pantry - Full Width with Enhanced Design */}
                 <TouchLink
@@ -125,7 +122,7 @@ export default function SettingsPage() {
                   hoverScale={1.01}
                   haptic="medium"
                   variant="card"
-                  className="w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-dusty-rose/20 p-4 hover:shadow-lg transition-all block relative overflow-hidden shadow-sm group"
+                  className="w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-dusty-rose/20 p-[min(5vw,1.25rem)] hover:shadow-lg transition-all block relative overflow-hidden shadow-sm group"
                 >
                   {/* Gradient overlay on hover */}
                   <div className="absolute inset-0 bg-gradient-to-br from-dusty-rose/0 via-dusty-rose/5 to-rose/10 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -158,7 +155,7 @@ export default function SettingsPage() {
                   hoverScale={1.01}
                   haptic="medium"
                   variant="card"
-                  className="w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-sage/20 p-4 hover:shadow-lg transition-all block relative overflow-hidden shadow-sm group"
+                  className="w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-sage/20 p-[min(5vw,1.25rem)] hover:shadow-lg transition-all block relative overflow-hidden shadow-sm group"
                 >
                   {/* Gradient overlay on hover */}
                   <div className="absolute inset-0 bg-gradient-to-br from-sage-light/0 via-sage/5 to-sage-dark/10 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -188,10 +185,7 @@ export default function SettingsPage() {
             
             {/* Notifications */}
             {bridge.isInReactNative() && (
-              <div className={getTouchClasses(
-                "rounded-2xl bg-white/80 backdrop-blur-sm border border-rose/20 p-4 shadow-sm",
-                { feedback: true }
-              )}>
+              <div className="rounded-2xl bg-white/80 backdrop-blur-sm border border-rose/20 p-[min(5vw,1.25rem)] shadow-sm">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose to-burgundy flex items-center justify-center">
@@ -260,10 +254,7 @@ export default function SettingsPage() {
             {/* Privacy & Security - Hidden for now */}
             
             {/* Dark Mode */}
-            <div className={getTouchClasses(
-              "rounded-2xl bg-white/80 backdrop-blur-sm border border-soft-lavender/20 p-4 shadow-sm",
-              { feedback: true }
-            )}>
+            <div className="rounded-2xl bg-white/80 backdrop-blur-sm border border-soft-lavender/20 p-[min(5vw,1.25rem)] shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-soft-lavender to-burgundy flex items-center justify-center">
@@ -294,19 +285,16 @@ export default function SettingsPage() {
               cardGlow
               haptic="medium"
               shadow="sm"
-              className="w-full rounded-2xl backdrop-blur-sm border border-dusty-rose/20 p-4 text-left"
+              className="w-full rounded-2xl backdrop-blur-sm border border-dusty-rose/20 p-[min(5vw,1.25rem)] text-left"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-dusty-rose to-rose flex items-center justify-center">
-                    <Info className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-primary-text">About Thrive</h3>
-                    <p className="text-sm text-primary-text/60">Learn about our philosophy</p>
-                  </div>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-dusty-rose to-rose flex items-center justify-center">
+                  <Info className="w-5 h-5 text-white" />
                 </div>
-                <ChevronRight className="w-5 h-5 text-gray-400" />
+                <div className="text-left">
+                  <h3 className="font-medium text-primary-text text-sm">About Thrive</h3>
+                  <p className="text-xs text-primary-text/60">Learn about our philosophy</p>
+                </div>
               </div>
             </Button>
           </div>
@@ -336,8 +324,8 @@ export default function SettingsPage() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirmation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-fade-in">
-          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-scale-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-[min(5vw,1.25rem)] bg-black/50 animate-fade-in">
+          <div className="bg-white rounded-3xl p-[min(5vw,1.5rem)] max-w-sm w-full shadow-2xl animate-scale-in">
             <div className="text-center mb-6">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
                 <Trash2 className="w-8 h-8 text-red-600" />

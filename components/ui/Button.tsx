@@ -268,9 +268,9 @@ export const RoseGradientButton = forwardRef<HTMLButtonElement, Omit<ButtonProps
   )
 );
 
-// Icon button variant
+// Icon button variant - Enhanced with premium defaults
 export const IconButton = forwardRef<HTMLButtonElement, Omit<ButtonProps, 'size'>>(
-  ({ className, ...props }, ref) => (
+  ({ className, springAnimation = true, cardGlow = true, gradientOverlay = true, scale = 0.93, shadow = 'md', ...props }, ref) => (
     <Button 
       ref={ref} 
       size="sm"
@@ -278,15 +278,19 @@ export const IconButton = forwardRef<HTMLButtonElement, Omit<ButtonProps, 'size'
         'w-11 h-11 p-0 min-h-0',
         className
       )}
-      scale={0.85}
+      scale={scale}
+      springAnimation={springAnimation}
+      cardGlow={cardGlow}
+      gradientOverlay={gradientOverlay}
+      shadow={shadow}
       {...props} 
     />
   )
 );
 
-// Menu button (like settings button)
+// Menu button (like settings button) - Enhanced with premium defaults
 export const MenuButton = forwardRef<HTMLButtonElement, Omit<ButtonProps, 'variant' | 'shadow' | 'rounded'>>(
-  (props, ref) => (
+  ({ springAnimation = true, gradientOverlay = true, scale = 0.93, ...props }, ref) => (
     <Button 
       ref={ref} 
       variant="ghost"
@@ -295,6 +299,9 @@ export const MenuButton = forwardRef<HTMLButtonElement, Omit<ButtonProps, 'varia
       className="bg-white/60 hover:bg-white/90"
       cardGlow
       hoverScale={1.02}
+      springAnimation={springAnimation}
+      gradientOverlay={gradientOverlay}
+      scale={scale}
       {...props} 
     />
   )
@@ -316,7 +323,8 @@ export const CardButton = forwardRef<HTMLButtonElement, ButtonProps>(
       scale={0.97}
       className={cn(
         'bg-white/90 backdrop-blur-sm hover:bg-white',
-        'p-5 text-left',
+        'p-[min(5vw,1.25rem)]',
+        'justify-start', // Ensure left alignment by default
         className
       )}
       {...props} 

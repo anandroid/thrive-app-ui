@@ -23,8 +23,6 @@ import { getJourneyByType } from '@/src/utils/journeyStorage';
 import { ChatEditor } from '@/components/ui/ChatEditor';
 import { createChatThread, addMessageToThread, getChatThread, deleteChatThread } from '@/src/utils/chatStorage';
 import { useKeyboardAwareChat } from '@/hooks/useKeyboardAwareChat';
-import { useNativeKeyboard } from '@/hooks/useNativeKeyboard';
-import { useWebViewKeyboard } from '@/hooks/useWebViewKeyboard';
 import { ChatWelcome } from './ChatWelcome';
 import { ThrivingTutorial } from './ThrivingTutorial';
 import { PantryAddModal } from './PantryAddModal';
@@ -76,8 +74,6 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   const hasScrolledToStreamRef = useRef<Set<number>>(new Set());
   const streamingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { messagesEndRef, chatContainerRef, scrollToBottom } = useKeyboardAwareChat();
-  const { adjustForKeyboard, isInWebView } = useNativeKeyboard();
-  const webViewKeyboard = useWebViewKeyboard();
   const [showThrivingTutorial, setShowThrivingTutorial] = useState(false);
   const [tutorialActionableText, setTutorialActionableText] = useState<string>('');
   const hasShownTutorialInSession = useRef(false);
@@ -1341,19 +1337,14 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   return (
     <div 
       className="chat-container" 
-      ref={(el) => {
-        chatContainerRef.current = el;
-        // Make container keyboard-aware for WebView
-        if (webViewKeyboard.isInWebView && el) {
-          webViewKeyboard.makeKeyboardAware(el);
-        }
-      }}
-      data-keyboard-container="true"
+      ref={chatContainerRef}
     >
-      {/* Header - stays at top */}
-      <div className="chat-header safe-top">
-        {renderHeader?.()}
-      </div>
+      {/* Header - only render if provided */}
+      {renderHeader && (
+        <div className="chat-header safe-top">
+          {renderHeader()}
+        </div>
+      )}
 
       {/* Messages - scrollable middle section that shrinks */}
       <div className="chat-messages smooth-scroll">
@@ -1433,19 +1424,10 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
               : "Ask about your wellness journey..."
           }
           onFocus={() => {
-            // Use enhanced WebView keyboard handling
-            // Get the textarea element from the ChatEditor
-            const textarea = document.querySelector('.chat-input-area textarea') as HTMLElement;
-            if (webViewKeyboard.isInWebView && textarea) {
-              webViewKeyboard.scrollToInput(textarea);
-            } else if (isInWebView && textarea) {
-              adjustForKeyboard();
-            } else {
-              // Regular scroll for non-WebView environments
-              setTimeout(() => {
-                scrollToBottom();
-              }, 300);
-            }
+            // Let the browser handle keyboard naturally
+            setTimeout(() => {
+              scrollToBottom();
+            }, 300);
           }}
         />
       </div>

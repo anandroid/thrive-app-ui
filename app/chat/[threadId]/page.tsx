@@ -4,7 +4,7 @@ import React, { useState, useEffect, use } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Heart } from 'lucide-react';
 import { SmartCardChat } from '@/components/features/SmartCardChat';
-import { TouchLink } from '@/components/ui/TouchLink';
+import { IconButton } from '@/components/ui/Button';
 import { saveThrivingToStorage } from '@/src/utils/thrivingStorage';
 import { saveJourneyToStorage } from '@/src/utils/journeyStorage';
 import { Thriving, AdditionalRecommendation } from '@/src/types/thriving';
@@ -41,14 +41,17 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
           <>
             <div className="action-bar-content">
               <div className="action-bar-left">
-                <TouchLink 
-                  href="/"
-                  className="action-bar-button"
-                  variant="icon"
+                <IconButton
+                  onClick={() => router.push('/')}
+                  variant="ghost"
+                  springAnimation
+                  gradientOverlay
+                  cardGlow
                   haptic="medium"
+                  className="hover:bg-gray-100 text-gray-700"
                 >
                   <ArrowLeft className="w-5 h-5" />
-                </TouchLink>
+                </IconButton>
               </div>
               <div className="action-bar-center">
                 <div className="flex items-center space-x-2">

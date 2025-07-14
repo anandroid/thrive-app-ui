@@ -14,6 +14,7 @@ interface AppLayoutProps {
     variant?: 'default' | 'transparent' | 'blur';
   };
   customHeader?: ReactNode; // For completely custom header content
+  stickyBottom?: ReactNode; // For sticky bottom elements (input, buttons, etc)
   className?: string;
   contentClassName?: string;
 }
@@ -22,7 +23,7 @@ interface AppLayoutProps {
  * AppLayout - Universal layout for all pages
  * 
  * Features:
- * - Fixed header that stays at top
+ * - Sticky header that scrolls then sticks at top
  * - Scrollable content area that adjusts to keyboard
  * - Consistent spacing and safe areas
  * 
@@ -37,12 +38,13 @@ export function AppLayout({
   children,
   header,
   customHeader,
+  stickyBottom,
   className = '',
   contentClassName = ''
 }: AppLayoutProps) {
   return (
     <div className={`app-layout ${className}`}>
-      {/* Fixed Header */}
+      {/* Sticky Header */}
       {(header || customHeader) && (
         <div className="app-header">
           {customHeader ? (
@@ -63,6 +65,11 @@ export function AppLayout({
       {/* Scrollable Content */}
       <div className={`app-content ${contentClassName}`}>
         {children}
+        {stickyBottom && (
+          <div className="app-sticky-bottom">
+            {stickyBottom}
+          </div>
+        )}
       </div>
     </div>
   );

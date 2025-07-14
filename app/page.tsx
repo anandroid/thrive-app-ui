@@ -205,6 +205,7 @@ export default function HomePage() {
       {/* Main app content - Only render when ready */}
       {showMainContent && (
         <AppLayout
+          className="chat-simple-layout"
           customHeader={
             <div className="flex items-center justify-between content-padding h-14 bg-white border-b border-gray-200">
               <div className="flex items-center space-x-3">
@@ -231,7 +232,15 @@ export default function HomePage() {
               </MenuButton>
             </div>
           }
-          className="chat-simple-layout"
+          stickyBottom={
+            <div className="chat-input-container">
+              <ChatEditor
+                value={input}
+                onChange={setInput}
+                onSubmit={handleSendMessage}
+              />
+            </div>
+          }
         >
 
           {/* Main Content */}
@@ -257,7 +266,7 @@ export default function HomePage() {
                     {thrivings.slice(0, 5).map((thriving, index) => (
                       <div
                         key={thriving.id}
-                        className="flex-none w-[280px] p-5 rounded-2xl bg-white shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all group cursor-pointer touch-feedback touch-manipulation"
+                        className="flex-none w-[280px] p-[min(5vw,1.25rem)] rounded-2xl bg-white shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all group cursor-pointer touch-feedback touch-manipulation"
                         onClick={() => router.push(`/thrivings?id=${thriving.id}`)}
                       >
                         <div className="flex items-start justify-between mb-3">
@@ -347,11 +356,11 @@ export default function HomePage() {
                 <h3 className="text-[min(4.5vw,1.125rem)] font-semibold text-gray-700 mb-3">Pick up where you left off</h3>
                 <button
                   onClick={() => router.push(`/chat/${latestChat.threadId}`)}
-                  className="w-full p-[5vw] max-p-[1.5rem] rounded-[5vw] max-rounded-[1.25rem] bg-white shadow-md hover:shadow-lg active:scale-[0.98] transition-all border border-gray-100 text-left group touch-feedback touch-manipulation"
+                  className="w-full p-[min(5vw,1.25rem)] rounded-[5vw] max-rounded-[1.25rem] bg-white shadow-md hover:shadow-lg active:scale-[0.98] transition-all border border-gray-100 text-left group touch-feedback touch-manipulation"
                 >
-                  <div className="flex items-start space-x-[4vw] max-space-x-4">
-                    <div className="w-[12vw] h-[12vw] max-w-[3rem] max-h-[3rem] rounded-[3vw] max-rounded-[0.75rem] bg-gradient-to-br from-rose/20 to-burgundy/15 flex items-center justify-center flex-shrink-0 group-hover:from-rose/30 group-hover:to-burgundy/25 transition-colors">
-                      <MessageCircle className="w-[6vw] h-[6vw] max-w-[1.5rem] max-h-[1.5rem] text-burgundy" />
+                  <div className="flex items-start space-x-[min(4vw,1rem)]">
+                    <div className="w-[min(11vw,2.75rem)] h-[min(11vw,2.75rem)] rounded-xl bg-gradient-to-br from-rose/20 to-burgundy/15 flex items-center justify-center flex-shrink-0 group-hover:from-rose/30 group-hover:to-burgundy/25 transition-colors">
+                      <MessageCircle className="w-[min(5.5vw,1.375rem)] h-[min(5.5vw,1.375rem)] text-burgundy" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-[min(4vw,1rem)] font-semibold text-gray-900 mb-[1vw] truncate">
@@ -407,30 +416,19 @@ export default function HomePage() {
                     <CardButton
                       key={index}
                       onClick={() => handlePromptClick(template.text)}
-                      className="p-5"
+                      className="flex items-center gap-[min(4vw,1rem)]"
                     >
-                      <div className="flex items-center space-x-4 w-full">
-                        <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${template.iconGradient} grid place-items-center flex-shrink-0 shadow-lg`}>
-                          <Icon className="w-6 h-6 text-white flex-shrink-0" />
-                        </div>
-                        <span className="text-gray-800 text-[15px] font-medium flex-1">
-                          {template.text}
-                        </span>
+                      <div className={`w-[min(11vw,2.75rem)] h-[min(11vw,2.75rem)] rounded-xl bg-gradient-to-br ${template.iconGradient} flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                        <Icon className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-white" strokeWidth={2} />
                       </div>
+                      <span className="text-gray-800 text-[min(3.75vw,0.9375rem)] font-medium text-left flex-1">
+                        {template.text}
+                      </span>
                     </CardButton>
                   );
                 })}
               </div>
             </div>
-          </div>
-
-          {/* Input Area - Fixed at Bottom */}
-          <div className="chat-input-area safe-bottom">
-            <ChatEditor
-              value={input}
-              onChange={setInput}
-              onSubmit={handleSendMessage}
-            />
           </div>
         </AppLayout>
       )}

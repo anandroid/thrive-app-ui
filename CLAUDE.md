@@ -9,6 +9,13 @@ All buttons and interactive elements throughout the app now have premium touch f
 - Gradient overlays for shimmer effects
 - Enhanced shadow transitions
 
+### ActionBar Improvements:
+- ActionBar back buttons now use IconButton with premium effects
+- IconButton default scale increased from 0.85 to 0.93 for better feedback
+- IconButton has springAnimation, cardGlow, and gradientOverlay enabled by default
+- MenuButton enhanced with premium defaults
+- All action buttons now have consistent touch experience
+
 ## 🤖 AI AGENT MANDATORY RULES - READ FIRST!
 
 ### RULE #1: Touch Feedback is NOT Optional
@@ -91,11 +98,32 @@ Custom layout structures               // Not allowed
 ```
 
 ### AppLayout Features
-- **Fixed header** that stays at top while content scrolls
+- **Sticky header** that scrolls with content then sticks at top
 - **Natural scroll behavior** - no complex CSS transforms
 - **Automatic safe area handling** for notch devices
 - **Consistent spacing** across all pages
 - **Mobile-first architecture**
+
+### 🚨 CRITICAL: Header Positioning Framework (2025-07-14)
+**ALL headers use STICKY positioning, NOT fixed!**
+
+#### Why Sticky Over Fixed:
+1. **Natural keyboard handling** - Browser handles keyboard adjustments automatically
+2. **No padding calculations** - Header stays in document flow, no need for padding-top
+3. **Consistent behavior** - All pages behave the same way
+4. **Simpler CSS** - Less complexity, fewer edge cases
+
+#### Implementation Rules:
+- `.app-header` uses `position: sticky` with `top: 0`
+- `.app-content` has NO padding-top (header takes natural space)
+- ActionBar inside app-header is `position: relative` (parent handles stickiness)
+- NEVER mix fixed and sticky positioning strategies
+
+#### Common Mistakes to Avoid:
+- ❌ Using `position: fixed` for headers
+- ❌ Adding `padding-top` to content when using sticky
+- ❌ Creating custom header implementations
+- ❌ Using ActionBar directly without AppLayout
 
 ### Exception: Pages with Special Requirements
 Only these pages may use custom layouts:
@@ -115,66 +143,57 @@ The AppLayout automatically applies these classes:
 3. No manual keyboard handling needed - browser handles it naturally
 4. Always test on mobile devices to ensure proper scrolling behavior
 
-## 🎯 WebView Keyboard Handling Solution
+## 🎯 Keyboard Handling Solution (Sticky Bottom Pattern)
 
 ### The Problem
-WebView environments (React Native WebView) have persistent issues with keyboard handling where:
-- Input fields get covered by the keyboard
-- Standard solutions like `visualViewport` API don't work reliably
-- CSS viewport units behave differently
-- Each platform (iOS/Android) has different quirks
+Mobile keyboards can cover input fields, causing poor UX where users can't see what they're typing. Traditional JavaScript solutions are unreliable and cause flicker.
 
-### The Solution: Use Our Custom Input Components
-We've created keyboard-aware Input and Textarea components that automatically handle all keyboard issues in WebView.
+### The Solution: CSS Sticky Bottom Pattern
+We use a pure CSS approach with sticky positioning that lets the browser handle keyboard appearance naturally.
 
-#### For ALL Text Inputs in the App:
-```typescript
-// ❌ DON'T use regular inputs
-<input type="text" value={value} onChange={...} />
-<textarea value={value} onChange={...} />
+#### How It Works:
+```
+AppLayout (100dvh flex container)
+  ├── Header (sticky top - always visible)
+  └── Content (flex: 1, scrollable)
+       ├── Main content area
+       └── Sticky bottom (inputs/buttons - sticks to keyboard)
+```
 
-// ✅ DO use our keyboard-aware components
+#### Implementation:
+```tsx
+// For pages with bottom inputs
+<AppLayout
+  header={{ title: "My Page" }}
+  stickyBottom={
+    <div className="chat-input-container">
+      <ChatEditor />
+    </div>
+  }
+>
+  {/* Your scrollable content */}
+</AppLayout>
+
+// For regular forms
 import { Input, Textarea } from '@/components/ui/form-inputs';
 
 <Input 
   value={value} 
   onChange={(e) => setValue(e.target.value)}
   label="Name"
-  placeholder="Enter name..."
-  error={errors.name}
-/>
-
-<Textarea 
-  value={notes} 
-  onChange={(e) => setNotes(e.target.value)}
-  label="Notes"
-  rows={4}
 />
 ```
 
-#### Features:
-- **Automatic keyboard handling** - Works in both WebView and regular browsers
-- **Consistent styling** - Uses viewport units for mobile-first design
-- **Built-in validation** - Error and helper text support
-- **Type safety** - Full TypeScript support
-- **No manual setup** - Just import and use
+#### Key Benefits:
+- **Zero JavaScript** - Browser handles everything natively
+- **No flicker** - Instant response to keyboard
+- **Cross-platform** - Works identically everywhere
+- **Performance** - No DOM manipulation or timers
 
-#### Creating New Forms:
-When creating new forms or modals with text inputs:
-1. Always import from `@/components/ui/form-inputs`
-2. Use `Input` for single-line text fields
-3. Use `Textarea` for multi-line text fields
-4. These components handle ALL keyboard issues automatically
-
-#### For Special Cases (Chat, Editors):
-If you need custom input behavior (like ChatEditor), use the hook directly:
-```typescript
-import { useKeyboardAwareInput } from '@/hooks/useKeyboardAwareInput';
-
-const { handleFocus } = useKeyboardAwareInput();
-
-<input onFocus={handleFocus} />
-```
+#### CSS Classes:
+- `.app-sticky-bottom` - Applied to sticky bottom content
+- `.chat-input-container` - For chat-style inputs
+- Content automatically has padding-bottom to prevent overlap
 
 ## 🔐 Environment Variables
 
@@ -227,6 +246,53 @@ export async function POST(request) {
 ```
 
 Environment variables are not available during the build process, only at runtime.
+
+## 🚨 CRITICAL: NO PIXEL THINKING - ONLY VIEWPORT UNITS!
+
+### NEVER TALK OR THINK IN PIXELS!
+This is a MOBILE-FIRST app. We NEVER use or reference pixel values. ALWAYS use viewport-relative units.
+
+### ❌ FORBIDDEN (Never use or mention):
+- "20px padding" 
+- "16px spacing"
+- "44px touch target"
+- Any fixed pixel references
+
+### ✅ REQUIRED (Always use):
+- "5vw padding with 1.25rem max"
+- "4vw spacing with 1rem max"
+- "11vw touch target with 2.75rem max"
+- Viewport-first thinking
+
+## 📐 UNIVERSAL SPACING SYSTEM (MANDATORY FOR ALL COMPONENTS)
+
+### Consistent Spacing Units
+Use these EXACT spacing values throughout the app for perfect alignment:
+
+**Padding:**
+- Card padding: `p-[min(5vw,1.25rem)]`
+- Container padding: `px-[min(4vw,1rem)]`
+- Small padding: `p-[min(3vw,0.75rem)]`
+
+**Spacing:**
+- Between elements: `space-x-[min(4vw,1rem)]`
+- Small gaps: `gap-[min(3vw,0.75rem)]`
+- Large gaps: `gap-[min(5vw,1.25rem)]`
+
+**Icon Sizes:**
+- Standard icon container: `w-[min(11vw,2.75rem)] h-[min(11vw,2.75rem)]`
+- Small icon container: `w-[min(10vw,2.5rem)] h-[min(10vw,2.5rem)]`
+- Icon inset: `inset-[min(2vw,0.5rem)]`
+
+**Text Sizes:**
+- Body text: `text-[min(3.75vw,0.9375rem)]`
+- Small text: `text-[min(3.5vw,0.875rem)]`
+- Title text: `text-[min(4.5vw,1.125rem)]`
+
+**Border Radius:**
+- Cards: `rounded-2xl`
+- Buttons: `rounded-xl`
+- Small elements: `rounded-lg`
 
 ## 🚨 CRITICAL: VIEWPORT-FIRST DEVELOPMENT RULE - MANDATORY FOR ALL COMPONENTS
 **THIS IS A MOBILE APP - ABSOLUTELY NO HARDCODED PIXEL VALUES ALLOWED!**
