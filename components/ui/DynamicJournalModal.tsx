@@ -177,13 +177,10 @@ export function DynamicJournalModal({ thriving, isOpen, onClose }: DynamicJourna
 
   const modalHeader = (
     <div className="w-full">
-      {/* Gradient background that extends to edges */}
-      <div className="absolute inset-x-0 top-0 h-[min(35vw,8.75rem)] bg-gradient-to-r from-dusty-rose/10 to-rose/10 rounded-t-2xl" />
-      
       {/* Content */}
-      <div className="relative z-10">
+      <div className="relative">
         <div className="flex items-center space-x-[min(3vw,0.75rem)]">
-          <div className="w-[min(10vw,2.5rem)] h-[min(10vw,2.5rem)] rounded-2xl bg-gradient-to-br from-dusty-rose to-rose flex items-center justify-center">
+          <div className="w-[min(10vw,2.5rem)] h-[min(10vw,2.5rem)] rounded-2xl bg-gradient-to-br from-[#daa0a9] to-[#fb7185] flex items-center justify-center">
             <Brain className="w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)] text-white" />
           </div>
           <div>
@@ -195,19 +192,19 @@ export function DynamicJournalModal({ thriving, isOpen, onClose }: DynamicJourna
         {/* Progress Bar */}
         <div className="mt-[min(4vw,1rem)]">
           <div className="flex justify-between text-[min(3vw,0.75rem)] text-gray-500 mb-[min(2vw,0.5rem)]">
-            <span className={currentStep === 'fields' ? 'text-dusty-rose font-medium' : ''}>
+            <span className={currentStep === 'fields' ? 'text-[#daa0a9] font-medium' : ''}>
               Track Progress
             </span>
-            <span className={currentStep === 'prompts' ? 'text-dusty-rose font-medium' : ''}>
+            <span className={currentStep === 'prompts' ? 'text-[#daa0a9] font-medium' : ''}>
               Reflect
             </span>
-            <span className={currentStep === 'insights' ? 'text-dusty-rose font-medium' : ''}>
+            <span className={currentStep === 'insights' ? 'text-[#daa0a9] font-medium' : ''}>
               Insights
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-[min(2vw,0.5rem)]">
             <div 
-              className="bg-gradient-to-r from-dusty-rose to-rose h-full rounded-full transition-all duration-500"
+              className="bg-gradient-to-r from-[#daa0a9] to-[#fb7185] h-full rounded-full transition-all duration-500"
               style={{ width: `${getStepProgress()}%` }}
             />
           </div>
@@ -231,7 +228,7 @@ export function DynamicJournalModal({ thriving, isOpen, onClose }: DynamicJourna
         <button
           onClick={handleNext}
           disabled={!isStepComplete()}
-          className="flex-1 py-[min(3vw,0.75rem)] px-[min(5vw,1rem)] rounded-2xl bg-gradient-to-r from-dusty-rose to-rose text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all touch-feedback touch-manipulation"
+          className="flex-1 py-[min(3vw,0.75rem)] px-[min(5vw,1rem)] rounded-2xl bg-gradient-to-r from-[#daa0a9] to-[#fb7185] text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all touch-feedback touch-manipulation"
         >
           {currentStep === 'fields' ? 'Continue' : 'Next'}
         </button>
@@ -256,7 +253,6 @@ export function DynamicJournalModal({ thriving, isOpen, onClose }: DynamicJourna
       header={modalHeader}
       footer={modalFooter}
       size="lg"
-      className="max-w-lg"
     >
 
       {/* Fields Step */}

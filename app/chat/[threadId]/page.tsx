@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect, use } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Heart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { SmartCardChat } from '@/components/features/SmartCardChat';
-import { IconButton } from '@/components/ui/Button';
 import { saveThrivingToStorage } from '@/src/utils/thrivingStorage';
 import { saveJourneyToStorage } from '@/src/utils/journeyStorage';
 import { Thriving, AdditionalRecommendation } from '@/src/types/thriving';
@@ -37,46 +36,28 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
   return (
     <>
       <AppLayout
-        customHeader={
-          <>
-            <div className="action-bar-content">
-              <div className="action-bar-left">
-                <IconButton
-                  onClick={() => router.push('/')}
-                  variant="ghost"
-                  springAnimation
-                  gradientOverlay
-                  cardGlow
-                  haptic="medium"
-                  className="hover:bg-gray-100 text-gray-700"
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                </IconButton>
-              </div>
-              <div className="action-bar-center">
-                <div className="flex items-center space-x-2">
-                  <h1 className="action-bar-title">Companion</h1>
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose/20 to-dusty-rose/30 flex items-center justify-center">
-                    <Heart className="w-4 h-4 text-rose fill-rose/30" />
-                  </div>
-                </div>
-              </div>
-              <div className="action-bar-right">
-                <div className="w-11" />
+        header={{
+          title: (
+            <div className="flex items-center space-x-2">
+              <h1 className="action-bar-title">Companion</h1>
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose/20 to-dusty-rose/30 flex items-center justify-center">
+                <Heart className="w-4 h-4 text-rose fill-rose/30" />
               </div>
             </div>
-            {chatIntent === 'create_thriving' && (
-              <div className="flex justify-center py-2 bg-white/80">
-                <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-rose to-burgundy text-white px-4 py-1.5 rounded-full text-sm shadow-lg">
-                  <span>🌿</span>
-                  <span className="font-medium">Thriving Creation Mode</span>
-                </div>
-              </div>
-            )}
-          </>
-        }
+          ),
+          showBackButton: true,
+          backHref: "/"
+        }}
         className="chat-layout"
       >
+        {chatIntent === 'create_thriving' && (
+          <div className="flex justify-center py-2 bg-white/80 border-b border-gray-100">
+            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-rose to-burgundy text-white px-4 py-1.5 rounded-full text-sm shadow-lg">
+              <span>🌿</span>
+              <span className="font-medium">Thriving Creation Mode</span>
+            </div>
+          </div>
+        )}
         <SmartCardChat
           threadId={currentThreadId === 'new' ? undefined : currentThreadId}
           chatIntent={chatIntent}

@@ -18,11 +18,11 @@ interface ModalProps {
 }
 
 const sizeClasses = {
-  sm: 'max-w-sm',
-  md: 'max-w-md', 
-  lg: 'max-w-lg',
-  xl: 'max-w-xl',
-  full: 'max-w-[95vw]'
+  sm: 'w-[85vw] max-w-[24rem]',
+  md: 'w-[90vw] max-w-[28rem]', 
+  lg: 'w-[90vw] max-w-[32rem]',
+  xl: 'w-[95vw] max-w-[36rem]',
+  full: 'w-[95vw] max-w-[95vw]'
 };
 
 export function Modal({
@@ -90,21 +90,21 @@ export function Modal({
           >
             {/* Header */}
             {(header || title || showCloseButton) && (
-              <div className="relative flex items-center justify-between p-[min(5vw,1.5rem)] border-b border-gray-100 overflow-hidden">
+              <div className="relative flex items-center justify-between p-[min(5vw,1.5rem)] border-b border-gray-100 bg-white rounded-t-2xl">
                 {header || (
                   title && (
-                    <h2 id="modal-title" className="text-xl font-semibold text-primary-text pr-8">
+                    <h2 id="modal-title" className="text-[min(5vw,1.25rem)] font-semibold text-primary-text pr-[min(12vw,3rem)]">
                       {title}
                     </h2>
                   )
                 )}
                 
                 {showCloseButton && (
-                  <div className="absolute top-[min(5vw,1rem)] right-[min(5vw,1rem)] z-20">
+                  <div className="absolute top-[min(4vw,1rem)] right-[min(4vw,1rem)] z-30 pointer-events-auto">
                     <TouchCloseButton 
                       onClose={onClose}
                       size="md"
-                      className="hover:bg-gray-100"
+                      className="bg-white hover:bg-gray-100"
                     />
                   </div>
                 )}

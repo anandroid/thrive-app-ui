@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { X } from 'lucide-react';
+import { useTouchFeedback } from '@/hooks/useTouchFeedback';
 
 interface TouchCloseButtonProps {
   onClose: () => void;
@@ -17,14 +18,18 @@ export function TouchCloseButton({
   variant = 'default'
 }: TouchCloseButtonProps) {
   
-  const handleClose = (e: React.MouseEvent | React.TouchEvent) => {
+  const { touchHandlers, triggerHaptic } = useTouchFeedback({ 
+    hapticStyle: 'medium',
+    preventDoubleTap: true,
+    scale: 0.93
+  });
+  
+  const handleClose = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // Haptic feedback for mobile devices
-    if ('vibrate' in navigator) {
-      navigator.vibrate(10); // Subtle haptic feedback
-    }
+    // Trigger haptic feedback
+    triggerHaptic();
     
     onClose();
   };
@@ -50,7 +55,7 @@ export function TouchCloseButton({
   return (
     <button
       onClick={handleClose}
-      onTouchStart={handleClose}
+      {...touchHandlers}
       className={`
         ${sizeClasses[size]}
         ${variantClasses[variant]}
@@ -59,7 +64,7 @@ export function TouchCloseButton({
         shadow-lg hover:shadow-xl 
         backdrop-blur-sm
         transition-all duration-200 ease-out
-        active:scale-95 
+        touch-feedback-spring
         hover:scale-105
         touch-manipulation
         focus:outline-none focus:ring-2 focus:ring-rose/20

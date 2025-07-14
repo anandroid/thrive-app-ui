@@ -626,9 +626,11 @@ export default function ThrivingsPage() {
                           e.stopPropagation();
                           window.location.href = `/thrivings/${thriving.id}/journal`;
                         }}
+                        size="sm"
                         fullWidth
-                        className="mt-3 text-dusty-rose"
+                        className="mt-3 text-[#914372] relative overflow-hidden"
                         icon={<BookOpen className="w-4 h-4" />}
+                        gradientOverlay
                       >
                         Smart Journal
                       </SoftButton>

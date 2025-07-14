@@ -67,10 +67,10 @@ Use these components - they already include all premium effects:
 
 **Remember: Premium touch feedback is MANDATORY, not optional!**
 
-## 🏗️ Page Layout Architecture (MANDATORY)
+## 🏗️ Page Layout Architecture (MANDATORY - Updated 2025-07-14)
 
 ### ALL page.tsx files MUST use AppLayout
-Every page in the app MUST use the standardized AppLayout component for consistency:
+Every page in the app MUST use the standardized AppLayout component for consistency and proper keyboard handling:
 
 ```tsx
 // ✅ CORRECT - All pages must follow this pattern
@@ -85,6 +85,7 @@ export default function MyPage() {
         backHref: "/",
         rightElement: <CustomButton />
       }}
+      stickyBottom={<InputComponent />}  // Optional - for inputs that stick to keyboard
     >
       {/* Your page content */}
     </AppLayout>
@@ -95,6 +96,7 @@ export default function MyPage() {
 <div className="app-screen">...</div>  // Legacy pattern
 <PageLayout>...</PageLayout>           // Removed component
 Custom layout structures               // Not allowed
+customHeader prop                      // Use header prop instead
 ```
 
 ### AppLayout Features
@@ -102,46 +104,58 @@ Custom layout structures               // Not allowed
 - **Natural scroll behavior** - no complex CSS transforms
 - **Automatic safe area handling** for notch devices
 - **Consistent spacing** across all pages
+- **Keyboard-aware** - Works seamlessly with React Native WebView
 - **Mobile-first architecture**
 
-### 🚨 CRITICAL: Header Positioning Framework (2025-07-14)
-**ALL headers use STICKY positioning, NOT fixed!**
+### 🚨 CRITICAL: Unified Layout Structure for Keyboard Handling
+**ALL pages use the same CSS structure for consistent keyboard behavior:**
 
-#### Why Sticky Over Fixed:
-1. **Natural keyboard handling** - Browser handles keyboard adjustments automatically
-2. **No padding calculations** - Header stays in document flow, no need for padding-top
-3. **Consistent behavior** - All pages behave the same way
-4. **Simpler CSS** - Less complexity, fewer edge cases
+#### CSS Classes Applied by AppLayout:
+- `.app-layout` - Main container (100dvh flex container)
+- `.app-header` - Sticky header (stays at top when keyboard appears)
+- `.app-content` - Scrollable content (receives padding-bottom for keyboard)
+- `.app-sticky-bottom` - Optional sticky elements (inputs, buttons)
+
+#### Why This Structure Works:
+1. **React Native Integration** - WebView injects padding to `.app-content`
+2. **Headers Stay Fixed** - Only content area moves with keyboard
+3. **Consistent Behavior** - Same experience on all pages
+4. **Zero JavaScript** - Pure CSS solution, no flicker
 
 #### Implementation Rules:
 - `.app-header` uses `position: sticky` with `top: 0`
 - `.app-content` has NO padding-top (header takes natural space)
-- ActionBar inside app-header is `position: relative` (parent handles stickiness)
-- NEVER mix fixed and sticky positioning strategies
+- `.app-content` receives dynamic `padding-bottom` from React Native
+- ActionBar inside app-header is `position: relative`
 
 #### Common Mistakes to Avoid:
-- ❌ Using `position: fixed` for headers
-- ❌ Adding `padding-top` to content when using sticky
-- ❌ Creating custom header implementations
-- ❌ Using ActionBar directly without AppLayout
+- ❌ Using `customHeader` prop (use `header` prop instead)
+- ❌ Creating custom layout structures
+- ❌ Adding manual keyboard handling in web app
+- ❌ Using different class names for content areas
 
-### Exception: Pages with Special Requirements
-Only these pages may use custom layouts:
-- **Home page** (`/page.tsx`) - Has drawer navigation
-- **Chat** (`/chat/[threadId]/page.tsx`) - Uses SmartCardChat component
-- Pages that directly use **ActionBar** with legacy `app-screen` pattern (being phased out)
+### Migration from Legacy Patterns
+If your page uses old patterns, update to AppLayout:
+```tsx
+// Old pattern (REMOVE)
+<div className="app-screen">
+  <ActionBar title="Page" />
+  <div className="content">
+    {/* content */}
+  </div>
+</div>
 
-### CSS Classes Provided
-The AppLayout automatically applies these classes:
-- `.app-layout` - Main container
-- `.app-header` - Fixed header container
-- `.app-content` - Scrollable content area
+// New pattern (USE THIS)
+<AppLayout header={{ title: "Page" }}>
+  {/* content */}
+</AppLayout>
+```
 
 ### Important Notes
 1. The ActionBar inside AppLayout has `padding-top: 0` to prevent double padding
-2. Content area automatically has proper `padding-top` for the fixed header
-3. No manual keyboard handling needed - browser handles it naturally
-4. Always test on mobile devices to ensure proper scrolling behavior
+2. React Native WebView handles keyboard by injecting padding to `.app-content`
+3. No manual keyboard handling needed in web app
+4. Always test with React Native WebView for keyboard behavior
 
 ## 🎯 Keyboard Handling Solution (Sticky Bottom Pattern)
 
@@ -200,49 +214,42 @@ import { Input, Textarea } from '@/components/ui/form-inputs';
 ### Overview
 The app is designed to work seamlessly inside a React Native WebView with proper keyboard handling and native-like behavior.
 
-### WebView Implementation (React Native Side)
-```tsx
-// ChatWebView.tsx
-import { KeyboardAwareWebView } from 'react-native-webview-keyboard-handler';
+### WebView Keyboard Handling (React Native Side)
+The React Native WebView automatically handles keyboard appearance by injecting JavaScript:
 
-export default function ChatWebView() {
-  return (
-    <KeyboardAwareWebView
-      source={{ uri: 'https://your-domain.com' }}
-      originWhitelist={['*']}
-      // Keyboard & focus settings
-      keyboardDisplayRequiresUserAction={false}  // iOS: auto-focus shows keyboard
-      androidLayerType="hardware"               // Android: avoids flicker
-      // Web features
-      allowsInlineMediaPlayback
-      mediaPlaybackRequiresUserAction={false}
-      javaScriptEnabled
-      domStorageEnabled
-      startInLoadingState
-      onMessage={handleMessage}  // For bridge communication
-    />
-  );
-}
+```javascript
+// When keyboard shows:
+webView.injectJavaScript(`
+  document.querySelector('.app-content').style.paddingBottom = '${keyboardHeight}px';
+`);
+
+// When keyboard hides:
+webView.injectJavaScript(`
+  document.querySelector('.app-content').style.paddingBottom = '0px';
+`);
 ```
 
 ### Android Configuration
 **AndroidManifest.xml** (`android/app/src/main/AndroidManifest.xml`):
 ```xml
-<manifest>
-  <!-- Required permissions -->
-  <uses-permission android:name="android.permission.INTERNET"/>
-  
-  <application
-    android:usesCleartextTraffic="true">  <!-- Dev only for http:// -->
-    <activity
-      android:name=".MainActivity"
-      android:windowSoftInputMode="adjustResize"  <!-- KEY: Resize WebView for keyboard -->
-      android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-      android:hardwareAccelerated="true"
-      android:exported="true">
-    </activity>
-  </application>
-</manifest>
+<activity
+  android:name=".MainActivity"
+  android:windowSoftInputMode="adjustResize"  <!-- Standard for keyboard handling -->
+  android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+  android:hardwareAccelerated="true"
+  android:exported="true">
+</activity>
+```
+
+**MainActivity.kt**:
+```kotlin
+override fun onCreate(savedInstanceState: Bundle?) {
+  super.onCreate(savedInstanceState)
+  window.setSoftInputMode(
+    WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE or 
+    WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN
+  )
+}
 ```
 
 ### iOS Configuration

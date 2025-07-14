@@ -131,3 +131,22 @@
   height: 0.625rem;
   color: white;
 }
+
+/* Layout variations */
+.action-bar.left-aligned .action-bar-content {
+  justify-content: space-between;
+}
+
+.action-bar.left-aligned .action-bar-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.action-bar.left-aligned .action-bar-center {
+  display: none;
+}
+
+.action-bar.left-aligned .action-bar-right {
+  flex-shrink: 0;
+}

@@ -205,7 +205,10 @@ export default function HomePage() {
       {/* Main app content - Only render when ready */}
       {showMainContent && (
         <AppLayout
+          className="chat-simple-layout"
           header={{
+            showBackButton: false,
+            layout: 'left-aligned',
             title: (
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center">
@@ -234,13 +237,11 @@ export default function HomePage() {
             )
           }}
           stickyBottom={
-            <div className="chat-input-container">
-              <ChatEditor
-                value={input}
-                onChange={setInput}
-                onSubmit={handleSendMessage}
-              />
-            </div>
+            <ChatEditor
+              value={input}
+              onChange={setInput}
+              onSubmit={handleSendMessage}
+            />
           }
         >
 
@@ -339,7 +340,7 @@ export default function HomePage() {
                           icon={<BookOpen className="w-4 h-4" />}
                           gradientOverlay
                         >
-                          Open Journal
+                          Smart Journal
                         </SoftButton>
                       </div>
                     ))}

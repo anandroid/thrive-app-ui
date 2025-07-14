@@ -10,8 +10,10 @@ interface AppLayoutProps {
     showBackButton?: boolean;
     backHref?: string;
     onBackClick?: () => void;
+    leftElement?: ReactNode;
     rightElement?: ReactNode;
     variant?: 'default' | 'transparent' | 'blur';
+    layout?: 'centered' | 'left-aligned' | 'space-between';
   };
   customHeader?: ReactNode; // For completely custom header content
   stickyBottom?: ReactNode; // For sticky bottom elements (input, buttons, etc)
