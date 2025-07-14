@@ -45,12 +45,13 @@ export function ActionBar({
             <TouchLink 
               href={backHref}
               onClick={handleBackClick}
-              className="action-bar-button"
+              className="action-bar-button touch-feedback-spring"
               variant="icon"
               haptic="medium"
-              scale={0.9}
-              shadow="sm"
+              scale={0.93}
+              shadow="md"
               cardGlow
+              hoverScale={1.02}
             >
               <ArrowLeft className="w-5 h-5" />
             </TouchLink>

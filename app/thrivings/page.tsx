@@ -18,6 +18,7 @@ import { LoadingButton } from '@/components/ui/LoadingButton';
 import { ThrivingNotificationCard } from '@/components/features/ThrivingNotificationCard';
 import { HealthInsights } from '@/components/features/HealthInsights';
 import { ThrivingExpertHelp } from '@/components/features/ThrivingExpertHelp';
+import { SoftButton } from '@/components/ui/Button';
 
 export default function ThrivingsPage() {
   // Initialize with data from localStorage to prevent empty state flash
@@ -130,18 +131,27 @@ export default function ThrivingsPage() {
   useEffect(() => {
     if (selectedThriving && !showAdjustmentTutorial && !hasShownTutorialInSession.current) {
       const tutorialCount = parseInt(localStorage.getItem('adjustmentTutorialCount') || '0');
+      const shouldShowFromNotification = sessionStorage.getItem('showAdjustmentTutorial') === 'true';
       
       // Show tutorial if:
       // 1. User has created a thriving (selectedThriving exists)
       // 2. Tutorial has been shown less than 2 times
       // 3. Not already shown in this session
+      // 4. Either flagged from notification modal OR it's the second time
       if (tutorialCount < 2) {
-        // Show tutorial after a delay
+        let delay = 4000; // Default 4 seconds for second time
+        
+        if (shouldShowFromNotification) {
+          // First time - show after notification modal with extra delay
+          delay = 2000; // 2 seconds after notification modal
+          sessionStorage.removeItem('showAdjustmentTutorial');
+        }
+        
+        // Show tutorial after appropriate delay
         const timer = setTimeout(() => {
-          // Show tutorial immediately without scrolling first
           setShowAdjustmentTutorial(true);
           hasShownTutorialInSession.current = true;
-        }, 3000); // 3 second delay to let the page load
+        }, delay);
         
         return () => clearTimeout(timer);
       }
@@ -611,17 +621,17 @@ export default function ThrivingsPage() {
                       })()}
                       
                       {/* Journal Button */}
-                      <button
+                      <SoftButton
                         onClick={(e) => {
                           e.stopPropagation();
                           window.location.href = `/thrivings/${thriving.id}/journal`;
                         }}
-                        className="w-full mt-3 py-3 rounded-2xl bg-gradient-to-r from-dusty-rose/15 to-rose/15 border border-dusty-rose/20 text-dusty-rose font-medium text-sm hover:from-dusty-rose/25 hover:to-rose/25 hover:border-dusty-rose/30 hover:shadow-md transition-all flex items-center justify-center space-x-2 touch-feedback touch-manipulation group relative overflow-hidden"
+                        fullWidth
+                        className="mt-3 text-dusty-rose"
+                        icon={<BookOpen className="w-4 h-4" />}
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-dusty-rose/0 via-dusty-rose/10 to-dusty-rose/0 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <BookOpen className="w-4 h-4 relative z-10" />
-                        <span className="relative z-10">Smart Journal</span>
-                      </button>
+                        Smart Journal
+                      </SoftButton>
                     </div>
                   ))}
 

@@ -17,6 +17,7 @@ import {
 import { generateSupplementRecommendations } from '@/src/services/recommendations/supplementRecommendations';
 import { useThreadMetadata } from '@/src/hooks/useThreadMetadata';
 import { PantryNaturalInput } from '@/components/features/PantryNaturalInput';
+import Button, { IconButton } from '@/components/ui/Button';
 
 const categoryIcons = {
   supplement: Sparkles,
@@ -153,12 +154,26 @@ export default function PantryPage() {
         showBackButton: true,
         backHref: "/settings",
         rightElement: (
-          <button
+          <IconButton
             onClick={() => setShowAddModal(true)}
-            className="action-bar-button bg-gradient-to-r from-rose to-burgundy text-white touch-feedback touch-manipulation"
+            variant="gradient"
+            gradient={{
+              from: 'rose',
+              to: 'burgundy',
+              hoverFrom: 'burgundy',
+              hoverTo: 'burgundy',
+              activeFrom: 'rose/80',
+              activeTo: 'burgundy/80'
+            }}
+            springAnimation
+            gradientOverlay
+            cardGlow
+            haptic="medium"
+            shadow="md"
+            className="text-white"
           >
             <Plus className="w-5 h-5" />
-          </button>
+          </IconButton>
         )
       }}
       className="bg-gray-50"
@@ -201,28 +216,48 @@ export default function PantryPage() {
             {/* Tag Filter - Only show if there are items with tags */}
             {allTags.length > 0 && (
               <div className="flex gap-2 overflow-x-auto pb-2">
-                <button
+                <Button
                   onClick={() => setSelectedTag('all')}
-                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                    selectedTag === 'all'
-                      ? 'bg-gradient-to-r from-rose to-burgundy text-white'
-                      : 'bg-white text-gray-600 border border-gray-200'
-                  }`}
+                  variant={selectedTag === 'all' ? 'gradient' : 'outline'}
+                  gradient={{
+                    from: 'rose',
+                    to: 'burgundy',
+                    hoverFrom: 'burgundy',
+                    hoverTo: 'burgundy',
+                    activeFrom: 'rose/80',
+                    activeTo: 'burgundy/80'
+                  }}
+                  springAnimation
+                  gradientOverlay={selectedTag === 'all'}
+                  cardGlow={selectedTag === 'all'}
+                  haptic="light"
+                  size="sm"
+                  className="text-sm font-medium whitespace-nowrap"
                 >
                   All Items
-                </button>
+                </Button>
                 {allTags.map((tag) => (
-                  <button
+                  <Button
                     key={tag}
                     onClick={() => setSelectedTag(tag)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                      selectedTag === tag
-                        ? 'bg-gradient-to-r from-rose to-burgundy text-white'
-                        : 'bg-white text-gray-600 border border-gray-200'
-                    }`}
+                    variant={selectedTag === tag ? 'gradient' : 'outline'}
+                    gradient={{
+                      from: 'rose',
+                      to: 'burgundy',
+                      hoverFrom: 'burgundy',
+                      hoverTo: 'burgundy',
+                      activeFrom: 'rose/80',
+                      activeTo: 'burgundy/80'
+                    }}
+                    springAnimation
+                    gradientOverlay={selectedTag === tag}
+                    cardGlow={selectedTag === tag}
+                    haptic="light"
+                    size="sm"
+                    className="text-sm font-medium whitespace-nowrap"
                   >
                     {tag}
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}
@@ -253,12 +288,26 @@ export default function PantryPage() {
                   <p className="text-secondary-text-thin max-w-md mx-auto mb-8">
                     Your companion will use this private inventory to personalize recommendations just for you.
                   </p>
-                  <button
+                  <Button
                     onClick={() => setShowAddModal(true)}
-                    className="px-6 py-3 rounded-2xl bg-gradient-to-r from-rose to-burgundy text-white font-medium shadow-lg hover:shadow-xl transition-all touch-feedback touch-manipulation"
+                    variant="gradient"
+                    gradient={{
+                      from: 'rose',
+                      to: 'burgundy',
+                      hoverFrom: 'burgundy',
+                      hoverTo: 'burgundy',
+                      activeFrom: 'rose/80',
+                      activeTo: 'burgundy/80'
+                    }}
+                    springAnimation
+                    gradientOverlay
+                    cardGlow
+                    haptic="medium"
+                    shadow="lg"
+                    className="font-medium"
                   >
                     Add Your First Item
-                  </button>
+                  </Button>
                 </>
               )}
             </div>
@@ -293,12 +342,24 @@ export default function PantryPage() {
                       )}
                       
                       {/* Delete button */}
-                      <button
+                      <IconButton
                         onClick={() => handleDeleteItem(item.id)}
-                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-all duration-200 touch-feedback touch-manipulation active:scale-95 active:bg-gray-100"
+                        variant="gradient"
+                        gradient={{
+                          from: 'white/90',
+                          to: 'white/90',
+                          hoverFrom: 'white',
+                          hoverTo: 'white',
+                          activeFrom: 'gray-100',
+                          activeTo: 'gray-100'
+                        }}
+                        springAnimation
+                        cardGlow
+                        haptic="light"
+                        className="absolute top-2 right-2 bg-white/90 w-8 h-8"
                       >
                         <X className="w-5 h-5 text-gray-600" />
-                      </button>
+                      </IconButton>
                     </div>
 
                     {/* Content */}
@@ -381,7 +442,7 @@ export default function PantryPage() {
                       )}
                     </div>
 
-                    <button
+                    <Button
                       onClick={async () => {
                         const newPantryItem: PantryItem = {
                           id: Date.now().toString(),
@@ -399,10 +460,24 @@ export default function PantryPage() {
                         // Update thread metadata for context awareness
                         await onPantryChange();
                       }}
-                      className="mt-3 w-full py-2 rounded-xl bg-gradient-to-r from-rose/10 to-burgundy/10 text-burgundy font-medium text-sm hover:from-rose/20 hover:to-burgundy/20 transition-all"
+                      variant="gradient"
+                      gradient={{
+                        from: 'rose/10',
+                        to: 'burgundy/10',
+                        hoverFrom: 'rose/20',
+                        hoverTo: 'burgundy/20',
+                        activeFrom: 'rose/30',
+                        activeTo: 'burgundy/30'
+                      }}
+                      springAnimation
+                      gradientOverlay
+                      cardGlow
+                      haptic="light"
+                      fullWidth
+                      className="mt-3 text-burgundy font-medium text-sm"
                     >
                       Add to Pantry
-                    </button>
+                    </Button>
                   </div>
                 ))}
               </div>

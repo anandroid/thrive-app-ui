@@ -5,6 +5,8 @@ import { Bell, Sparkles, Clock } from 'lucide-react';
 import { NotificationHelper } from '@/src/utils/notificationHelper';
 import bridge from '@/src/lib/react-native-bridge';
 import { Modal } from '@/components/ui/Modal';
+import Button from '@/components/ui/Button';
+import { LoadingButton } from '@/components/ui/LoadingButton';
 
 interface NotificationPermissionModalProps {
   isOpen: boolean;
@@ -141,28 +143,48 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
       
       {/* Actions */}
       <div className="space-y-3">
-        <button
+        <LoadingButton
           onClick={handleEnableNotifications}
+          isLoading={isRequesting}
           disabled={isRequesting}
-          className="w-full py-4 rounded-xl bg-gradient-to-r from-rose to-burgundy text-white font-semibold 
-                   hover:shadow-lg transition-all disabled:opacity-70 touch-feedback touch-manipulation"
+          variant="gradient"
+          gradient={{
+            from: 'rose',
+            to: 'burgundy',
+            hoverFrom: 'burgundy',
+            hoverTo: 'burgundy',
+            activeFrom: 'rose/40',
+            activeTo: 'burgundy/30'
+          }}
+          fullWidth
+          size="lg"
+          springAnimation
+          gradientOverlay
+          cardGlow
+          haptic="medium"
+          shadow="lg"
+          className="font-semibold"
+          loadingMessages={[
+            'Requesting...',
+            'Checking permissions...',
+            'Setting up reminders...',
+            'Almost ready...'
+          ]}
+          messageInterval={2000}
         >
-          {isRequesting ? (
-            <span className="flex items-center justify-center gap-2">
-              <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-              <span>Requesting...</span>
-            </span>
-          ) : (
-            'Enable Notifications'
-          )}
-        </button>
+          Enable Notifications
+        </LoadingButton>
         
-        <button
+        <Button
           onClick={handleNotNow}
-          className="w-full py-3 rounded-xl text-gray-600 font-medium hover:bg-gray-50 transition-colors touch-feedback touch-manipulation"
+          variant="ghost"
+          fullWidth
+          springAnimation
+          haptic="light"
+          className="text-gray-600 font-medium"
         >
           Not Now
-        </button>
+        </Button>
         
         <p className="text-xs text-center text-gray-500 mt-4">
           {askCount < 3

@@ -4,7 +4,7 @@ import React, { forwardRef } from 'react';
 import { useTouchFeedback } from '@/hooks/useTouchFeedback';
 import { cn } from '@/lib/utils';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'gradient' | 'soft' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;

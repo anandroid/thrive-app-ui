@@ -1,14 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { Info, Moon, ChevronRight, Plus, Leaf, MessageSquare, Trash2, Bell } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getTouchClasses } from '@/hooks/useTouchFeedback';
+import { TouchLink } from '@/components/ui/TouchLink';
 import { AppLayout } from '@/components/layout/AppLayout';
 import bridge from '@/src/lib/react-native-bridge';
 import { NotificationHelper } from '@/src/utils/notificationHelper';
 import { NotificationPermissionModal } from '@/components/features/NotificationPermissionModal';
+import Button from '@/components/ui/Button';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -82,15 +83,25 @@ export default function SettingsPage() {
               <div className="space-y-3">
                 {/* First Row */}
                 <div className="flex gap-3">
-                  <button
+                  <Button
                     onClick={() => {
                       sessionStorage.setItem('initialMessage', 'Create a wellness thriving for me');
                       router.push('/chat/new?intent=create_thriving');
                     }}
-                    className={getTouchClasses(
-                      "flex-1 rounded-2xl bg-gradient-to-br from-rose/10 to-burgundy/5 border border-rose/20 p-4 hover:shadow-md transition-all",
-                      { feedback: true, ripple: true }
-                    )}
+                    variant="gradient"
+                    gradient={{
+                      from: 'rose/10',
+                      to: 'burgundy/5',
+                      hoverFrom: 'rose/20',
+                      hoverTo: 'burgundy/10',
+                      activeFrom: 'rose/30',
+                      activeTo: 'burgundy/15'
+                    }}
+                    springAnimation
+                    gradientOverlay
+                    cardGlow
+                    haptic="medium"
+                    className="flex-1 rounded-2xl border border-rose/20 p-4"
                   >
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose to-burgundy flex items-center justify-center flex-shrink-0">
@@ -101,17 +112,20 @@ export default function SettingsPage() {
                         <p className="text-xs text-primary-text/60">New wellness plan</p>
                       </div>
                     </div>
-                  </button>
+                  </Button>
                   
                 </div>
 
                 {/* Pantry - Full Width with Enhanced Design */}
-                <Link
+                <TouchLink
                   href="/pantry"
-                  className={getTouchClasses(
-                    "w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-dusty-rose/20 p-4 hover:shadow-lg transition-all block relative overflow-hidden shadow-sm group",
-                    { feedback: true }
-                  )}
+                  scale={0.97}
+                  shadow="md"
+                  cardGlow
+                  hoverScale={1.01}
+                  haptic="medium"
+                  variant="card"
+                  className="w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-dusty-rose/20 p-4 hover:shadow-lg transition-all block relative overflow-hidden shadow-sm group"
                 >
                   {/* Gradient overlay on hover */}
                   <div className="absolute inset-0 bg-gradient-to-br from-dusty-rose/0 via-dusty-rose/5 to-rose/10 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -133,15 +147,18 @@ export default function SettingsPage() {
                     </div>
                     <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
                   </div>
-                </Link>
+                </TouchLink>
 
                 {/* Chat History - Full Width with Enhanced Design */}
-                <Link
+                <TouchLink
                   href="/chat-history"
-                  className={getTouchClasses(
-                    "w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-sage/20 p-4 hover:shadow-lg transition-all block relative overflow-hidden shadow-sm group",
-                    { feedback: true }
-                  )}
+                  scale={0.97}
+                  shadow="md"
+                  cardGlow
+                  hoverScale={1.01}
+                  haptic="medium"
+                  variant="card"
+                  className="w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-sage/20 p-4 hover:shadow-lg transition-all block relative overflow-hidden shadow-sm group"
                 >
                   {/* Gradient overlay on hover */}
                   <div className="absolute inset-0 bg-gradient-to-br from-sage-light/0 via-sage/5 to-sage-dark/10 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -163,7 +180,7 @@ export default function SettingsPage() {
                     </div>
                     <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
                   </div>
-                </Link>
+                </TouchLink>
               </div>
             </div>
 
@@ -189,19 +206,48 @@ export default function SettingsPage() {
                   </div>
                   {notificationStatus === 'disabled' && (
                     <div className="flex gap-2">
-                      <button
+                      <Button
                         onClick={() => setShowNotificationModal(true)}
-                        className="px-3 py-2 bg-dusty-rose text-white rounded-full text-sm font-medium hover:bg-burgundy transition-colors"
+                        variant="gradient"
+                        gradient={{
+                          from: 'dusty-rose',
+                          to: 'dusty-rose',
+                          hoverFrom: 'burgundy',
+                          hoverTo: 'burgundy',
+                          activeFrom: 'dusty-rose/80',
+                          activeTo: 'dusty-rose/80'
+                        }}
+                        springAnimation
+                        gradientOverlay
+                        cardGlow
+                        haptic="light"
+                        size="sm"
+                        className="text-sm font-medium"
                       >
                         Modal
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={handleEnableNotifications}
                         disabled={isRequestingPermission}
-                        className="px-4 py-2 bg-rose text-white rounded-full text-sm font-medium hover:bg-burgundy transition-colors disabled:opacity-50"
+                        loading={isRequestingPermission}
+                        variant="gradient"
+                        gradient={{
+                          from: 'rose',
+                          to: 'rose',
+                          hoverFrom: 'burgundy',
+                          hoverTo: 'burgundy',
+                          activeFrom: 'rose/80',
+                          activeTo: 'rose/80'
+                        }}
+                        springAnimation
+                        gradientOverlay
+                        cardGlow
+                        haptic="medium"
+                        size="sm"
+                        className="text-sm font-medium"
                       >
                         {isRequestingPermission ? 'Requesting...' : 'Enable'}
-                      </button>
+                      </Button>
                     </div>
                   )}
                   {notificationStatus === 'enabled' && (
@@ -232,12 +278,23 @@ export default function SettingsPage() {
             </div>
             
             {/* About */}
-            <button 
+            <Button
               onClick={() => router.push('/settings/about')}
-              className={getTouchClasses(
-                "w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-dusty-rose/20 p-4 shadow-sm hover:shadow-md transition-all text-left",
-                { feedback: true }
-              )}
+              variant="gradient"
+              gradient={{
+                from: 'white/80',
+                to: 'white/80',
+                hoverFrom: 'dusty-rose/10',
+                hoverTo: 'rose/5',
+                activeFrom: 'dusty-rose/20',
+                activeTo: 'rose/10'
+              }}
+              springAnimation
+              gradientOverlay
+              cardGlow
+              haptic="medium"
+              shadow="sm"
+              className="w-full rounded-2xl backdrop-blur-sm border border-dusty-rose/20 p-4 text-left"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
@@ -251,7 +308,7 @@ export default function SettingsPage() {
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400" />
               </div>
-            </button>
+            </Button>
           </div>
           
           {/* Footer */}
@@ -264,12 +321,15 @@ export default function SettingsPage() {
             </p>
             
             {/* Delete Data - Subtle Option */}
-            <button 
+            <Button
               onClick={() => setShowDeleteConfirmation(true)}
-              className="mt-8 text-xs text-gray-400 hover:text-gray-600 transition-colors touch-feedback touch-manipulation"
+              variant="ghost"
+              springAnimation
+              haptic="light"
+              className="mt-8 text-xs text-gray-400 hover:text-gray-600 transition-colors"
             >
               Delete All Data
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -298,13 +358,25 @@ export default function SettingsPage() {
             </div>
 
             <div className="flex gap-3">
-              <button
+              <Button
                 onClick={() => setShowDeleteConfirmation(false)}
-                className="flex-1 py-3 rounded-2xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors touch-feedback touch-manipulation"
+                variant="gradient"
+                gradient={{
+                  from: 'gray-100',
+                  to: 'gray-100',
+                  hoverFrom: 'gray-200',
+                  hoverTo: 'gray-200',
+                  activeFrom: 'gray-300',
+                  activeTo: 'gray-300'
+                }}
+                springAnimation
+                gradientOverlay
+                haptic="light"
+                className="flex-1 text-gray-700 font-medium"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => {
                   // Clear all data
                   localStorage.clear();
@@ -324,10 +396,23 @@ export default function SettingsPage() {
                   // Navigate to home page (will show welcome screen)
                   window.location.href = '/';
                 }}
-                className="flex-1 py-3 rounded-2xl bg-red-600 text-white font-medium hover:bg-red-700 transition-colors active:scale-[0.98] touch-feedback touch-manipulation"
+                variant="gradient"
+                gradient={{
+                  from: 'red-600',
+                  to: 'red-600',
+                  hoverFrom: 'red-700',
+                  hoverTo: 'red-700',
+                  activeFrom: 'red-800',
+                  activeTo: 'red-800'
+                }}
+                springAnimation
+                gradientOverlay
+                cardGlow
+                haptic="heavy"
+                className="flex-1 text-white font-medium"
               >
                 Delete Everything
-              </button>
+              </Button>
             </div>
           </div>
         </div>

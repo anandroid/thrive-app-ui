@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import Button, { ButtonProps } from './Button';
 
 // Inline keyframe style for spinner
 const spinnerStyle = `
@@ -15,14 +16,10 @@ const spinnerStyle = `
   }
 `;
 
-interface LoadingButtonProps {
+interface LoadingButtonProps extends Omit<ButtonProps, 'loading'> {
   isLoading: boolean;
-  onClick?: () => void;
-  disabled?: boolean;
-  children: React.ReactNode;
   loadingMessages?: string[];
   messageInterval?: number;
-  className?: string;
   loadingClassName?: string;
   showSpinner?: boolean;
   spinnerClassName?: string;
@@ -48,6 +45,7 @@ export const LoadingButton: React.FC<LoadingButtonProps> = ({
   loadingClassName = '',
   showSpinner = true,
   spinnerClassName = '',
+  ...buttonProps
 }) => {
   const [currentMessage, setCurrentMessage] = useState(loadingMessages[0]);
 
@@ -85,11 +83,17 @@ export const LoadingButton: React.FC<LoadingButtonProps> = ({
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: spinnerStyle }} />
-      <button
+      <Button
+        {...buttonProps}
         onClick={onClick}
+        loading={isLoading}
         disabled={disabled || isLoading}
+        springAnimation
+        gradientOverlay
+        cardGlow
+        haptic="medium"
         className={cn(
-          'relative overflow-hidden transition-all',
+          'relative overflow-hidden',
           className,
           isLoading && loadingClassName
         )}
@@ -99,7 +103,7 @@ export const LoadingButton: React.FC<LoadingButtonProps> = ({
             {showSpinner && (
               <div
                 className={cn(
-                  'w-4 h-4 border-2 border-white border-t-transparent rounded-full flex-shrink-0',
+                  'w-4 h-4 border-2 border-current border-t-transparent rounded-full flex-shrink-0',
                   spinnerClassName
                 )}
                 style={{
@@ -127,7 +131,7 @@ export const LoadingButton: React.FC<LoadingButtonProps> = ({
       ) : (
         children
       )}
-    </button>
+      </Button>
     </>
   );
 };

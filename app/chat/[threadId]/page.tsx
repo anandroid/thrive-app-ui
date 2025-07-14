@@ -189,7 +189,14 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
                 
                 // Store the thriving for later navigation
                 setCreatedThriving(thriving);
-                setShowNotificationModal(true);
+                
+                // Navigate to thrivings page immediately
+                router.push(`/thrivings?id=${thriving.id}`);
+                
+                // Show notification modal after 4 seconds
+                setTimeout(() => {
+                  setShowNotificationModal(true);
+                }, 4000);
               } else {
                 // Redirect to the thriving page with the newly created thriving
                 router.push(`/thrivings?id=${thriving.id}`);
@@ -228,9 +235,12 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
         isOpen={showNotificationModal}
         onClose={() => {
           setShowNotificationModal(false);
-          // Navigate to thrivings page after modal closes
-          if (createdThriving) {
-            router.push(`/thrivings?id=${createdThriving.id}`);
+          
+          // Check if this is the first time asking for notifications
+          const notificationAskCount = parseInt(localStorage.getItem('notificationAskCount') || '0');
+          if (notificationAskCount === 1) {
+            // First time - mark that adjustment tutorial should be shown
+            sessionStorage.setItem('showAdjustmentTutorial', 'true');
           }
         }}
         onPermissionGranted={() => {
@@ -238,6 +248,13 @@ export default function ChatPage({ params }: { params: Promise<{ threadId: strin
           if (createdThriving && window.ReactNativeBridge) {
             const thrivings = JSON.parse(localStorage.getItem('thrive_thrivings') || '[]');
             NotificationHelper.scheduleRoutineReminders(thrivings);
+          }
+          
+          // Check if this is the first time asking for notifications
+          const notificationAskCount = parseInt(localStorage.getItem('notificationAskCount') || '0');
+          if (notificationAskCount === 1) {
+            // First time - mark that adjustment tutorial should be shown
+            sessionStorage.setItem('showAdjustmentTutorial', 'true');
           }
         }}
         routineName={createdThriving?.title}

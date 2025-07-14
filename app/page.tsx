@@ -12,7 +12,6 @@ import { ChatHistoryItem } from '@/src/types/chat';
 import { GetStarted } from '@/components/features/GetStarted';
 import { ChatEditor } from '@/components/ui/ChatEditor';
 import { PrivacySection } from '@/components/features/PrivacySection';
-import { NotificationPermissionBanner } from '@/components/features/NotificationPermissionBanner';
 import { HealthConnectModal } from '@/components/features/HealthConnectModal';
 import { AppLayout } from '@/components/layout/AppLayout';
 // import { PrivacySection2 } from '@/components/features/PrivacySection2';
@@ -411,8 +410,8 @@ export default function HomePage() {
                       className="p-5"
                     >
                       <div className="flex items-center space-x-4 w-full">
-                        <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${template.iconGradient} flex items-center justify-center flex-shrink-0 shadow-lg`}>
-                          <Icon className="w-6 h-6 text-white" />
+                        <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${template.iconGradient} grid place-items-center flex-shrink-0 shadow-lg`}>
+                          <Icon className="w-6 h-6 text-white flex-shrink-0" />
                         </div>
                         <span className="text-gray-800 text-[15px] font-medium flex-1">
                           {template.text}
@@ -435,9 +434,6 @@ export default function HomePage() {
           </div>
         </AppLayout>
       )}
-      
-      {/* Notification Permission Banner */}
-      <NotificationPermissionBanner />
       
       {/* Health Connect Modal */}
       <HealthConnectModal

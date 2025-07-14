@@ -28,6 +28,7 @@ import { useWebViewKeyboard } from '@/hooks/useWebViewKeyboard';
 import { ChatWelcome } from './ChatWelcome';
 import { ThrivingTutorial } from './ThrivingTutorial';
 import { PantryAddModal } from './PantryAddModal';
+import Button, { CardButton } from '@/components/ui/Button';
 import { savePantryItem } from '@/src/utils/pantryStorage';
 import { PantryItem } from '@/src/types/pantry';
 import { EnhancedQuestions } from './EnhancedQuestions';
@@ -931,10 +932,13 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                           const Icon = item.type === 'already_have' ? PlusCircle : 
                                        item.type === 'buy' ? ShoppingCart : Heart;
                           return (
-                            <button
+                            <CardButton
                               key={idx}
                               onClick={() => handleActionClick(item)}
-                              className="w-full p-3 rounded-xl bg-gradient-to-r from-gray-50 to-white border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-200 text-left group touch-feedback"
+                              className="w-full p-3 rounded-xl bg-gradient-to-r from-gray-50 to-white border border-gray-200/50 text-left"
+                              springAnimation
+                              gradientOverlay
+                              scale={0.98}
                             >
                               <div className="flex items-start space-x-3">
                                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center flex-shrink-0">
@@ -947,7 +951,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                                   )}
                                 </div>
                               </div>
-                            </button>
+                            </CardButton>
                           );
                         });
                       }
@@ -993,26 +997,52 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                               <h4 className="font-semibold text-gray-900 text-[15px] mb-3">{productName}</h4>
                               <div className="flex gap-2">
                                 {alreadyHaveItem && (
-                                  <button
+                                  <Button
                                     onClick={() => handleActionClick(alreadyHaveItem)}
-                                    className="flex-1 px-4 py-2.5 rounded-lg bg-gradient-to-r from-sage-light/20 to-sage/10 border border-sage/20 hover:border-sage/40 hover:shadow-sm transition-all duration-200 group touch-feedback"
+                                    variant="gradient"
+                                    gradient={{
+                                      from: 'sage-light/20',
+                                      to: 'sage/10',
+                                      hoverFrom: 'sage-light/30',
+                                      hoverTo: 'sage/20',
+                                      activeFrom: 'sage-light/40',
+                                      activeTo: 'sage/30'
+                                    }}
+                                    className="flex-1 border border-sage/20 hover:border-sage/40"
+                                    springAnimation
+                                    gradientOverlay
+                                    cardGlow
+                                    haptic="medium"
                                   >
                                     <div className="flex items-center justify-center space-x-2">
                                       <PlusCircle className="w-4 h-4 text-sage-dark" />
                                       <span className="text-[13px] font-medium text-sage-dark">I already have it</span>
                                     </div>
-                                  </button>
+                                  </Button>
                                 )}
                                 {buyItem && (
-                                  <button
+                                  <Button
                                     onClick={() => handleActionClick(buyItem)}
-                                    className="flex-1 px-4 py-2.5 rounded-lg bg-gradient-to-r from-rose/10 to-dusty-rose/10 border border-rose/20 hover:border-rose/40 hover:shadow-sm transition-all duration-200 group touch-feedback"
+                                    variant="gradient"
+                                    gradient={{
+                                      from: 'rose/10',
+                                      to: 'dusty-rose/10',
+                                      hoverFrom: 'rose/20',
+                                      hoverTo: 'dusty-rose/20',
+                                      activeFrom: 'rose/30',
+                                      activeTo: 'dusty-rose/30'
+                                    }}
+                                    className="flex-1 border border-rose/20 hover:border-rose/40"
+                                    springAnimation
+                                    gradientOverlay
+                                    cardGlow
+                                    haptic="medium"
                                   >
                                     <div className="flex items-center justify-center space-x-2">
                                       <ShoppingCart className="w-4 h-4 text-rose" />
                                       <span className="text-[13px] font-medium text-rose">Buy</span>
                                     </div>
-                                  </button>
+                                  </Button>
                                 )}
                               </div>
                               {(alreadyHaveItem?.dosage || buyItem?.dosage) && (
@@ -1032,7 +1062,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                                   <h4 className="font-semibold text-gray-900 text-[16px]">{item.title}</h4>
                                 </div>
                                 <div className="flex gap-2">
-                                  <button
+                                  <Button
                                     onClick={() => {
                                       // Handle "I already have it" action
                                       const alreadyHaveAction: ActionableItem = {
@@ -1045,27 +1075,53 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                                       };
                                       handleActionClick(alreadyHaveAction);
                                     }}
-                                    className="flex-1 px-4 py-2.5 rounded-lg bg-gradient-to-r from-sage-light/20 to-sage/10 border border-sage/20 hover:border-sage/40 hover:shadow-sm transition-all duration-200 group touch-feedback"
+                                    variant="gradient"
+                                    gradient={{
+                                      from: 'sage-light/20',
+                                      to: 'sage/10',
+                                      hoverFrom: 'sage-light/30',
+                                      hoverTo: 'sage/20',
+                                      activeFrom: 'sage-light/40',
+                                      activeTo: 'sage/30'
+                                    }}
+                                    className="flex-1 border border-sage/20 hover:border-sage/40"
+                                    springAnimation
+                                    gradientOverlay
+                                    cardGlow
+                                    haptic="medium"
                                   >
                                     <div className="flex items-center justify-center space-x-2">
                                       <PlusCircle className="w-4 h-4 text-sage-dark" />
                                       <span className="text-[13px] font-medium text-sage-dark">I already have it</span>
                                     </div>
-                                  </button>
-                                  <button
+                                  </Button>
+                                  <Button
                                     onClick={() => {
                                       // Handle "Buy" action
                                       const searchQuery = item.searchQuery || encodeURIComponent(item.productName || item.title);
                                       const amazonSearchUrl = `https://www.amazon.com/s?k=${searchQuery}`;
                                       bridge.openExternalUrl(amazonSearchUrl);
                                     }}
-                                    className="flex-1 px-4 py-2.5 rounded-lg bg-gradient-to-r from-rose/10 to-dusty-rose/10 border border-rose/20 hover:border-rose/40 hover:shadow-sm transition-all duration-200 group touch-feedback"
+                                    variant="gradient"
+                                    gradient={{
+                                      from: 'rose/10',
+                                      to: 'dusty-rose/10',
+                                      hoverFrom: 'rose/20',
+                                      hoverTo: 'dusty-rose/20',
+                                      activeFrom: 'rose/30',
+                                      activeTo: 'dusty-rose/30'
+                                    }}
+                                    className="flex-1 border border-rose/20 hover:border-rose/40"
+                                    springAnimation
+                                    gradientOverlay
+                                    cardGlow
+                                    haptic="medium"
                                   >
                                     <div className="flex items-center justify-center space-x-2">
                                       <ShoppingCart className="w-4 h-4 text-rose" />
                                       <span className="text-[13px] font-medium text-rose">Buy</span>
                                     </div>
-                                  </button>
+                                  </Button>
                                 </div>
                                 {item.dosage && item.timing && (
                                   <p className="text-[11px] text-gray-500 mt-2 text-center">
@@ -1165,11 +1221,15 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                          singleItem.description === tutorialActionableText);
 
                       return (
-                        <button
+                        <CardButton
                           key={idx}
                           ref={shouldAttachRef ? tutorialTargetButtonRef : undefined}
                           onClick={() => handleActionClick(singleItem)}
-                          className={`w-full p-3 rounded-xl bg-gradient-to-r ${backgroundClass} border border-gray-200/50 shadow-sm ${shadowClass} hover:shadow-md ${borderColorHover} transition-all duration-200 text-left group touch-feedback touch-manipulation`}
+                          className={`w-full p-3 rounded-xl bg-gradient-to-r ${backgroundClass} border border-gray-200/50 ${shadowClass} ${borderColorHover} text-left`}
+                          springAnimation
+                          gradientOverlay
+                          scale={0.98}
+                          haptic="medium"
                         >
                           <div className="flex items-start space-x-3">
                             <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${gradientClass} flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm group-hover:scale-105 transition-transform`}>
@@ -1185,7 +1245,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                               )}
                             </div>
                           </div>
-                        </button>
+                        </CardButton>
                       );
                         }
                       });
