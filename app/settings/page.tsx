@@ -81,37 +81,42 @@ export default function SettingsPage() {
               <h2 className="text-lg font-semibold text-primary-text mb-3">Quick Actions</h2>
               <div className="space-y-3">
                 {/* Create Thriving */}
-                <Button
-                  onClick={() => {
+                <TouchLink
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
                     sessionStorage.setItem('initialMessage', 'Create a wellness thriving for me');
                     router.push('/chat/new?intent=create_thriving');
                   }}
-                  variant="gradient"
-                  gradient={{
-                    from: 'white/80',
-                    to: 'white/80',
-                    hoverFrom: 'rose/10',
-                    hoverTo: 'burgundy/5',
-                    activeFrom: 'rose/20',
-                    activeTo: 'burgundy/10'
-                  }}
-                  springAnimation
-                  gradientOverlay
+                  scale={0.97}
+                  shadow="md"
                   cardGlow
+                  hoverScale={1.01}
                   haptic="medium"
-                  shadow="sm"
-                  className="w-full rounded-2xl backdrop-blur-sm border border-rose/20 p-[min(5vw,1.25rem)] text-left"
+                  variant="card"
+                  className="w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-rose/20 p-[min(5vw,1.25rem)] hover:shadow-lg transition-all block relative overflow-hidden shadow-sm group"
                 >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose to-burgundy flex items-center justify-center flex-shrink-0">
-                      <Plus className="w-5 h-5 text-white" strokeWidth={2} />
+                  {/* Gradient overlay on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-rose/0 via-rose/5 to-burgundy/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  
+                  {/* Decorative elements */}
+                  <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-gradient-to-br from-rose/20 to-burgundy/15 blur-3xl opacity-60" />
+                  <div className="absolute -bottom-16 -left-16 w-32 h-32 rounded-full bg-gradient-to-tr from-burgundy/15 to-rose/10 blur-2xl opacity-50" />
+                  
+                  <div className="flex items-center justify-between relative">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose to-burgundy flex items-center justify-center shadow-lg relative group-hover:shadow-xl transition-all">
+                        <div className="absolute inset-0 bg-gradient-to-t from-burgundy/20 to-transparent rounded-full" />
+                        <Plus className="w-5 h-5 text-white relative z-10" strokeWidth={2} />
+                      </div>
+                      <div className="text-left">
+                        <h3 className="font-medium text-primary-text text-sm">Create Thriving</h3>
+                        <p className="text-xs text-primary-text/60">New wellness plan</p>
+                      </div>
                     </div>
-                    <div className="text-left">
-                      <h3 className="font-medium text-primary-text text-sm">Create Thriving</h3>
-                      <p className="text-xs text-primary-text/60">New wellness plan</p>
-                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
                   </div>
-                </Button>
+                </TouchLink>
 
                 {/* Pantry - Full Width with Enhanced Design */}
                 <TouchLink
@@ -269,34 +274,37 @@ export default function SettingsPage() {
             </div>
             
             {/* About */}
-            <Button
-              onClick={() => router.push('/settings/about')}
-              variant="gradient"
-              gradient={{
-                from: 'white/80',
-                to: 'white/80',
-                hoverFrom: 'dusty-rose/10',
-                hoverTo: 'rose/5',
-                activeFrom: 'dusty-rose/20',
-                activeTo: 'rose/10'
-              }}
-              springAnimation
-              gradientOverlay
+            <TouchLink
+              href="/settings/about"
+              scale={0.97}
+              shadow="md"
               cardGlow
+              hoverScale={1.01}
               haptic="medium"
-              shadow="sm"
-              className="w-full rounded-2xl backdrop-blur-sm border border-dusty-rose/20 p-[min(5vw,1.25rem)] text-left"
+              variant="card"
+              className="w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-dusty-rose/20 p-[min(5vw,1.25rem)] hover:shadow-lg transition-all block relative overflow-hidden shadow-sm group"
             >
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-dusty-rose to-rose flex items-center justify-center">
-                  <Info className="w-5 h-5 text-white" />
+              {/* Gradient overlay on hover */}
+              <div className="absolute inset-0 bg-gradient-to-br from-dusty-rose/0 via-dusty-rose/5 to-rose/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+              
+              {/* Decorative elements */}
+              <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-gradient-to-br from-dusty-rose/20 to-rose/15 blur-3xl opacity-60" />
+              <div className="absolute -bottom-16 -left-16 w-32 h-32 rounded-full bg-gradient-to-tr from-rose/15 to-dusty-rose/10 blur-2xl opacity-50" />
+              
+              <div className="flex items-center justify-between relative">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-dusty-rose to-rose flex items-center justify-center shadow-lg relative group-hover:shadow-xl transition-all">
+                    <div className="absolute inset-0 bg-gradient-to-t from-rose/20 to-transparent rounded-full" />
+                    <Info className="w-5 h-5 text-white relative z-10" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="font-medium text-primary-text text-sm">About Thrive</h3>
+                    <p className="text-xs text-primary-text/60">Learn about our philosophy</p>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <h3 className="font-medium text-primary-text text-sm">About Thrive</h3>
-                  <p className="text-xs text-primary-text/60">Learn about our philosophy</p>
-                </div>
+                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
               </div>
-            </Button>
+            </TouchLink>
           </div>
           
           {/* Footer */}
