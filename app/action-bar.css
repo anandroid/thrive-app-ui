@@ -17,11 +17,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
 }
 
 /* Left section for back button */
 .action-bar-left {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
 /* Center section for title */
@@ -133,20 +136,33 @@
 }
 
 /* Layout variations */
-.action-bar.left-aligned .action-bar-content {
-  justify-content: space-between;
-}
 
-.action-bar.left-aligned .action-bar-left {
-  flex: 1;
+/* Left-aligned layout */
+.action-bar.left-aligned .action-bar-content {
   display: flex;
+  justify-content: space-between;
   align-items: center;
 }
 
+.action-bar.left-aligned .action-bar-left {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
 .action-bar.left-aligned .action-bar-center {
-  display: none;
+  display: none !important;
 }
 
 .action-bar.left-aligned .action-bar-right {
-  flex-shrink: 0;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Remove text centering for left-aligned titles */
+.action-bar.left-aligned .action-bar-title {
+  text-align: left;
 }

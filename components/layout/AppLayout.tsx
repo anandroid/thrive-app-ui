@@ -57,8 +57,10 @@ export function AppLayout({
               showBackButton={header!.showBackButton}
               backHref={header!.backHref}
               onBackClick={header!.onBackClick}
+              leftElement={header!.leftElement}
               rightElement={header!.rightElement}
               variant={header!.variant || 'default'}
+              layout={header!.layout}
             />
           )}
         </div>

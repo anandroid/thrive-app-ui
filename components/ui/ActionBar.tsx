@@ -49,29 +49,25 @@ export function ActionBar({
     return (
       <div className={`action-bar left-aligned ${variantClasses[variant]} ${className}`}>
         <div className="action-bar-content">
-          {/* Left side - title or custom element */}
+          {/* Left side - back button and title */}
           <div className="action-bar-left">
-            {leftElement || (
-              <>
-                {showBackButton && (
-                  <IconButton
-                    onClick={handleBackClick}
-                    variant="ghost"
-                    springAnimation
-                    gradientOverlay
-                    cardGlow
-                    haptic="medium"
-                    className="hover:bg-gray-100 text-gray-700 mr-3"
-                  >
-                    <ArrowLeft className="w-5 h-5" />
-                  </IconButton>
-                )}
-                {typeof title === 'string' ? (
-                  <h1 className="action-bar-title text-left">{title}</h1>
-                ) : (
-                  title
-                )}
-              </>
+            {showBackButton && (
+              <IconButton
+                onClick={handleBackClick}
+                variant="ghost"
+                springAnimation
+                gradientOverlay
+                cardGlow
+                haptic="medium"
+                className="hover:bg-gray-100 text-gray-700 mr-3"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </IconButton>
+            )}
+            {typeof title === 'string' ? (
+              <h1 className="action-bar-title text-left">{title}</h1>
+            ) : (
+              title
             )}
           </div>
 
