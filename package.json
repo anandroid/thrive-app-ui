@@ -11,6 +11,8 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:assistant": "node tests/puppeteer-assistant-tests.js",
+    "create-assistants": "node scripts/create-assistant-team.js",
+    "create-assistants:prod": "node scripts/create-assistant-team.js --prod",
     "update-assistants": "node scripts/create-assistant-team.js",
     "update-assistant": "node scripts/update-assistants-with-functions.js"
   },

@@ -4,15 +4,54 @@
  * Dynamic script to create/update the Thrive AI assistant team
  * This version dynamically imports configurations from TypeScript files
  * to avoid duplication and ensure consistency
+ * 
+ * Usage:
+ *   npm run create-assistants           # Creates/updates dev assistants (default)
+ *   npm run create-assistants -- --prod # Creates/updates production assistants
  */
 
 require('dotenv').config({ path: '.env.local' });
 const OpenAI = require('openai');
 const fs = require('fs').promises;
 const path = require('path');
+const { exec } = require('child_process');
+const util = require('util');
+const execPromise = util.promisify(exec);
+
+// Parse command line arguments
+const args = process.argv.slice(2);
+const isProduction = args.includes('--prod');
+const environment = isProduction ? 'production' : 'dev';
+
+console.log(`\n🎯 Environment: ${environment.toUpperCase()}`);
+console.log(`🔑 Using ${isProduction ? 'production' : 'development'} API keys and project\n`);
+
+// Environment-specific configuration
+const envConfig = {
+  dev: {
+    apiKey: process.env.THRIVE_OPENAI_API_KEY, // Dev environment uses the new dev API key
+    project: 'thrive-dev-465922',
+    assistantSuffix: ' (Dev)',
+    envPrefix: 'THRIVE_'
+  },
+  production: {
+    apiKey: process.env.THRIVE_OPENAI_API_KEY, // Production environment  
+    project: 'thrive-465618', 
+    assistantSuffix: '',
+    envPrefix: 'THRIVE_'
+  }
+};
+
+const config = envConfig[environment];
+
+if (!config.apiKey) {
+  console.error(`❌ Error: THRIVE_OPENAI_API_KEY not found in .env.local`);
+  console.error(`Make sure you have the ${environment} API key configured.`);
+  process.exit(1);
+}
 
 const openai = new OpenAI({
-  apiKey: process.env.THRIVE_OPENAI_API_KEY,
+  apiKey: config.apiKey,
 });
 
 // Helper to extract instructions from TypeScript files
@@ -181,13 +220,31 @@ const PANTRY_FUNCTIONS = [
 ];
 
 /**
+ * Store assistant ID in Google Cloud Secret Manager
+ */
+async function storeSecretInGCloud(secretName, assistantId) {
+  try {
+    console.log(`   📝 Storing ${secretName} in Google Cloud Secret Manager...`);
+    
+    // Create or update secret version in the dev project
+    const command = `echo "${assistantId}" | gcloud secrets versions add ${secretName} --project=${config.project} --data-file=-`;
+    await execPromise(command);
+    
+    console.log(`   ✅ Stored ${secretName} in ${config.project}`);
+  } catch (error) {
+    console.error(`   ⚠️  Warning: Could not store secret in Google Cloud: ${error.message}`);
+    console.log(`   📝 Please manually add: ${secretName}=${assistantId} to your ${environment} environment`);
+  }
+}
+
+/**
  * Create or update an assistant
  */
-async function createOrUpdateAssistant(role, config) {
-  const envKey = `THRIVE_${role.toUpperCase()}_ASSISTANT_ID`;
+async function createOrUpdateAssistant(role, assistantConfig) {
+  const envKey = `${config.envPrefix}${role.toUpperCase()}_ASSISTANT_ID`;
   const existingId = process.env[envKey];
   
-  console.log(`\n🤖 Processing ${role} assistant...`);
+  console.log(`\n🤖 Processing ${role} assistant for ${environment}...`);
   
   try {
     // Define response schemas for each role
@@ -319,33 +376,41 @@ async function createOrUpdateAssistant(role, config) {
     // Check if functions should be enabled
     const enableFunctions = process.env.ENABLE_ASSISTANT_FUNCTIONS === 'true';
     
-    const assistantConfig = {
-      name: config.name,
-      description: config.description,
-      model: config.model,
-      instructions: config.instructions,
-      tools: enableFunctions ? config.functions.map(func => ({ type: 'function', function: func })) : [],
+    const finalAssistantConfig = {
+      name: assistantConfig.name + config.assistantSuffix,
+      description: assistantConfig.description + (isProduction ? '' : ' - Development version'),
+      model: assistantConfig.model,
+      instructions: assistantConfig.instructions,
+      tools: enableFunctions ? assistantConfig.functions.map(func => ({ type: 'function', function: func })) : [],
       response_format: { type: 'json_object' },
-      temperature: config.temperature,
+      temperature: assistantConfig.temperature,
       metadata: {
         role,
+        environment,
         version: '3.0',
         team: 'thrive-wellness',
-        source: 'typescript-files'
+        source: 'typescript-files',
+        project: config.project
       }
     };
     
     if (existingId) {
       // Update existing assistant
       console.log(`   Updating existing assistant: ${existingId}`);
-      const assistant = await openai.beta.assistants.update(existingId, assistantConfig);
+      const assistant = await openai.beta.assistants.update(existingId, finalAssistantConfig);
       console.log(`   ✅ Updated: ${assistant.name}`);
       return { role, id: assistant.id, name: assistant.name };
     } else {
       // Create new assistant
       console.log(`   Creating new ${role} assistant...`);
-      const assistant = await openai.beta.assistants.create(assistantConfig);
+      const assistant = await openai.beta.assistants.create(finalAssistantConfig);
       console.log(`   ✅ Created: ${assistant.name} (${assistant.id})`);
+      
+      // Store assistant ID in Google Cloud Secret Manager for the appropriate environment
+      if (!isProduction) {
+        await storeSecretInGCloud(envKey, assistant.id);
+      }
+      
       return { role, id: assistant.id, name: assistant.name, isNew: true };
     }
   } catch (error) {
@@ -402,14 +467,23 @@ async function updateEnvFile(assistants) {
  * Main function to create/update all assistants
  */
 async function main() {
-  console.log('🚀 Thrive AI Assistant Team Setup (Dynamic Version)\n');
+  console.log(`🚀 Thrive AI Assistant Team Setup - ${environment.toUpperCase()}\n`);
   
   const enableFunctions = process.env.ENABLE_ASSISTANT_FUNCTIONS === 'true';
-  console.log(`📋 Assistant Functions: ${enableFunctions ? '✅ Enabled' : '❌ Disabled'}\n`);
+  console.log(`📋 Assistant Functions: ${enableFunctions ? '✅ Enabled' : '❌ Disabled'}`);
+  console.log(`🗄️  Project: ${config.project}`);
+  console.log(`🏷️  Assistant Suffix: "${config.assistantSuffix}"\n`);
   
-  if (!process.env.THRIVE_OPENAI_API_KEY) {
-    console.error('❌ Error: THRIVE_OPENAI_API_KEY not found in .env.local');
-    process.exit(1);
+  if (isProduction) {
+    console.log('⚠️  PRODUCTION MODE: Please confirm you want to update production assistants');
+    console.log('   Press Ctrl+C to cancel, or Enter to continue...');
+    
+    // Wait for user confirmation in production
+    await new Promise((resolve) => {
+      process.stdin.once('data', () => {
+        resolve();
+      });
+    });
   }
   
   try {
@@ -470,9 +544,18 @@ async function main() {
         console.log(`${r.role.padEnd(10)} - ${r.name} (${r.id})`);
       });
       
-      console.log('\n✨ Thrive AI Assistant Team setup complete!');
+      console.log(`\n✨ Thrive AI Assistant Team setup complete for ${environment.toUpperCase()}!`);
       console.log('\n💡 Instructions are now dynamically loaded from TypeScript files.');
       console.log('   Any changes to the .ts files will be reflected when you run this script.');
+      
+      if (!isProduction) {
+        console.log(`\n🔐 Assistant IDs have been stored in Google Cloud Secret Manager (${config.project})`);
+        console.log('   Your dev environment is ready to use these assistants.');
+      }
+      
+      console.log('\n📝 Usage:');
+      console.log('   Dev:        npm run create-assistants');
+      console.log('   Production: npm run create-assistants -- --prod');
     }
     
   } catch (error) {
