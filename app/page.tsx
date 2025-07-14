@@ -205,15 +205,16 @@ export default function HomePage() {
       {/* Main app content - Only render when ready */}
       {showMainContent && (
         <AppLayout
-          className="chat-simple-layout"
-          customHeader={
-            <div className="flex items-center justify-between content-padding h-14 bg-white border-b border-gray-200">
+          header={{
+            title: (
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center">
                   <Leaf className="w-6 h-6 text-white" />
                 </div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-burgundy to-rose bg-clip-text text-transparent">Thrive</h1>
               </div>
+            ),
+            rightElement: (
               <MenuButton
                 onClick={() => {
                   localStorage.setItem('hasClickedMenu', 'true');
@@ -230,8 +231,8 @@ export default function HomePage() {
                   </div>
                 )}
               </MenuButton>
-            </div>
-          }
+            )
+          }}
           stickyBottom={
             <div className="chat-input-container">
               <ChatEditor
@@ -334,7 +335,7 @@ export default function HomePage() {
                           }}
                           size="sm"
                           fullWidth
-                          className="mt-3 text-dusty-rose relative overflow-hidden"
+                          className="mt-3 text-[#914372] relative overflow-hidden"
                           icon={<BookOpen className="w-4 h-4" />}
                           gradientOverlay
                         >

@@ -388,25 +388,20 @@ export const ConsultationButton = forwardRef<HTMLButtonElement, Omit<ButtonProps
 
 // Soft button (like journal button)
 export const SoftButton = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, gradient, ...props }, ref) => (
+  ({ className, ...props }, ref) => (
     <Button 
       ref={ref} 
-      variant="gradient"
-      gradient={gradient || {
-        from: 'dusty-rose/15',
-        to: 'rose/15',
-        hoverFrom: 'dusty-rose/25',
-        hoverTo: 'rose/25',
-        activeFrom: 'dusty-rose/30',
-        activeTo: 'rose/30'
-      }}
+      variant="soft"
       shadow="none"
       cardGlow
       gradientOverlay
       springAnimation
       className={cn(
-        'border border-dusty-rose/20',
-        'hover:border-dusty-rose/30',
+        'bg-gradient-to-r from-[rgba(218,160,169,0.15)] to-[rgba(251,113,133,0.15)]',
+        'hover:from-[rgba(218,160,169,0.25)] hover:to-[rgba(251,113,133,0.25)]',
+        'active:from-[rgba(218,160,169,0.30)] active:to-[rgba(251,113,133,0.30)]',
+        'border border-[rgba(218,160,169,0.20)]',
+        'hover:border-[rgba(218,160,169,0.30)]',
         'hover:shadow-md',
         className
       )}
