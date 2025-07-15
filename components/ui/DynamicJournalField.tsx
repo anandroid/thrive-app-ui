@@ -1,12 +1,18 @@
 'use client';
 
 import React from 'react';
-import { CustomJournalField } from '@/src/types/thriving';
+import { CustomJournalField, LegacyJournalField } from '@/src/types/thriving';
 
 interface DynamicJournalFieldProps {
   field: CustomJournalField;
   value: unknown;
   onChange: (value: unknown) => void;
+}
+
+// Type guard to check if it's a legacy field
+function isLegacyField(field: CustomJournalField): field is LegacyJournalField {
+  return 'placeholder' in field || 
+    ['text_area', 'rating_scale', 'time_input', 'energy_level', 'mood_scale', 'pain_scale', 'sleep_quality', 'custom_metric'].includes(field.type);
 }
 
 export function DynamicJournalField({ field, value, onChange }: DynamicJournalFieldProps) {
@@ -17,11 +23,11 @@ export function DynamicJournalField({ field, value, onChange }: DynamicJournalFi
         {field.required && <span className="text-red-500 ml-1">*</span>}
       </label>
       
-      {field.type === 'text_area' && (
+      {(field.type === 'text_area' || field.type === 'text_input') && (
         <textarea
           value={String(value || '')}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={field.placeholder}
+          placeholder={isLegacyField(field) ? field.placeholder : undefined}
           className="w-full p-[min(4vw,1rem)] border border-gray-300 rounded-xl focus:border-rose focus:ring-2 focus:ring-rose/20 transition-all"
           required={field.required}
         />
@@ -54,7 +60,7 @@ export function DynamicJournalField({ field, value, onChange }: DynamicJournalFi
       {/* Default to slider for any scale or numeric fields */}
       {(field.type === 'energy_level' || field.type === 'mood_scale' || 
         field.type === 'pain_scale' || field.type === 'sleep_quality' || 
-        field.type === 'custom_metric') && (
+        field.type === 'custom_metric' || field.type === 'slider') && (
         <div className="space-y-2">
           <div className="flex items-center justify-between text-[min(3.5vw,0.875rem)] text-gray-600">
             <span>Low</span>
@@ -75,12 +81,12 @@ export function DynamicJournalField({ field, value, onChange }: DynamicJournalFi
       )}
       
       {/* Fallback for unknown field types - show as text input */}
-      {!['text_area', 'rating_scale', 'time_input', 'energy_level', 'mood_scale', 'pain_scale', 'sleep_quality', 'custom_metric'].includes(field.type) && (
+      {!['text_area', 'text_input', 'rating_scale', 'time_input', 'energy_level', 'mood_scale', 'pain_scale', 'sleep_quality', 'custom_metric', 'slider'].includes(field.type as string) && (
         <input
           type="text"
           value={String(value || '')}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
+          placeholder={isLegacyField(field) && field.placeholder ? field.placeholder : `Enter ${field.label.toLowerCase()}`}
           className="w-full p-[min(3vw,0.75rem)] border border-gray-300 rounded-xl focus:border-rose focus:ring-2 focus:ring-rose/20 transition-all"
           required={field.required}
         />

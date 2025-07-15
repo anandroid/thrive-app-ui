@@ -1,0 +1,70 @@
+# Auto-deployment configuration for thrive-app-ui repository
+# When you push to this repo, it will:
+# 1. Deploy the current thrive-app-ui code
+# 2. Trigger deployment of thrive-app-shop from the monorepo
+
+steps:
+  # Step 1: Build thrive-app-ui (current repository)
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-thrive-app-ui'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/thrive-app-ui:latest'
+      - '.'
+
+  # Step 2: Push thrive-app-ui image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-thrive-app-ui'
+    args: 
+      - 'push'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/thrive-app-ui:latest'
+    waitFor: ['build-thrive-app-ui']
+
+  # Step 3: Deploy thrive-app-ui to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    id: 'deploy-thrive-app-ui'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'thrive-app-ui'
+      - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/thrive-app-ui:latest'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--port=8080'
+      - '--set-secrets=ENABLE_ASSISTANT_FUNCTIONS=ENABLE_ASSISTANT_FUNCTIONS:latest,NEXT_PUBLIC_APP_URL=NEXT_PUBLIC_APP_URL:latest,NEXT_PUBLIC_ENABLE_ASSISTANT_FUNCTIONS=NEXT_PUBLIC_ENABLE_ASSISTANT_FUNCTIONS:latest,NEXT_PUBLIC_SHOP_URL=NEXT_PUBLIC_SHOP_URL:latest,NODE_ENV=NODE_ENV:latest,OPENAI_API_KEY=OPENAI_API_KEY:latest,THRIVE_CHAT_ASSISTANT_ID=THRIVE_CHAT_ASSISTANT_ID:latest,THRIVE_GEMINI_API_KEY=THRIVE_GEMINI_API_KEY:latest,THRIVE_OPENAI_API_KEY=THRIVE_OPENAI_API_KEY:latest,THRIVE_PANTRY_ASSISTANT_ID=THRIVE_PANTRY_ASSISTANT_ID:latest,THRIVE_ROUTINE_ASSISTANT_ID=THRIVE_ROUTINE_ASSISTANT_ID:latest'
+      - '--service-account=647294150154-compute@developer.gserviceaccount.com'
+      - '--min-instances=0'
+      - '--max-instances=100'
+      - '--cpu=1'
+      - '--memory=512Mi'
+      - '--timeout=300s'
+    waitFor: ['push-thrive-app-ui']
+
+  # Step 4: Trigger thrive-app-shop deployment from monorepo
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    id: 'trigger-shop-deployment'
+    entrypoint: 'gcloud'
+    args:
+      - 'builds'
+      - 'triggers'
+      - 'run'
+      - 'thrive-shop-monorepo-deploy'
+      - '--branch=main'
+      - '--project=$PROJECT_ID'
+    waitFor: ['deploy-thrive-app-ui']
+
+# Images built
+images:
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/thrive-app-ui:latest'
+
+# Build options
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'
+  substitutionOption: ALLOW_LOOSE
+
+# Build timeout
+timeout: '2400s'

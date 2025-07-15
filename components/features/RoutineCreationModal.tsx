@@ -5,8 +5,6 @@ import { Sparkles, Moon, Sun, Info } from 'lucide-react';
 import { ActionableItem, WellnessRoutine } from '@/src/services/openai/types';
 import { LoadingButton } from '@/components/ui/LoadingButton';
 import { Modal } from '@/components/ui/Modal';
-import bridge from '@/src/lib/react-native-bridge';
-import { NotificationHelper } from '@/src/utils/notificationHelper';
 
 interface RoutineModalData {
   title?: string;
@@ -25,7 +23,7 @@ interface RoutineCreationModalProps {
   routineData: ActionableItem;
   healthConcern?: string;
   threadId?: string;
-  onRoutineCreated: (routine: WellnessRoutine) => void;
+  onRoutineCreated?: (routine: WellnessRoutine) => void;
 }
 
 export const RoutineCreationModal: React.FC<RoutineCreationModalProps> = ({
@@ -33,8 +31,7 @@ export const RoutineCreationModal: React.FC<RoutineCreationModalProps> = ({
   onClose,
   routineData,
   healthConcern,
-  threadId,
-  onRoutineCreated
+  threadId
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedDuration, setSelectedDuration] = useState('7_days');
@@ -65,48 +62,37 @@ export const RoutineCreationModal: React.FC<RoutineCreationModalProps> = ({
     setIsCreating(true);
 
     try {
-      const response = await fetch('/api/routine/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          routineType: modalData.routineType,
-          healthConcern: healthConcern || routineData.description,
-          customInstructions: customInstructions.trim() || undefined,
-          frequency: modalData.frequency,
-          duration: selectedDuration,
-          threadId: threadId,
-          userPreferences: {
-            sleepSchedule: {
-              bedtime: sleepTime,
-              wakeTime: wakeTime
-            },
-            availableTime: selectedDuration === '7_days' ? 20 : 30
+      // Store the routine data for streaming creation
+      const routineCreationData = {
+        routineType: modalData.routineType,
+        healthConcern: healthConcern || routineData.description,
+        customInstructions: customInstructions.trim() || undefined,
+        frequency: modalData.frequency,
+        duration: selectedDuration,
+        threadId: threadId,
+        userPreferences: {
+          sleepSchedule: {
+            bedtime: sleepTime,
+            wakeTime: wakeTime
           },
-          origin: threadId ? {
-            threadId,
-            createdFrom: 'chat' as const,
-            context: healthConcern || routineData.description
-          } : undefined
-        })
-      });
+          availableTime: selectedDuration === '7_days' ? 20 : 30
+        },
+        origin: threadId ? {
+          threadId,
+          createdFrom: 'chat' as const,
+          context: healthConcern || routineData.description
+        } : undefined
+      };
 
-      if (!response.ok) throw new Error('Failed to create routine');
-
-      const routine = await response.json();
-      onRoutineCreated(routine);
+      // Store the routine data in sessionStorage for the streaming page
+      sessionStorage.setItem('routineCreationData', JSON.stringify(routineCreationData));
       
-      // Schedule notifications if in React Native
-      if (NotificationHelper.isSupported()) {
-        const result = await NotificationHelper.scheduleRoutineReminders([routine]);
-        if (result.success) {
-          console.log('Routine reminders scheduled successfully');
-        }
-      }
+      // Close modal and redirect to thrivings page with streaming flag
+      onClose();
+      window.location.href = '/thrivings?streaming=true';
       
-      // Notify React Native that a thriving was created
-      bridge.notifyThrivingCreated();
     } catch (error) {
-      console.error('Error creating routine:', error);
+      console.error('Error preparing routine creation:', error);
     } finally {
       setIsCreating(false);
     }
@@ -317,7 +303,7 @@ export const RoutineCreationModal: React.FC<RoutineCreationModalProps> = ({
                   'Analyzing...',
                   'Personalizing...',
                   'Optimizing...',
-                  'Preparing...',
+                  'Scheduling...',
                   'Finalizing...'
                 ]}
                 messageInterval={2500}

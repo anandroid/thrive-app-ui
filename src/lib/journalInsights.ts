@@ -241,7 +241,8 @@ export class JournalInsightsEngine {
     };
 
     // Add base fields for routine type
-    template.customFields = this.getBaseFieldsForRoutineType(routine.type);
+    // TODO: Convert these to smart field types in the future
+    template.customFields = this.getBaseFieldsForRoutineType(routine.type) as unknown as typeof template.customFields;
     
     // Add routine-specific tracking
     template.trackingFocus = this.getTrackingFocusForRoutineType(routine.type);

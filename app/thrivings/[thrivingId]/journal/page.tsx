@@ -225,7 +225,7 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
                   </div>
                   <div className="text-left">
                     <div className="font-semibold text-gray-800 text-[15px] flex items-center space-x-2">
-                      <span>Smart Journal</span>
+                      <span>AI Journal</span>
                       {userProfile && userProfile.dataPoints > 5 && (
                         <Sparkles className="w-4 h-4 text-purple-500" />
                       )}

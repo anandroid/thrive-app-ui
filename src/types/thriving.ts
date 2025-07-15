@@ -1,6 +1,8 @@
 // Thriving types - replacing the old routine system
 // A Thriving combines daily routines with journal tracking
 
+import type { SmartJournalField } from './journal-inputs';
+
 export interface JournalEntry {
   id: string;
   thrivingId: string;
@@ -19,14 +21,14 @@ export interface JournalEntry {
   updatedAt: string;
 }
 
-// Dynamic Journal Field Types
-export interface CustomJournalField {
+// Legacy field types for backward compatibility
+export interface LegacyJournalField {
   id: string;
   type: 'mood_scale' | 'pain_scale' | 'energy_level' | 'sleep_quality' | 'symptom_tracker' | 'supplement_effects' | 'custom_metric' | 'time_input' | 'text_area' | 'checkbox_list' | 'rating_scale';
   label: string;
   description?: string;
   required: boolean;
-  options?: string[]; // For dropdowns/checkboxes
+  options?: string[];
   scale?: { min: number; max: number; labels: Record<number, string> };
   placeholder?: string;
   validation?: {
@@ -35,6 +37,9 @@ export interface CustomJournalField {
     pattern?: string;
   };
 }
+
+// Union type for backward compatibility
+export type CustomJournalField = SmartJournalField | LegacyJournalField;
 
 export interface JournalPrompt {
   id: string;
@@ -53,7 +58,7 @@ export interface DynamicJournalTemplate {
   templateId: string;
   routineId: string;
   journalType: 'sleep_tracking' | 'pain_monitoring' | 'mood_wellness' | 'stress_management' | 'medication_tracking' | 'general_wellness';
-  customFields: CustomJournalField[];
+  customFields: SmartJournalField[];
   prompts: JournalPrompt[];
   trackingFocus: string[];
   visualizations?: ('body_map' | 'mood_chart' | 'energy_timeline' | 'pain_heatmap')[];

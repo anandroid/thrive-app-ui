@@ -167,9 +167,9 @@ export default function ChatHistoryPage() {
       {chatHistory.length > 0 && (
         <Link
           href="/chat/new"
-          className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-sage to-sage-dark shadow-lg hover:shadow-xl transition-all flex items-center justify-center group touch-feedback touch-manipulation"
+          className="fixed bottom-[min(6vw,1.5rem)] right-[min(6vw,1.5rem)] w-[min(14vw,3.5rem)] h-[min(14vw,3.5rem)] rounded-full bg-gradient-to-br from-sage to-sage-dark shadow-lg hover:shadow-xl transition-all flex items-center justify-center group touch-feedback touch-manipulation z-50"
         >
-          <Plus className="w-6 h-6 text-white group-hover:rotate-90 transition-transform duration-300" />
+          <Plus className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-white group-hover:rotate-90 transition-transform duration-300" />
         </Link>
       )}
     </AppLayout>

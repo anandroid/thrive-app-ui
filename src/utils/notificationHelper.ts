@@ -1,5 +1,6 @@
 import { WellnessRoutine } from '@/src/services/openai/types';
 import { Thriving } from '@/src/types/thriving';
+import { generateStepNotificationId } from './idGenerator';
 
 // Type for notification-specific methods
 interface NotificationBridge {
@@ -41,11 +42,11 @@ export const isReactNative = (): boolean => {
   // Use the centralized bridge detection
   const result = bridge.isInReactNative();
   
-  console.log('NotificationHelper isReactNative check:', {
+  console.log('NotificationHelper isReactNative check:', JSON.stringify({
     hasWindow: typeof window !== 'undefined',
     bridgeStatus: bridge.getBridgeStatus(),
     result
-  });
+  }, null, 2));
   
   return result;
 };
@@ -168,7 +169,7 @@ export const NotificationHelper = {
         return stepEnabled && settingsEnabled;
       })
       .map(step => ({
-        id: step.id,
+        id: generateStepNotificationId(thriving.id, step.id), // Use safe notification ID
         routineId: thriving.id,
         routineName: thriving.title,
         title: step.title,

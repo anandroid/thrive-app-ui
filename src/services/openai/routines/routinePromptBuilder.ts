@@ -72,7 +72,55 @@ Return a JSON object with this EXACT structure:
   ],
   "expectedOutcomes": ["Outcome 1", "Outcome 2", "Outcome 3"],
   "safetyNotes": ["Important safety consideration"],
-  "progressTracking": "How to track progress"
+  "progressTracking": "How to track progress",
+  "journalTemplate": {
+    "journalType": "sleep_tracking|pain_monitoring|mood_wellness|stress_management|medication_tracking|general_wellness",
+    "customFields": [
+      {
+        "id": "unique_field_id",
+        "type": "slider|emoji_picker|tag_selector|time_picker|magnitude_input|multiple_choice",
+        "label": "User-friendly label",
+        "description": "Optional helpful text",
+        "required": true|false,
+        "sliderConfig": {
+          "min": 1, "max": 10, "step": 1,
+          "labels": {"1": "Label1", "10": "Label2"},
+          "showValue": true, "gradient": true
+        },
+        "emojiConfig": {
+          "emojiSet": ["😊", "😐", "😔"],
+          "columns": 5
+        },
+        "tagConfig": {
+          "options": ["Option1", "Option2"],
+          "maxSelections": 5,
+          "allowCustom": true
+        },
+        "timeConfig": {
+          "format": "12h",
+          "defaultValue": "10:00 PM"
+        },
+        "magnitudeConfig": {
+          "min": 0, "max": 12, "step": 0.5,
+          "unit": "hours",
+          "showTrend": true
+        },
+        "multipleChoiceConfig": {
+          "options": ["Option1", "Option2"],
+          "layout": "vertical"
+        }
+      }
+    ],
+    "prompts": [
+      {
+        "id": "unique_prompt_id",
+        "question": "Personalized question based on user's specific context",
+        "type": "reflection|tracking|troubleshooting|celebration",
+        "priority": 1-10
+      }
+    ],
+    "trackingFocus": ["sleep_quality", "supplement_effectiveness", "pain_levels"]
+  }
 }
 
 Include 3-7 daily routine steps that need reminders, and 2-5 additional steps for one-time setup, weekly maintenance, or as-needed activities. Additional steps are things like "Buy a humidifier", "Clean equipment weekly", "Replace filters monthly", etc.`;
@@ -112,6 +160,23 @@ For timing: Always consider the user's sleep schedule when suggesting activity t
 Technical requirements:
 - Separate regular daily routine steps (that need reminders) from additional one-time or as-needed steps
 - For will_video_tutorial_help: true for visual demonstrations (exercises, techniques), false for simple activities (medication, water, journaling)
-- Always return valid JSON with the exact structure specified`;
+- Always return valid JSON with the exact structure specified
+
+JOURNAL TEMPLATE REQUIREMENTS:
+1. ALWAYS include a personalized journalTemplate that matches the routine type
+2. For sleep routines: Include sleep quality tracking, morning mood, actual sleep times, supplement effectiveness
+3. For pain routines: Include pain level sliders for each specific area mentioned, pain character emojis, what helped
+4. For stress routines: Include stress level slider, coping strategies used, effectiveness tracking
+5. For medication routines: Include medication adherence tracking, side effects, effectiveness
+6. Use smart input types that make mobile tracking effortless:
+   - Sliders for ratings/levels with contextual labels
+   - Emoji pickers for mood/feelings
+   - Tag selectors for symptoms/strategies with user's specific items
+   - Time pickers for sleep/activity times
+   - Magnitude inputs for durations with appropriate units
+   - Multiple choice for single selections
+7. Reference the user's EXACT context in prompts and field labels
+8. If user mentioned specific supplements, create effectiveness tracking fields for each
+9. If user mentioned specific symptoms/areas, create dedicated tracking for each`;
   }
 }

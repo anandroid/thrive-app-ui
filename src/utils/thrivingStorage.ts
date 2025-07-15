@@ -418,3 +418,79 @@ export const syncThrivingsWithNotifications = async (): Promise<void> => {
     }
   }
 };
+
+/**
+ * Migration function to fix notification ID format issues
+ * This clears all existing notifications and reschedules them with safe integer IDs
+ * Call this once to fix the NumberFormatException issues from compound string IDs
+ */
+export const migrateNotificationIds = async (): Promise<void> => {
+  if (!NotificationHelper.isSupported()) {
+    console.log('[ThrivingStorage] Not in React Native, skipping notification ID migration');
+    return;
+  }
+  
+  console.log('[ThrivingStorage] Starting notification ID migration...');
+  
+  try {
+    const thrivings = getThrivingsFromStorage();
+    const activeThrivings = thrivings.filter(t => t.isActive);
+    
+    console.log(`[ThrivingStorage] Found ${activeThrivings.length} active thrivings to migrate`);
+    
+    // Cancel all existing notifications first to clear any legacy compound IDs
+    for (const thriving of activeThrivings) {
+      console.log(`[ThrivingStorage] Canceling existing notifications for: ${thriving.title}`);
+      await NotificationHelper.cancelStepNotifications(thriving.id);
+    }
+    
+    // Wait a moment for cancellations to process
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Reschedule all notifications with new safe integer IDs
+    let successCount = 0;
+    let errorCount = 0;
+    
+    for (const thriving of activeThrivings) {
+      try {
+        console.log(`[ThrivingStorage] Rescheduling notifications for: ${thriving.title}`);
+        const result = await NotificationHelper.scheduleAllNotifications(thriving);
+        
+        if (result.success) {
+          successCount++;
+          console.log(`[ThrivingStorage] ✓ Successfully rescheduled ${result.stepCount} notifications for: ${thriving.title}`);
+        } else {
+          errorCount++;
+          console.error(`[ThrivingStorage] ✗ Failed to reschedule notifications for: ${thriving.title}`, result.errors);
+        }
+      } catch (error) {
+        errorCount++;
+        console.error(`[ThrivingStorage] ✗ Error rescheduling notifications for: ${thriving.title}`, error);
+      }
+    }
+    
+    // Mark migration as completed
+    localStorage.setItem('notificationIdMigrationCompleted', 'true');
+    localStorage.setItem('notificationIdMigrationDate', new Date().toISOString());
+    
+    console.log(`[ThrivingStorage] Notification ID migration completed:
+      - Total thrivings: ${activeThrivings.length}
+      - Successfully migrated: ${successCount}
+      - Errors: ${errorCount}`);
+      
+    if (errorCount > 0) {
+      console.warn('[ThrivingStorage] Some notifications failed to migrate. Check logs above for details.');
+    }
+    
+  } catch (error) {
+    console.error('[ThrivingStorage] Error during notification ID migration:', error);
+    throw error;
+  }
+};
+
+/**
+ * Check if notification ID migration has been completed
+ */
+export const isNotificationIdMigrationCompleted = (): boolean => {
+  return localStorage.getItem('notificationIdMigrationCompleted') === 'true';
+};

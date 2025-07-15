@@ -7,13 +7,18 @@ import { Thriving } from '@/src/types/thriving';
 import { TouchLink } from '@/components/ui/TouchLink';
 import { MenuButton, CardButton, SoftButton } from '@/components/ui/Button';
 import { getThrivingsFromStorage, migrateRoutinesToThrivings } from '@/src/utils/thrivingStorage';
+import { findSortedStepIndex } from '@/src/utils/thrivingHelpers';
 import { getChatHistory } from '@/src/utils/chatStorage';
 import { ChatHistoryItem } from '@/src/types/chat';
 import { GetStarted } from '@/components/features/GetStarted';
+import { getPantryItems } from '@/src/utils/pantryStorage';
+import { PantryItem } from '@/src/types/pantry';
 import { ChatEditor } from '@/components/ui/ChatEditor';
 import { PrivacySection } from '@/components/features/PrivacySection';
 import { HealthConnectModal } from '@/components/features/HealthConnectModal';
+import HealthInsights from '@/components/features/HealthInsights';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { DynamicRecommendationWidget } from '@/src/components/features/DynamicRecommendationWidget';
 // import { PrivacySection2 } from '@/components/features/PrivacySection2';
 // import { PrivacySection3 } from '@/components/features/PrivacySection3';
 
@@ -117,6 +122,8 @@ export default function HomePage() {
   });
   const [showHealthConnectModal, setShowHealthConnectModal] = useState(false);
   const [latestChat, setLatestChat] = useState<ChatHistoryItem | null>(null);
+  const [showHealthSummary, setShowHealthSummary] = useState(false);
+  const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
 
   useEffect(() => {
     // Initialize showGetStarted after mount to prevent hydration mismatch
@@ -129,6 +136,10 @@ export default function HomePage() {
       setLatestChat(chatHistory[0]);
     }
     
+    // Get pantry items
+    const items = getPantryItems();
+    setPantryItems(items);
+    
     // Check if should show menu sparkle
     const hasUsedChat = localStorage.getItem('hasUsedChat');
     const hasClickedMenu = localStorage.getItem('hasClickedMenu');
@@ -138,6 +149,9 @@ export default function HomePage() {
     
     // Check if should show health connect modal
     checkHealthConnectModal();
+    
+    // Check if should show health summary on home page
+    checkHealthSummaryDisplay();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkHealthConnectModal = () => {
@@ -153,6 +167,30 @@ export default function HomePage() {
       setTimeout(() => {
         setShowHealthConnectModal(true);
       }, 1500);
+    }
+  };
+
+  const checkHealthSummaryDisplay = async () => {
+    // Only show health summary on home page if:
+    // 1. We're in the React Native app
+    // 2. Health permissions are granted
+    if (!window.ReactNativeBridge) {
+      console.log('[HomePage] No ReactNativeBridge - not showing health summary');
+      return;
+    }
+    
+    // Use the health permission manager to check current status
+    const { healthPermissionManager } = await import('@/src/utils/healthPermissionManager');
+    const hasPermission = await healthPermissionManager.getPermissionStatus();
+    
+    console.log('[HomePage] Health summary check:', {
+      hasPermission,
+      willShowSummary: hasPermission
+    });
+    
+    // Show on home page if health permissions are granted
+    if (hasPermission) {
+      setShowHealthSummary(true);
     }
   };
 
@@ -236,20 +274,30 @@ export default function HomePage() {
               </MenuButton>
             )
           }}
-          stickyBottom={
-            <ChatEditor
-              value={input}
-              onChange={setInput}
-              onSubmit={handleSendMessage}
-            />
-          }
         >
-
-          {/* Main Content */}
-          <div className="chat-messages-content">
+          {/* Flex container for proper keyboard handling */}
+          <div className="flex flex-col h-full">
+            {/* Scrollable content area */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="chat-messages-content">
+            
+            {/* Dynamic Recommendation Widget - Always show if user has data */}
+            {(thrivings.length > 0 || pantryItems.length > 0 || latestChat) && (
+              <div className="px-[min(4vw,1rem)] pt-3 pb-6">
+                <DynamicRecommendationWidget 
+                  className="w-full"
+                  onRefresh={() => {
+                    // Could trigger analytics or other actions
+                    console.log('Recommendation refreshed');
+                  }}
+                />
+              </div>
+            )}
+            
             {/* Thrivings Section - Only show if thrivings exist */}
             {thrivings.length > 0 && (
-              <div className="content-padding py-6 bg-gray-50">
+              <div className="content-padding pt-3 pb-6">
+                <div className="bg-gray-50 rounded-2xl p-6 -mx-4">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-2xl font-bold text-primary-text">Your Thrivings</h2>
                   <TouchLink 
@@ -268,7 +316,7 @@ export default function HomePage() {
                     {thrivings.slice(0, 5).map((thriving, index) => (
                       <div
                         key={thriving.id}
-                        className="flex-none w-[280px] p-[min(5vw,1.25rem)] rounded-2xl bg-white shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all group cursor-pointer touch-feedback touch-manipulation"
+                        className="flex-none w-[75vw] max-w-[280px] p-[min(5vw,1.25rem)] rounded-2xl bg-white shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all group cursor-pointer touch-feedback touch-manipulation"
                         onClick={() => router.push(`/thrivings?id=${thriving.id}`)}
                       >
                         <div className="flex items-start justify-between mb-3">
@@ -292,7 +340,9 @@ export default function HomePage() {
                             }
                           </span>
                         </div>
-                        <h3 className="font-semibold text-primary-text text-lg mb-3">{thriving.title}</h3>
+                        <div className="h-[4.5rem] mb-3 flex items-start">
+                          <h3 className="font-semibold text-primary-text line-clamp-3 leading-relaxed text-[min(4.5vw,1rem)]">{thriving.title}</h3>
+                        </div>
                         
                         {/* What's Next Section */}
                         {(() => {
@@ -304,8 +354,8 @@ export default function HomePage() {
                               className="rounded-xl bg-gradient-to-r from-sage-light/20 to-sage/10 border border-sage-light/30 p-3 mb-3 hover:from-sage-light/30 hover:to-sage/20 transition-all touch-feedback touch-manipulation"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                // Find the index of this step in the steps array
-                                const stepIndex = thriving.steps.findIndex(s => s.id === nextStep.id);
+                                // Find the index of this step in the sorted steps array
+                                const stepIndex = findSortedStepIndex(thriving.steps, nextStep.id);
                                 router.push(`/thrivings?id=${thriving.id}&step=${stepIndex}`);
                               }}
                             >
@@ -336,15 +386,19 @@ export default function HomePage() {
                           }}
                           size="sm"
                           fullWidth
-                          className="mt-3 text-[#914372] relative overflow-hidden"
-                          icon={<BookOpen className="w-4 h-4" />}
+                          className="mt-[min(3vw,0.75rem)] text-[#914372] relative overflow-hidden flex items-center justify-center gap-[min(2vw,0.5rem)]"
+                          icon={<BookOpen className="w-[min(4vw,1rem)] h-[min(4vw,1rem)]" />}
                           gradientOverlay
+                          springAnimation
+                          cardGlow
+                          haptic="medium"
                         >
-                          Smart Journal
+                          Journal
                         </SoftButton>
                       </div>
                     ))}
                   </div>
+                </div>
                 </div>
               </div>
             )}
@@ -354,31 +408,31 @@ export default function HomePage() {
 
             {/* Continue with Previous Chat - Only show if there's a latest chat */}
             {latestChat && (
-              <div className="content-padding py-6">
-                <h3 className="text-[min(4.5vw,1.125rem)] font-semibold text-gray-700 mb-3">Pick up where you left off</h3>
+              <div className="px-[min(4vw,1rem)] py-6">
+                <h3 className="text-[min(4.5vw,1.125rem)] font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <MessageCircle className="w-5 h-5" />
+                  Recent
+                </h3>
                 <button
                   onClick={() => router.push(`/chat/${latestChat.threadId}`)}
-                  className="w-full p-[min(5vw,1.25rem)] rounded-[5vw] max-rounded-[1.25rem] bg-white shadow-md hover:shadow-lg active:scale-[0.98] transition-all border border-gray-100 text-left group touch-feedback touch-manipulation"
+                  className="w-full p-[min(5vw,1.25rem)] rounded-2xl bg-white shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all border border-gray-100 text-left group touch-feedback touch-manipulation"
                 >
                   <div className="flex items-start space-x-[min(4vw,1rem)]">
-                    <div className="w-[min(11vw,2.75rem)] h-[min(11vw,2.75rem)] rounded-xl bg-gradient-to-br from-rose/20 to-burgundy/15 flex items-center justify-center flex-shrink-0 group-hover:from-rose/30 group-hover:to-burgundy/25 transition-colors">
-                      <MessageCircle className="w-[min(5.5vw,1.375rem)] h-[min(5.5vw,1.375rem)] text-burgundy" />
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose/20 to-burgundy/15 flex items-center justify-center flex-shrink-0 group-hover:from-rose/30 group-hover:to-burgundy/25 transition-colors shadow-sm">
+                      <MessageCircle className="w-5 h-5 text-burgundy" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-[min(4vw,1rem)] font-semibold text-gray-900 mb-[1vw] truncate">
+                      <h4 className="text-[min(4vw,1rem)] font-semibold text-gray-900 mb-1 truncate">
                         {latestChat.title === 'New Conversation' && latestChat.lastMessage 
                           ? latestChat.lastMessage.length > 40 
                             ? latestChat.lastMessage.substring(0, 40) + '...'
                             : latestChat.lastMessage
                           : latestChat.title}
                       </h4>
-                      <p className="text-[min(3.5vw,0.875rem)] text-gray-600 line-clamp-2">
+                      <p className="text-[min(3.5vw,0.875rem)] text-gray-600 line-clamp-2 mb-3">
                         {latestChat.lastMessage}
                       </p>
-                      <div className="flex items-center justify-between mt-[2vw]">
-                        <span className="text-[min(3vw,0.75rem)] text-gray-500">
-                          {latestChat.messageCount} {latestChat.messageCount === 1 ? 'message' : 'messages'}
-                        </span>
+                      <div className="flex items-center justify-end">
                         <span className="text-[min(3vw,0.75rem)] text-gray-500">
                           {(() => {
                             const updatedDate = new Date(latestChat.updatedAt);
@@ -403,8 +457,15 @@ export default function HomePage() {
               </div>
             )}
 
+            {/* Health Summary - Show compact view on home page after permission granted and seen once */}
+            {showHealthSummary && (
+              <div className="px-[min(4vw,1rem)] py-6">
+                <HealthInsights showFullView={false} />
+              </div>
+            )}
+
             {/* Prompt Templates */}
-            <div className={`content-padding py-8 space-y-3 bg-gradient-to-br from-sage-light/10 to-sage/10 backdrop-blur-sm ${
+            <div className={`px-[min(4vw,1rem)] py-8 space-y-3 bg-gradient-to-br from-sage-light/10 to-sage/10 backdrop-blur-sm ${
               thrivings.length === 0 ? 'rounded-b-3xl' : 'rounded-3xl'
             }`}>
               <p className="text-lg text-secondary-text font-light text-center mb-8">
@@ -432,6 +493,17 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+            </div>
+            
+            {/* Input area - flex-shrink-0 keeps it at bottom */}
+            <div className="flex-shrink-0 border-t border-gray-200 bg-white">
+              <ChatEditor
+                value={input}
+                onChange={setInput}
+                onSubmit={handleSendMessage}
+              />
+            </div>
+          </div>
         </AppLayout>
       )}
       
@@ -443,6 +515,7 @@ export default function HomePage() {
           localStorage.setItem('hasSeenHealthConnect', 'true');
         }}
         onConnect={() => {
+          console.log('[HomePage] HealthConnect onConnect callback triggered');
           // Navigate to thrivings page to show health insights
           router.push('/thrivings#health-insights');
         }}

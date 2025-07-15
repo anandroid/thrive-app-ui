@@ -105,6 +105,9 @@ export const HealthConnectModal: React.FC<HealthConnectModalProps> = ({
         <div className="space-y-3">
           <button
             onClick={() => {
+              console.log('[HealthConnectModal] Connect button clicked');
+              console.log('[HealthConnectModal] Platform:', devicePlatform);
+              console.log('[HealthConnectModal] Health service:', healthServiceName);
               onConnect();
               onClose();
             }}

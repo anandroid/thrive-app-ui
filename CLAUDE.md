@@ -1,5 +1,29 @@
 # Thrive App - Mobile-First Development Guidelines
 
+## 🎯 RECENT UPDATES (2025-01-15)
+
+### Fixed UI Issues in Home Page
+- **Fixed "Pick up where you left off" text truncation**: Added proper line-clamp CSS utilities to globals.css
+- **Improved Quick Journal button**: Added flex alignment classes for better icon and text spacing
+- **Updated thriving cards**: Changed width from fixed 280px to viewport-based w-[75vw] max-w-[280px] for better mobile display
+- **Added CSS utilities**: Added .line-clamp-2 and .line-clamp-3 classes with proper webkit prefixes for consistent text truncation across browsers
+
+### Refactored Assistant Instructions
+- **Common Instructions** now contain only truly shared elements:
+  - Team identity and mission
+  - JSON response formatting requirements  
+  - Safety protocols and emergency handling
+  - Error handling standards
+  - Shared terminology (thrivings, journals, etc.)
+  
+- **Role-Specific Instructions** moved to individual assistants:
+  - Chat Assistant: Natural wellness flow, conversation stages, handoff protocols
+  - Routine Assistant: No generic responses policy, personalization requirements
+  - Pantry Assistant: Supplement knowledge, interaction awareness
+  - Recommendation Assistant: Standalone instructions (no common instructions) focused solely on widget generation
+
+This reduces redundancy and makes each assistant's role clearer.
+
 ## 🎯 CRITICAL UPDATE (2025-07-14): Premium Touch Feedback is NOW IMPLEMENTED EVERYWHERE
 All buttons and interactive elements throughout the app now have premium touch feedback with:
 - Spring animation (bouncy cubic-bezier curves)

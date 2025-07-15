@@ -3,6 +3,11 @@ import { ChatThread, ChatMessage, ChatHistoryItem } from '@/src/types/chat';
 const CHAT_THREADS_KEY = 'thrive_chat_threads';
 const ACTIVE_THREAD_KEY = 'thrive_active_thread';
 
+// Check if a thread ID is locally generated (not from OpenAI)
+export const isGeneratedThreadId = (threadId: string): boolean => {
+  return threadId.startsWith('generated_');
+};
+
 // Get all chat threads
 export const getChatThreads = (): ChatThread[] => {
   if (typeof window === 'undefined') return [];
@@ -26,7 +31,7 @@ export const getChatThread = (threadId: string): ChatThread | null => {
 // Create a new chat thread
 export const createChatThread = (title?: string): ChatThread => {
   const thread: ChatThread = {
-    id: Date.now().toString(),
+    id: `generated_${Date.now()}`,
     title: title || 'New Conversation',
     messages: [],
     createdAt: new Date().toISOString(),
