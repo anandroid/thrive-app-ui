@@ -77,7 +77,7 @@ Return a JSON object with this EXACT structure:
     "journalType": "sleep_tracking|pain_monitoring|mood_wellness|stress_management|medication_tracking|general_wellness",
     "customFields": [
       {
-        "id": "unique_field_id",
+        "id": "field_1", // Use simple sequential IDs like field_1, field_2, etc.
         "type": "slider|emoji_picker|tag_selector|time_picker|magnitude_input|multiple_choice",
         "label": "User-friendly label",
         "description": "Optional helpful text",
@@ -113,10 +113,10 @@ Return a JSON object with this EXACT structure:
     ],
     "prompts": [
       {
-        "id": "unique_prompt_id",
+        "id": "prompt_1", // Use simple sequential IDs
         "question": "Personalized question based on user's specific context",
         "type": "reflection|tracking|troubleshooting|celebration",
-        "priority": 1-10
+        "priority": 1 // Number between 1-10
       }
     ],
     "trackingFocus": ["sleep_quality", "supplement_effectiveness", "pain_levels"]

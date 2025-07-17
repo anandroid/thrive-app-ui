@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { RoutineCreationService } from '@/src/services/openai/routines/routineCreationService';
 import { getMultiAssistantService } from '@/src/services/openai/multiAssistantService';
+import { parseStepsProgressive } from './parseSteps';
 
 // Step type definition
 interface RoutineStep {
@@ -18,9 +19,24 @@ interface RoutineStep {
 
 // Helper function to transform routine data
 function transformRoutine(routine: Record<string, unknown>, routineType: string, healthConcern: string, threadId?: string, origin?: Record<string, unknown>) {
+  const routineId = routine.id || Date.now().toString();
+  
+  // Transform journal template if it exists
+  let journalTemplate = routine.journalTemplate;
+  if (journalTemplate && typeof journalTemplate === 'object') {
+    const template = journalTemplate as Record<string, unknown>;
+    journalTemplate = {
+      ...template,
+      templateId: template.templateId || `template-${routineId}`,
+      routineId: routineId,
+      version: template.version || '1.0',
+      createdAt: template.createdAt || new Date().toISOString()
+    };
+  }
+  
   return {
     ...routine,
-    id: routine.id || Date.now().toString(),
+    id: routineId,
     title: routine.routineTitle || routine.title || routine.name || 'Wellness Routine',
     name: routine.routineTitle || routine.name || 'Wellness Routine', // Keep for backward compatibility
     description: routine.routineDescription || routine.description || '',
@@ -32,6 +48,7 @@ function transformRoutine(routine: Record<string, unknown>, routineType: string,
     reminderTimes: (routine.steps as RoutineStep[] | undefined)?.map((s) => s.reminderTime).filter(Boolean) || [],
     healthConcern: routine.healthConcern || healthConcern,
     steps: ((routine.steps as RoutineStep[] | undefined) || []).map((step, index) => ({
+      id: `step-${routineId}-${index + 1}`,
       order: index + 1,
       title: step.title,
       description: step.description,
@@ -60,7 +77,7 @@ function transformRoutine(routine: Record<string, unknown>, routineType: string,
     additionalSteps: routine.additionalSteps,
     additionalRecommendations: routine.additionalRecommendations,
     proTips: routine.proTips,
-    journalTemplate: routine.journalTemplate,
+    journalTemplate: journalTemplate,
     origin: origin || (threadId ? {
       threadId,
       createdFrom: 'chat' as const,
@@ -69,14 +86,15 @@ function transformRoutine(routine: Record<string, unknown>, routineType: string,
   };
 }
 
-// Helper function to attempt parsing partial JSON
-function attemptPartialParse(content: string, lastIndex: number, parsedSteps: Set<number> = new Set()): { 
+// Helper function to attempt parsing partial JSON (kept for potential future use)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function attemptPartialParse(content: string, lastIndex: number, parsedSteps: Set<string> = new Set()): { 
   parsed: boolean; 
   type?: string; 
   data?: unknown; 
   index?: number; 
   lastIndex: number;
-  parsedSteps?: Set<number>;
+  parsedSteps?: Set<string>;
 } {
   // Try to find complete JSON properties as they stream
   
@@ -92,18 +110,20 @@ function attemptPartialParse(content: string, lastIndex: number, parsedSteps: Se
     return { parsed: true, type: 'description', data: descMatch[1], lastIndex: descMatch.index! + descMatch[0].length };
   }
   
-  // Look for steps array - use simpler parsing to avoid regex catastrophic backtracking
-  const stepsStartIdx = content.indexOf('"steps"', lastIndex);
-  if (stepsStartIdx > -1) {
-    const colonIdx = content.indexOf(':', stepsStartIdx);
-    const arrayStartIdx = content.indexOf('[', colonIdx);
+  // Look for step objects starting from lastIndex
+  // This allows us to continue parsing steps progressively
+  let currentIdx = lastIndex;
+  
+  // First, check if we're inside or can find a steps array
+  const stepsArrayCheck = content.substring(0, currentIdx).lastIndexOf('"steps"');
+  const inStepsArray = stepsArrayCheck > -1 && content.substring(stepsArrayCheck).includes('[');
+  
+  if (inStepsArray || content.indexOf('"steps"', lastIndex) > -1) {
+    let stepIndex = parsedSteps.size; // Start from the next unparsed step
+    let searchAttempts = 0;
     
-    if (arrayStartIdx > -1) {
-      // Find step objects within the array
-      let currentIdx = arrayStartIdx + 1;
-      let stepIndex = 0;
-      
-      while (currentIdx < content.length) {
+    while (currentIdx < content.length && searchAttempts < 50) {
+      searchAttempts++;
         // Skip whitespace
         while (currentIdx < content.length && /\s/.test(content[currentIdx])) {
           currentIdx++;
@@ -149,9 +169,11 @@ function attemptPartialParse(content: string, lastIndex: number, parsedSteps: Se
               const step = JSON.parse(objStr);
               if (step && (step.title || step.stepTitle)) {
                 // Check if this step has new data
+                const stepTitle = step.title || step.stepTitle;
                 const hasMoreData = step.description && step.description !== 'Loading step details...';
-                if (!parsedSteps.has(stepIndex) || hasMoreData) {
-                  parsedSteps.add(stepIndex);
+                if (stepTitle && (!parsedSteps.has(stepTitle) || hasMoreData)) {
+                  parsedSteps.add(stepTitle);
+                  console.log(`Parsed step ${stepIndex + 1}: "${stepTitle}"`);
                   return {
                     parsed: true,
                     type: 'step',
@@ -164,13 +186,17 @@ function attemptPartialParse(content: string, lastIndex: number, parsedSteps: Se
               }
             } catch {
               // Not valid JSON yet, try partial parsing
+              if (stepIndex < 5) { // Log first few parsing attempts
+                console.log(`Step ${stepIndex} parse failed, partial content: ${objStr.substring(0, 100)}...`);
+              }
               const titleMatch = objStr.match(/"(?:title|stepTitle)"\s*:\s*"([^"]+)"/);
-              if (titleMatch && !parsedSteps.has(stepIndex)) {
+              if (titleMatch && !parsedSteps.has(titleMatch[1])) {
                 // Extract what we can
                 const descMatch = objStr.match(/"(?:description|stepDescription)"\s*:\s*"([^"]+)"/);
                 const durationMatch = objStr.match(/"duration"\s*:\s*["\']?(\d+)/);
                 
-                parsedSteps.add(stepIndex);
+                parsedSteps.add(titleMatch[1]);
+                console.log(`Parsed partial step ${stepIndex + 1}: "${titleMatch[1]}"`);
                 return {
                   parsed: true,
                   type: 'partial_step',
@@ -189,68 +215,71 @@ function attemptPartialParse(content: string, lastIndex: number, parsedSteps: Se
             
             stepIndex++;
           } else {
-            // Incomplete object, break out to wait for more data
+            // Incomplete object, skip ahead to look for more complete steps
+            // Don't break - there might be complete steps further in the stream
+            const nextBraceIdx = content.indexOf('{', currentIdx);
+            if (nextBraceIdx > -1 && nextBraceIdx < content.length - 10) {
+              currentIdx = nextBraceIdx;
+              // Don't increment stepIndex yet - we haven't successfully parsed this step
+            } else {
+              // No more potential objects to parse
+              break;
+            }
+          }
+        } else {
+          // Not an object start, look for next object
+          const nextObjIdx = content.indexOf('{', currentIdx);
+          if (nextObjIdx > -1) {
+            currentIdx = nextObjIdx;
+          } else {
             break;
           }
         }
-        
-        // Skip to next potential object
-        const nextObjIdx = content.indexOf('{', currentIdx);
-        const nextCommaIdx = content.indexOf(',', currentIdx);
-        
-        if (nextCommaIdx > -1 && (nextObjIdx === -1 || nextCommaIdx < nextObjIdx)) {
-          currentIdx = nextCommaIdx + 1;
-        } else if (nextObjIdx > -1) {
-          currentIdx = nextObjIdx;
-        } else {
-          break;
-        }
       }
     }
-  }
-  
-  // Look for journalTemplate section
-  const journalTemplateRegex = /"journalTemplate"\s*:\s*(\{[\s\S]*?\}(?=\s*[,}]))/;
-  const journalMatch = content.match(journalTemplateRegex);
-  if (journalMatch && journalMatch.index! > lastIndex) {
-    try {
-      // Try to parse the journal template object
-      const journalTemplate = JSON.parse(journalMatch[1]);
-      if (journalTemplate && journalTemplate.journalType) {
-        return { 
-          parsed: true, 
-          type: 'journalTemplate', 
-          data: journalTemplate, 
-          lastIndex: journalMatch.index! + journalMatch[0].length 
-        };
-      }
-    } catch {
-      // Not complete yet, continue
-    }
-  }
-
-  // Look for other sections as they complete
-  const sectionsToCheck = [
-    { name: 'additionalRecommendations', type: 'recommendations' },
-    { name: 'expectedOutcomes', type: 'outcomes' },
-    { name: 'proTips', type: 'tips' },
-    { name: 'safetyNotes', type: 'safety' }
-  ];
-  
-  for (const section of sectionsToCheck) {
-    const sectionRegex = new RegExp(`"${section.name}"\\s*:\\s*\\[(.*?)\\]`);
-    const sectionMatch = content.match(sectionRegex);
-    if (sectionMatch && sectionMatch.index! > lastIndex) {
+    
+    // Look for journalTemplate section
+    const journalTemplateRegex = /"journalTemplate"\s*:\s*(\{[\s\S]*?\}(?=\s*[,}]))/;
+    const journalMatch = content.match(journalTemplateRegex);
+    if (journalMatch && journalMatch.index! > lastIndex) {
       try {
-        const data = JSON.parse(`[${sectionMatch[1]}]`);
-        if (data.length > 0) {
-          return { parsed: true, type: section.type, data, lastIndex: sectionMatch.index! + sectionMatch[0].length };
+        // Try to parse the journal template object
+        const journalTemplate = JSON.parse(journalMatch[1]);
+        if (journalTemplate && journalTemplate.journalType) {
+          return { 
+            parsed: true, 
+            type: 'journalTemplate', 
+            data: journalTemplate, 
+            lastIndex: journalMatch.index! + journalMatch[0].length 
+          };
         }
       } catch {
-        // Not complete yet
+        // Not complete yet, continue
       }
     }
-  }
+
+    // Look for other sections as they complete
+    const sectionsToCheck = [
+      { name: 'additionalRecommendations', type: 'recommendations' },
+      { name: 'expectedOutcomes', type: 'outcomes' },
+      { name: 'proTips', type: 'tips' },
+      { name: 'safetyNotes', type: 'safety' }
+    ];
+    
+    for (const section of sectionsToCheck) {
+      const sectionRegex = new RegExp(`"${section.name}"\\s*:\\s*\\[(.*?)\\]`);
+      const sectionMatch = content.match(sectionRegex);
+      if (sectionMatch && sectionMatch.index! > lastIndex) {
+        try {
+          const data = JSON.parse(`[${sectionMatch[1]}]`);
+          if (data.length > 0) {
+            return { parsed: true, type: section.type, data, lastIndex: sectionMatch.index! + sectionMatch[0].length };
+          }
+        } catch {
+          // Not complete yet
+        }
+      }
+    }
   
   return { parsed: false, lastIndex, parsedSteps };
 }
@@ -409,8 +438,9 @@ CRITICAL INSTRUCTIONS:
           // Track streamed content and parsing state
           let streamedContent = '';
           let lastParsedIndex = 0;
-          let parsedSteps = new Set<number>();
+          const parsedStepTitles = new Set<string>();
           let totalChunks = 0;
+          let lastStepSearchPos = 0;
           // let currentRoutine: Record<string, any> | null = null;
 
           // Use the streaming method
@@ -433,6 +463,58 @@ CRITICAL INSTRUCTIONS:
                 console.log(`Chunk ${totalChunks}, total length: ${streamedContent.length}`);
               }
               
+              // Parse title and description using simple regex
+              const titleMatch = streamedContent.match(/"routineTitle"\s*:\s*"([^"]+)"/);
+              if (titleMatch && titleMatch.index! > lastParsedIndex) {
+                safeEnqueue({
+                  type: 'routine_info',
+                  data: { title: titleMatch[1] }
+                });
+                lastParsedIndex = titleMatch.index! + titleMatch[0].length;
+              }
+              
+              const descMatch = streamedContent.match(/"routineDescription"\s*:\s*"([^"]+)"/);
+              if (descMatch && descMatch.index! > lastParsedIndex) {
+                safeEnqueue({
+                  type: 'routine_info',
+                  data: { description: descMatch[1] }
+                });
+                lastParsedIndex = Math.max(lastParsedIndex, descMatch.index! + descMatch[0].length);
+              }
+              
+              // Use progressive parser for all steps
+              try {
+                const foundSteps = parseStepsProgressive(streamedContent, lastStepSearchPos, parsedStepTitles);
+                
+                for (const {step, index, endPos} of foundSteps) {
+                  console.log(`Streaming step ${index + 1}: "${step.title || step.stepTitle}"`);
+                  
+                  // Send the step
+                  const timeMatch = typeof step.bestTime === 'string' 
+                    ? step.bestTime.match(/\d{2}:\d{2}/) 
+                    : null;
+                    
+                  safeEnqueue({
+                    type: 'step',
+                    stepIndex: index,
+                    data: {
+                      ...step,
+                      stepNumber: index + 1,
+                      time: timeMatch?.[0] || 
+                            step.reminderTime || 
+                            `${7 + index}:00`
+                    }
+                  });
+                  
+                  // Update search position
+                  lastStepSearchPos = Math.max(lastStepSearchPos, endPos);
+                }
+              } catch (e) {
+                console.error('Step parsing error:', e);
+              }
+              
+              // Skip the old parsing logic - we're using the progressive parser above
+              /*
               // Try to parse and send partial data as it streams
               // Keep parsing until no more complete elements are found
               let parseResult;
@@ -440,7 +522,7 @@ CRITICAL INSTRUCTIONS:
               do {
                 parseCount++;
                 try {
-                  parseResult = attemptPartialParse(streamedContent, lastParsedIndex, parsedSteps);
+                  parseResult = attemptPartialParse(streamedContent, lastParsedIndex, parsedStepTitles);
                   if (parseResult.parsed) {
                     // Update parsed steps set if provided
                     if (parseResult.parsedSteps) {
@@ -514,6 +596,7 @@ CRITICAL INSTRUCTIONS:
                   break;
                 }
               } while (parseResult && parseResult.parsed); // Keep parsing until no more complete elements
+              */
               
               // Send streaming indicator less frequently to avoid overwhelming the connection
               if (totalChunks % 20 === 0) {

@@ -345,7 +345,71 @@ export function SmartJournalField({ field, value, onChange, previousValue }: Sma
     );
   }
 
-  // Fallback for text input
+  // Text Input (explicit handler)
+  if (field.type === 'text_input') {
+    return (
+      <div className="space-y-[min(3vw,0.75rem)]">
+        <label className="font-medium text-[min(4vw,1rem)] text-gray-900">
+          {field.label}
+          {field.required && <span className="text-red-500 ml-1">*</span>}
+        </label>
+        {field.description && (
+          <p className="text-[min(3.5vw,0.875rem)] text-gray-600">{field.description}</p>
+        )}
+        
+        <input
+          type="text"
+          value={String(value || '')}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={field.description || `Enter ${field.label.toLowerCase()}`}
+          className="w-full p-[min(4vw,1rem)] border border-gray-300 rounded-xl focus:border-rose focus:ring-2 focus:ring-rose/20"
+          required={field.required}
+        />
+        
+        {/* Previous value indicator */}
+        {field.showPreviousValue && previousValue !== undefined && (
+          <p className="text-[min(3vw,0.75rem)] text-gray-500">
+            Previous: {String(previousValue)}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  // Number Input (explicit handler) 
+  if (field.type === 'number_input') {
+    return (
+      <div className="space-y-[min(3vw,0.75rem)]">
+        <label className="font-medium text-[min(4vw,1rem)] text-gray-900">
+          {field.label}
+          {field.required && <span className="text-red-500 ml-1">*</span>}
+        </label>
+        {field.description && (
+          <p className="text-[min(3.5vw,0.875rem)] text-gray-600">{field.description}</p>
+        )}
+        
+        <input
+          type="number"
+          value={String(value || '')}
+          onChange={(e) => onChange(Number(e.target.value))}
+          placeholder={field.description || `Enter ${field.label.toLowerCase()}`}
+          className="w-full p-[min(4vw,1rem)] border border-gray-300 rounded-xl focus:border-rose focus:ring-2 focus:ring-rose/20"
+          required={field.required}
+          min={field.validation?.min}
+          max={field.validation?.max}
+        />
+        
+        {/* Previous value indicator */}
+        {field.showPreviousValue && previousValue !== undefined && (
+          <p className="text-[min(3vw,0.75rem)] text-gray-500">
+            Previous: {String(previousValue)}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  // Fallback for any other types
   return (
     <div className="space-y-[min(3vw,0.75rem)]">
       <label className="font-medium text-[min(4vw,1rem)] text-gray-900">

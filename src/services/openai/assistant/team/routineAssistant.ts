@@ -68,6 +68,13 @@ When in routine creation/adjustment mode, keep responses focused:
 
 When creating routines, ALWAYS include a journalTemplate with SMART INPUT TYPES:
 
+#### 🚨 CRITICAL MOBILE-FIRST JOURNAL RULES:
+1. **MAXIMUM ONE text input per journal** - Everything else MUST be tappable
+2. **Prioritize tap-based inputs**: sliders, emoji_picker, tag_selector, multiple_choice
+3. **Text input should be OPTIONAL** - Place it last and make it non-required
+4. **All required fields MUST be tap-based** for easy mobile completion
+5. **Think "one thumb operation"** - User should complete journal with quick taps
+
 Example structure (use this format):
 {
   "actionableItems": [{
@@ -468,13 +475,77 @@ Stress journal template MUST include these smart inputs:
 ❌ WRONG: Number input "Hours of sleep?"
 ✅ RIGHT: magnitude_input with hours unit, 0.5 step, trend display
 
+### 📱 MOBILE-FIRST INPUT SELECTION GUIDE:
+
+#### Preferred Tap-Based Inputs (USE THESE FIRST):
+1. **emoji_picker** - Perfect for mood, feelings, pain character
+2. **slider** - Ideal for ratings, intensity, effectiveness (0-100%)
+3. **tag_selector** - Great for symptoms, triggers, what helped
+4. **multiple_choice** - Single selection from options
+5. **magnitude_input** - For quantities with +/- buttons
+6. **time_picker** - Native time selector
+
+#### Text Input Usage (STRICT LIMITS):
+- **Maximum ONE per journal**
+- **Always OPTIONAL (required: false)**
+- **Place at END of form**
+- **Use only for "Additional notes" or "Anything else?"**
+- **Provide placeholder with examples**
+
+#### Example Mobile-Optimized Journal:
+\`\`\`json
+{
+  "customFields": [
+    {
+      "id": "field_1",
+      "type": "emoji_picker",
+      "label": "Morning mood",
+      "required": true,
+      "emojiConfig": {
+        "emojiSet": ["😊", "😐", "😔", "😴", "🥱"],
+        "columns": 5
+      }
+    },
+    {
+      "id": "field_2", 
+      "type": "slider",
+      "label": "Sleep quality",
+      "required": true,
+      "sliderConfig": {
+        "min": 1,
+        "max": 10,
+        "gradient": true,
+        "labels": {"1": "Poor", "10": "Great"}
+      }
+    },
+    {
+      "id": "field_3",
+      "type": "tag_selector",
+      "label": "What affected your sleep?",
+      "required": false,
+      "tagConfig": {
+        "options": ["Stress", "Noise", "Temperature", "Late meal", "Exercise"],
+        "maxSelections": 5
+      }
+    },
+    {
+      "id": "field_4",
+      "type": "text_input",  // ONLY text input, optional, at end
+      "label": "Additional notes (optional)",
+      "required": false,
+      "placeholder": "Anything else about your sleep?"
+    }
+  ]
+}
+\`\`\`
+
 ❌ WRONG: Generic "Rate pain"
 ✅ RIGHT: Separate sliders for each mentioned area with visual gradient
 
 ❌ WRONG: Yes/No "Did you take supplements?"
 ✅ RIGHT: tag_selector with their specific supplements from pantry
 
-### Complete Example - Sleep Routine with Magnesium:
+### Complete Example - Sleep Routine with Magnesium (MOBILE-OPTIMIZED):
 
 \`\`\`json
 {
@@ -482,9 +553,10 @@ Stress journal template MUST include these smart inputs:
     "journalType": "sleep_tracking",
     "customFields": [
       {
-        "id": "morning_mood",
+        "id": "field_1",
         "type": "emoji_picker",
-        "label": "How do you feel after taking magnesium last night?",
+        "label": "How do you feel this morning?",
+        "description": "Tap the emoji that matches",
         "emojiConfig": {
           "emojiSet": ["😊", "😐", "😔", "😴", "🥱"],
           "columns": 5
@@ -492,7 +564,21 @@ Stress journal template MUST include these smart inputs:
         "required": true
       },
       {
-        "id": "sleep_duration",
+        "id": "field_2",
+        "type": "slider",
+        "label": "Rate your sleep quality",
+        "sliderConfig": {
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "labels": {"1": "Terrible", "5": "OK", "10": "Amazing"},
+          "gradient": true,
+          "showValue": true
+        },
+        "required": true
+      },
+      {
+        "id": "field_3",
         "type": "magnitude_input",
         "label": "Hours of sleep",
         "magnitudeConfig": {
@@ -505,24 +591,53 @@ Stress journal template MUST include these smart inputs:
         "required": true
       },
       {
-        "id": "magnesium_effectiveness",
+        "id": "field_4",
         "type": "slider",
-        "label": "How well did the 400mg magnesium help you sleep?",
+        "label": "How well did the 400mg magnesium work?",
         "sliderConfig": {
           "min": 0,
           "max": 100,
+          "step": 10,
+          "unit": "%",
           "labels": {"0": "No effect", "50": "Some help", "100": "Very effective"},
           "gradient": true
         },
         "required": true
+      },
+      {
+        "id": "field_5",
+        "type": "multiple_choice",
+        "label": "When did you fall asleep?",
+        "multipleChoiceConfig": {
+          "options": ["Before 10 PM", "10-11 PM", "11 PM-12 AM", "After midnight"],
+          "layout": "vertical"
+        },
+        "required": false
+      },
+      {
+        "id": "field_6",
+        "type": "tag_selector",
+        "label": "Any sleep issues? (tap all that apply)",
+        "tagConfig": {
+          "options": ["Hard to fall asleep", "Woke up multiple times", "Too hot", "Too cold", "Bad dreams", "Restless"],
+          "maxSelections": 6
+        },
+        "required": false
+      },
+      {
+        "id": "field_7",
+        "type": "text_input",  // ONLY text field, optional, at the end
+        "label": "Any other notes? (optional)",
+        "placeholder": "e.g., dreams, how you feel, etc.",
+        "required": false
       }
     ],
     "prompts": [
       {
-        "id": "bedtime_routine",
-        "question": "How did the 9 PM wind-down routine with chamomile tea work?",
+        "id": "prompt_1",
+        "question": "Did the 9 PM chamomile tea help you wind down?",
         "type": "tracking",
-        "priority": 9
+        "priority": 8
       }
     ],
     "trackingFocus": ["sleep_quality", "magnesium_effectiveness", "morning_energy"]

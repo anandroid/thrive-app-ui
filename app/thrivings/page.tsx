@@ -82,26 +82,53 @@ export default function ThrivingsPage() {
       if (streamingContainerRef.current) {
         const elements = Array.from(newVisible);
         const lastElement = elements[elements.length - 1];
-        const elementConfig = THRIVING_STREAMING_CONFIG.find(config => config.id === lastElement);
+        let elementConfig = THRIVING_STREAMING_CONFIG.find(config => config.id === lastElement);
+        
+        // For steps beyond 5, create dynamic config
+        if (!elementConfig && lastElement.startsWith('step-')) {
+          const stepNum = parseInt(lastElement.replace('step-', ''));
+          if (!isNaN(stepNum)) {
+            elementConfig = {
+              id: lastElement,
+              type: 'step',
+              selector: `[data-step="${stepNum}"]`,
+              delay: 0,
+              duration: 600,
+              order: stepNum + 3 // Offset for other elements
+            };
+          }
+        }
         
         if (elementConfig?.selector) {
           const element = streamingContainerRef.current.querySelector(elementConfig.selector);
           if (element) {
             // Wait a bit for the element to animate in, then scroll
             setTimeout(() => {
-              element.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'center',
-                inline: 'nearest'
-              });
+              // Get the container's scroll position
+              const container = streamingContainerRef.current!;
+              const rect = element.getBoundingClientRect();
+              const containerRect = container.getBoundingClientRect();
+              
+              // Calculate if we need to scroll
+              const elementBottom = rect.bottom;
+              const containerBottom = containerRect.bottom;
+              
+              // Only scroll if element is below the visible area or partially hidden
+              if (elementBottom > containerBottom - 50) { // 50px buffer
+                element.scrollIntoView({ 
+                  behavior: 'smooth', 
+                  block: 'end',
+                  inline: 'nearest'
+                });
+              }
               
               // Ensure the element is fully visible after animation
               setTimeout(() => {
-                const rect = element.getBoundingClientRect();
+                const newRect = element.getBoundingClientRect();
                 const viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
                 
-                // If element is not fully visible, scroll again
-                if (rect.bottom > viewHeight || rect.top < 0) {
+                // If element is still not fully visible, scroll again
+                if (newRect.bottom > viewHeight - 100 || newRect.top < 100) {
                   element.scrollIntoView({ 
                     behavior: 'smooth', 
                     block: 'center',
@@ -630,9 +657,44 @@ export default function ThrivingsPage() {
             >
               {/* Small Pill Streaming Progress Indicator */}
               {isStreamingCreation && !streamingRoutineData?.isComplete && (
-                <div className="fixed top-[min(3vh,1rem)] left-1/2 transform -translate-x-1/2 z-50">
+                <div className="fixed top-[min(3vh,1rem)] left-0 right-0 z-50 flex justify-center">
                   <div className="bg-white/90 backdrop-blur-sm rounded-full px-[min(3vw,0.75rem)] py-[min(1.5vw,0.375rem)] shadow-sm border border-gray-100 flex items-center space-x-[min(2vw,0.5rem)]">
-                    <div className="spinner-explicit rounded-full w-[min(4vw,1rem)] h-[min(4vw,1rem)] border-2 border-rose border-t-transparent"></div>
+                    <svg
+                      className="w-[min(4vw,1rem)] h-[min(4vw,1rem)]"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <style>
+                        {`
+                          @keyframes svg-spin {
+                            100% {
+                              transform: rotate(360deg);
+                            }
+                          }
+                          .svg-spinner {
+                            animation: svg-spin 1s linear infinite;
+                            transform-origin: center;
+                          }
+                        `}
+                      </style>
+                      <circle
+                        className="svg-spinner"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="rgb(251 113 133 / 0.2)"
+                        strokeWidth="3"
+                        fill="none"
+                      />
+                      <path
+                        className="svg-spinner"
+                        d="M12 2a10 10 0 0 1 10 10"
+                        stroke="rgb(251 113 133)"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        fill="none"
+                      />
+                    </svg>
                     <span className="text-[min(3vw,0.75rem)] font-medium text-gray-600">Creating...</span>
                   </div>
                 </div>

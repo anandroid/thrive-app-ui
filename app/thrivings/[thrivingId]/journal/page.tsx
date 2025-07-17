@@ -13,7 +13,7 @@ import {
 } from '@/src/utils/thrivingStorage';
 import { Thriving, ThrivingJournal, JournalEntry, UserLearningProfile } from '@/src/types/thriving';
 import { JournalEditor } from '@/components/ui/JournalEditor';
-import { DynamicJournalModal } from '@/components/ui/DynamicJournalModal';
+import { SmartJournalModal } from '@/components/journal/SmartJournalModal';
 import { UserLearningProfileManager } from '@/src/lib/userLearningProfile';
 import { JournalInsightsEngine } from '@/src/lib/journalInsights';
 
@@ -31,7 +31,7 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
   const [thriving, setThriving] = useState<Thriving | null>(null);
   const [journal, setJournal] = useState<ThrivingJournal | null>(null);
   const [showNewEntry, setShowNewEntry] = useState(false);
-  const [showDynamicJournal, setShowDynamicJournal] = useState(false);
+  const [showSmartJournal, setShowSmartJournal] = useState(false);
   const [userProfile, setUserProfile] = useState<UserLearningProfile | null>(null);
   const [showInsights, setShowInsights] = useState(false);
   const [newEntry, setNewEntry] = useState({
@@ -131,8 +131,8 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
     setShowNewEntry(false);
   };
 
-  const handleDynamicJournalClose = () => {
-    setShowDynamicJournal(false);
+  const handleSmartJournalClose = () => {
+    setShowSmartJournal(false);
     refreshJournalData();
   };
 
@@ -212,7 +212,7 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
             <div className="space-y-3">
               {/* Smart Journal Button */}
               <button
-                onClick={() => setShowDynamicJournal(true)}
+                onClick={() => setShowSmartJournal(true)}
                 className="w-full rounded-2xl bg-gradient-to-r from-purple/5 via-dusty-rose/5 to-blue/5 border border-purple/10 py-4 px-6 flex items-center justify-between hover:from-purple/10 hover:via-dusty-rose/10 hover:to-blue/10 hover:border-purple/20 transition-all duration-300 group relative"
               >
                 <div className="flex items-center space-x-3">
@@ -497,7 +497,36 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
                   </div>
                 </div>
 
-                <p className="text-gray-700 mb-3">{entry.content}</p>
+                {/* Display content or smart fields */}
+                {entry.customData ? (
+                  <div className="space-y-3">
+                    {/* Smart Journal Fields */}
+                    {Object.entries(entry.customData).map(([fieldId, value]) => {
+                      // Find the field definition from the journal template
+                      const field = thriving.journalTemplate?.customFields.find(f => f.id === fieldId);
+                      if (!field) return null;
+                      
+                      return (
+                        <div key={fieldId} className="bg-gray-50 rounded-lg p-3">
+                          <p className="text-xs font-medium text-gray-600 mb-1">{field.label}</p>
+                          <p className="text-sm text-gray-800">
+                            {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                          </p>
+                        </div>
+                      );
+                    })}
+                    
+                    {/* AI Insights */}
+                    {entry.aiInsights && (
+                      <div className="bg-gradient-to-r from-purple/5 to-blue/5 rounded-lg p-3 border border-purple/10">
+                        <p className="text-xs font-medium text-purple-700 mb-1">AI Insight</p>
+                        <p className="text-sm text-gray-700">{entry.aiInsights}</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-gray-700 mb-3">{entry.content}</p>
+                )}
 
                 {/* Symptoms */}
                 {entry.symptoms && entry.symptoms.length > 0 && (
@@ -545,12 +574,28 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
           </div>
         </div>
 
-      {/* Dynamic Journal Modal */}
+      {/* Smart Journal Modal */}
       {thriving && (
-        <DynamicJournalModal
+        <SmartJournalModal
           thriving={thriving}
-          isOpen={showDynamicJournal}
-          onClose={handleDynamicJournalClose}
+          isOpen={showSmartJournal}
+          onClose={handleSmartJournalClose}
+          onSave={(entry) => {
+            // Convert SmartJournalEntry to JournalEntry format
+            const newEntry = addJournalEntry(thrivingId, {
+              date: entry.date,
+              mood: 'okay', // Default mood since SmartJournal doesn't have mood field
+              moodEmoji: '😊',
+              content: JSON.stringify(entry.fieldValues), // Store field values as JSON string
+              painLevel: undefined,
+              symptoms: [],
+              gratitude: [],
+              tags: [],
+              customData: entry.fieldValues, // Store field values in customData
+              aiInsights: entry.aiInsight // Note: plural 'aiInsights'
+            });
+            console.log('Smart journal entry saved:', newEntry);
+          }}
         />
       )}
     </AppLayout>

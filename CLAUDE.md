@@ -1,5 +1,13 @@
 # Thrive App - Mobile-First Development Guidelines
 
+## 🎯 RECENT UPDATES (2025-07-17)
+
+### Chat Assistant Question Structure Enhancement
+- **Fixed unstructured questions**: Chat assistant now NEVER sends open-ended questions embedded in paragraphs
+- **Added negative examples**: Clear examples of what NOT to do (e.g., "Could you tell me more about...")
+- **Enforced quick_reply format**: All questions must be answerable with quick taps, not long-form typing
+- **Structured JSON responses**: Questions must be in proper JSON format with quickOptions arrays
+
 ## 🎯 RECENT UPDATES (2025-01-15)
 
 ### Fixed UI Issues in Home Page
@@ -23,6 +31,13 @@
   - Recommendation Assistant: Standalone instructions (no common instructions) focused solely on widget generation
 
 This reduces redundancy and makes each assistant's role clearer.
+
+### Chat Assistant Question Structure Requirements
+- **NEVER send unstructured questions** embedded in paragraphs
+- **ALWAYS use quick_reply format** with specific options users can tap
+- **Questions must be structured as JSON objects**, not plain text
+- Added negative examples showing what NOT to do (e.g., "Could you tell me more about...")
+- All questions must be easily answerable with quick taps, not long-form typing
 
 ## 🎯 CRITICAL UPDATE (2025-07-14): Premium Touch Feedback is NOW IMPLEMENTED EVERYWHERE
 All buttons and interactive elements throughout the app now have premium touch feedback with:
