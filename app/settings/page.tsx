@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Info, Moon, ChevronRight, Plus, Leaf, MessageSquare, Trash2, Bell } from 'lucide-react';
+import { Info, Moon, ChevronRight, Plus, Leaf, MessageSquare, Trash2, Bell, Heart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { TouchLink } from '@/components/ui/TouchLink';
 import { AppLayout } from '@/components/layout/AppLayout';
 import bridge from '@/src/lib/react-native-bridge';
 import { NotificationHelper } from '@/src/utils/notificationHelper';
 import { NotificationPermissionModal } from '@/components/features/NotificationPermissionModal';
+import { NotificationDebugModal } from '@/components/features/NotificationDebugModal';
 import Button from '@/components/ui/Button';
 
 export default function SettingsPage() {
@@ -16,6 +17,7 @@ export default function SettingsPage() {
   const [notificationStatus, setNotificationStatus] = useState<'unknown' | 'enabled' | 'disabled'>('unknown');
   const [isRequestingPermission, setIsRequestingPermission] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [showNotificationDebugModal, setShowNotificationDebugModal] = useState(false);
 
   useEffect(() => {
     checkNotificationStatus();
@@ -226,6 +228,26 @@ export default function SettingsPage() {
                         Modal
                       </Button>
                       <Button
+                        onClick={() => setShowNotificationDebugModal(true)}
+                        variant="gradient"
+                        gradient={{
+                          from: 'blue-500',
+                          to: 'purple-600',
+                          hoverFrom: 'blue-600',
+                          hoverTo: 'purple-700',
+                          activeFrom: 'blue-400',
+                          activeTo: 'purple-500'
+                        }}
+                        springAnimation
+                        gradientOverlay
+                        cardGlow
+                        haptic="light"
+                        size="sm"
+                        className="text-sm font-medium text-white"
+                      >
+                        Debug
+                      </Button>
+                      <Button
                         onClick={handleEnableNotifications}
                         disabled={isRequestingPermission}
                         loading={isRequestingPermission}
@@ -250,10 +272,74 @@ export default function SettingsPage() {
                     </div>
                   )}
                   {notificationStatus === 'enabled' && (
-                    <span className="text-sm text-sage-dark">✓</span>
+                    <div className="flex items-center gap-3">
+                      <Button
+                        onClick={() => setShowNotificationDebugModal(true)}
+                        variant="gradient"
+                        gradient={{
+                          from: 'blue-500',
+                          to: 'purple-600',
+                          hoverFrom: 'blue-600',
+                          hoverTo: 'purple-700',
+                          activeFrom: 'blue-400',
+                          activeTo: 'purple-500'
+                        }}
+                        springAnimation
+                        gradientOverlay
+                        cardGlow
+                        haptic="light"
+                        size="sm"
+                        className="text-sm font-medium text-white"
+                      >
+                        Debug
+                      </Button>
+                      <span className="text-sm text-sage-dark">✓</span>
+                    </div>
                   )}
                 </div>
               </div>
+            )}
+            
+            {/* Health Data - Only show in React Native */}
+            {bridge.isInReactNative() && (
+              <TouchLink
+                href="/settings/health"
+                scale={0.97}
+                shadow="md"
+                cardGlow
+                hoverScale={1.01}
+                haptic="medium"
+                variant="card"
+                className="w-full rounded-2xl bg-white/80 backdrop-blur-sm border border-rose/20 p-[min(5vw,1.25rem)] hover:shadow-lg transition-all block relative overflow-hidden shadow-sm group"
+              >
+                {/* Gradient overlay on hover */}
+                <div className="absolute inset-0 bg-gradient-to-br from-rose/0 via-rose/5 to-burgundy/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                
+                {/* Decorative elements */}
+                <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-gradient-to-br from-rose/20 to-burgundy/15 blur-3xl opacity-60" />
+                <div className="absolute -bottom-16 -left-16 w-32 h-32 rounded-full bg-gradient-to-tr from-burgundy/15 to-rose/10 blur-2xl opacity-50" />
+                
+                <div className="flex items-center justify-between relative">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose to-burgundy flex items-center justify-center shadow-lg relative group-hover:shadow-xl transition-all">
+                      <div className="absolute inset-0 bg-gradient-to-t from-burgundy/20 to-transparent rounded-full" />
+                      <Heart className="w-5 h-5 text-white relative z-10" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-medium text-primary-text text-sm">Health Data</h3>
+                      <p className="text-xs text-primary-text/60">
+                        {typeof window !== 'undefined' && localStorage.getItem('healthDataConnected') === 'true'
+                          ? navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad') 
+                            ? 'Apple Health connected' 
+                            : 'Google Fit connected'
+                          : 'Connect health apps'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
+                </div>
+              </TouchLink>
             )}
             
             {/* Privacy & Security - Hidden for now */}
@@ -429,6 +515,12 @@ export default function SettingsPage() {
             }
           }}
         />
+
+      {/* Notification Debug Modal */}
+      <NotificationDebugModal
+        isOpen={showNotificationDebugModal}
+        onClose={() => setShowNotificationDebugModal(false)}
+      />
       </AppLayout>
     </>
   );

@@ -8,6 +8,7 @@
 import { CHAT_ASSISTANT_CONFIG } from './chatAssistant';
 import { ROUTINE_ASSISTANT_CONFIG } from './routineAssistant';
 import { PANTRY_ASSISTANT_CONFIG } from './pantryAssistant';
+import { RECOMMENDATION_ASSISTANT_CONFIG } from './recommendationAssistant';
 import { getFunctionsForRole } from './sharedFunctions';
 import { isFeatureEnabled } from '@/src/config/features';
 import { buildAssistantInstructions } from './instructionBuilder';
@@ -16,7 +17,7 @@ import { checkForEmergency } from './commonInstructions';
 /**
  * Assistant types
  */
-export type AssistantRole = 'chat' | 'routine' | 'pantry';
+export type AssistantRole = 'chat' | 'routine' | 'pantry' | 'recommendation';
 
 /**
  * Assistant configuration with IDs
@@ -141,6 +142,8 @@ export const getAssistantConfig = (role: AssistantRole) => {
       return ROUTINE_ASSISTANT_CONFIG;
     case 'pantry':
       return PANTRY_ASSISTANT_CONFIG;
+    case 'recommendation':
+      return RECOMMENDATION_ASSISTANT_CONFIG;
     default:
       return CHAT_ASSISTANT_CONFIG;
   }
@@ -205,7 +208,8 @@ export const getHandoffMessage = (fromRole: AssistantRole, toRole: AssistantRole
 export const ASSISTANT_ENV_KEYS = {
   chat: 'THRIVE_CHAT_ASSISTANT_ID',
   routine: 'THRIVE_ROUTINE_ASSISTANT_ID',
-  pantry: 'THRIVE_PANTRY_ASSISTANT_ID'
+  pantry: 'THRIVE_PANTRY_ASSISTANT_ID',
+  recommendation: 'THRIVE_RECOMMENDATION_ASSISTANT_ID'
 } as const;
 
 /**

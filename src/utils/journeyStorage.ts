@@ -7,6 +7,11 @@ const STORAGE_KEY = 'wellness-journeys';
  */
 export const saveJourneyToStorage = (journey: WellnessJourney): void => {
   try {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      throw new Error('localStorage is not available');
+    }
+    
     const existingJourneys = getJourneysFromStorage();
     const updatedJourneys = [...existingJourneys, journey];
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedJourneys));
@@ -21,6 +26,11 @@ export const saveJourneyToStorage = (journey: WellnessJourney): void => {
  */
 export const getJourneysFromStorage = (): WellnessJourney[] => {
   try {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      return [];
+    }
+    
     const journeysJson = localStorage.getItem(STORAGE_KEY);
     if (!journeysJson) return [];
     
@@ -62,6 +72,11 @@ export const getJourneyByType = (journeyType: string): WellnessJourney | null =>
  */
 export const addJourneyEntry = (journeyId: string, entry: JourneyEntry): boolean => {
   try {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      return false;
+    }
+    
     const journeys = getJourneysFromStorage();
     const journeyIndex = journeys.findIndex(j => j.id === journeyId);
     
@@ -86,6 +101,11 @@ export const addJourneyEntry = (journeyId: string, entry: JourneyEntry): boolean
  */
 export const updateJourneyInStorage = (updatedJourney: WellnessJourney): boolean => {
   try {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      return false;
+    }
+    
     const journeys = getJourneysFromStorage();
     const index = journeys.findIndex(j => j.id === updatedJourney.id);
     

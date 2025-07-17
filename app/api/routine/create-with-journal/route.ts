@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DynamicJournalTemplate, CustomJournalField, JournalPrompt } from '@/src/types/thriving';
+import { DynamicJournalTemplate, JournalPrompt } from '@/src/types/thriving';
+import { SmartJournalField } from '@/src/types/journal-inputs';
 import { JournalInsightsEngine } from '@/src/lib/journalInsights';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { routine, journalTemplate } = body;
+
+    // For now, we'll use the provided journal template or create a default one
+    // TODO: In the future, integrate with routine assistant for smart journal template generation
 
     // Validate the journal template structure
     if (journalTemplate) {
@@ -100,10 +104,14 @@ function validateJournalTemplate(template: unknown): DynamicJournalTemplate | nu
 }
 
 /**
- * Validate custom field structure
+ * Validate custom field structure with smart input types
  */
 function validateCustomField(field: unknown): boolean {
   const validFieldTypes = [
+    // Smart input types
+    'slider', 'emoji_picker', 'tag_selector', 'time_picker', 
+    'magnitude_input', 'multiple_choice', 'text_input', 'number_input',
+    // Legacy types for backward compatibility
     'mood_scale', 'pain_scale', 'energy_level', 'sleep_quality', 
     'symptom_tracker', 'supplement_effects', 'custom_metric', 
     'time_input', 'text_area', 'checkbox_list', 'rating_scale'
@@ -119,29 +127,112 @@ function validateCustomField(field: unknown): boolean {
 }
 
 /**
- * Sanitize custom field data
+ * Sanitize custom field data with smart input configurations
  */
-function sanitizeCustomField(field: unknown): CustomJournalField {
+function sanitizeCustomField(field: unknown): SmartJournalField {
   const fieldObj = field as Record<string, unknown>;
-  return {
-    id: (fieldObj.id as string).replace(/[^a-zA-Z0-9_]/g, '_'), // Sanitize ID
-    type: fieldObj.type as CustomJournalField['type'],
-    label: (fieldObj.label as string).substring(0, 100), // Limit label length
+  const sanitized: SmartJournalField = {
+    id: (fieldObj.id as string).replace(/[^a-zA-Z0-9_]/g, '_'),
+    type: fieldObj.type as SmartJournalField['type'],
+    label: (fieldObj.label as string).substring(0, 100),
     description: fieldObj.description ? (fieldObj.description as string).substring(0, 300) : undefined,
     required: Boolean(fieldObj.required),
-    options: Array.isArray(fieldObj.options) ? (fieldObj.options as string[]).slice(0, 20) : undefined, // Limit options
-    scale: fieldObj.scale && typeof fieldObj.scale === 'object' ? {
-      min: Number((fieldObj.scale as Record<string, unknown>).min) || 1,
-      max: Number((fieldObj.scale as Record<string, unknown>).max) || 10,
-      labels: typeof (fieldObj.scale as Record<string, unknown>).labels === 'object' ? (fieldObj.scale as Record<string, unknown>).labels as Record<number, string> : {}
-    } : undefined,
-    placeholder: fieldObj.placeholder ? (fieldObj.placeholder as string).substring(0, 200) : undefined,
-    validation: fieldObj.validation && typeof fieldObj.validation === 'object' ? {
-      min: (fieldObj.validation as Record<string, unknown>).min !== undefined ? Number((fieldObj.validation as Record<string, unknown>).min) : undefined,
-      max: (fieldObj.validation as Record<string, unknown>).max !== undefined ? Number((fieldObj.validation as Record<string, unknown>).max) : undefined,
-      pattern: typeof (fieldObj.validation as Record<string, unknown>).pattern === 'string' ? (fieldObj.validation as Record<string, unknown>).pattern as string : undefined
-    } : undefined
+    showPreviousValue: Boolean(fieldObj.showPreviousValue),
+    linkedTo: fieldObj.linkedTo ? String(fieldObj.linkedTo) : undefined
   };
+
+  // Handle smart input type configs
+  if (fieldObj.sliderConfig && typeof fieldObj.sliderConfig === 'object') {
+    const config = fieldObj.sliderConfig as Record<string, unknown>;
+    sanitized.sliderConfig = {
+      min: Number(config.min) || 0,
+      max: Number(config.max) || 10,
+      step: Number(config.step) || 1,
+      labels: typeof config.labels === 'object' ? config.labels as Record<number, string> : undefined,
+      showValue: Boolean(config.showValue),
+      gradient: Boolean(config.gradient)
+    };
+  }
+
+  if (fieldObj.emojiConfig && typeof fieldObj.emojiConfig === 'object') {
+    const config = fieldObj.emojiConfig as Record<string, unknown>;
+    sanitized.emojiConfig = {
+      emojiSet: Array.isArray(config.emojiSet) ? (config.emojiSet as string[]).slice(0, 10) : [],
+      columns: Number(config.columns) || 5,
+      allowCustom: Boolean(config.allowCustom)
+    };
+  }
+
+  if (fieldObj.tagConfig && typeof fieldObj.tagConfig === 'object') {
+    const config = fieldObj.tagConfig as Record<string, unknown>;
+    sanitized.tagConfig = {
+      options: Array.isArray(config.options) ? (config.options as string[]).slice(0, 20) : [],
+      maxSelections: Number(config.maxSelections) || undefined,
+      allowCustom: Boolean(config.allowCustom),
+      placeholder: config.placeholder ? String(config.placeholder).substring(0, 100) : undefined
+    };
+  }
+
+  if (fieldObj.timeConfig && typeof fieldObj.timeConfig === 'object') {
+    const config = fieldObj.timeConfig as Record<string, unknown>;
+    sanitized.timeConfig = {
+      format: config.format === '24h' ? '24h' : '12h',
+      defaultValue: config.defaultValue ? String(config.defaultValue) : undefined,
+      minTime: config.minTime ? String(config.minTime) : undefined,
+      maxTime: config.maxTime ? String(config.maxTime) : undefined
+    };
+  }
+
+  if (fieldObj.magnitudeConfig && typeof fieldObj.magnitudeConfig === 'object') {
+    const config = fieldObj.magnitudeConfig as Record<string, unknown>;
+    sanitized.magnitudeConfig = {
+      min: Number(config.min) || 0,
+      max: Number(config.max) || 100,
+      step: Number(config.step) || 1,
+      unit: String(config.unit) || '',
+      showTrend: Boolean(config.showTrend)
+    };
+  }
+
+  if (fieldObj.multipleChoiceConfig && typeof fieldObj.multipleChoiceConfig === 'object') {
+    const config = fieldObj.multipleChoiceConfig as Record<string, unknown>;
+    sanitized.multipleChoiceConfig = {
+      options: Array.isArray(config.options) ? (config.options as string[]).slice(0, 10) : [],
+      layout: ['vertical', 'horizontal', 'grid'].includes(config.layout as string) ? 
+        config.layout as 'vertical' | 'horizontal' | 'grid' : 'vertical',
+      showIcons: Boolean(config.showIcons)
+    };
+  }
+
+  // Legacy support for backward compatibility
+  if (fieldObj.options && Array.isArray(fieldObj.options)) {
+    sanitized.tagConfig = {
+      options: (fieldObj.options as string[]).slice(0, 20),
+      allowCustom: false
+    };
+  }
+
+  if (fieldObj.scale && typeof fieldObj.scale === 'object') {
+    const scale = fieldObj.scale as Record<string, unknown>;
+    sanitized.sliderConfig = {
+      min: Number(scale.min) || 1,
+      max: Number(scale.max) || 10,
+      labels: typeof scale.labels === 'object' ? scale.labels as Record<number, string> : undefined
+    };
+  }
+
+  if (fieldObj.validation && typeof fieldObj.validation === 'object') {
+    sanitized.validation = {
+      min: (fieldObj.validation as Record<string, unknown>).min !== undefined ? 
+        Number((fieldObj.validation as Record<string, unknown>).min) : undefined,
+      max: (fieldObj.validation as Record<string, unknown>).max !== undefined ? 
+        Number((fieldObj.validation as Record<string, unknown>).max) : undefined,
+      pattern: typeof (fieldObj.validation as Record<string, unknown>).pattern === 'string' ? 
+        (fieldObj.validation as Record<string, unknown>).pattern as string : undefined
+    };
+  }
+
+  return sanitized;
 }
 
 /**

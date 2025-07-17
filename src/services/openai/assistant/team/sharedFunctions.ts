@@ -183,7 +183,7 @@ export const ROUTINE_MANAGEMENT_FUNCTIONS: FunctionDefinition[] = [
  * @param {string} role - The assistant role
  * @returns {FunctionDefinition[]} Array of function definitions
  */
-export const getFunctionsForRole = (role: 'chat' | 'routine' | 'pantry'): FunctionDefinition[] => {
+export const getFunctionsForRole = (role: 'chat' | 'routine' | 'pantry' | 'recommendation'): FunctionDefinition[] => {
   const baseFunctions = [...SHARED_FUNCTIONS];
   
   switch (role) {
@@ -198,6 +198,10 @@ export const getFunctionsForRole = (role: 'chat' | 'routine' | 'pantry'): Functi
     case 'pantry':
       // Pantry assistant gets shared + supplement recommendation function
       return [...baseFunctions, SUPPLEMENT_RECOMMENDATION_FUNCTION];
+      
+    case 'recommendation':
+      // Recommendation assistant gets all functions for comprehensive context
+      return [...baseFunctions, SUPPLEMENT_RECOMMENDATION_FUNCTION, ...ROUTINE_MANAGEMENT_FUNCTIONS];
       
     default:
       return baseFunctions;

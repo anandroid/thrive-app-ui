@@ -7,6 +7,7 @@ import { TouchFeedbackProvider } from "@/src/providers/TouchFeedbackProvider";
 import { NotificationProvider } from "@/src/providers/NotificationProvider";
 import { JournalMigrationProvider } from "@/src/providers/JournalMigrationProvider";
 import { NotificationSyncProvider } from "@/src/providers/NotificationSyncProvider";
+import { PermissionSyncProvider } from "@/src/providers/PermissionSyncProvider";
 import "@/src/utils/clearCorruptedData";
 import { Toaster } from 'react-hot-toast';
 import { SessionInitializer } from '@/components/features/SessionInitializer';
@@ -63,12 +64,14 @@ export default function RootLayout({
           <TouchFeedbackProvider>
             <NotificationProvider>
               <JournalMigrationProvider>
-                <NotificationSyncProvider>
-                  <SessionInitializer />
-                  <OfflineIndicator />
-                  <Toaster position="top-center" />
-                  {children}
-                </NotificationSyncProvider>
+                <PermissionSyncProvider>
+                  <NotificationSyncProvider>
+                    <SessionInitializer />
+                    <OfflineIndicator />
+                    <Toaster position="top-center" />
+                    {children}
+                  </NotificationSyncProvider>
+                </PermissionSyncProvider>
               </JournalMigrationProvider>
             </NotificationProvider>
           </TouchFeedbackProvider>

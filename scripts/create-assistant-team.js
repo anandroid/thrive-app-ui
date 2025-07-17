@@ -4,35 +4,90 @@
  * Dynamic script to create/update the Thrive AI assistant team
  * This version dynamically imports configurations from TypeScript files
  * to avoid duplication and ensure consistency
+ * 
+ * Usage:
+ *   npm run create-assistants           # Creates/updates dev assistants (default)
+ *   npm run create-assistants -- --prod # Creates/updates production assistants
  */
 
 require('dotenv').config({ path: '.env.local' });
 const OpenAI = require('openai');
 const fs = require('fs').promises;
 const path = require('path');
+const { exec } = require('child_process');
+const util = require('util');
+const execPromise = util.promisify(exec);
 
-const openai = new OpenAI({
-  apiKey: process.env.THRIVE_OPENAI_API_KEY,
-});
+// Parse command line arguments
+const args = process.argv.slice(2);
+const isProduction = args.includes('--prod');
+const environment = isProduction ? 'production' : 'dev';
+
+console.log(`\n🎯 Environment: ${environment.toUpperCase()}`);
+console.log(`🔑 Using ${isProduction ? 'production' : 'development'} API keys and project\n`);
+
+// Helper to get production API key from Google Cloud
+async function getProductionApiKey() {
+  if (!isProduction) {
+    return process.env.THRIVE_OPENAI_API_KEY;
+  }
+  
+  try {
+    console.log('🔑 Fetching production API key from Google Cloud...');
+    const command = `gcloud secrets versions access latest --secret=THRIVE_OPENAI_API_KEY --project=thrive-465618`;
+    const { stdout } = await execPromise(command);
+    const apiKey = stdout.trim();
+    console.log(`🔑 Production API key fetched successfully`);
+    return apiKey;
+  } catch (error) {
+    console.error(`❌ Error fetching production API key from Google Cloud: ${error.message}`);
+    console.log(`🔄 Falling back to local environment variable...`);
+    return process.env.THRIVE_OPENAI_API_KEY;
+  }
+}
+
+// Environment-specific configuration
+const envConfig = {
+  dev: {
+    apiKey: process.env.THRIVE_OPENAI_API_KEY, // Dev environment uses the dev API key
+    project: 'thrive-dev-465922',
+    assistantSuffix: ' (Dev)',
+    envPrefix: 'THRIVE_'
+  },
+  production: {
+    apiKey: null, // Will be set dynamically from Google Cloud
+    project: 'thrive-465618', 
+    assistantSuffix: '',
+    envPrefix: 'THRIVE_'
+  }
+};
+
+const config = envConfig[environment];
+
+// OpenAI client will be initialized in main() after getting the API key
+let openai;
 
 // Helper to extract instructions from TypeScript files
 async function extractInstructionsFromTS(filePath) {
   try {
     const content = await fs.readFile(filePath, 'utf-8');
     
-    // Extract the instructions constant (handles template literals)
+    // For files that use template literal interpolation with COMMON_TEAM_INSTRUCTIONS
+    const templateMatch = content.match(/export\s+const\s+\w*_INSTRUCTIONS\s*=\s*`\$\{COMMON_TEAM_INSTRUCTIONS\}\s*([\s\S]*?)`;/);
+    if (templateMatch) {
+      console.log(`   📄 Found template literal instructions in ${path.basename(filePath)}`);
+      // We need to resolve the COMMON_TEAM_INSTRUCTIONS at runtime
+      return templateMatch[1]; // Return only the specific part, we'll add common instructions in main function
+    }
+    
+    // Extract standalone instructions constant (handles template literals)
     const instructionsMatch = content.match(/export\s+const\s+\w*_INSTRUCTIONS\s*=\s*`([\s\S]*?)`;/);
     if (instructionsMatch) {
+      console.log(`   📄 Found standalone instructions in ${path.basename(filePath)}`);
       return instructionsMatch[1];
     }
     
-    // If using COMMON_TEAM_INSTRUCTIONS, extract the additional part
-    const commonMatch = content.match(/\$\{COMMON_TEAM_INSTRUCTIONS\}\s*\n([\s\S]*?)`;/);
-    if (commonMatch) {
-      return commonMatch[1];
-    }
-    
-    throw new Error('Could not extract instructions from file');
+    throw new Error(`Could not extract instructions from ${path.basename(filePath)}`);
   } catch (error) {
     console.error(`Error reading ${filePath}:`, error.message);
     throw error;
@@ -181,13 +236,61 @@ const PANTRY_FUNCTIONS = [
 ];
 
 /**
+ * Store assistant ID in Google Cloud Secret Manager
+ */
+async function storeSecretInGCloud(secretName, assistantId) {
+  try {
+    console.log(`   📝 Storing ${secretName} in Google Cloud Secret Manager...`);
+    
+    // Create or update secret version in the dev project
+    const command = `echo "${assistantId}" | gcloud secrets versions add ${secretName} --project=${config.project} --data-file=-`;
+    await execPromise(command);
+    
+    console.log(`   ✅ Stored ${secretName} in ${config.project}`);
+  } catch (error) {
+    console.error(`   ⚠️  Warning: Could not store secret in Google Cloud: ${error.message}`);
+    console.log(`   📝 Please manually add: ${secretName}=${assistantId} to your ${environment} environment`);
+  }
+}
+
+/**
+ * Get assistant ID from Google Cloud Secret Manager
+ */
+async function getAssistantIdFromCloud(secretName) {
+  try {
+    const command = `gcloud secrets versions access latest --secret=${secretName} --project=${config.project}`;
+    const { stdout } = await execPromise(command);
+    const assistantId = stdout.trim();
+    if (assistantId && assistantId !== 'null' && assistantId !== '') {
+      return assistantId;
+    }
+  } catch (error) {
+    console.log(`   ⚠️  Could not fetch ${secretName} from Google Cloud: ${error.message}`);
+  }
+  
+  // Try local env as fallback
+  const localId = process.env[secretName];
+  if (localId && localId !== 'null' && localId !== '') {
+    return localId;
+  }
+  
+  console.log(`   ℹ️  No existing assistant ID found for ${secretName}, will create new assistant`);
+  return null;
+}
+
+/**
  * Create or update an assistant
  */
-async function createOrUpdateAssistant(role, config) {
-  const envKey = `THRIVE_${role.toUpperCase()}_ASSISTANT_ID`;
-  const existingId = process.env[envKey];
+async function createOrUpdateAssistant(role, assistantConfig) {
+  const envKey = `${config.envPrefix}${role.toUpperCase()}_ASSISTANT_ID`;
   
-  console.log(`\n🤖 Processing ${role} assistant...`);
+  // Get existing ID from appropriate source (cloud for dev, env for prod)
+  const existingId = await getAssistantIdFromCloud(envKey);
+  
+  console.log(`\n🤖 Processing ${role} assistant for ${environment}...`);
+  if (existingId) {
+    console.log(`   📋 Found existing assistant: ${existingId}`);
+  }
   
   try {
     // Define response schemas for each role
@@ -313,40 +416,130 @@ async function createOrUpdateAssistant(role, config) {
           },
           strict: true
         }
+      },
+      recommendation: {
+        type: 'json_object'
       }
     };
 
     // Check if functions should be enabled
     const enableFunctions = process.env.ENABLE_ASSISTANT_FUNCTIONS === 'true';
     
-    const assistantConfig = {
-      name: config.name,
-      description: config.description,
-      model: config.model,
-      instructions: config.instructions,
-      tools: enableFunctions ? config.functions.map(func => ({ type: 'function', function: func })) : [],
-      response_format: { type: 'json_object' },
-      temperature: config.temperature,
-      metadata: {
-        role,
-        version: '3.0',
-        team: 'thrive-wellness',
-        source: 'typescript-files'
+    // Configure vector store IDs for file search
+    const vectorStoreConfig = {
+      dev: {
+        chat: 'vs_68759409b70c8191a6163bfb9daa9fc4',
+        routine: 'vs_68759409b70c8191a6163bfb9daa9fc4'
+      },
+      production: {
+        chat: 'vs_68748581bae881918043903a14276e6e',
+        routine: 'vs_68748581bae881918043903a14276e6e'
       }
     };
+    
+    // Build tools array
+    const tools = [];
+    
+    // Add function tools if enabled
+    if (enableFunctions) {
+      tools.push(...assistantConfig.functions.map(func => ({ type: 'function', function: func })));
+    }
+    
+    // Add file search for chat and routine assistants
+    if (role === 'chat' || role === 'routine') {
+      const vectorStoreId = vectorStoreConfig[environment][role];
+      if (vectorStoreId) {
+        tools.push({
+          type: 'file_search'
+        });
+        console.log(`   📚 Added file search capability for ${role} assistant`);
+      }
+    }
+    
+    const finalAssistantConfig = {
+      name: assistantConfig.name + config.assistantSuffix,
+      description: assistantConfig.description + (isProduction ? '' : ' - Development version'),
+      model: assistantConfig.model,
+      instructions: assistantConfig.instructions,
+      tools: tools,
+      response_format: { type: 'json_object' },
+      temperature: assistantConfig.temperature,
+      metadata: {
+        role,
+        environment,
+        version: '3.0',
+        team: 'thrive-wellness',
+        source: 'typescript-files',
+        project: config.project
+      }
+    };
+    
+    // Add tool resources for file search if vector store is configured
+    if ((role === 'chat' || role === 'routine') && vectorStoreConfig[environment][role]) {
+      finalAssistantConfig.tool_resources = {
+        file_search: {
+          vector_store_ids: [vectorStoreConfig[environment][role]]
+        }
+      };
+      console.log(`   📚 Will attempt to add vector store: ${vectorStoreConfig[environment][role]}`);
+    }
     
     if (existingId) {
       // Update existing assistant
       console.log(`   Updating existing assistant: ${existingId}`);
-      const assistant = await openai.beta.assistants.update(existingId, assistantConfig);
-      console.log(`   ✅ Updated: ${assistant.name}`);
-      return { role, id: assistant.id, name: assistant.name };
+      try {
+        const assistant = await openai.beta.assistants.update(existingId, finalAssistantConfig);
+        console.log(`   ✅ Updated: ${assistant.name}`);
+        if (finalAssistantConfig.tool_resources?.file_search) {
+          console.log(`   📚 File search enabled with vector store`);
+        }
+        return { role, id: assistant.id, name: assistant.name };
+      } catch (error) {
+        if (error.message.includes('vector store') || error.message.includes('No vector store found')) {
+          console.log(`   ⚠️  Vector store not found, updating without file search...`);
+          // Remove tool_resources and file_search tool, then retry
+          delete finalAssistantConfig.tool_resources;
+          finalAssistantConfig.tools = finalAssistantConfig.tools.filter(tool => tool.type !== 'file_search');
+          const assistant = await openai.beta.assistants.update(existingId, finalAssistantConfig);
+          console.log(`   ✅ Updated: ${assistant.name} (without file search)`);
+          return { role, id: assistant.id, name: assistant.name };
+        }
+        throw error;
+      }
     } else {
       // Create new assistant
       console.log(`   Creating new ${role} assistant...`);
-      const assistant = await openai.beta.assistants.create(assistantConfig);
-      console.log(`   ✅ Created: ${assistant.name} (${assistant.id})`);
-      return { role, id: assistant.id, name: assistant.name, isNew: true };
+      try {
+        const assistant = await openai.beta.assistants.create(finalAssistantConfig);
+        console.log(`   ✅ Created: ${assistant.name} (${assistant.id})`);
+        if (finalAssistantConfig.tool_resources?.file_search) {
+          console.log(`   📚 File search enabled with vector store`);
+        }
+        
+        // Store assistant ID in Google Cloud Secret Manager for the appropriate environment
+        if (!isProduction) {
+          await storeSecretInGCloud(envKey, assistant.id);
+        }
+        
+        return { role, id: assistant.id, name: assistant.name, isNew: true };
+      } catch (error) {
+        if (error.message.includes('vector store') || error.message.includes('No vector store found')) {
+          console.log(`   ⚠️  Vector store not found, creating without file search...`);
+          // Remove tool_resources and file_search tool, then retry
+          delete finalAssistantConfig.tool_resources;
+          finalAssistantConfig.tools = finalAssistantConfig.tools.filter(tool => tool.type !== 'file_search');
+          const assistant = await openai.beta.assistants.create(finalAssistantConfig);
+          console.log(`   ✅ Created: ${assistant.name} (${assistant.id}) (without file search)`);
+          
+          // Store assistant ID in Google Cloud Secret Manager for the appropriate environment
+          if (!isProduction) {
+            await storeSecretInGCloud(envKey, assistant.id);
+          }
+          
+          return { role, id: assistant.id, name: assistant.name, isNew: true };
+        }
+        throw error;
+      }
     }
   } catch (error) {
     console.error(`   ❌ Error with ${role} assistant:`, error.message);
@@ -402,14 +595,35 @@ async function updateEnvFile(assistants) {
  * Main function to create/update all assistants
  */
 async function main() {
-  console.log('🚀 Thrive AI Assistant Team Setup (Dynamic Version)\n');
+  console.log(`🚀 Thrive AI Assistant Team Setup - ${environment.toUpperCase()}\n`);
+  
+  // Initialize API key and OpenAI client
+  const apiKey = await getProductionApiKey();
+  if (!apiKey) {
+    console.error(`❌ Error: Could not get API key for ${environment}`);
+    process.exit(1);
+  }
+  
+  // Initialize OpenAI client with the correct API key
+  openai = new OpenAI({
+    apiKey: apiKey,
+  });
   
   const enableFunctions = process.env.ENABLE_ASSISTANT_FUNCTIONS === 'true';
-  console.log(`📋 Assistant Functions: ${enableFunctions ? '✅ Enabled' : '❌ Disabled'}\n`);
+  console.log(`📋 Assistant Functions: ${enableFunctions ? '✅ Enabled' : '❌ Disabled'}`);
+  console.log(`🗄️  Project: ${config.project}`);
+  console.log(`🏷️  Assistant Suffix: "${config.assistantSuffix}"\n`);
   
-  if (!process.env.THRIVE_OPENAI_API_KEY) {
-    console.error('❌ Error: THRIVE_OPENAI_API_KEY not found in .env.local');
-    process.exit(1);
+  if (isProduction) {
+    console.log('⚠️  PRODUCTION MODE: Please confirm you want to update production assistants');
+    console.log('   Press Ctrl+C to cancel, or Enter to continue...');
+    
+    // Wait for user confirmation in production
+    await new Promise((resolve) => {
+      process.stdin.once('data', () => {
+        resolve();
+      });
+    });
   }
   
   try {
@@ -421,7 +635,8 @@ async function main() {
     const assistantPaths = {
       chat: path.join(__dirname, '../src/services/openai/assistant/team/chatAssistant.ts'),
       routine: path.join(__dirname, '../src/services/openai/assistant/team/routineAssistant.ts'),
-      pantry: path.join(__dirname, '../src/services/openai/assistant/team/pantryAssistant.ts')
+      pantry: path.join(__dirname, '../src/services/openai/assistant/team/pantryAssistant.ts'),
+      recommendation: path.join(__dirname, '../src/services/openai/assistant/team/recommendationAssistant.ts')
     };
     
     const results = [];
@@ -470,9 +685,18 @@ async function main() {
         console.log(`${r.role.padEnd(10)} - ${r.name} (${r.id})`);
       });
       
-      console.log('\n✨ Thrive AI Assistant Team setup complete!');
+      console.log(`\n✨ Thrive AI Assistant Team setup complete for ${environment.toUpperCase()}!`);
       console.log('\n💡 Instructions are now dynamically loaded from TypeScript files.');
       console.log('   Any changes to the .ts files will be reflected when you run this script.');
+      
+      if (!isProduction) {
+        console.log(`\n🔐 Assistant IDs have been stored in Google Cloud Secret Manager (${config.project})`);
+        console.log('   Your dev environment is ready to use these assistants.');
+      }
+      
+      console.log('\n📝 Usage:');
+      console.log('   Dev:        npm run create-assistants');
+      console.log('   Production: npm run create-assistants -- --prod');
     }
     
   } catch (error) {

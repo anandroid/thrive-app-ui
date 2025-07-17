@@ -9,6 +9,7 @@ declare global {
       postMessage: (message: unknown) => void;
       requestCameraPermission: () => void;
       requestNotificationPermission: () => void;
+      checkNotificationPermission: () => Promise<boolean>;  // Now implemented!
       notifyThrivingCreated: () => void;
       openExternalUrl: (url: string) => void;
       scheduleStepReminders: (stepNotifications: Array<{
@@ -23,9 +24,17 @@ declare global {
         enabledWeekends: boolean;
       }>) => void;
       cancelStepReminders: (routineId: string) => void;
-      checkHealthPermission?: () => Promise<boolean>;
-      requestHealthPermission?: () => Promise<boolean>;
-      getHealthData?: (params: {
+      getScheduledNotifications?: () => Promise<Array<{
+        id: string;
+        title: string;
+        body: string;
+        data?: Record<string, unknown>;
+        scheduledTime: string;
+        isRepeating: boolean;
+      }>>;
+      checkHealthPermission: () => Promise<boolean>;  // Now implemented!
+      requestHealthPermission: () => Promise<boolean>;  // Now implemented!
+      getHealthData: (params: {  // Now implemented!
         metrics: string[];
         timeRange: 'day' | 'week' | 'month';
       }) => Promise<{
@@ -142,14 +151,14 @@ class ReactNativeBridgeManager {
     
     // Debug logging
     if (typeof window !== 'undefined') {
-      console.log('React Native Bridge Detection:', {
+      console.log('React Native Bridge Detection:', JSON.stringify({
         timestamp: new Date().toISOString(),
         hasWindow: true,
         hasReactNativeWebView: !!window.ReactNativeWebView,
         hasReactNativeBridge: !!window.ReactNativeBridge,
         hasWebViewOnly,
         forceReactNative,
-        userAgent,
+        userAgent: userAgent.substring(0, 100), // Truncate for readability
         hasReactNativeUserAgent,
         hasCustomProperty,
         isReactNative: this.isReactNative,
@@ -158,7 +167,7 @@ class ReactNativeBridgeManager {
           k.toLowerCase().includes('native') ||
           k.toLowerCase().includes('bridge')
         )
-      });
+      }, null, 2));
     }
   }
 
@@ -182,14 +191,22 @@ class ReactNativeBridgeManager {
           const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
           if (data && typeof data === 'object' && 'type' in data) {
             console.log('[Bridge] Message event received:', data);
+            // Special logging for health permission messages
+            if (data.type === 'health_permission_result' || data.type === 'health_permission_status') {
+              console.log('[Bridge] Got ' + data.type + ':', JSON.stringify(data.payload));
+            }
             const handler = this.messageHandlers.get(data.type);
             if (handler) {
               console.log('[Bridge] Found handler for message type:', data.type);
               handler(data.payload);
+            } else {
+              console.log('[Bridge] No handler found for message type:', data.type);
             }
           }
-        } catch {
-          // Not a JSON message, ignore
+        } catch (e) {
+          // Log the raw event data for debugging
+          console.log('[Bridge] Raw message event data:', event.data);
+          console.log('[Bridge] Parse error:', e);
         }
       });
     }
@@ -270,6 +287,13 @@ class ReactNativeBridgeManager {
         console.log('[Bridge] Received notification_permission_result:', payload);
         const result = payload as { granted: boolean };
         this.messageHandlers.delete('notification_permission_result');
+        
+        // Update localStorage immediately when we get the result
+        if (result.granted) {
+          console.log('[Bridge] Permission granted, updating localStorage');
+          localStorage.setItem('notificationPermissionGranted', 'true');
+        }
+        
         resolve(result.granted);
       };
       
@@ -278,12 +302,53 @@ class ReactNativeBridgeManager {
       console.log('[Bridge] Calling ReactNativeBridge.requestNotificationPermission()');
       window.ReactNativeBridge?.requestNotificationPermission();
       
-      // Timeout after 10 seconds
+      // Timeout after 15 seconds (increased from 10s to handle permission dialog delays)
       setTimeout(() => {
-        console.log('[Bridge] Notification permission request timed out after 10s');
+        console.log('[Bridge] Notification permission request timed out after 15s');
         this.messageHandlers.delete('notification_permission_result');
+        // On timeout, assume permission was not granted
         resolve(false);
-      }, 10000);
+      }, 15000);
+    });
+  }
+
+  public async checkNotificationPermission(): Promise<boolean> {
+    console.log('[Bridge] checkNotificationPermission called');
+    
+    if (!this.isReactNative || !window.ReactNativeBridge) {
+      console.log('[Bridge] Not in React Native, returning false');
+      return false;
+    }
+
+    // Check if the method exists before calling it
+    if (typeof window.ReactNativeBridge.checkNotificationPermission !== 'function') {
+      console.log('[Bridge] checkNotificationPermission method not implemented in native app');
+      throw new Error('checkNotificationPermission method not implemented in native app');
+    }
+
+    return new Promise((resolve) => {
+      console.log('[Bridge] Setting up notification permission check handler');
+      
+      // Set up one-time handler for permission status
+      const handler = (payload: unknown) => {
+        console.log('[Bridge] Received notification_permission_status:', payload);
+        const result = payload as { granted: boolean };
+        this.messageHandlers.delete('notification_permission_status');
+        resolve(result.granted);
+      };
+      
+      this.onMessage('notification_permission_status', handler);
+      
+      // Call the native app's checkNotificationPermission method  
+      console.log('[Bridge] Calling ReactNativeBridge.checkNotificationPermission()');
+      window.ReactNativeBridge?.checkNotificationPermission!();
+      
+      // Timeout after 2 seconds for status check
+      setTimeout(() => {
+        console.log('[Bridge] Notification permission check timed out after 2s');
+        this.messageHandlers.delete('notification_permission_status');
+        resolve(false);
+      }, 2000);
     });
   }
 
@@ -381,6 +446,150 @@ class ReactNativeBridgeManager {
     if (this.isReactNative && window.ReactNativeBridge) {
       window.ReactNativeBridge.cancelStepReminders(routineId);
     }
+  }
+
+  public async getScheduledNotifications(): Promise<Array<{
+    id: string;
+    title: string;
+    body: string;
+    data?: Record<string, unknown>;
+    scheduledTime: string;
+    isRepeating: boolean;
+  }>> {
+    console.log('[Bridge] getScheduledNotifications called');
+    
+    if (!this.isReactNative || !window.ReactNativeBridge) {
+      console.log('[Bridge] Not in React Native, returning empty notifications list');
+      return [];
+    }
+
+    // Check if the method exists before calling it
+    if (typeof window.ReactNativeBridge.getScheduledNotifications !== 'function') {
+      console.log('[Bridge] getScheduledNotifications method not implemented in native app');
+      return [];
+    }
+
+    return new Promise((resolve) => {
+      console.log('[Bridge] Setting up scheduled notifications handler');
+      
+      // Set up one-time handler for notification list
+      const handler = (payload: unknown) => {
+        console.log('[Bridge] Received scheduled_notifications_list:', payload);
+        const result = payload as { notifications: Array<{
+          id: string;
+          title: string;
+          body: string;
+          data?: Record<string, unknown>;
+          scheduledTime: string;
+          isRepeating: boolean;
+        }> };
+        this.messageHandlers.delete('scheduled_notifications_list');
+        resolve(result.notifications || []);
+      };
+      
+      this.onMessage('scheduled_notifications_list', handler);
+      
+      // Call the native app's getScheduledNotifications method  
+      console.log('[Bridge] Calling ReactNativeBridge.getScheduledNotifications()');
+      window.ReactNativeBridge?.getScheduledNotifications!();
+      
+      // Timeout after 3 seconds for list retrieval
+      setTimeout(() => {
+        console.log('[Bridge] Scheduled notifications request timed out after 3s');
+        this.messageHandlers.delete('scheduled_notifications_list');
+        resolve([]);
+      }, 3000);
+    });
+  }
+  
+  public async checkHealthPermission(): Promise<boolean> {
+    console.log('[Bridge] checkHealthPermission called');
+    
+    if (!this.isReactNative || !window.ReactNativeBridge) {
+      console.log('[Bridge] Not in React Native, returning false');
+      return false;
+    }
+
+    // Check if the method exists before calling it
+    if (typeof window.ReactNativeBridge.checkHealthPermission !== 'function') {
+      console.log('[Bridge] checkHealthPermission method not implemented in native app');
+      throw new Error('checkHealthPermission method not implemented in native app');
+    }
+
+    return new Promise((resolve) => {
+      console.log('[Bridge] Setting up health permission check handler');
+      
+      // Set up handlers for both possible message types
+      // Native app might send either health_permission_status or health_permission_result
+      const handler = (payload: unknown) => {
+        console.log('[Bridge] Received health permission check result:', JSON.stringify(payload));
+        const result = payload as { granted: boolean };
+        console.log('[Bridge] Parsed granted value:', result.granted, 'type:', typeof result.granted);
+        // Remove both handlers
+        this.messageHandlers.delete('health_permission_status');
+        this.messageHandlers.delete('health_permission_result');
+        resolve(result.granted);
+      };
+      
+      // Register for both possible message types
+      this.onMessage('health_permission_status', handler);
+      this.onMessage('health_permission_result', handler);
+      
+      // Call the native app's checkHealthPermission method  
+      console.log('[Bridge] Calling ReactNativeBridge.checkHealthPermission()');
+      window.ReactNativeBridge?.checkHealthPermission!();
+      
+      // Timeout after 2 seconds for status check
+      setTimeout(() => {
+        console.log('[Bridge] Health permission check timed out after 2s');
+        this.messageHandlers.delete('health_permission_status');
+        this.messageHandlers.delete('health_permission_result');
+        resolve(false);
+      }, 2000);
+    });
+  }
+
+  public async requestHealthPermission(): Promise<boolean> {
+    console.log('[Bridge] requestHealthPermission called');
+    console.log('[Bridge] isReactNative:', this.isReactNative);
+    console.log('[Bridge] ReactNativeBridge exists:', !!window.ReactNativeBridge);
+    
+    if (!this.isReactNative || !window.ReactNativeBridge) {
+      console.log('[Bridge] Not in React Native, returning false');
+      return false;
+    }
+
+    return new Promise((resolve) => {
+      console.log('[Bridge] Setting up health permission handler');
+      
+      // Set up one-time handler for permission result
+      const handler = (payload: unknown) => {
+        console.log('[Bridge] Received health_permission_result:', payload);
+        const result = payload as { granted: boolean };
+        this.messageHandlers.delete('health_permission_result');
+        
+        // Update localStorage immediately when we get the result
+        if (result.granted) {
+          console.log('[Bridge] Health permission granted, updating localStorage');
+          localStorage.setItem('healthDataConnected', 'true');
+        }
+        
+        resolve(result.granted);
+      };
+      
+      this.onMessage('health_permission_result', handler);
+      
+      console.log('[Bridge] Calling ReactNativeBridge.requestHealthPermission()');
+      window.ReactNativeBridge?.requestHealthPermission();
+      
+      // Timeout after 15 seconds (to handle permission dialog delays)
+      setTimeout(() => {
+        console.log('[Bridge] Health permission request timed out after 15s');
+        this.messageHandlers.delete('health_permission_result');
+        // On timeout, assume permission was not granted
+        resolve(false);
+      }, 15000);
+    });
   }
   
   public forceDetection() {

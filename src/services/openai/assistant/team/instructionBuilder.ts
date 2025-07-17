@@ -11,7 +11,7 @@ import { AssistantRole } from './assistantManager';
 /**
  * Function-related instructions to append when functions are enabled
  */
-const FUNCTION_ENABLED_INSTRUCTIONS = {
+const FUNCTION_ENABLED_INSTRUCTIONS: Record<string, string> = {
   chat: `
 ## Available Functions
 When functions are enabled, you have access to:
@@ -37,7 +37,16 @@ When functions are enabled, you can:
 - Check for interactions
 - Access detailed supplement information
 
-Use functions for comprehensive pantry management.`
+Use functions for comprehensive pantry management.`,
+
+  recommendation: `
+## Available Functions
+When functions are enabled, you can:
+- Get full user context including all data
+- Analyze patterns across all user activities
+- Check supply levels and usage rates
+
+Use functions to generate highly personalized, timely recommendations.`
 };
 
 /**

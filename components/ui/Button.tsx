@@ -78,9 +78,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
 
   // Size classes with viewport units for mobile-first design
   const sizeClasses = {
-    sm: 'min-h-[40px] px-[4vw] max-px-4 py-[2vw] max-py-2 text-[min(3.5vw,0.875rem)]',
-    md: 'min-h-[44px] px-[5vw] max-px-6 py-[3vw] max-py-3 text-[min(4vw,1rem)]',
-    lg: 'min-h-[52px] px-[6vw] max-px-8 py-[3.5vw] max-py-4 text-[min(4.5vw,1.125rem)]'
+    sm: 'min-h-[40px] px-[min(4vw,1rem)] py-[min(2vw,0.5rem)] text-[min(3.5vw,0.875rem)]',
+    md: 'min-h-[44px] px-[min(5vw,1.5rem)] py-[min(3vw,0.75rem)] text-[min(4vw,1rem)]',
+    lg: 'min-h-[52px] px-[min(6vw,2rem)] py-[min(3.5vw,1rem)] text-[min(4.5vw,1.125rem)]'
   };
 
   // Shadow classes

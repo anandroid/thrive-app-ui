@@ -86,7 +86,6 @@ export const LoadingButton: React.FC<LoadingButtonProps> = ({
       <Button
         {...buttonProps}
         onClick={onClick}
-        loading={isLoading}
         disabled={disabled || isLoading}
         springAnimation
         gradientOverlay

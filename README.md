@@ -120,6 +120,36 @@ thrive-app/
 - Follow the mobile-first responsive design approach
 - Maintain the premium feel with smooth animations and transitions
 
+## Known Issues
+
+### GPT-4.1-nano JSON Response Format
+The GPT-4.1-nano model (used for chat assistant) has a known issue where it doesn't properly enforce JSON response format after tool outputs submission. This can cause the assistant to return responses as separate fields instead of a proper JSON object.
+
+**Workaround Implemented:**
+- Strong JSON formatting instructions in assistant prompts
+- Fallback parser in `responseParser.ts` to handle plain text responses
+- Multiple reminders in instructions to return proper JSON objects
+
+**Example of the issue:**
+```
+// What the model sometimes returns (WRONG):
+greeting: "I understand your concern..."
+questions: [...]
+
+// What it should return (CORRECT):
+{
+  "greeting": "I understand your concern...",
+  "attentionRequired": null,
+  "emergencyReasoning": null,
+  "actionItems": [],
+  "additionalInformation": null,
+  "actionableItems": [],
+  "questions": [...]
+}
+```
+
+**Note:** This is a model limitation, not a code issue. The workarounds ensure the app continues to function correctly despite this limitation.
+
 ## License
 
 This project is proprietary and confidential.

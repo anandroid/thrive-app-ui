@@ -365,7 +365,7 @@ export function DynamicJournalModal({ thriving, isOpen, onClose }: DynamicJourna
                       <div key={fieldId} className="flex justify-between text-sm">
                         <span className="text-gray-600">{field.label}:</span>
                         <span className="font-medium text-gray-900">
-                          {field.type === 'rating_scale' || field.type === 'pain_scale' 
+                          {(field.type as string) === 'rating_scale' || (field.type as string) === 'pain_scale' 
                             ? `${value}/10` 
                             : String(value)
                           }

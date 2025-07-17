@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { 
   AlertCircle, ShoppingCart, PlusCircle, ChevronRight, Heart,
   Calendar, Pill, Sparkles, Moon, Brain, Activity, FileText, Globe, BookOpen, Settings 
@@ -8,7 +8,6 @@ import {
 import {
   ChatMessage,
   ActionableItem,
-  WellnessRoutine,
   EnhancedQuestion,
   PartialAssistantResponse
 } from '@/src/services/openai/types';
@@ -21,7 +20,7 @@ import bridge from '@/src/lib/react-native-bridge';
 import { WellnessJourney } from '@/src/services/openai/types/journey';
 import { getJourneyByType } from '@/src/utils/journeyStorage';
 import { ChatEditor } from '@/components/ui/ChatEditor';
-import { createChatThread, addMessageToThread, getChatThread, deleteChatThread } from '@/src/utils/chatStorage';
+import { createChatThread, addMessageToThread, getChatThread, deleteChatThread, isGeneratedThreadId } from '@/src/utils/chatStorage';
 import { useKeyboardAwareChat } from '@/hooks/useKeyboardAwareChat';
 import { ChatWelcome } from './ChatWelcome';
 import { ThrivingTutorial } from './ThrivingTutorial';
@@ -39,7 +38,6 @@ interface SmartCardChatProps {
   threadId?: string;
   chatIntent?: string | null;
   onThreadCreated?: (threadId: string) => void;
-  onRoutineCreated?: (routine: WellnessRoutine) => void;
   onJourneyCreated?: (journey: WellnessJourney) => void;
   onNavigateToJourney?: (journey: WellnessJourney) => void;
   selectedPrompt?: string | null;
@@ -52,7 +50,6 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   threadId: initialThreadId,
   chatIntent,
   onThreadCreated,
-  onRoutineCreated,
   onJourneyCreated,
   onNavigateToJourney,
   selectedPrompt,
@@ -78,6 +75,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
   const [tutorialActionableText, setTutorialActionableText] = useState<string>('');
   const hasShownTutorialInSession = useRef(false);
   const tutorialTargetButtonRef = useRef<HTMLButtonElement | null>(null);
+  const handledIncompleteConversations = useRef<Set<string>>(new Set());
   const [showPantryModal, setShowPantryModal] = useState(false);
   const [pantryItemToAdd, setPantryItemToAdd] = useState<ActionableItem | null>(null);
   // Conversational Flow State
@@ -131,9 +129,134 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
           return message;
         });
         setMessages(loadedMessages);
+        
+        // Check if the last message is from the user AND there's no recent assistant response
+        // This prevents false positives when user has answered questions but conversation is complete
+        const hasIncompleteConversation = loadedMessages.length > 0 && 
+          loadedMessages[loadedMessages.length - 1].role === 'user' &&
+          (() => {
+            // Look for the last assistant message
+            const lastAssistantMessageIndex = loadedMessages.map(m => m.role).lastIndexOf('assistant');
+            if (lastAssistantMessageIndex === -1) {
+              // No assistant message at all - definitely incomplete
+              return true;
+            }
+            
+            // Check if the last assistant message was a meaningful response
+            const lastAssistantMessage = loadedMessages[lastAssistantMessageIndex];
+            try {
+              const parsed = JSON.parse(lastAssistantMessage.content);
+              // If assistant message has substantive content (greeting, actions, or questions), 
+              // then the conversation is likely complete
+              if (parsed.greeting || 
+                  (parsed.actionItems && parsed.actionItems.length > 0) || 
+                  (parsed.actionableItems && parsed.actionableItems.length > 0) ||
+                  (parsed.questions && parsed.questions.length > 0)) {
+                return false; // Conversation is complete
+              }
+            } catch {
+              // If not JSON or has plain text content, consider it complete
+              if (lastAssistantMessage.content.trim().length > 10) {
+                return false;
+              }
+            }
+            
+            // If we get here, the last assistant message was likely empty or incomplete
+            return true;
+          })();
+        
+        // Auto-scroll to the latest message after loading from history
+        // Add a delay to ensure messages are rendered in the DOM
+        if (loadedMessages.length > 0) {
+          // Use requestAnimationFrame to ensure DOM is updated
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              const messagesContainer = document.querySelector('.chat-messages-container');
+              if (messagesContainer) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+              }
+              // Force a second scroll after a longer delay in case of slow renders
+              setTimeout(() => {
+                if (messagesContainer) {
+                  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
+              }, 300);
+            }, 50);
+          });
+        }
+        
+        // If conversation is incomplete, re-send the last user message
+        if (hasIncompleteConversation) {
+          const lastUserMessage = loadedMessages[loadedMessages.length - 1];
+          const handlingKey = `${initialThreadId}_${lastUserMessage.content}_${lastUserMessage.timestamp}`;
+          
+          // Triple protection: sessionStorage, useRef, and recent handling check
+          const hasAlreadyHandled = sessionStorage.getItem(`incomplete_${handlingKey}`) || 
+                                   handledIncompleteConversations.current.has(handlingKey);
+          
+          // Additional check: Don't resend if we just loaded this conversation (might be false positive)
+          const justLoadedKey = `loaded_${initialThreadId}`;
+          const wasJustLoaded = sessionStorage.getItem(justLoadedKey);
+          if (!wasJustLoaded) {
+            sessionStorage.setItem(justLoadedKey, 'true');
+            // Clean up after 5 seconds
+            setTimeout(() => {
+              sessionStorage.removeItem(justLoadedKey);
+            }, 5000);
+          }
+          
+          if (!hasAlreadyHandled && !wasJustLoaded) {
+            sessionStorage.setItem(`incomplete_${handlingKey}`, 'true');
+            handledIncompleteConversations.current.add(handlingKey);
+            
+            console.log('Detected truly incomplete conversation, re-sending:', lastUserMessage.content);
+            
+            // Add a delay to ensure UI is ready
+            setTimeout(() => {
+              // Show a loading state immediately
+              const loadingMessage: ChatMessage = {
+                role: 'assistant',
+                content: '',
+                timestamp: new Date(),
+                isStreaming: true,
+                parsedContent: {} as PartialAssistantResponse
+              };
+              setMessages(prev => [...prev, loadingMessage]);
+              
+              // Re-send the message to get a response, but don't add it to history again
+              handleSendMessage(lastUserMessage.content, lastUserMessage.content, true);
+            }, 500);
+          } else {
+            console.log('Skipping resend - conversation was already handled or just loaded');
+          }
+        }
       }
     }
-  }, [initialThreadId]);
+  }, [initialThreadId]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Intentionally omitting handleSendMessage to prevent infinite loops
+  // This useEffect should only run when initialThreadId changes (i.e., loading a different thread)
+
+  // Check for post-action message from routine creation
+  useEffect(() => {
+    const postActionData = sessionStorage.getItem('routineCreatedPostAction');
+    if (postActionData && threadId) {
+      try {
+        const postAction = JSON.parse(postActionData);
+        const postActionMsg = generatePostActionMessage(postAction);
+        
+        // Add a small delay to ensure the chat is fully loaded
+        setTimeout(() => {
+          handleSendMessage(postActionMsg);
+        }, 500);
+        
+        // Clear the post-action data
+        sessionStorage.removeItem('routineCreatedPostAction');
+      } catch (error) {
+        console.error('Error handling post-action message:', error);
+        sessionStorage.removeItem('routineCreatedPostAction');
+      }
+    }
+  }, [threadId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // scrollToBottom is now provided by useKeyboardAwareChat hook
 
@@ -253,7 +376,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
    * @param answers - Array of staged Q&A pairs
    * @param additionalMessage - User's typed message (if they interrupted by typing)
    */
-  const handleSendStagedAnswers = async (answers: Array<{ question: string; answer: string; timestamp: number }>, additionalMessage?: string) => {
+  const handleSendStagedAnswers = useCallback(async (answers: Array<{ question: string; answer: string; timestamp: number }>, additionalMessage?: string) => {
     if (answers.length === 0) return;
     
     // Clear staged answers
@@ -279,9 +402,9 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       // Just send the batched Q&A answers
       await handleSendMessage(displayMessage, apiMessage);
     }
-  };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleSendMessage = async (messageOverride?: string, apiMessageOverride?: string) => {
+  const handleSendMessage = useCallback(async (messageOverride?: string, apiMessageOverride?: string, skipAddToHistory?: boolean) => {
     const messageToSend = messageOverride || input;
     if (!messageToSend.trim() || isLoading) return;
     
@@ -379,25 +502,33 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
     // Store the health concern for routine creation
     setHealthConcern(messageToSend);
 
-    setMessages(prev => [...prev, userMessage]);
+    // Only add the user message if it's not already in history (for incomplete conversation resends)
+    if (!skipAddToHistory) {
+      setMessages(prev => [...prev, userMessage]);
+    }
     setInput('');
     setIsLoading(true);
 
-    // Save user message to chat history
+    // Save user message to chat history (only if not skipping)
     const currentThreadId = chatThreadId || threadId || createChatThread().id;
     if (!chatThreadId && !threadId) {
       setChatThreadId(currentThreadId);
     }
-    addMessageToThread(currentThreadId, { role: 'user', content: userMessage.content });
+    if (!skipAddToHistory) {
+      addMessageToThread(currentThreadId, { role: 'user', content: userMessage.content });
+    }
 
-    const assistantMessage: ChatMessage = {
-      role: 'assistant',
-      content: '',
-      timestamp: new Date(),
-      isStreaming: true,
-      parsedContent: {} as PartialAssistantResponse
-    };
-    setMessages(prev => [...prev, assistantMessage]);
+    // Only add assistant message if we haven't already added one (for incomplete conversations)
+    if (!skipAddToHistory) {
+      const assistantMessage: ChatMessage = {
+        role: 'assistant',
+        content: '',
+        timestamp: new Date(),
+        isStreaming: true,
+        parsedContent: {} as PartialAssistantResponse
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+    }
     
     // Immediately scroll to show the typing indicator
     setTimeout(() => {
@@ -428,12 +559,16 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       // Extract enhanced basic context from localStorage for hybrid approach
       const basicContext = getBasicContext();
       
+      // Don't send generated thread IDs to OpenAI - let it create a real one
+      const currentThreadId = chatThreadId || threadId;
+      const threadIdToSend = currentThreadId && !isGeneratedThreadId(currentThreadId) ? currentThreadId : undefined;
+      
       const response = await fetch('/api/assistant/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: apiMessage, // Send full message with context to API
-          threadId: chatThreadId || threadId,
+          threadId: threadIdToSend, // Only send real OpenAI thread IDs
           basicContext
         }),
         signal: abortControllerRef.current.signal
@@ -473,28 +608,43 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                 setChatThreadId(data.threadId);
                 onThreadCreated?.(data.threadId);
                 
-                // If we had a temporary local thread, we should update to use the API thread ID
+                // Always ensure all messages up to this point are saved to the new thread
+                // This includes the user's first message that triggered the thread creation
+                const existingMessages = messages.filter(m => m.content);
+                
+                // If we had a temporary local thread, transfer its messages first
                 if (chatThreadId && chatThreadId !== data.threadId) {
-                  // Update the thread ID in localStorage to match the API thread ID
                   const localThread = getChatThread(chatThreadId);
                   if (localThread) {
-                    // Transfer messages to the new thread ID
+                    // Transfer messages from temp thread
                     localThread.messages.forEach(msg => {
                       addMessageToThread(data.threadId, msg);
                     });
                     // Delete the old temporary thread
                     deleteChatThread(chatThreadId);
-                  } else {
-                    // If no local thread exists, create one with the API thread ID
-                    // This handles the case where we're using the API thread ID from the start
-                    const existingMessages = messages.filter(m => m.content);
-                    existingMessages.forEach(msg => {
-                      if (msg.role === 'user' || msg.role === 'assistant') {
-                        addMessageToThread(data.threadId, { role: msg.role, content: msg.content });
-                      }
-                    });
                   }
                 }
+                
+                // Then add any messages that are in the current state but might not be in the thread yet
+                // This ensures the first message is always saved
+                existingMessages.forEach(msg => {
+                  if (msg.role === 'user' || msg.role === 'assistant') {
+                    // Check if this message already exists in the thread to avoid duplicates
+                    const thread = getChatThread(data.threadId);
+                    const messageExists = thread?.messages.some(m => 
+                      m.role === msg.role && 
+                      m.content === msg.content && 
+                      Math.abs(new Date(m.timestamp).getTime() - msg.timestamp.getTime()) < 1000
+                    );
+                    
+                    if (!messageExists) {
+                      addMessageToThread(data.threadId, { 
+                        role: msg.role, 
+                        content: msg.content
+                      });
+                    }
+                  }
+                });
               }
 
               if ((data.type === 'delta' || data.type === 'content') && data.content) {
@@ -536,133 +686,138 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                   toolOutputs
                 });
                 
-                const submitResponse = await fetch('/api/assistant/submit-tool-outputs', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    threadId: data.threadId,
-                    runId: data.runId,
-                    toolOutputs
-                  })
-                });
+                // Ensure we only submit with real OpenAI thread IDs
+                if (!isGeneratedThreadId(data.threadId)) {
+                  const submitResponse = await fetch('/api/assistant/submit-tool-outputs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      threadId: data.threadId,
+                      runId: data.runId,
+                      toolOutputs
+                    })
+                  });
 
-                console.log('Submit response status:', submitResponse.status);
-                if (!submitResponse.ok) {
-                  const errorText = await submitResponse.text();
-                  console.error('Submit tool outputs HTTP error:', submitResponse.status, errorText);
-                  console.debug('Failed tool outputs:', toolOutputs);
-                  console.debug('Continuing without tool results - AI will work with available data');
-                  
-                  // Don't throw - let AI continue without the tool results
-                  // Just skip processing the submit response
-                  continue;
-                }
+                  console.log('Submit response status:', submitResponse.status);
+                  if (!submitResponse.ok) {
+                    const errorText = await submitResponse.text();
+                    console.error('Submit tool outputs HTTP error:', submitResponse.status, errorText);
+                    console.debug('Failed tool outputs:', toolOutputs);
+                    console.debug('Continuing without tool results - AI will work with available data');
+                    
+                    // Don't throw - let AI continue without the tool results
+                    // Just skip processing the submit response
+                    continue;
+                  }
 
-                // Continue processing the new stream
-                const submitReader = submitResponse.body?.getReader();
-                if (submitReader) {
-                  console.log('Processing submit response stream...');
-                  let submitBuffer = '';
-                  
-                  // Reset fullContent when starting to process tool output response
-                  fullContent = '';
-                  
-                  while (true) {
-                    const { done: submitDone, value: submitValue } = await submitReader.read();
-                    if (submitDone) {
-                      console.log('Submit stream ended');
-                      break;
-                    }
+                  // Continue processing the new stream
+                  const submitReader = submitResponse.body?.getReader();
+                  if (submitReader) {
+                    console.log('Processing submit response stream...');
+                    let submitBuffer = '';
+                    
+                    // Reset fullContent when starting to process tool output response
+                    fullContent = '';
+                    
+                    while (true) {
+                      const { done: submitDone, value: submitValue } = await submitReader.read();
+                      if (submitDone) {
+                        console.log('Submit stream ended');
+                        break;
+                      }
 
-                    submitBuffer += decoder.decode(submitValue, { stream: true });
-                    const submitLines = submitBuffer.split('\n');
-                    submitBuffer = submitLines.pop() || ''; // Keep incomplete line in buffer
+                      submitBuffer += decoder.decode(submitValue, { stream: true });
+                      const submitLines = submitBuffer.split('\n');
+                      submitBuffer = submitLines.pop() || ''; // Keep incomplete line in buffer
 
-                    for (const submitLine of submitLines) {
-                      if (submitLine.trim() === '') continue;
-                      
-                      if (submitLine.startsWith('data: ')) {
-                        const submitDataStr = submitLine.slice(6);
-                        try {
-                          const submitData = JSON.parse(submitDataStr);
-                          console.log('Submit stream event:', submitData.type);
-                          
-                          if (submitData.type === 'delta' && submitData.content) {
-                            // Update the outer fullContent variable
-                            fullContent += submitData.content;
-                            setMessages(prev => {
-                              const updated = [...prev];
-                              const lastMessage = updated[updated.length - 1];
-                              if (lastMessage.role === 'assistant') {
-                                lastMessage.content = fullContent;
-                                const partialParsed = parsePartialAssistantResponse(fullContent);
-                                if (partialParsed) {
-                                  lastMessage.parsedContent = partialParsed;
-                                }
-                              }
-                              return updated;
-                            });
-                          }
-                          
-                          if (submitData.type === 'completed') {
-                            console.log('Submit stream completed, final content length:', fullContent.length);
+                      for (const submitLine of submitLines) {
+                        if (submitLine.trim() === '') continue;
+                        
+                        if (submitLine.startsWith('data: ')) {
+                          const submitDataStr = submitLine.slice(6);
+                          try {
+                            const submitData = JSON.parse(submitDataStr);
+                            console.log('Submit stream event:', submitData.type);
                             
-                            // Clear the typing indicator timeout
-                            if (streamingTimeoutRef.current) {
-                              clearTimeout(streamingTimeoutRef.current);
-                              streamingTimeoutRef.current = null;
+                            if (submitData.type === 'delta' && submitData.content) {
+                              // Update the outer fullContent variable
+                              fullContent += submitData.content;
+                              setMessages(prev => {
+                                const updated = [...prev];
+                                const lastMessage = updated[updated.length - 1];
+                                if (lastMessage.role === 'assistant') {
+                                  lastMessage.content = fullContent;
+                                  const partialParsed = parsePartialAssistantResponse(fullContent);
+                                  if (partialParsed) {
+                                    lastMessage.parsedContent = partialParsed;
+                                  }
+                                }
+                                return updated;
+                              });
                             }
                             
-                            // Mark the message as complete
-                            setMessages(prev => {
-                              const updated = [...prev];
-                              const lastMessage = updated[updated.length - 1];
-                              if (lastMessage.role === 'assistant') {
-                                lastMessage.isStreaming = false;
-                                const finalParsed = parseAssistantResponse(fullContent);
-                                if (finalParsed) {
-                                  lastMessage.parsedContent = finalParsed;
+                            if (submitData.type === 'completed') {
+                              console.log('Submit stream completed, final content length:', fullContent.length);
+                              
+                              // Clear the typing indicator timeout
+                              if (streamingTimeoutRef.current) {
+                                clearTimeout(streamingTimeoutRef.current);
+                                streamingTimeoutRef.current = null;
+                              }
+                              
+                              // Mark the message as complete
+                              setMessages(prev => {
+                                const updated = [...prev];
+                                const lastMessage = updated[updated.length - 1];
+                                if (lastMessage.role === 'assistant') {
+                                  lastMessage.isStreaming = false;
+                                  const finalParsed = parseAssistantResponse(fullContent);
+                                  if (finalParsed) {
+                                    lastMessage.parsedContent = finalParsed;
+                                  }
                                 }
-                              }
-                              return updated;
-                            });
+                                return updated;
+                              });
+                            }
+                            
+                            if (submitData.type === 'error') {
+                              console.error('Submit tool outputs error (continuing without results):', submitData.error);
+                              console.debug('Tool outputs that failed:', toolOutputs);
+                              console.debug('Thread ID:', data.threadId);
+                              console.debug('Run ID:', data.runId);
+                              
+                              // Don't show error to user - let AI continue without tool results
+                              // The AI can still provide a meaningful response
+                              console.log('Continuing without tool results - AI will handle gracefully');
+                              
+                              // Keep the streaming state to show AI is still working
+                              setMessages(prev => {
+                                const updated = [...prev];
+                                const lastMessage = updated[updated.length - 1];
+                                if (lastMessage.role === 'assistant') {
+                                  // Keep streaming, AI will continue
+                                  lastMessage.isStreaming = true;
+                                }
+                                return updated;
+                              });
+                              
+                              // Don't break - let the stream continue
+                              // The AI assistant should handle the missing data gracefully
+                            }
+                          } catch (e) {
+                            console.error('Error parsing submit response:', e);
                           }
-                          
-                          if (submitData.type === 'error') {
-                            console.error('Submit tool outputs error (continuing without results):', submitData.error);
-                            console.debug('Tool outputs that failed:', toolOutputs);
-                            console.debug('Thread ID:', data.threadId);
-                            console.debug('Run ID:', data.runId);
-                            
-                            // Don't show error to user - let AI continue without tool results
-                            // The AI can still provide a meaningful response
-                            console.log('Continuing without tool results - AI will handle gracefully');
-                            
-                            // Keep the streaming state to show AI is still working
-                            setMessages(prev => {
-                              const updated = [...prev];
-                              const lastMessage = updated[updated.length - 1];
-                              if (lastMessage.role === 'assistant') {
-                                // Keep streaming, AI will continue
-                                lastMessage.isStreaming = true;
-                              }
-                              return updated;
-                            });
-                            
-                            // Don't break - let the stream continue
-                            // The AI assistant should handle the missing data gracefully
-                          }
-                        } catch (e) {
-                          console.error('Error parsing submit response:', e);
                         }
                       }
                     }
+                    
+                    // Process any remaining buffer
+                    if (submitBuffer.trim()) {
+                      console.log('Remaining submit buffer:', submitBuffer);
+                    }
                   }
-                  
-                  // Process any remaining buffer
-                  if (submitBuffer.trim()) {
-                    console.log('Remaining submit buffer:', submitBuffer);
-                  }
+                } else {
+                  console.log('Skipping submit-tool-outputs for generated thread ID:', data.threadId);
                 }
               }
 
@@ -697,6 +852,17 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                 const currentThreadId = newThreadId || chatThreadId || threadId;
                 if (currentThreadId) {
                   addMessageToThread(currentThreadId, { role: 'assistant', content: fullContent });
+                  
+                  // Clean up the incomplete conversation handling flag since we got a response
+                  const thread = getChatThread(currentThreadId);
+                  if (thread && thread.messages.length > 0) {
+                    const userMessages = thread.messages.filter(m => m.role === 'user');
+                    if (userMessages.length > 0) {
+                      const lastUserMessage = userMessages[userMessages.length - 1];
+                      const handlingKey = `incomplete_${currentThreadId}_${lastUserMessage.content}`;
+                      sessionStorage.removeItem(handlingKey);
+                    }
+                  }
                 }
               }
 
@@ -748,7 +914,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       setIsLoading(false);
       abortControllerRef.current = null;
     }
-  };
+  }, [input, isLoading, messages, threadId, scrollToBottom, chatIntent, chatThreadId, currentQuestion, handleSendStagedAnswers, lastAssistantQuestions, onThreadCreated, stagedAnswers]);
 
   // Parsers are imported from utils/chat/responseParser
 
@@ -1450,24 +1616,6 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
           routineData={routineData}
           healthConcern={healthConcern}
           threadId={threadId}
-          onRoutineCreated={(routine) => {
-            onRoutineCreated?.(routine);
-            setShowRoutineModal(false);
-            setRoutineData(null);
-            // Mark that user has created a thriving
-            localStorage.setItem('hasCreatedThriving', 'true');
-            
-            // Send post-action message to chat
-            const postAction: PostActionMessage = {
-              type: 'routine_created',
-              context: {
-                routineName: routine.name,
-                routineType: routine.type
-              }
-            };
-            const postActionMsg = generatePostActionMessage(postAction);
-            handleSendMessage(postActionMsg);
-          }}
         />
       )}
 

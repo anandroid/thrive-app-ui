@@ -30,8 +30,43 @@ import {
  */
 export const parseAssistantResponse = (content: string): AssistantResponse | undefined => {
   try {
+    // Clean up common JSON formatting issues from streaming
+    let cleanedContent = content.trim();
+    
+    // Fix extra closing braces/brackets at the end (common streaming issue)
+    // Count opening and closing braces and brackets
+    const openBraces = (cleanedContent.match(/{/g) || []).length;
+    const closeBraces = (cleanedContent.match(/}/g) || []).length;
+    const openBrackets = (cleanedContent.match(/\[/g) || []).length;
+    const closeBrackets = (cleanedContent.match(/\]/g) || []).length;
+    
+    // Fix from the end of the string by removing excess delimiters
+    if (closeBraces > openBraces || closeBrackets > openBrackets) {
+      // Work backwards from the end, removing unmatched closing delimiters
+      const tempContent = cleanedContent;
+      let braceBalance = 0;
+      let bracketBalance = 0;
+      let result = '';
+      
+      // Scan from start to track balance
+      for (let i = 0; i < tempContent.length; i++) {
+        const char = tempContent[i];
+        if (char === '{') braceBalance++;
+        else if (char === '}') braceBalance--;
+        else if (char === '[') bracketBalance++;
+        else if (char === ']') bracketBalance--;
+        
+        // If we go negative, we have an unmatched closing delimiter
+        if (braceBalance >= 0 && bracketBalance >= 0) {
+          result += char;
+        }
+      }
+      
+      cleanedContent = result;
+    }
+    
     // First try to parse as JSON
-    const parsed = JSON.parse(content);
+    const parsed = JSON.parse(cleanedContent);
     if (parsed && typeof parsed === 'object') {
       // Post-process actionableItems to ensure both buy and already_have options exist for supplements
       if (parsed.actionableItems && Array.isArray(parsed.actionableItems)) {
@@ -70,7 +105,10 @@ export const parseAssistantResponse = (content: string): AssistantResponse | und
       return parsed as AssistantResponse;
     }
     return undefined;
-  } catch {
+  } catch (error) {
+    console.warn('Failed to parse assistant response:', error);
+    console.debug('Raw content:', content);
+    
     // If JSON parsing fails, check if it's plain text
     if (typeof content === 'string' && content.trim().length > 0) {
       // This is a fallback for when the assistant returns plain text instead of JSON
@@ -141,8 +179,42 @@ export const parseAssistantResponse = (content: string): AssistantResponse | und
  */
 export const parsePartialAssistantResponse = (content: string): PartialAssistantResponse | undefined => {
   try {
+    // Clean up common JSON formatting issues from streaming
+    let cleanedContent = content.trim();
+    
+    // Fix extra closing braces/brackets at the end (common streaming issue)
+    const openBraces = (cleanedContent.match(/{/g) || []).length;
+    const closeBraces = (cleanedContent.match(/}/g) || []).length;
+    const openBrackets = (cleanedContent.match(/\[/g) || []).length;
+    const closeBrackets = (cleanedContent.match(/\]/g) || []).length;
+    
+    // Fix from the end of the string by removing excess delimiters
+    if (closeBraces > openBraces || closeBrackets > openBrackets) {
+      // Work backwards from the end, removing unmatched closing delimiters
+      const tempContent = cleanedContent;
+      let braceBalance = 0;
+      let bracketBalance = 0;
+      let result = '';
+      
+      // Scan from start to track balance
+      for (let i = 0; i < tempContent.length; i++) {
+        const char = tempContent[i];
+        if (char === '{') braceBalance++;
+        else if (char === '}') braceBalance--;
+        else if (char === '[') bracketBalance++;
+        else if (char === ']') bracketBalance--;
+        
+        // If we go negative, we have an unmatched closing delimiter
+        if (braceBalance >= 0 && bracketBalance >= 0) {
+          result += char;
+        }
+      }
+      
+      cleanedContent = result;
+    }
+    
     // Try to parse complete JSON first
-    const parsed = JSON.parse(content);
+    const parsed = JSON.parse(cleanedContent);
     if (parsed && typeof parsed === 'object') {
       // Apply same post-processing as complete response
       if (parsed.actionableItems && Array.isArray(parsed.actionableItems)) {
