@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { BookOpen, Plus, Brain, TrendingUp, Sparkles } from 'lucide-react';
+import { BookOpen, Plus, Brain, TrendingUp, Sparkles, ChevronRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { 
   getThrivingById, 
@@ -14,6 +14,7 @@ import {
 import { Thriving, ThrivingJournal, JournalEntry, UserLearningProfile } from '@/src/types/thriving';
 import { JournalEditor } from '@/components/ui/JournalEditor';
 import { SmartJournalModal } from '@/components/journal/SmartJournalModal';
+import { JournalEntryCard } from '@/components/journal/JournalEntryCard';
 import { UserLearningProfileManager } from '@/src/lib/userLearningProfile';
 import { JournalInsightsEngine } from '@/src/lib/journalInsights';
 
@@ -53,6 +54,14 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
       return;
     }
     setThriving(thrivingData);
+    
+    // Debug: Log the journal template
+    console.log('Thriving loaded:', {
+      id: thrivingData.id,
+      title: thrivingData.title,
+      hasJournalTemplate: !!thrivingData.journalTemplate,
+      journalTemplate: thrivingData.journalTemplate
+    });
 
     // Load or create journal
     let journalData = getJournalByThrivingId(thrivingId);
@@ -158,22 +167,44 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-  };
-
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit' 
-    });
+  // Removed unused formatDate and formatTime functions
+  // These are now handled in JournalEntryCard component
+  
+  // Calculate current streak from journal entries
+  const calculateStreak = (entries: JournalEntry[]): number => {
+    if (entries.length === 0) return 0;
+    
+    const sortedEntries = [...entries].sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    
+    let streak = 1;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const lastEntry = new Date(sortedEntries[0].createdAt);
+    lastEntry.setHours(0, 0, 0, 0);
+    
+    // If last entry isn't today or yesterday, streak is broken
+    const daysDiff = Math.floor((today.getTime() - lastEntry.getTime()) / (1000 * 60 * 60 * 24));
+    if (daysDiff > 1) return 0;
+    
+    // Count consecutive days
+    for (let i = 1; i < sortedEntries.length; i++) {
+      const currentDate = new Date(sortedEntries[i - 1].createdAt);
+      const previousDate = new Date(sortedEntries[i].createdAt);
+      currentDate.setHours(0, 0, 0, 0);
+      previousDate.setHours(0, 0, 0, 0);
+      
+      const diff = Math.floor((currentDate.getTime() - previousDate.getTime()) / (1000 * 60 * 60 * 24));
+      if (diff === 1) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    
+    return streak;
   };
 
   if (!thriving || !journal) {
@@ -187,22 +218,62 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
   return (
     <AppLayout
       header={{
-        title: (
-          <div className="flex items-center space-x-2">
-            <BookOpen className="w-5 h-5 text-dusty-rose" />
-            <span>Journal</span>
-          </div>
-        ),
+        title: 'Journal',
         showBackButton: true,
-        backHref: `/thrivings?id=${thrivingId}`,
-        variant: 'blur'
+        backHref: `/thrivings?id=${thrivingId}`
       }}
-      className="bg-gray-50"
     >
-      {/* Thriving Info */}
-      <div className="px-4 py-4 bg-white border-b border-gray-100">
-        <h2 className="text-lg font-semibold text-primary-text">{thriving.title}</h2>
-        <p className="text-sm text-secondary-text-thin">{journal.totalEntries} journal entries</p>
+      {/* Hero Section */}
+      <div className="bg-gradient-to-b from-white to-gray-50 border-b border-gray-100">
+        <div className="px-[min(4vw,1rem)] py-[min(6vw,1.5rem)]">
+          <div className="flex items-center space-x-[min(3vw,0.75rem)] mb-[min(2vw,0.5rem)]">
+            <div className="w-[min(12vw,3rem)] h-[min(12vw,3rem)] rounded-2xl bg-gradient-to-br from-rose/20 to-burgundy/20 flex items-center justify-center">
+              <BookOpen className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-burgundy" />
+            </div>
+            <div className="flex-1">
+              <h1 className="text-[min(5vw,1.25rem)] font-bold text-gray-900 leading-tight">
+                {thriving.title}
+              </h1>
+              <div className="flex items-center space-x-[min(4vw,1rem)] mt-[min(1vw,0.25rem)]">
+                <span className="text-[min(3.5vw,0.875rem)] text-gray-600">
+                  {journal.totalEntries} entries
+                </span>
+                {journal.totalEntries > 0 && (
+                  <>
+                    <span className="text-gray-300">•</span>
+                    <span className="text-[min(3.5vw,0.875rem)] text-gray-600">
+                      {calculateStreak(journal.entries)} day streak
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          {/* Quick Stats */}
+          {journal.totalEntries > 0 && (
+            <div className="grid grid-cols-3 gap-[min(3vw,0.75rem)] mt-[min(4vw,1rem)]">
+              <div className="bg-white rounded-xl p-[min(3vw,0.75rem)] border border-gray-200">
+                <div className="text-[min(6vw,1.5rem)] font-bold text-emerald-600">
+                  {calculateStreak(journal.entries)}
+                </div>
+                <div className="text-[min(3vw,0.75rem)] text-gray-600">Day Streak</div>
+              </div>
+              <div className="bg-white rounded-xl p-[min(3vw,0.75rem)] border border-gray-200">
+                <div className="text-[min(6vw,1.5rem)] font-bold text-purple-600">
+                  {userProfile?.confidenceLevel ? Math.round(userProfile.confidenceLevel * 100) : 0}%
+                </div>
+                <div className="text-[min(3vw,0.75rem)] text-gray-600">Insights</div>
+              </div>
+              <div className="bg-white rounded-xl p-[min(3vw,0.75rem)] border border-gray-200">
+                <div className="text-[min(6vw,1.5rem)] font-bold text-rose">
+                  {journal.totalEntries}
+                </div>
+                <div className="text-[min(3vw,0.75rem)] text-gray-600">Total</div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Main Content */}
@@ -210,36 +281,53 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
           {/* Add Entry Buttons */}
           {!showNewEntry && (
             <div className="space-y-3">
-              {/* Smart Journal Button */}
+              {/* Smart Journal Button - Premium Design */}
               <button
                 onClick={() => setShowSmartJournal(true)}
-                className="w-full rounded-2xl bg-gradient-to-r from-purple/5 via-dusty-rose/5 to-blue/5 border border-purple/10 py-4 px-6 flex items-center justify-between hover:from-purple/10 hover:via-dusty-rose/10 hover:to-blue/10 hover:border-purple/20 transition-all duration-300 group relative"
+                className="w-full rounded-2xl overflow-hidden relative group transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               >
-                <div className="flex items-center space-x-3">
-                  <div className="relative">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300">
-                      <Brain className="w-5 h-5 text-white" />
-                    </div>
-                    {/* Subtle glow effect */}
-                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 blur-lg opacity-40 group-hover:opacity-60 transition-opacity duration-300" />
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold text-gray-800 text-[15px] flex items-center space-x-2">
-                      <span>AI Journal</span>
-                      {userProfile && userProfile.dataPoints > 5 && (
-                        <Sparkles className="w-4 h-4 text-purple-500" />
-                      )}
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      {userProfile && userProfile.dataPoints > 5 
-                        ? `Personalized for you • ${Math.round(userProfile.confidenceLevel * 100)}% insights`
-                        : 'Guided prompts and tracking'
-                      }
-                    </div>
-                  </div>
+                {/* Gradient Background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600" />
+                
+                {/* Animated Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                
+                {/* Shimmer Effect */}
+                <div className="absolute inset-0 opacity-30">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent -skew-x-12 -translate-x-full animate-shimmer" />
                 </div>
-                <div className="text-gray-400">
-                  <span className="text-xs">Recommended</span>
+                
+                {/* Content */}
+                <div className="relative p-[min(5vw,1.25rem)] flex items-center justify-between">
+                  <div className="flex items-center space-x-[min(4vw,1rem)]">
+                    <div className="relative">
+                      <div className="w-[min(12vw,3rem)] h-[min(12vw,3rem)] rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                        <Brain className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-white" />
+                      </div>
+                      {/* Pulse effect */}
+                      <div className="absolute inset-0 rounded-xl bg-white/20 animate-ping opacity-30" />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-semibold text-white text-[min(4vw,1rem)] flex items-center space-x-[min(2vw,0.5rem)]">
+                        <span>AI Journal</span>
+                        {userProfile && userProfile.dataPoints > 5 && (
+                          <Sparkles className="w-[min(4vw,1rem)] h-[min(4vw,1rem)] text-yellow-300 animate-pulse" />
+                        )}
+                      </div>
+                      <div className="text-[min(3vw,0.75rem)] text-white/80">
+                        {thriving.journalTemplate 
+                          ? 'Guided prompts and smart tracking'
+                          : 'Quick, personalized check-in'
+                        }
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-[min(2.5vw,0.625rem)] text-white/60 uppercase tracking-wider">
+                      Recommended
+                    </span>
+                    <ChevronRight className="w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)] text-white/80 mt-1" />
+                  </div>
                 </div>
               </button>
 
@@ -406,26 +494,7 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
             </div>
           )}
 
-          {/* Privacy Notice - Only show when no entries exist */}
-          {journal.totalEntries === 0 && !showNewEntry && (
-            <div className="rounded-2xl bg-gradient-to-br from-sage-light/20 to-sage/10 border border-sage-light/30 p-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 rounded-full bg-sage/20 flex items-center justify-center flex-shrink-0">
-                  <span className="text-sm">🔒</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-sage-dark mb-1">Your Privacy Matters</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    Your journal entries are stored locally on your device for complete privacy. 
-                    We never access, track, or share your personal reflections. 
-                    Your healing journey remains yours alone.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Insights Section */}
+          {/* Insights Section - Now shown first */}
           {journal.insights && userProfile && userProfile.dataPoints >= 5 && (
             <div className="rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 p-5">
               <div className="flex items-center justify-between mb-4">
@@ -476,99 +545,54 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
             </div>
           )}
 
-          {/* Journal Entries */}
-          <div className="space-y-4">
-            {recentEntries.map((entry) => (
-              <div key={entry.id} className="rounded-2xl bg-white border border-gray-200 p-4 shadow-sm">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <p className="text-sm font-medium text-primary-text">
-                      {formatDate(entry.date)}
-                    </p>
-                    <p className="text-xs text-gray-500">{formatTime(entry.createdAt)}</p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-2xl">{entry.moodEmoji}</span>
-                    {entry.painLevel && (
-                      <span className="px-2 py-1 rounded-full bg-red-50 text-red-600 text-xs font-medium">
-                        Pain: {entry.painLevel}/10
-                      </span>
-                    )}
-                  </div>
+          {/* Privacy Notice - Only show when no entries exist */}
+          {journal.totalEntries === 0 && !showNewEntry && (
+            <div className="rounded-2xl bg-gradient-to-br from-sage-light/20 to-sage/10 border border-sage-light/30 p-4">
+              <div className="flex items-start space-x-3">
+                <div className="w-8 h-8 rounded-full bg-sage/20 flex items-center justify-center flex-shrink-0">
+                  <span className="text-sm">🔒</span>
                 </div>
-
-                {/* Display content or smart fields */}
-                {entry.customData ? (
-                  <div className="space-y-3">
-                    {/* Smart Journal Fields */}
-                    {Object.entries(entry.customData).map(([fieldId, value]) => {
-                      // Find the field definition from the journal template
-                      const field = thriving.journalTemplate?.customFields.find(f => f.id === fieldId);
-                      if (!field) return null;
-                      
-                      return (
-                        <div key={fieldId} className="bg-gray-50 rounded-lg p-3">
-                          <p className="text-xs font-medium text-gray-600 mb-1">{field.label}</p>
-                          <p className="text-sm text-gray-800">
-                            {typeof value === 'object' ? JSON.stringify(value) : String(value)}
-                          </p>
-                        </div>
-                      );
-                    })}
-                    
-                    {/* AI Insights */}
-                    {entry.aiInsights && (
-                      <div className="bg-gradient-to-r from-purple/5 to-blue/5 rounded-lg p-3 border border-purple/10">
-                        <p className="text-xs font-medium text-purple-700 mb-1">AI Insight</p>
-                        <p className="text-sm text-gray-700">{entry.aiInsights}</p>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-gray-700 mb-3">{entry.content}</p>
-                )}
-
-                {/* Symptoms */}
-                {entry.symptoms && entry.symptoms.length > 0 && (
-                  <div className="mb-3">
-                    <p className="text-xs font-medium text-gray-500 mb-1">Symptoms:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {entry.symptoms.map((symptom, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 rounded-full bg-red-50 text-red-600 text-xs"
-                        >
-                          {symptom}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Gratitude */}
-                {entry.gratitude && entry.gratitude.length > 0 && (
-                  <div>
-                    <p className="text-xs font-medium text-gray-500 mb-1">Grateful for:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {entry.gratitude.map((item, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 rounded-full bg-green-50 text-green-600 text-xs"
-                        >
-                          {item}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <div className="flex-1">
+                  <h3 className="font-medium text-sage-dark mb-1">Your Privacy Matters</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    Your journal entries are stored locally on your device for complete privacy. 
+                    We never access, track, or share your personal reflections. 
+                    Your healing journey remains yours alone.
+                  </p>
+                </div>
               </div>
+            </div>
+          )}
+
+          {/* Journal Entries with New Design */}
+          <div className="space-y-4">
+            {recentEntries.map((entry, index) => (
+              <JournalEntryCard 
+                key={entry.id} 
+                entry={entry} 
+                thriving={thriving}
+                isLatest={index === 0}
+              />
             ))}
 
             {recentEntries.length === 0 && !showNewEntry && (
-              <div className="text-center py-12">
-                <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">No journal entries yet</p>
-                <p className="text-sm text-gray-400">Start writing to track your wellness journey</p>
+              <div className="rounded-2xl bg-gradient-to-br from-gray-50 to-white border border-gray-200 p-8 text-center">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-rose/10 to-burgundy/10 flex items-center justify-center mx-auto mb-4">
+                  <BookOpen className="w-10 h-10 text-burgundy" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Start Your Journal Journey
+                </h3>
+                <p className="text-sm text-gray-600 mb-6 max-w-xs mx-auto">
+                  Track your progress, capture insights, and watch your wellness patterns emerge over time.
+                </p>
+                <button
+                  onClick={() => setShowSmartJournal(true)}
+                  className="px-6 py-3 rounded-full bg-gradient-to-r from-rose to-burgundy text-white font-medium shadow-lg hover:shadow-xl transition-all inline-flex items-center space-x-2"
+                >
+                  <Brain className="w-4 h-4" />
+                  <span>Start with AI Journal</span>
+                </button>
               </div>
             )}
           </div>

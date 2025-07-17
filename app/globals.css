@@ -25,6 +25,23 @@
   line-height: 1.4;
 }
 
+/* Animated gradient text effect */
+@keyframes gradient {
+  0%, 100% {
+    background-size: 200% 200%;
+    background-position: left center;
+  }
+  50% {
+    background-size: 200% 200%;
+    background-position: right center;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 6s ease infinite;
+}
+
 /* Dynamic Recommendation Widget Styles */
 .recommendation-widget {
   @apply p-5 rounded-2xl cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98];
@@ -953,4 +970,18 @@ input[type="range"].slider::-moz-range-thumb:hover {
 
 .animate-toast-fade-in {
   animation: toast-fade-in 0.3s ease-out;
+}
+
+/* Shimmer animation for AI Journal button */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) skewX(-12deg);
+  }
+  100% {
+    transform: translateX(200%) skewX(-12deg);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 3s infinite;
 }

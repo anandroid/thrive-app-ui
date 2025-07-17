@@ -35,7 +35,16 @@ export function SmartJournalModal({
   const template = thriving.journalTemplate;
   const fields = template?.customFields || [];
   const currentField = fields[currentFieldIndex];
-  const progress = fields.length > 0 ? ((currentFieldIndex + 1) / fields.length) * 100 : 0;
+  
+  // Debug: Log what we receive
+  console.log('SmartJournalModal:', {
+    thrivingId: thriving.id,
+    thrivingTitle: thriving.title,
+    hasTemplate: !!template,
+    templateType: template?.journalType,
+    fieldsCount: fields.length,
+    template: template
+  });
 
   // Initialize with previous values if available
   useEffect(() => {
@@ -124,9 +133,36 @@ export function SmartJournalModal({
   };
 
   const generateInsight = async (): Promise<string> => {
-    // This would call your API to generate insights
-    // For now, return a placeholder
-    return "Great job tracking today! I noticed you're making progress with your routine. Keep it up! 🌟";
+    try {
+      const response = await fetch('/api/journal/insights', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          entry: {
+            fieldValues,
+            date: new Date().toISOString(),
+          },
+          thriving: {
+            title: thriving.title,
+            type: thriving.type,
+            journalTemplate: thriving.journalTemplate,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate insight');
+      }
+
+      const data = await response.json();
+      return data.insight;
+    } catch (error) {
+      console.error('Error generating insight:', error);
+      // Fallback insight
+      return "Great job tracking today! Your consistency in journaling helps identify patterns that support your wellness journey. Keep it up! 🌟";
+    }
   };
 
   if (!template || fields.length === 0) {
@@ -180,18 +216,24 @@ export function SmartJournalModal({
             </div>
           </div>
           
-          {/* Progress bar */}
-          <div className="w-full bg-gray-200 rounded-full h-[min(2vw,0.5rem)]">
-            <div 
-              className="bg-gradient-to-r from-rose to-burgundy h-full rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
+          {/* Progress dots */}
+          <div className="flex items-center justify-center space-x-[min(2vw,0.5rem)]">
+            {fields.map((_, index) => (
+              <div
+                key={index}
+                className={`
+                  transition-all duration-300
+                  ${index === currentFieldIndex 
+                    ? 'w-[min(2.5vw,0.625rem)] h-[min(2.5vw,0.625rem)] bg-gradient-to-r from-rose to-burgundy shadow-sm' 
+                    : index < currentFieldIndex
+                    ? 'w-[min(2vw,0.5rem)] h-[min(2vw,0.5rem)] bg-rose/60'
+                    : 'w-[min(2vw,0.5rem)] h-[min(2vw,0.5rem)] bg-gray-300'
+                  }
+                  rounded-full
+                `}
+              />
+            ))}
           </div>
-          
-          {/* Field counter */}
-          <p className="text-[min(3vw,0.75rem)] text-gray-600 text-center">
-            Question {currentFieldIndex + 1} of {fields.length}
-          </p>
         </div>
       }
       footer={

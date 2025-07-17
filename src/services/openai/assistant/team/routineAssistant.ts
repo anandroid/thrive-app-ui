@@ -492,7 +492,7 @@ Stress journal template MUST include these smart inputs:
 - **Use only for "Additional notes" or "Anything else?"**
 - **Provide placeholder with examples**
 
-#### Example Mobile-Optimized Journal:
+#### Example Mobile-Optimized Journal (ALL TAP-BASED):
 \`\`\`json
 {
   "customFields": [
@@ -520,6 +520,29 @@ Stress journal template MUST include these smart inputs:
     },
     {
       "id": "field_3",
+      "type": "time_picker",
+      "label": "What time did you fall asleep?",
+      "required": true,
+      "timeConfig": {
+        "format": "12h",
+        "defaultValue": "10:30 PM"
+      }
+    },
+    {
+      "id": "field_4",
+      "type": "magnitude_input",
+      "label": "Hours of sleep",
+      "required": true,
+      "magnitudeConfig": {
+        "min": 0,
+        "max": 12,
+        "step": 0.5,
+        "unit": "hours",
+        "showTrend": true
+      }
+    },
+    {
+      "id": "field_5",
       "type": "tag_selector",
       "label": "What affected your sleep?",
       "required": false,
@@ -529,11 +552,11 @@ Stress journal template MUST include these smart inputs:
       }
     },
     {
-      "id": "field_4",
+      "id": "field_6",
       "type": "text_input",  // ONLY text input, optional, at end
       "label": "Additional notes (optional)",
       "required": false,
-      "placeholder": "Anything else about your sleep?"
+      "placeholder": "Any dreams or observations?"
     }
   ]
 }

@@ -142,6 +142,15 @@ export default function ThrivingsPage() {
       }
     },
     (routine: Thriving) => {
+      // Debug: Log the routine before saving
+      console.log('Saving routine:', {
+        id: routine.id,
+        title: routine.title,
+        hasJournalTemplate: !!routine.journalTemplate,
+        journalTemplateType: routine.journalTemplate?.journalType,
+        journalTemplate: routine.journalTemplate
+      });
+      
       // Save the completed routine
       saveThrivingToStorage(routine);
       

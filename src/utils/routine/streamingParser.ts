@@ -140,6 +140,7 @@ export class StreamingRoutineParser {
         break;
 
       case 'journalTemplate':
+        console.log('Received journal template:', data.data);
         this.partialData.journalTemplate = data.data;
         this.onUpdate(this.partialData);
         break;

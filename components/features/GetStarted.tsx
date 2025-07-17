@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
-import { ChevronRight, Shield, Sparkles, Heart, Leaf } from 'lucide-react';
+import { ChevronRight, Shield, Sparkles, Heart, Leaf, Check } from 'lucide-react';
+import Button from '@/components/ui/Button';
+import { Modal } from '@/components/ui/Modal';
 
 interface GetStartedProps {
   onComplete: () => void;
@@ -26,56 +28,61 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
 
   return (
     <>
-      <div className="fixed inset-0 w-full h-[100vh] h-[100dvh] overflow-hidden bg-white">
-        {/* Simple, elegant background */}
+      <div className="fixed inset-0 w-full h-[100vh] h-[100dvh] overflow-hidden bg-gradient-to-br from-white via-soft-blush/20 to-sage-light/10">
+        {/* Modern gradient background with subtle animation */}
         <div className="absolute inset-0 z-0">
-          {/* Clean gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-b from-soft-blush/20 via-white to-soft-lavender/10" />
+          {/* Animated gradient orbs */}
+          <div className="absolute top-[10%] left-[10%] w-[min(40vw,200px)] h-[min(40vw,200px)] bg-gradient-to-br from-rose/20 to-burgundy/15 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '4s' }} />
+          <div className="absolute bottom-[20%] right-[10%] w-[min(50vw,300px)] h-[min(50vw,300px)] bg-gradient-to-br from-sage-light/20 to-sage/15 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '5s', animationDelay: '1s' }} />
+          <div className="absolute top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 w-[min(60vw,400px)] h-[min(60vw,400px)] bg-gradient-to-br from-soft-lavender/15 to-dusty-rose/10 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '6s', animationDelay: '2s' }} />
           
-          {/* Subtle top accent */}
-          <div className="absolute top-0 left-0 right-0 h-[40vh] bg-gradient-to-b from-rose/5 to-transparent" />
-          
-          {/* Bottom accent */}
-          <div className="absolute bottom-0 left-0 right-0 h-[30vh] bg-gradient-to-t from-sage-light/5 to-transparent" />
-          
-          {/* Very subtle pattern overlay for texture */}
-          <div className="absolute inset-0 opacity-[0.02]" 
+          {/* Subtle grid pattern */}
+          <div className="absolute inset-0" 
                style={{ 
-                 backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.03'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")`,
+                 backgroundImage: `radial-gradient(circle at 1px 1px, rgba(145, 67, 114, 0.03) 1px, transparent 1px)`,
+                 backgroundSize: '40px 40px'
                }}
           />
         </div>
 
         {/* Main Content Area */}
         <div className="relative z-10 w-full h-full flex flex-col">
-          {/* Top Spacer */}
-          <div className="h-[8vh]" />
-          
-          {/* Content Container */}
-          <div className="flex-1 px-[min(6vw,2rem)] flex flex-col items-center justify-start">
+          {/* Content Container with safe scrolling */}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden">
+            <div className="min-h-full flex flex-col items-center justify-center px-[min(6vw,2rem)] py-[min(8vh,4rem)]">
             {/* Logo and illustration container */}
-            <div className={`relative w-[min(70vw,300px)] h-[min(25vh,200px)] mb-[min(4vh,2rem)] transition-all duration-1000 ${
-              isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            <div className={`relative w-[min(80vw,320px)] h-[min(30vh,240px)] mb-[min(5vh,2.5rem)] transition-all duration-1000 transform ${
+              isLoaded ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'
             }`}>
-              {/* Decorative elements with viewport units */}
-              <div className="absolute -top-[min(2vw,1rem)] -right-[min(2vw,1rem)] text-rose/40 animate-pulse">
-                <Sparkles className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)]" />
+              {/* Enhanced decorative elements */}
+              <div className="absolute -top-[min(3vw,1.5rem)] -right-[min(3vw,1.5rem)] text-rose animate-bounce" style={{ animationDuration: '3s' }}>
+                <div className="relative">
+                  <Sparkles className="w-[min(7vw,2rem)] h-[min(7vw,2rem)]" />
+                  <div className="absolute inset-0 blur-xl bg-rose/30" />
+                </div>
               </div>
-              <div className="absolute -bottom-[min(1vw,0.5rem)] -left-[min(1.5vw,0.75rem)] text-sage/40 animate-pulse" style={{ animationDelay: '1s' }}>
-                <Leaf className="w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)]" />
+              <div className="absolute -bottom-[min(2vw,1rem)] -left-[min(2vw,1rem)] text-sage animate-bounce" style={{ animationDelay: '1s', animationDuration: '3s' }}>
+                <div className="relative">
+                  <Leaf className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)]" />
+                  <div className="absolute inset-0 blur-xl bg-sage/30" />
+                </div>
               </div>
-              <div className="absolute top-1/2 -right-[min(3vw,1.5rem)] text-dusty-rose/40 animate-pulse" style={{ animationDelay: '2s' }}>
-                <Heart className="w-[min(4vw,1rem)] h-[min(4vw,1rem)]" />
+              <div className="absolute top-1/2 -right-[min(4vw,2rem)] text-dusty-rose animate-bounce" style={{ animationDelay: '2s', animationDuration: '3s' }}>
+                <div className="relative">
+                  <Heart className="w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)]" />
+                  <div className="absolute inset-0 blur-xl bg-dusty-rose/30" />
+                </div>
               </div>
               
-              {/* Loading placeholder */}
+              {/* Enhanced loading placeholder */}
               <div className={`absolute inset-0 transition-all duration-700 ${
                 imageLoaded ? 'opacity-0 scale-110' : 'opacity-100 scale-100'
               }`}>
                 <div className="w-full h-full flex items-center justify-center">
-                  <div className="relative w-[60%] h-[60%]">
-                    <div className="absolute inset-0 bg-gradient-to-br from-rose/25 to-dusty-rose/20 rounded-full blur-2xl animate-pulse" />
-                    <div className="absolute inset-0 bg-gradient-to-tl from-sage-light/20 to-sage/15 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+                  <div className="relative w-[70%] h-[70%]">
+                    <div className="absolute inset-0 bg-gradient-to-br from-rose/30 to-burgundy/25 rounded-full blur-3xl animate-pulse" />
+                    <div className="absolute inset-0 bg-gradient-to-tl from-sage-light/25 to-sage/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+                    <div className="absolute inset-0 bg-gradient-to-r from-soft-lavender/20 to-dusty-rose/15 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
                   </div>
                 </div>
               </div>
@@ -96,99 +103,108 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
               </div>
             </div>
 
-            {/* Text Content */}
-            <div className="text-center space-y-[min(2.5vh,1rem)] max-w-[min(85vw,500px)]">
-              <h1 className={`text-[min(8vw,2.25rem)] font-bold transition-all duration-1000 delay-300 ${
+            {/* Enhanced Text Content */}
+            <div className="text-center space-y-[min(3vh,1.5rem)] max-w-[min(90vw,600px)]">
+              <h1 className={`text-[min(10vw,3rem)] font-extrabold leading-tight transition-all duration-1000 delay-300 ${
                 isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
               }`}>
-                <span className="bg-gradient-to-r from-burgundy via-rose to-dusty-rose bg-clip-text text-transparent">
+                <span className="bg-gradient-to-br from-burgundy via-rose to-sage bg-clip-text text-transparent animate-gradient">
                   Welcome to Thrive
                 </span>
               </h1>
               
-              <p className={`text-[min(5vw,1.25rem)] font-medium text-gray-800 transition-all duration-1000 delay-500 ${
+              <p className={`text-[min(6vw,1.5rem)] font-semibold text-gray-800 transition-all duration-1000 delay-500 ${
                 isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
               }`}>
                 Your natural wellness companion
               </p>
               
-              <p className={`text-[min(4vw,1rem)] text-gray-600 leading-relaxed px-[min(2vw,1rem)] transition-all duration-1000 delay-700 ${
+              <p className={`text-[min(4.5vw,1.125rem)] text-gray-600 leading-relaxed px-[min(3vw,1.5rem)] transition-all duration-1000 delay-700 ${
                 isLoaded ? 'opacity-100' : 'opacity-0'
               }`}>
                 Blend timeless natural remedies with modern wellness tracking. Create personalized routines and track your healing journey - all guided by holistic practices, completely private.
               </p>
               
-              {/* Feature pills */}
-              <div className={`flex flex-wrap justify-center gap-[min(2vw,0.5rem)] pt-[min(2vh,1rem)] transition-all duration-1000 delay-900 ${
+              {/* Enhanced Feature pills with icons */}
+              <div className={`flex flex-wrap justify-center gap-[min(3vw,1rem)] pt-[min(3vh,1.5rem)] transition-all duration-1000 delay-900 ${
                 isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
               }`}>
-                <span className="px-[min(3vw,0.75rem)] py-[min(1.5vw,0.375rem)] text-[min(3.5vw,0.875rem)] bg-rose/10 text-rose-600 font-medium rounded-full border border-rose/20">
-                  100% Private
-                </span>
-                <span className="px-[min(3vw,0.75rem)] py-[min(1.5vw,0.375rem)] text-[min(3.5vw,0.875rem)] bg-sage/10 text-sage-dark font-medium rounded-full border border-sage/20">
-                  Natural First
-                </span>
-                <span className="px-[min(3vw,0.75rem)] py-[min(1.5vw,0.375rem)] text-[min(3.5vw,0.875rem)] bg-dusty-rose/10 text-burgundy font-medium rounded-full border border-dusty-rose/20">
-                  Personalized
-                </span>
+                <div className="group px-[min(4vw,1rem)] py-[min(2vw,0.5rem)] bg-gradient-to-r from-rose/10 to-burgundy/10 text-rose-600 font-semibold rounded-full border border-rose/20 hover:border-rose/40 transition-all hover:scale-105 cursor-default flex items-center gap-[min(1.5vw,0.375rem)]">
+                  <Shield className="w-[min(4vw,1rem)] h-[min(4vw,1rem)]" />
+                  <span className="text-[min(3.5vw,0.875rem)]">100% Private</span>
+                </div>
+                <div className="group px-[min(4vw,1rem)] py-[min(2vw,0.5rem)] bg-gradient-to-r from-sage/10 to-sage-dark/10 text-sage-dark font-semibold rounded-full border border-sage/20 hover:border-sage/40 transition-all hover:scale-105 cursor-default flex items-center gap-[min(1.5vw,0.375rem)]">
+                  <Leaf className="w-[min(4vw,1rem)] h-[min(4vw,1rem)]" />
+                  <span className="text-[min(3.5vw,0.875rem)]">Natural First</span>
+                </div>
+                <div className="group px-[min(4vw,1rem)] py-[min(2vw,0.5rem)] bg-gradient-to-r from-dusty-rose/10 to-rose/10 text-burgundy font-semibold rounded-full border border-dusty-rose/20 hover:border-dusty-rose/40 transition-all hover:scale-105 cursor-default flex items-center gap-[min(1.5vw,0.375rem)]">
+                  <Heart className="w-[min(4vw,1rem)] h-[min(4vw,1rem)]" />
+                  <span className="text-[min(3.5vw,0.875rem)]">Personalized</span>
+                </div>
               </div>
+            </div>
             </div>
           </div>
 
-          {/* Bottom Section with proper spacing */}
-          <div className={`px-[min(6vw,2rem)] pb-[max(15vh,100px)] transition-all duration-1000 delay-1000 ${
+          {/* Enhanced Bottom Section with safe spacing for Safari */}
+          <div className={`px-[min(6vw,2rem)] pb-[max(20vh,120px)] transition-all duration-1000 delay-1000 ${
             isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}>
-            <div className="space-y-[min(3vh,1rem)]">
+            <div className="space-y-[min(4vh,1.5rem)]">
               {/* Terms Notice */}
               <div className="text-center">
                 <p className="text-[min(3.5vw,0.875rem)] text-gray-600">
                   By continuing, you accept our{' '}
                   <button
                     onClick={() => setShowTermsModal(true)}
-                    className="text-burgundy font-medium underline decoration-burgundy/30 hover:decoration-burgundy/60 transition-all"
+                    className="text-burgundy font-semibold underline decoration-burgundy/30 hover:decoration-burgundy/60 transition-all active:scale-95 touch-manipulation"
                   >
                     Terms & Conditions
                   </button>
                 </p>
               </div>
               
-              {/* Get Started Button */}
-              <button
+              {/* Premium Get Started Button with all effects */}
+              <Button
                 onClick={handleGetStarted}
-                className="relative w-full py-[min(4vw,1rem)] min-h-[min(12vw,3rem)] rounded-[min(4vw,1rem)] bg-gradient-to-r from-sage-light to-sage text-white font-semibold text-[min(4.5vw,1.125rem)] shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-[min(2vw,0.5rem)] group overflow-hidden active:scale-[0.98] touch-manipulation"
-                style={{ WebkitTapHighlightColor: 'transparent' }}
+                variant="gradient"
+                size="lg"
+                fullWidth
+                springAnimation
+                gradientOverlay
+                cardGlow
+                haptic="medium"
+                shadow="xl"
+                gradient={{
+                  from: 'sage-light',
+                  to: 'sage',
+                  hoverFrom: 'sage',
+                  hoverTo: 'sage-dark',
+                  activeFrom: 'sage-light/40',
+                  activeTo: 'sage/30',
+                  direction: 'to-r'
+                }}
+                rounded="3xl"
+                className="relative min-h-[min(14vw,3.5rem)] text-[min(5vw,1.25rem)] font-bold"
+                icon={<ChevronRight className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)]" />}
+                iconPosition="right"
               >
-                {/* Button gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-r from-sage to-sage-dark opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                
-                {/* Button shine effect */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent transform -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-                </div>
-                
-                {/* Button content */}
-                <span className="relative font-semibold">Get Started</span>
-                <ChevronRight className="relative w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)] group-hover:translate-x-1 transition-transform duration-300" />
-              </button>
+                Get Started
+              </Button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Terms Modal */}
-      {showTermsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-[min(4vw,1rem)] bg-black/50 animate-fade-in">
-          <div className="bg-white rounded-[min(6vw,1.5rem)] p-[min(6vw,1.5rem)] w-[min(90vw,400px)] max-h-[80vh] overflow-y-auto shadow-2xl animate-scale-in">
-            <div className="flex items-center justify-between mb-[min(4vw,1.5rem)]">
-              <h2 className="text-[min(6vw,1.5rem)] font-bold text-primary-text">Terms & Conditions</h2>
-              <button
-                onClick={() => setShowTermsModal(false)}
-                className="w-[min(10vw,2.5rem)] h-[min(10vw,2.5rem)] rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors touch-feedback touch-manipulation cursor-pointer"
-              >
-                <span className="text-[min(5vw,1.25rem)]">&times;</span>
-              </button>
-            </div>
+      {/* Enhanced Terms Modal with Modal component */}
+      <Modal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        title="Terms & Conditions"
+        size="lg"
+        className="max-w-[min(90vw,600px)]"
+      >
+        <div className="space-y-[min(4vw,1.5rem)] text-secondary-text">
 
             <div className="space-y-[min(4vw,1.5rem)] text-secondary-text">
               <div>
@@ -229,16 +245,28 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
                 </p>
               </div>
             </div>
-
-            <button
-              onClick={() => setShowTermsModal(false)}
-              className="w-full mt-[min(4vw,1.5rem)] py-[min(3vw,0.75rem)] rounded-[min(4vw,1rem)] bg-gradient-to-r from-sage-light to-sage text-white font-medium text-[min(4vw,1rem)] shadow-lg hover:shadow-xl transition-all active:scale-[0.98] touch-manipulation"
-            >
-              I Understand
-            </button>
-          </div>
+          
+          <Button
+            onClick={() => setShowTermsModal(false)}
+            variant="gradient"
+            fullWidth
+            springAnimation
+            gradientOverlay
+            cardGlow
+            haptic="medium"
+            gradient={{
+              from: 'sage-light',
+              to: 'sage',
+              activeFrom: 'sage-light/40',
+              activeTo: 'sage/30'
+            }}
+            className="mt-[min(6vw,2rem)]"
+            icon={<Check className="w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)]" />}
+          >
+            I Understand
+          </Button>
         </div>
-      )}
+      </Modal>
     </>
   );
 };
