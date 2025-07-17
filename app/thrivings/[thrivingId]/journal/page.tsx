@@ -287,7 +287,7 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
                 className="w-full rounded-2xl overflow-hidden relative group transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               >
                 {/* Gradient Background */}
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600" />
+                <div className="absolute inset-0 gradient-ai-journal" />
                 
                 {/* Animated Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
