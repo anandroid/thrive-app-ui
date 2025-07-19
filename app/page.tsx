@@ -231,50 +231,52 @@ export default function HomePage() {
     );
   }
 
+  if (showGetStarted) {
+    return (
+      <div className="fixed inset-0 z-50">
+        <GetStarted onComplete={handleGetStartedComplete} />
+      </div>
+    );
+  }
+
+  if (!showMainContent) {
+    return null;
+  }
+
   return (
-    <>
-      {/* Show get started overlay when needed */}
-      {showGetStarted && (
-        <div className="fixed inset-0 z-50">
-          <GetStarted onComplete={handleGetStartedComplete} />
-        </div>
-      )}
-      
-      {/* Main app content - Only render when ready */}
-      {showMainContent && (
-        <AppLayout
-          className="chat-simple-layout"
-          header={{
-            showBackButton: false,
-            layout: 'left-aligned',
-            title: (
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center">
-                  <Leaf className="w-6 h-6 text-white" />
-                </div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-burgundy to-rose bg-clip-text text-transparent">Thrive</h1>
+    <AppLayout
+      className="chat-simple-layout"
+      header={{
+          showBackButton: false,
+          layout: 'left-aligned',
+          title: (
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center">
+              <Leaf className="w-6 h-6 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-burgundy to-rose bg-clip-text text-transparent">Thrive</h1>
+          </div>
+        ),
+        rightElement: (
+          <MenuButton
+            onClick={() => {
+              localStorage.setItem('hasClickedMenu', 'true');
+              setShowMenuSparkle(false);
+              router.push('/settings');
+            }}
+            className="w-11 h-11"
+          >
+            <Menu className="w-5 h-5 text-burgundy" />
+            {showMenuSparkle && (
+              <div className="absolute -top-0.5 -right-0.5 w-4 h-4 flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-br from-rose to-burgundy rounded-full" />
+                <Sparkles className="w-2.5 h-2.5 text-white relative z-10 animate-pulse" />
               </div>
-            ),
-            rightElement: (
-              <MenuButton
-                onClick={() => {
-                  localStorage.setItem('hasClickedMenu', 'true');
-                  setShowMenuSparkle(false);
-                  router.push('/settings');
-                }}
-                className="w-11 h-11"
-              >
-                <Menu className="w-5 h-5 text-burgundy" />
-                {showMenuSparkle && (
-                  <div className="absolute -top-0.5 -right-0.5 w-4 h-4 flex items-center justify-center">
-                    <div className="absolute inset-0 bg-gradient-to-br from-rose to-burgundy rounded-full" />
-                    <Sparkles className="w-2.5 h-2.5 text-white relative z-10 animate-pulse" />
-                  </div>
-                )}
-              </MenuButton>
-            )
-          }}
-        >
+            )}
+          </MenuButton>
+        )
+      }}
+    >
           {/* Flex container for proper keyboard handling */}
           <div className="flex flex-col h-full">
             {/* Scrollable content area */}
@@ -296,105 +298,122 @@ export default function HomePage() {
             
             {/* Thrivings Section - Only show if thrivings exist */}
             {thrivings.length > 0 && (
-              <div className="content-padding pt-3 pb-6">
-                <div className="bg-gray-50 rounded-2xl p-6 -mx-4">
+              <div className="content-padding pt-2 pb-4">
+                <div className="bg-gradient-to-br from-soft-blush/10 via-transparent to-soft-lavender/10 rounded-3xl p-4 -mx-4">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-2xl font-bold text-primary-text">Your Thrivings</h2>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-rose-gold to-warm-lavender flex items-center justify-center shadow-sm">
+                      <Sparkles className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <h2 className="text-lg font-semibold text-primary-text">Wellness</h2>
+                  </div>
                   <TouchLink 
                     href="/thrivings"
                     variant="subtle"
-                    className="flex items-center space-x-1 text-sm font-medium text-secondary-text hover:text-primary-text transition-colors"
+                    className="p-2 text-burgundy hover:text-rose transition-colors"
+                    haptic="light"
                   >
-                    <span>See all</span>
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="w-5 h-5" />
                   </TouchLink>
                 </div>
                 
                 {/* Horizontal Scroll Container */}
                 <div className="-mx-4 px-4 overflow-x-auto scrollbar-hide">
-                  <div className="flex space-x-3 pb-2">
+                  <div className="flex space-x-2.5 pb-2">
                     {thrivings.slice(0, 5).map((thriving, index) => (
                       <div
                         key={thriving.id}
-                        className="flex-none w-[75vw] max-w-[280px] p-[min(5vw,1.25rem)] rounded-2xl bg-white shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all group cursor-pointer touch-feedback touch-manipulation"
+                        className="flex-none w-[75vw] max-w-[300px] rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-1 transition-all group cursor-pointer touch-feedback touch-manipulation relative overflow-hidden bg-gradient-to-br from-gray-200/50 to-gray-300/50 p-[1px]"
                         onClick={() => router.push(`/thrivings?id=${thriving.id}`)}
                       >
-                        <div className="flex items-start justify-between mb-3">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm ${
-                            index % 4 === 0 ? 'bg-gradient-to-br from-sage-light/30 to-sage/20' :
-                            index % 4 === 1 ? 'bg-gradient-to-br from-rose/20 to-burgundy/15' :
-                            index % 4 === 2 ? 'bg-gradient-to-br from-lavender/25 to-dusty-rose/20' :
-                            'bg-gradient-to-br from-dusty-rose/20 to-rose/15'
-                          }`}>
-                            <Sparkles className={`w-5 h-5 ${
-                              index % 4 === 0 ? 'text-sage-dark' :
-                              index % 4 === 1 ? 'text-burgundy' :
-                              index % 4 === 2 ? 'text-purple-600' :
-                              'text-rose'
-                            }`} />
-                          </div>
-                          <span className="text-xs font-medium text-burgundy">
-                            {getRemainingStepsToday(thriving) === 0 
-                              ? '✓ Done for today!' 
-                              : `${getRemainingStepsToday(thriving)} more ${getRemainingStepsToday(thriving) === 1 ? 'step' : 'steps'}`
-                            }
-                          </span>
-                        </div>
-                        <div className="h-[4.5rem] mb-3 flex items-start">
-                          <h3 className="font-semibold text-primary-text line-clamp-3 leading-relaxed text-[min(4.5vw,1rem)]">{thriving.title}</h3>
-                        </div>
-                        
-                        {/* What's Next Section */}
-                        {(() => {
-                          const nextStep = getNextUpcomingStep(thriving);
-                          const remainingToday = getRemainingStepsToday(thriving);
+                        {/* Inner container with white background */}
+                        <div className="rounded-2xl bg-white/80 backdrop-blur-sm p-[min(5vw,1.25rem)] h-full relative overflow-hidden">
+                          {/* Subtle gradient overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-rose-gold/5 via-transparent to-warm-lavender/5 pointer-events-none" />
                           
-                          return nextStep ? (
-                            <div 
-                              className="rounded-xl bg-gradient-to-r from-sage-light/20 to-sage/10 border border-sage-light/30 p-3 mb-3 hover:from-sage-light/30 hover:to-sage/20 transition-all touch-feedback touch-manipulation"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                // Find the index of this step in the sorted steps array
-                                const stepIndex = findSortedStepIndex(thriving.steps, nextStep.id);
-                                router.push(`/thrivings?id=${thriving.id}&step=${stepIndex}`);
-                              }}
-                            >
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="text-xs font-medium text-sage-dark">
-                                  Next: {nextStep.time ? formatReminderTime(nextStep.time) : 'Soon'}
-                                </span>
-                                {remainingToday > 1 && (
-                                  <span className="text-xs text-gray-600">
-                                    +{remainingToday - 1} more
-                                  </span>
-                                )}
+                          {/* Content */}
+                          <div className="relative z-10">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${
+                              index % 4 === 0 ? 'bg-gradient-to-br from-sage-light to-sage' :
+                              index % 4 === 1 ? 'bg-gradient-to-br from-rose-gold to-burgundy' :
+                              index % 4 === 2 ? 'bg-gradient-to-br from-soft-lavender to-dusty-rose' :
+                              'bg-gradient-to-br from-dusty-rose to-rose'
+                            }`}>
+                              <Heart className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="px-3 py-1.5 rounded-full bg-gradient-to-r from-rose-gold/20 to-warm-lavender/20 border border-rose-gold/30">
+                              <span className="text-xs font-medium text-burgundy">
+                                {getRemainingStepsToday(thriving) === 0 
+                                  ? '✓ Complete' 
+                                  : `${getRemainingStepsToday(thriving)} ${getRemainingStepsToday(thriving) === 1 ? 'step' : 'steps'}`
+                                }
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div className="mb-4">
+                            <h3 className="font-semibold text-primary-text line-clamp-2 leading-relaxed text-[min(4.5vw,1rem)]">{thriving.title}</h3>
+                          </div>
+                          
+                          {/* What's Next Section */}
+                          {(() => {
+                            const nextStep = getNextUpcomingStep(thriving);
+                            const remainingToday = getRemainingStepsToday(thriving);
+                            
+                            return nextStep ? (
+                              <div 
+                                className="rounded-xl bg-gradient-to-r from-sage-mist/30 to-sage-light/20 border border-sage-light/40 p-4 mb-4 hover:from-sage-mist/40 hover:to-sage-light/30 transition-all touch-feedback touch-manipulation backdrop-blur-sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // Find the index of this step in the sorted steps array
+                                  const stepIndex = findSortedStepIndex(thriving.steps, nextStep.id);
+                                  router.push(`/thrivings?id=${thriving.id}&step=${stepIndex}`);
+                                }}
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center space-x-2">
+                                    <div className="w-2 h-2 bg-sage rounded-full"></div>
+                                    <span className="text-xs font-medium text-sage-dark">
+                                      {nextStep.time ? formatReminderTime(nextStep.time) : 'Soon'}
+                                    </span>
+                                  </div>
+                                  {remainingToday > 1 && (
+                                    <span className="text-xs text-gray-500 bg-white/50 px-2 py-1 rounded-full">
+                                      +{remainingToday - 1} more
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm font-medium text-gray-900 line-clamp-2">{nextStep.title}</p>
                               </div>
-                              <p className="text-sm font-medium text-gray-900">{nextStep.title}</p>
-                            </div>
-                          ) : (
-                            <div className="text-xs text-gray-500 italic mb-3">
-                              No scheduled reminders
-                            </div>
-                          );
-                        })()}
+                            ) : (
+                              <div className="text-xs text-gray-400 italic mb-4 text-center py-3">
+                                All caught up ✨
+                              </div>
+                            );
+                          })()}
+                        </div>
                         
                         {/* Journal Button */}
-                        <SoftButton
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            router.push(`/thrivings/${thriving.id}/journal`);
-                          }}
-                          size="sm"
-                          fullWidth
-                          className="mt-[min(3vw,0.75rem)] text-[#914372] relative overflow-hidden flex items-center justify-center gap-[min(2vw,0.5rem)]"
-                          icon={<BookOpen className="w-[min(4vw,1rem)] h-[min(4vw,1rem)]" />}
-                          gradientOverlay
-                          springAnimation
-                          cardGlow
-                          haptic="medium"
-                        >
-                          Journal
-                        </SoftButton>
+                        <div className="relative z-10">
+                          <SoftButton
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/thrivings/${thriving.id}/journal`);
+                            }}
+                            size="sm"
+                            fullWidth
+                            className="bg-gradient-to-r from-rose-gold/20 to-warm-lavender/20 border border-rose-gold/30 text-burgundy hover:from-rose-gold/30 hover:to-warm-lavender/30 hover:border-rose-gold/40 backdrop-blur-sm"
+                            icon={<BookOpen className="w-4 h-4" />}
+                            gradientOverlay
+                            springAnimation
+                            cardGlow
+                            haptic="medium"
+                          >
+                            Reflect
+                          </SoftButton>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -504,22 +523,20 @@ export default function HomePage() {
               />
             </div>
           </div>
-        </AppLayout>
-      )}
-      
-      {/* Health Connect Modal */}
-      <HealthConnectModal
-        isOpen={showHealthConnectModal}
-        onClose={() => {
-          setShowHealthConnectModal(false);
-          localStorage.setItem('hasSeenHealthConnect', 'true');
-        }}
-        onConnect={() => {
-          console.log('[HomePage] HealthConnect onConnect callback triggered');
-          // Navigate to thrivings page to show health insights
-          router.push('/thrivings#health-insights');
-        }}
-      />
-    </>
+          
+          {/* Health Connect Modal */}
+          <HealthConnectModal
+            isOpen={showHealthConnectModal}
+            onClose={() => {
+              setShowHealthConnectModal(false);
+              localStorage.setItem('hasSeenHealthConnect', 'true');
+            }}
+            onConnect={() => {
+              console.log('[HomePage] HealthConnect onConnect callback triggered');
+              // Navigate to thrivings page to show health insights
+              router.push('/thrivings#health-insights');
+            }}
+          />
+      </AppLayout>
   );
 }

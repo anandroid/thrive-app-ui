@@ -27,12 +27,12 @@ const SAFE_ICONS = {
  * Widget type styling configurations
  */
 const WIDGET_STYLES = {
-  action: 'from-sage-light/20 to-sage/15',
-  purchase: 'from-rose/20 to-burgundy/15',
-  appointment: 'from-soft-lavender/20 to-dusty-rose/15',
-  content: 'from-dusty-rose/20 to-rose/15',
-  reminder: 'from-yellow-100 to-orange-100',
-  insight: 'from-blue-100 to-purple-100'
+  action: 'widget-bg-action',
+  purchase: 'widget-bg-purchase',
+  appointment: 'widget-bg-appointment',
+  content: 'widget-bg-content',
+  reminder: 'widget-bg-reminder',
+  insight: 'widget-bg-insight'
 };
 
 interface WidgetData {
@@ -339,12 +339,12 @@ export const DynamicRecommendationWidget: React.FC<DynamicRecommendationWidgetPr
   }
 
   // Apply widget-specific styling
-  const gradientClass = widgetData ? WIDGET_STYLES[widgetData.widgetType] : '';
+  const gradientClass = widgetData ? WIDGET_STYLES[widgetData.widgetType] : 'widget-bg-reminder';
 
   return (
     <div className={`${className} relative group`}>
       {/* Render the dynamic widget */}
-      <div className={`dynamic-widget-container bg-gradient-to-br ${gradientClass}`}>
+      <div className={`dynamic-widget-container ${gradientClass}`}>
         <DynamicWidget />
       </div>
       

@@ -284,19 +284,9 @@ export default function ThrivingsPage() {
     // Clear the flag after checking
     sessionStorage.removeItem('navigateFromHome');
     
-    if (thrivingId && thrivings.length > 0) {
-      const thriving = thrivings.find(t => t.id === thrivingId);
-      if (thriving) {
-        setSelectedThriving(thriving);
-        // Set active step if provided
-        if (stepIndex !== null) {
-          setActiveStep(parseInt(stepIndex));
-        }
-      } else {
-        setSelectedThriving(thrivings[0]);
-      }
-    } else if (thrivings.length > 0) {
-      setSelectedThriving(thrivings[0]);
+    // Set active step if provided
+    if (stepIndex !== null) {
+      setActiveStep(parseInt(stepIndex));
     }
     
     // Load recommendations collapsed state from localStorage
@@ -352,7 +342,29 @@ export default function ThrivingsPage() {
         }
       }
     }
-  }, [thrivings, startStreaming]); // Add thrivings as dependency since we reference it
+  }, [startStreaming]); // Remove thrivings dependency to prevent re-running
+
+  // Handle initial thriving selection from URL (only once when thrivings are loaded)
+  useEffect(() => {
+    if (thrivings.length === 0) return;
+    
+    // Only run this once when thrivings are first loaded
+    if (selectedThriving) return;
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const thrivingId = urlParams.get('id');
+    
+    if (thrivingId) {
+      const thriving = thrivings.find(t => t.id === thrivingId);
+      if (thriving) {
+        setSelectedThriving(thriving);
+      } else {
+        setSelectedThriving(thrivings[0]);
+      }
+    } else {
+      setSelectedThriving(thrivings[0]);
+    }
+  }, [thrivings.length]); // Only depend on length to run once when loaded
 
   // Show adjustment tutorial when appropriate
   useEffect(() => {
@@ -645,10 +657,10 @@ export default function ThrivingsPage() {
         showBackButton: true,
         backHref: cameFromChatThreadId ? `/chat/${cameFromChatThreadId}` : '/',
         title: (
-          <div className="flex items-center space-x-2">
-            <span>Thrivings</span>
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-sage-light/30 to-sage/20 flex items-center justify-center">
-              <Heart className="w-4 h-4 text-sage-dark fill-sage-light/30" />
+          <div className="flex items-center space-x-3">
+            <span>Wellness Journey</span>
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-gold to-warm-lavender flex items-center justify-center shadow-sm">
+              <Heart className="w-4 h-4 text-white" />
             </div>
           </div>
         )
@@ -1039,16 +1051,24 @@ export default function ThrivingsPage() {
                     <div
                       key={thriving.id}
                       onClick={() => setSelectedThriving(thriving)}
-                      className={`thriving-card flex-shrink-0 w-[min(90vw,20rem)] rounded-2xl p-[min(5vw,1.25rem)] cursor-pointer transition-all snap-center snap-always ${
+                      className={`thriving-card flex-shrink-0 w-[min(90vw,20rem)] rounded-3xl p-[min(5vw,1.25rem)] cursor-pointer transition-all snap-center snap-always relative overflow-hidden backdrop-blur-sm ${
                         selectedThriving?.id === thriving.id 
-                          ? 'bg-white shadow-xl border-2 border-rose/20' 
-                          : 'bg-white hover:shadow-lg border border-gray-200'
+                          ? 'bg-white/95 shadow-elegant border-2 border-rose-gold/40' 
+                          : 'bg-white/80 hover:shadow-elegant-sm border border-white/60'
                       }`}
                       style={{ scrollSnapAlign: 'center', scrollSnapStop: 'always' }}
                     >
+                      {/* Subtle gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-rose/5 via-transparent to-sage/5 pointer-events-none" />
+                      
+                      {/* Content wrapper */}
+                      <div className="relative z-10">
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex-1">
                           <div className="h-[4.5rem] flex items-start">
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-gold to-warm-lavender flex items-center justify-center mr-3 flex-shrink-0 shadow-sm">
+                              <Heart className="w-6 h-6 text-white" />
+                            </div>
                             <h3 className="font-semibold text-gray-900 line-clamp-3 leading-relaxed text-[min(5vw,1.25rem)]">
                               {thriving.title}
                             </h3>
@@ -1059,10 +1079,10 @@ export default function ThrivingsPage() {
                             e.stopPropagation();
                             handleThrivingToggle(thriving.id);
                           }}
-                          className={`px-4 py-2 rounded-full flex items-center gap-2 text-sm font-medium transition-all ${
+                          className={`px-4 py-2 rounded-full flex items-center gap-2 text-sm font-medium transition-all backdrop-blur-sm ${
                             thriving.isActive 
-                              ? 'bg-rose/10 text-rose hover:bg-rose/20' 
-                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                              ? 'bg-rose-gold/20 text-burgundy hover:bg-rose-gold/30 border border-rose-gold/40' 
+                              : 'bg-gray-100/80 text-gray-600 hover:bg-gray-200/80 border border-gray-200'
                           }`}
                         >
                           <Bell className="w-4 h-4" />
@@ -1081,9 +1101,9 @@ export default function ThrivingsPage() {
                             }
                           </span>
                         </div>
-                        <div className="bg-gray-100 rounded-full overflow-hidden h-2">
+                        <div className="bg-gray-100/50 rounded-full overflow-hidden h-2 backdrop-blur-sm">
                           <div 
-                            className="h-full bg-gradient-to-r from-sage to-sage-dark transition-all duration-500"
+                            className="h-full bg-gradient-to-r from-sage-mist to-sage transition-all duration-500"
                             style={{ width: `${calculateProgress(thriving)}%` }}
                           />
                         </div>
@@ -1096,7 +1116,7 @@ export default function ThrivingsPage() {
                         
                         return nextStep ? (
                           <div 
-                            className="rounded-xl bg-gradient-to-r from-sage-light/20 to-sage/10 border border-sage-light/30 p-3 mb-3 cursor-pointer hover:from-sage-light/30 hover:to-sage/20 transition-all"
+                            className="rounded-2xl bg-gradient-to-r from-sage-mist/30 to-sage-light/20 border border-sage-light/40 p-4 mb-3 cursor-pointer hover:from-sage-mist/40 hover:to-sage-light/30 transition-all backdrop-blur-sm"
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedThriving(thriving);
@@ -1156,6 +1176,7 @@ export default function ThrivingsPage() {
                       >
                         Journal
                       </SoftButton>
+                      </div>
                     </div>
                   ))}
 
@@ -1191,12 +1212,21 @@ export default function ThrivingsPage() {
                     {/* Steps Section */}
                     <div className="lg:col-span-2 space-y-4">
                     {/* Daily Reminders Section */}
-                    <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
-                      <div className="flex justify-between items-center mb-6">
-                        <div>
-                          <h2 className="text-xl font-semibold text-gray-900">Daily Reminders</h2>
-                          <p className="text-sm text-gray-600 mt-1">Gentle reminders for your wellness journey</p>
-                        </div>
+                    <div className="rounded-3xl bg-white/90 backdrop-blur-sm p-6 shadow-elegant border border-white/60 relative overflow-hidden">
+                      {/* Subtle gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-rose-gold/5 via-transparent to-sage-mist/5 pointer-events-none" />
+                      
+                      <div className="relative z-10">
+                        <div className="flex justify-between items-center mb-6">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-sage-mist to-sage-light flex items-center justify-center shadow-sm">
+                              <Bell className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <h2 className="text-xl font-semibold text-gray-900">Daily Rituals</h2>
+                              <p className="text-xs text-gray-500 mt-1">Gentle reminders for your wellness journey</p>
+                            </div>
+                          </div>
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => {
@@ -1246,11 +1276,15 @@ export default function ThrivingsPage() {
                             key={step.id || index} 
                             ref={el => {stepRefs.current[index] = el;}}
                             className="group">
-                            <div className={`rounded-2xl bg-white shadow-sm hover:shadow-md transition-all duration-500 overflow-hidden ${
+                            <div className={`rounded-3xl bg-white/90 backdrop-blur-sm shadow-elegant hover:shadow-elegant-sm transition-all duration-500 overflow-hidden relative ${
                               highlightedStep === index 
-                                ? 'ring-2 ring-offset-2 ring-rose/50 border-2 border-transparent bg-gradient-to-r from-rose/5 to-burgundy/5 shadow-lg shadow-rose/20' 
-                                : 'border border-gray-100 hover:border-gray-200'
+                                ? 'ring-2 ring-offset-2 ring-rose-gold/50 border-2 border-transparent shadow-lg shadow-rose-gold/20' 
+                                : 'border border-white/60 hover:border-white/80'
                             }`}>
+                              {/* Subtle gradient overlay */}
+                              <div className="absolute inset-0 bg-gradient-to-br from-rose-gold/3 via-transparent to-sage-mist/3 pointer-events-none" />
+                              
+                              <div className="relative z-10">
                               {/* Header with time and title */}
                               <div className="px-6 py-4 border-b border-gray-100">
                                 <div className="flex items-center gap-3 mb-2">
@@ -1273,7 +1307,7 @@ export default function ThrivingsPage() {
 
                               {/* Content */}
                               <div className="px-6 py-4">
-                                <p className="text-gray-600 leading-relaxed">
+                                <p className="text-gray-500 text-sm leading-relaxed">
                                   {step.description}
                                 </p>
                                 
@@ -1331,9 +1365,11 @@ export default function ThrivingsPage() {
                                   </div>
                                 )}
                               </div>
+                              </div>
                             </div>
                           </div>
                         ))}
+                      </div>
                       </div>
                     </div>
 
