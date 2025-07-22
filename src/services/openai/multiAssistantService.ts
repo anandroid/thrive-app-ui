@@ -39,12 +39,14 @@ interface ThreadState {
  */
 export class MultiAssistantService {
   private openai: OpenAI;
+  private apiKey: string;
   private threadStates: Map<string, ThreadState> = new Map();
   private contextManager: ThreadContextManager;
   private slidingWindow: SlidingWindowManager;
   private contextCache: ContextCache;
 
   constructor(config: MultiAssistantConfig) {
+    this.apiKey = config.apiKey;
     this.openai = new OpenAI({ apiKey: config.apiKey });
     this.contextManager = ThreadContextManager.getInstance();
     this.slidingWindow = new SlidingWindowManager({ 
@@ -83,7 +85,7 @@ export class MultiAssistantService {
     state.currentAssistant = role;
 
     // Update flow states based on response
-    if (response.actionableItems) {
+    if (response.actionableItems && Array.isArray(response.actionableItems)) {
       const hasRoutineAction = response.actionableItems.some(
         (item) => item.type === 'thriving' || item.type === 'adjust_routine'
       );
@@ -167,7 +169,7 @@ export class MultiAssistantService {
     // Handle streaming response
     for await (const chunk of run) {
       if (chunk.event === 'thread.message.delta') {
-        const content = chunk.data.delta.content?.[0];
+        const content = chunk.data?.delta?.content?.[0];
         if (content?.type === 'text' && content.text?.value) {
           onChunk?.({
             type: 'content',
@@ -176,28 +178,32 @@ export class MultiAssistantService {
           });
         }
       } else if (chunk.event === 'thread.message.completed') {
-        const messageContent = chunk.data.content[0];
-        if (messageContent?.type === 'text') {
-          const fullMessage = messageContent.text.value;
-          
-          // Store assistant response in context cache
-          this.contextCache.addMessage(threadId, {
-            role: 'assistant',
-            content: fullMessage,
-            timestamp: new Date(),
-            assistantRole: role
-          });
-          
-          try {
-            const parsed = JSON.parse(fullMessage);
-            this.updateThreadState(threadId, role, parsed);
-          } catch {
-            // Not JSON, that's okay
+        // Check if content exists and has items before accessing
+        const content = chunk.data?.content;
+        if (content && content.length > 0) {
+          const messageContent = content[0];
+          if (messageContent?.type === 'text' && messageContent.text?.value) {
+            const fullMessage = messageContent.text.value;
+            
+            // Store assistant response in context cache
+            this.contextCache.addMessage(threadId, {
+              role: 'assistant',
+              content: fullMessage,
+              timestamp: new Date(),
+              assistantRole: role
+            });
+            
+            try {
+              const parsed = JSON.parse(fullMessage);
+              this.updateThreadState(threadId, role, parsed);
+            } catch {
+              // Not JSON, that's okay
+            }
           }
         }
       } else if (chunk.event === 'thread.run.requires_action') {
         // Handle function calls
-        if (chunk.data.required_action?.submit_tool_outputs?.tool_calls) {
+        if (chunk.data?.required_action?.submit_tool_outputs?.tool_calls) {
           onChunk?.({
             type: 'function_call',
             toolCalls: chunk.data.required_action.submit_tool_outputs.tool_calls,
@@ -213,7 +219,7 @@ export class MultiAssistantService {
       } else if (chunk.event === 'thread.run.failed') {
         onChunk?.({
           type: 'error',
-          error: chunk.data.last_error?.message || 'Run failed',
+          error: chunk.data?.last_error?.message || 'Run failed',
           role
         });
       }
@@ -235,7 +241,7 @@ export class MultiAssistantService {
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.THRIVE_OPENAI_API_KEY}`,
+          'Authorization': `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json',
           'OpenAI-Beta': 'assistants=v2'
         },
@@ -263,7 +269,7 @@ export class MultiAssistantService {
         `https://api.openai.com/v1/threads/${threadId}/runs/${runId}`,
         {
           headers: {
-            'Authorization': `Bearer ${process.env.THRIVE_OPENAI_API_KEY}`,
+            'Authorization': `Bearer ${this.apiKey}`,
             'OpenAI-Beta': 'assistants=v2'
           }
         }
@@ -283,9 +289,9 @@ export class MultiAssistantService {
     if (currentRun.status === 'completed') {
       // Get the latest message
       const messages = await this.openai.beta.threads.messages.list(threadId, { limit: 1 });
-      const lastMessage = messages.data[0];
+      const lastMessage = messages.data?.[0];
       
-      if (lastMessage && lastMessage.content[0]?.type === 'text') {
+      if (lastMessage?.content?.length > 0 && lastMessage.content[0]?.type === 'text') {
         const content = lastMessage.content[0].text.value;
         onChunk?.({
           type: 'content',
@@ -319,7 +325,7 @@ export class MultiAssistantService {
     // First try to get from cache
     const cachedMessages = this.contextCache.getThreadContext(threadId);
     
-    if (cachedMessages.length > 0) {
+    if (cachedMessages && cachedMessages.length > 0) {
       // Use cached messages with sliding window
       return this.slidingWindow.getContextWindow(cachedMessages);
     }
@@ -332,9 +338,10 @@ export class MultiAssistantService {
     
     // Convert to our format and populate cache
     const formattedMessages = allMessages.data.reverse().map(msg => {
+      const firstContent = msg.content?.[0];
       const message = {
         role: msg.role as 'user' | 'assistant',
-        content: msg.content[0]?.type === 'text' ? msg.content[0].text.value : '',
+        content: firstContent?.type === 'text' ? firstContent.text?.value : '',
         timestamp: new Date(msg.created_at * 1000)
       };
       
@@ -357,7 +364,7 @@ export class MultiAssistantService {
       {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${process.env.THRIVE_OPENAI_API_KEY}`,
+          'Authorization': `Bearer ${this.apiKey}`,
           'OpenAI-Beta': 'assistants=v2'
         }
       }
@@ -395,12 +402,14 @@ let multiAssistantService: MultiAssistantService | null = null;
  * Get or create multi-assistant service instance
  */
 export const getMultiAssistantService = (): MultiAssistantService => {
+  // Always check for API key at runtime to ensure it's available in API routes
+  const apiKey = process.env.THRIVE_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error('THRIVE_OPENAI_API_KEY or OPENAI_API_KEY not configured');
+  }
+  
+  // Create new instance if not exists or API key changed
   if (!multiAssistantService) {
-    const apiKey = process.env.THRIVE_OPENAI_API_KEY;
-    if (!apiKey) {
-      throw new Error('THRIVE_OPENAI_API_KEY not configured');
-    }
-    
     multiAssistantService = new MultiAssistantService({
       apiKey
     });
