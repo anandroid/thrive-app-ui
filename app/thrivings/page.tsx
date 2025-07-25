@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { 
   Clock, 
   Bell, Edit2, Trash2,
   Plus, Target, Settings,
-  ChevronDown, ChevronUp, ChevronRight, Lightbulb, Package, Play, CheckCircle2, BookOpen, Heart, Info
+  ChevronDown, ChevronUp, ChevronRight, Lightbulb, Package, Play, CheckCircle2, BookOpen, Heart, Info,
+  Pause
 } from 'lucide-react';
 import { Thriving } from '@/src/types/thriving';
 import { getThrivingsFromStorage, updateThrivingInStorage, deleteThrivingFromStorage } from '@/src/utils/thrivingStorage';
@@ -19,7 +19,7 @@ import { LoadingButton } from '@/components/ui/LoadingButton';
 import { ThrivingNotificationCard } from '@/components/features/ThrivingNotificationCard';
 import HealthInsights from '@/components/features/HealthInsights';
 import { ThrivingExpertHelp } from '@/components/features/ThrivingExpertHelp';
-import { SoftButton } from '@/components/ui/Button';
+import Button from '@/components/ui/Button';
 import { useStreamingRoutineParser, PartialRoutineData } from '@/src/utils/routine/streamingParser';
 import { THRIVING_STREAMING_CONFIG } from '@/src/config/thrivingStreamingConfig';
 import { saveThrivingToStorage } from '@/src/utils/thrivingStorage';
@@ -342,6 +342,7 @@ export default function ThrivingsPage() {
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startStreaming]); // Remove thrivings dependency to prevent re-running
 
   // Handle initial thriving selection from URL (only once when thrivings are loaded)
@@ -364,6 +365,7 @@ export default function ThrivingsPage() {
     } else {
       setSelectedThriving(thrivings[0]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [thrivings.length]); // Only depend on length to run once when loaded
 
   // Show adjustment tutorial when appropriate
@@ -657,10 +659,10 @@ export default function ThrivingsPage() {
         showBackButton: true,
         backHref: cameFromChatThreadId ? `/chat/${cameFromChatThreadId}` : '/',
         title: (
-          <div className="flex items-center space-x-3">
-            <span>Wellness Journey</span>
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-gold to-warm-lavender flex items-center justify-center shadow-sm">
-              <Heart className="w-4 h-4 text-white" />
+          <div className="flex items-center" style={{ gap: 'min(3vw,0.75rem)' }}>
+            <span className="font-bold bg-clip-text text-transparent" style={{ fontSize: 'min(5.5vw,1.375rem)', backgroundImage: 'linear-gradient(135deg, var(--primary), var(--secondary))' }}>Thrivings</span>
+            <div className="shadow-lg" style={{ width: 'min(11vw,2.75rem)', height: 'min(11vw,2.75rem)', borderRadius: 'min(3vw,0.75rem)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, var(--secondary), var(--secondary-dark))' }}>
+              <Heart className="text-white" style={{ width: 'min(5.5vw,1.375rem)', height: 'min(5.5vw,1.375rem)' }} />
             </div>
           </div>
         )
@@ -703,14 +705,14 @@ export default function ThrivingsPage() {
                         cx="12"
                         cy="12"
                         r="10"
-                        stroke="rgb(251 113 133 / 0.2)"
+                        stroke="rgb(147 51 234 / 0.2)"
                         strokeWidth="3"
                         fill="none"
                       />
                       <path
                         className="svg-spinner"
                         d="M12 2a10 10 0 0 1 10 10"
-                        stroke="rgb(251 113 133)"
+                        stroke="rgb(147 51 234)"
                         strokeWidth="3"
                         strokeLinecap="round"
                         fill="none"
@@ -723,9 +725,9 @@ export default function ThrivingsPage() {
               
               {/* Completion Indicator */}
               {showCompletionIndicator && (
-                <div className="fixed top-4 right-4 z-50 bg-sage-light/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg border border-sage-light flex items-center space-x-2 animate-bounce-subtle">
-                  <CheckCircle2 className="w-4 h-4 text-sage-dark" />
-                  <span className="text-sm font-medium text-sage-dark">Your thriving is ready!</span>
+                <div className="fixed top-4 right-4 z-50 bg-pink-100 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg border border-pink-200 flex items-center space-x-2 animate-bounce-subtle">
+                  <CheckCircle2 className="w-4 h-4 text-rose-600" />
+                  <span className="text-sm font-medium text-rose-600">Your thriving is ready!</span>
                 </div>
               )}
               {/* Streaming Title */}
@@ -784,7 +786,7 @@ export default function ThrivingsPage() {
                     <div className="rounded-2xl bg-white shadow-sm border border-gray-100 overflow-hidden">
                       <div className="px-6 py-4 border-b border-gray-100">
                         <div className="flex items-center gap-3 mb-2">
-                          <div className="flex items-center text-sage-dark">
+                          <div className="flex items-center text-rose-600">
                             <Bell className="w-4 h-4 mr-1.5" />
                             <span className="text-sm font-medium">
                               {stepData.time || `Step ${index + 1}`}
@@ -843,7 +845,7 @@ export default function ThrivingsPage() {
                         
                         return (
                           <div key={index} className="flex items-start space-x-3">
-                            <div className="w-2 h-2 bg-rose rounded-full mt-2 flex-shrink-0"></div>
+                            <div className="w-2 h-2 bg-pink-400 rounded-full mt-2 flex-shrink-0"></div>
                             <div>
                               <p className="font-medium text-gray-900">{title}</p>
                               {description && (
@@ -873,7 +875,7 @@ export default function ThrivingsPage() {
                     <div className="space-y-2">
                       {streamingRoutineData.expectedOutcomes.map((outcome: string, index: number) => (
                         <div key={index} className="flex items-start space-x-3">
-                          <CheckCircle2 className="w-5 h-5 text-sage-dark mt-0.5 flex-shrink-0" />
+                          <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: 'var(--primary)' }} />
                           <p className="text-gray-700">{outcome}</p>
                         </div>
                       ))}
@@ -946,9 +948,9 @@ export default function ThrivingsPage() {
                 }`}
               >
                 {streamingRoutineData.isComplete && (
-                  <div className="rounded-2xl bg-gradient-to-r from-sage/10 to-sage-dark/10 p-6 border border-sage/20">
+                  <div className="rounded-2xl bg-pink-50 p-6 border border-pink-200">
                     <div className="flex items-center justify-center space-x-3">
-                      <CheckCircle2 className="w-6 h-6 text-sage-dark" />
+                      <CheckCircle2 className="w-6 h-6 text-rose-600" />
                       <p className="text-lg font-semibold text-gray-900">
                         Your thriving has been created successfully!
                       </p>
@@ -961,20 +963,32 @@ export default function ThrivingsPage() {
 
           {/* Empty State */}
           {!isStreamingCreation && thrivings.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-sage-light/30 to-sage/20 flex items-center justify-center mb-4">
-                <Plus className="w-10 h-10 text-sage-dark" />
+            <div className="flex flex-col items-center justify-center" style={{ paddingTop: 'min(20vw,5rem)', paddingBottom: 'min(20vw,5rem)' }}>
+              <div className="rounded-full flex items-center justify-center shadow-md" style={{ width: 'min(20vw,5rem)', height: 'min(20vw,5rem)', marginBottom: 'min(4vw,1rem)', background: 'linear-gradient(135deg, var(--primary-light), var(--secondary-light))' }}>
+                <Plus style={{ width: 'min(10vw,2.5rem)', height: 'min(10vw,2.5rem)', color: 'var(--primary)' }} />
               </div>
-              <h2 className="text-xl font-semibold text-primary-text mb-2">No Thrivings Yet</h2>
-              <p className="text-secondary-text-thin text-center max-w-xs mb-6">
+              <h2 className="font-semibold text-gray-900" style={{ fontSize: 'min(5vw,1.25rem)', marginBottom: 'min(2vw,0.5rem)' }}>No Thrivings Yet</h2>
+              <p className="text-gray-600 text-center max-w-xs" style={{ fontSize: 'min(4vw,1rem)', marginBottom: 'min(6vw,1.5rem)' }}>
                 Create personalized wellness thrivings to support your healing journey
               </p>
-              <Link
-                href="/chat/new"
-                className="px-6 py-3 rounded-2xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium shadow-lg hover:shadow-xl transition-all"
+              <Button
+                onClick={() => window.location.href = '/chat/new'}
+                variant="gradient"
+                springAnimation
+                gradientOverlay
+                cardGlow
+                haptic="medium"
+                shadow="lg"
+                className="text-white font-semibold"
+                style={{
+                  fontSize: 'min(4vw,1rem)',
+                  padding: 'min(3vw,0.75rem) min(6vw,1.5rem)',
+                  borderRadius: 'min(12vw,3rem)',
+                  background: 'linear-gradient(135deg, var(--primary), var(--secondary))'
+                }}
               >
                 Create Your First Thriving
-              </Link>
+              </Button>
             </div>
           )}
 
@@ -984,7 +998,7 @@ export default function ThrivingsPage() {
               {/* Thriving Cards - Horizontal Scroll */}
               <div className="relative mb-8">
                 {/* Scroll Indicators - Dots at bottom */}
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
+                <div className="absolute left-1/2 -translate-x-1/2 flex items-center z-10" style={{ bottom: 'min(-2vw,-0.5rem)', gap: 'min(1.5vw,0.375rem)' }}>
                   {[...thrivings, { id: 'add-new' }].map((item, index) => (
                     <button
                       key={item.id}
@@ -1016,11 +1030,15 @@ export default function ThrivingsPage() {
                           }
                         }
                       }}
-                      className={`w-2 h-2 rounded-full transition-all ${
+                      className={`rounded-full transition-all ${
                         item.id !== 'add-new' && selectedThriving?.id === item.id
-                          ? 'bg-rose w-6' 
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500' 
                           : 'bg-gray-300 hover:bg-gray-400'
                       }`}
+                      style={{ 
+                        width: item.id !== 'add-new' && selectedThriving?.id === item.id ? 'min(6vw,1.5rem)' : 'min(2vw,0.5rem)',
+                        height: 'min(2vw,0.5rem)'
+                      }}
                     />
                   ))}
                 </div>
@@ -1051,59 +1069,65 @@ export default function ThrivingsPage() {
                     <div
                       key={thriving.id}
                       onClick={() => setSelectedThriving(thriving)}
-                      className={`thriving-card flex-shrink-0 w-[min(90vw,20rem)] rounded-3xl p-[min(5vw,1.25rem)] cursor-pointer transition-all snap-center snap-always relative overflow-hidden backdrop-blur-sm ${
+                      className={`thriving-card flex-shrink-0 w-[min(85vw,20rem)] rounded-[min(6vw,1.5rem)] p-[min(5vw,1.25rem)] cursor-pointer transition-all snap-center snap-always relative overflow-hidden backdrop-blur-sm bg-white ${
                         selectedThriving?.id === thriving.id 
-                          ? 'bg-white/95 shadow-elegant border-2 border-rose-gold/40' 
-                          : 'bg-white/80 hover:shadow-elegant-sm border border-white/60'
+                          ? '' 
+                          : 'shadow-sm hover:shadow-md border border-gray-100'
                       }`}
-                      style={{ scrollSnapAlign: 'center', scrollSnapStop: 'always' }}
+                      style={{ 
+                        scrollSnapAlign: 'center', 
+                        scrollSnapStop: 'always',
+                        boxShadow: selectedThriving?.id === thriving.id 
+                          ? '0 0 0 1px rgba(100, 210, 160, 0.15), 0 0 12px rgba(100, 210, 160, 0.2), 0 2px 8px rgba(100, 210, 160, 0.15)' 
+                          : undefined 
+                      }}
                     >
-                      {/* Subtle gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-rose/5 via-transparent to-sage/5 pointer-events-none" />
                       
                       {/* Content wrapper */}
                       <div className="relative z-10">
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex-1">
                           <div className="h-[4.5rem] flex items-start">
-                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-gold to-warm-lavender flex items-center justify-center mr-3 flex-shrink-0 shadow-sm">
-                              <Heart className="w-6 h-6 text-white" />
+                            <div className="rounded-[min(3.5vw,0.875rem)] bg-gradient-to-br from-rose-400 to-red-500 flex items-center justify-center flex-shrink-0 shadow-md" style={{ width: 'min(11vw,2.75rem)', height: 'min(11vw,2.75rem)', marginRight: 'min(3vw,0.75rem)' }}>
+                              <Heart className="text-white" style={{ width: 'min(5.5vw,1.375rem)', height: 'min(5.5vw,1.375rem)' }} />
                             </div>
-                            <h3 className="font-semibold text-gray-900 line-clamp-3 leading-relaxed text-[min(5vw,1.25rem)]">
+                            <h3 className="font-semibold text-gray-900 line-clamp-2 leading-snug text-[min(4.5vw,1.125rem)]">
                               {thriving.title}
                             </h3>
                           </div>
                         </div>
-                        <button
+                        <Button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleThrivingToggle(thriving.id);
                           }}
-                          className={`px-4 py-2 rounded-full flex items-center gap-2 text-sm font-medium transition-all backdrop-blur-sm ${
-                            thriving.isActive 
-                              ? 'bg-rose-gold/20 text-burgundy hover:bg-rose-gold/30 border border-rose-gold/40' 
-                              : 'bg-gray-100/80 text-gray-600 hover:bg-gray-200/80 border border-gray-200'
-                          }`}
+                          variant="ghost"
+                          size="sm"
+                          haptic="light"
+                          icon={thriving.isActive ? 
+                            <Pause className="w-[min(3.5vw,0.875rem)] h-[min(3.5vw,0.875rem)]" /> : 
+                            <Bell className="w-[min(3.5vw,0.875rem)] h-[min(3.5vw,0.875rem)]" />
+                          }
+                          className={`font-medium ${thriving.isActive ? 'text-orange-600' : 'text-gray-600'}`}
                         >
-                          <Bell className="w-4 h-4" />
-                          {thriving.isActive ? 'Pause' : 'Resume'}
-                        </button>
+                          {thriving.isActive ? 'Pause' : 'Activate'}
+                        </Button>
                       </div>
 
                       {/* Progress Bar */}
                       <div className="mb-4">
-                        <div className="flex justify-between mb-1.5 text-xs">
-                          <span className="text-gray-600">Today&apos;s Progress</span>
-                          <span className="font-medium text-burgundy">
+                        <div className="flex justify-between items-center" style={{ marginBottom: 'min(2vw,0.5rem)' }}>
+                          <span className="text-gray-500" style={{ fontSize: 'min(3.5vw,0.875rem)' }}>Today&apos;s Progress</span>
+                          <span className="font-semibold text-rose-600" style={{ fontSize: 'min(3.5vw,0.875rem)' }}>
                             {getRemainingStepsToday(thriving) === 0 
-                              ? '✓ Done for today!' 
+                              ? '✓ All done!' 
                               : `${getRemainingStepsToday(thriving)} more ${getRemainingStepsToday(thriving) === 1 ? 'step' : 'steps'}`
                             }
                           </span>
                         </div>
-                        <div className="bg-gray-100/50 rounded-full overflow-hidden h-2 backdrop-blur-sm">
+                        <div className="bg-gray-100 rounded-full overflow-hidden" style={{ height: 'min(1.5vw,0.375rem)' }}>
                           <div 
-                            className="h-full bg-gradient-to-r from-sage-mist to-sage transition-all duration-500"
+                            className="h-full bg-gradient-to-r from-sage-400 to-sage-500 transition-all duration-500"
                             style={{ width: `${calculateProgress(thriving)}%` }}
                           />
                         </div>
@@ -1116,7 +1140,8 @@ export default function ThrivingsPage() {
                         
                         return nextStep ? (
                           <div 
-                            className="rounded-2xl bg-gradient-to-r from-sage-mist/30 to-sage-light/20 border border-sage-light/40 p-4 mb-3 cursor-pointer hover:from-sage-mist/40 hover:to-sage-light/30 transition-all backdrop-blur-sm"
+                            className="cursor-pointer transition-all backdrop-blur-sm hover:shadow-md"
+                            style={{ borderRadius: 'min(4vw,1rem)', padding: 'min(4vw,1rem)', marginBottom: 'min(3vw,0.75rem)', background: 'linear-gradient(135deg, rgba(100, 210, 160, 0.1), rgba(255, 182, 193, 0.1))', border: '1px solid rgba(100, 210, 160, 0.3)' }}
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedThriving(thriving);
@@ -1143,39 +1168,44 @@ export default function ThrivingsPage() {
                               }, 100);
                             }}
                           >
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-xs font-medium text-sage-dark">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-gray-500" style={{ fontSize: 'min(3.5vw,0.875rem)' }}>
                                 Next: {nextStep.time ? formatReminderTime(nextStep.time) : 'Soon'}
                               </span>
                               {remainingToday > 1 && (
-                                <span className="text-xs text-gray-600">
+                                <span className="text-gray-400" style={{ fontSize: 'min(3vw,0.75rem)' }}>
                                   +{remainingToday - 1} more
                                 </span>
                               )}
                             </div>
-                            <p className="text-sm font-medium text-gray-900">{nextStep.title}</p>
+                            <p className="font-semibold text-gray-900" style={{ fontSize: 'min(4vw,1rem)' }}>{nextStep.title}</p>
                           </div>
                         ) : (
-                          <div className="text-xs text-gray-500 italic">
+                          <div className="text-gray-500 italic" style={{ fontSize: 'min(3vw,0.75rem)' }}>
                             No scheduled reminders
                           </div>
                         );
                       })()}
                       
                       {/* Journal Button */}
-                      <SoftButton
+                      <Button
                         onClick={(e) => {
                           e.stopPropagation();
                           window.location.href = `/thrivings/${thriving.id}/journal`;
                         }}
                         size="sm"
                         fullWidth
-                        className="mt-[min(3vw,0.75rem)] text-[#914372] relative overflow-hidden"
+                        className="mt-[min(3vw,0.75rem)] relative overflow-hidden font-medium"
+                        style={{
+                          backgroundColor: '#f3f4f6', // gray-100
+                          color: '#ec4899' // rose-500
+                        }}
                         icon={<BookOpen className="w-[min(4vw,1rem)] h-[min(4vw,1rem)]" />}
-                        gradientOverlay
+                        springAnimation
+                        haptic="medium"
                       >
                         Journal
-                      </SoftButton>
+                      </Button>
                       </div>
                     </div>
                   ))}
@@ -1186,12 +1216,12 @@ export default function ThrivingsPage() {
                       sessionStorage.setItem('initialMessage', 'Create a wellness thriving for me');
                       window.location.href = '/chat/new?intent=create_thriving';
                     }}
-                    className="flex-shrink-0 w-[calc(100vw-2rem)] max-w-sm rounded-2xl border-2 border-dashed border-gray-300 p-6 flex flex-col items-center justify-center cursor-pointer hover:border-rose/50 hover:bg-gray-50 transition-all snap-center snap-always"
+                    className="flex-shrink-0 w-[calc(85vw)] max-w-sm rounded-[min(6vw,1.5rem)] border-2 border-dashed border-pink-300 p-[min(6vw,1.5rem)] flex flex-col items-center justify-center cursor-pointer hover:border-rose-400 hover:bg-gradient-to-br hover:from-pink-50 hover:to-rose-50 transition-all snap-center snap-always active:scale-95"
                     style={{ scrollSnapAlign: 'center', scrollSnapStop: 'always' }}
                   >
-                    <Plus className="w-12 h-12 text-gray-400 mb-3" />
-                    <p className="text-gray-900 font-medium">Create New Thriving</p>
-                    <p className="text-sm text-gray-600 text-center mt-1">
+                    <Plus className="text-pink-400 mb-[min(3vw,0.75rem)]" style={{ width: 'min(12vw,3rem)', height: 'min(12vw,3rem)' }} />
+                    <p className="text-gray-900 font-medium" style={{ fontSize: 'min(4vw,1rem)' }}>Create New Thriving</p>
+                    <p className="text-gray-600 text-center mt-[min(1vw,0.25rem)]" style={{ fontSize: 'min(3.5vw,0.875rem)' }}>
                       Add a personalized thriving to your wellness journey
                     </p>
                   </button>
@@ -1200,9 +1230,9 @@ export default function ThrivingsPage() {
               
               {/* Swipe Indicator - Below Cards */}
               {thrivings.length > 1 && (
-                <div className="flex items-center justify-center text-xs text-gray-400 mb-6 animate-pulse">
+                <div className="flex items-center justify-center text-gray-400 animate-pulse" style={{ fontSize: 'min(3vw,0.75rem)', marginBottom: 'min(6vw,1.5rem)' }}>
                   <span>swipe to see more</span>
-                  <ChevronRight className="w-3 h-3 ml-0.5" />
+                  <ChevronRight style={{ width: 'min(3vw,0.75rem)', height: 'min(3vw,0.75rem)', marginLeft: 'min(0.5vw,0.125rem)' }} />
                 </div>
               )}
 
@@ -1212,19 +1242,19 @@ export default function ThrivingsPage() {
                     {/* Steps Section */}
                     <div className="lg:col-span-2 space-y-4">
                     {/* Daily Reminders Section */}
-                    <div className="rounded-3xl bg-white/90 backdrop-blur-sm p-6 shadow-elegant border border-white/60 relative overflow-hidden">
+                    <div className="rounded-[min(6vw,1.5rem)] bg-white shadow-md border border-gray-100 relative overflow-hidden" style={{ padding: 'min(6vw,1.5rem)' }}>
                       {/* Subtle gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-rose-gold/5 via-transparent to-sage-mist/5 pointer-events-none" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-rose-50/20 via-transparent to-transparent pointer-events-none" />
                       
                       <div className="relative z-10">
                         <div className="flex justify-between items-center mb-6">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-sage-mist to-sage-light flex items-center justify-center shadow-sm">
-                              <Bell className="w-5 h-5 text-white" />
+                          <div className="flex items-center" style={{ gap: 'min(3vw,0.75rem)' }}>
+                            <div className="rounded-[min(3vw,0.75rem)] bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center shadow-lg" style={{ width: 'min(10vw,2.5rem)', height: 'min(10vw,2.5rem)' }}>
+                              <Bell className="text-white" style={{ width: 'min(5vw,1.25rem)', height: 'min(5vw,1.25rem)' }} />
                             </div>
                             <div>
-                              <h2 className="text-xl font-semibold text-gray-900">Daily Rituals</h2>
-                              <p className="text-xs text-gray-500 mt-1">Gentle reminders for your wellness journey</p>
+                              <h2 className="font-semibold text-gray-900" style={{ fontSize: 'min(5vw,1.25rem)' }}>Daily Rituals</h2>
+                              <p className="text-gray-500 mt-[min(1vw,0.25rem)]" style={{ fontSize: 'min(3vw,0.75rem)' }}>Gentle reminders for your wellness journey</p>
                             </div>
                           </div>
                         <div className="flex items-center gap-2">
@@ -1249,13 +1279,13 @@ export default function ThrivingsPage() {
                                 }, 2000);
                               }
                             }}
-                            className="p-2 rounded-lg hover:bg-gray-50 transition-all touch-feedback touch-manipulation"
+                            className="p-2 rounded-lg hover:bg-gray-50 transition-all touch-feedback touch-manipulation active:scale-95"
                           >
                             <Edit2 className="w-4 h-4 text-gray-600" />
                           </button>
                           <button
                             onClick={() => handleDeleteThriving(selectedThriving.id)}
-                            className="p-2 rounded-lg hover:bg-gray-50 transition-all touch-feedback touch-manipulation"
+                            className="p-2 rounded-lg hover:bg-gray-50 transition-all touch-feedback touch-manipulation active:scale-95"
                           >
                             <Trash2 className="w-4 h-4 text-red-600" />
                           </button>
@@ -1276,38 +1306,38 @@ export default function ThrivingsPage() {
                             key={step.id || index} 
                             ref={el => {stepRefs.current[index] = el;}}
                             className="group">
-                            <div className={`rounded-3xl bg-white/90 backdrop-blur-sm shadow-elegant hover:shadow-elegant-sm transition-all duration-500 overflow-hidden relative ${
+                            <div className={`rounded-[min(5vw,1.25rem)] bg-white shadow-sm hover:shadow-md transition-all duration-500 overflow-hidden relative ${
                               highlightedStep === index 
-                                ? 'ring-2 ring-offset-2 ring-rose-gold/50 border-2 border-transparent shadow-lg shadow-rose-gold/20' 
-                                : 'border border-white/60 hover:border-white/80'
+                                ? 'ring-2 ring-offset-2 ring-pink-400 border-2 border-transparent shadow-lg shadow-pink-200' 
+                                : 'border border-gray-100 hover:border-gray-200'
                             }`}>
                               {/* Subtle gradient overlay */}
-                              <div className="absolute inset-0 bg-gradient-to-br from-rose-gold/3 via-transparent to-sage-mist/3 pointer-events-none" />
+                              <div className="absolute inset-0 bg-gradient-to-br from-rose-50/20 via-transparent to-transparent pointer-events-none" />
                               
                               <div className="relative z-10">
                               {/* Header with time and title */}
-                              <div className="px-6 py-4 border-b border-gray-100">
-                                <div className="flex items-center gap-3 mb-2">
-                                  <div className="flex items-center text-sage-dark">
-                                    <Bell className="w-4 h-4 mr-1.5" />
-                                    <span className="text-sm font-medium">
+                              <div className="border-b border-gray-100" style={{ padding: 'min(4vw,1rem) min(6vw,1.5rem)' }}>
+                                <div className="flex items-center" style={{ gap: 'min(3vw,0.75rem)', marginBottom: 'min(2vw,0.5rem)' }}>
+                                  <div className="flex items-center text-rose-600">
+                                    <Bell style={{ width: 'min(4vw,1rem)', height: 'min(4vw,1rem)', marginRight: 'min(1.5vw,0.375rem)' }} />
+                                    <span className="font-medium" style={{ fontSize: 'min(3.5vw,0.875rem)' }}>
                                       {step.time ? formatReminderTime(step.time) : `Step ${index + 1}`}
                                     </span>
                                   </div>
                                   <span className="text-gray-300">•</span>
-                                  <span className="text-sm text-gray-500 flex items-center">
-                                    <Clock className="w-4 h-4 mr-1.5" />
+                                  <span className="text-gray-500 flex items-center" style={{ fontSize: 'min(3.5vw,0.875rem)' }}>
+                                    <Clock style={{ width: 'min(4vw,1rem)', height: 'min(4vw,1rem)', marginRight: 'min(1.5vw,0.375rem)' }} />
                                     {step.duration} min
                                   </span>
                                 </div>
-                                <h4 className="font-semibold text-gray-900 text-lg">
+                                <h4 className="font-semibold text-gray-900" style={{ fontSize: 'min(4.5vw,1.125rem)' }}>
                                   {step.title}
                                 </h4>
                               </div>
 
                               {/* Content */}
-                              <div className="px-6 py-4">
-                                <p className="text-gray-500 text-sm leading-relaxed">
+                              <div style={{ padding: 'min(4vw,1rem) min(6vw,1.5rem)' }}>
+                                <p className="text-gray-500 leading-relaxed" style={{ fontSize: 'min(3.5vw,0.875rem)' }}>
                                   {step.description}
                                 </p>
                                 
@@ -1318,14 +1348,15 @@ export default function ThrivingsPage() {
                                     {step.tips && step.tips.length > 0 ? (
                                       <button
                                         onClick={() => toggleTips(index + 1)}
-                                        className="flex items-center text-sm text-sage-dark hover:text-sage transition-colors"
+                                        className="flex items-center transition-colors"
+                                        style={{ fontSize: 'min(3.5vw,0.875rem)', color: 'var(--primary)' }}
                                       >
-                                        <Lightbulb className="w-4 h-4 mr-1.5" />
+                                        <Lightbulb style={{ width: 'min(4vw,1rem)', height: 'min(4vw,1rem)', marginRight: 'min(1.5vw,0.375rem)' }} />
                                         Pro Tips
                                         {expandedTips.has(index + 1) ? (
-                                          <ChevronUp className="w-4 h-4 ml-1" />
+                                          <ChevronUp style={{ width: 'min(4vw,1rem)', height: 'min(4vw,1rem)', marginLeft: 'min(1vw,0.25rem)' }} />
                                         ) : (
-                                          <ChevronDown className="w-4 h-4 ml-1" />
+                                          <ChevronDown style={{ width: 'min(4vw,1rem)', height: 'min(4vw,1rem)', marginLeft: 'min(1vw,0.25rem)' }} />
                                         )}
                                       </button>
                                     ) : (
@@ -1342,9 +1373,10 @@ export default function ThrivingsPage() {
                                             window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(step.title + ' tutorial')}`, '_blank');
                                           }
                                         }}
-                                        className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-gradient-to-r from-rose/10 to-dusty-rose/10 text-burgundy hover:from-rose/20 hover:to-dusty-rose/20 transition-all border border-rose/20 shadow-sm hover:shadow-md"
+                                        className="inline-flex items-center rounded-full font-medium transition-all shadow-sm hover:shadow-md active:scale-95"
+                                        style={{ padding: 'min(1vw,0.25rem) min(3vw,0.75rem)', fontSize: 'min(3vw,0.75rem)', background: 'linear-gradient(135deg, var(--primary-light), var(--secondary-light))', color: 'white', border: '1px solid var(--primary-light)' }}
                                       >
-                                        <Play className="w-3 h-3 mr-1.5 fill-current" />
+                                        <Play className="fill-current" style={{ width: 'min(3vw,0.75rem)', height: 'min(3vw,0.75rem)', marginRight: 'min(1.5vw,0.375rem)' }} />
                                         Tutorial
                                       </button>
                                     )}
@@ -1353,11 +1385,11 @@ export default function ThrivingsPage() {
                                 
                                 {/* Pro Tips Content - Collapsible */}
                                 {step.tips && step.tips.length > 0 && expandedTips.has(index + 1) && (
-                                  <div className="mt-3 p-4 rounded-lg bg-sage-light/10 border border-sage-light/30">
-                                    <ul className="space-y-2">
+                                  <div className="" style={{ marginTop: 'min(3vw,0.75rem)', padding: 'min(4vw,1rem)', borderRadius: 'min(2vw,0.5rem)', background: 'linear-gradient(135deg, rgba(255, 228, 132, 0.15), rgba(255, 199, 95, 0.15))', border: '1px solid rgba(255, 199, 95, 0.3)' }}>
+                                    <ul style={{ display: 'flex', flexDirection: 'column', gap: 'min(2vw,0.5rem)' }}>
                                       {step.tips.map((tip, idx) => (
-                                        <li key={idx} className="text-sm text-gray-600 flex items-start">
-                                          <span className="w-1.5 h-1.5 rounded-full bg-sage mt-1.5 mr-2 flex-shrink-0" />
+                                        <li key={idx} className="text-gray-600 flex items-start" style={{ fontSize: 'min(3.5vw,0.875rem)' }}>
+                                          <span className="rounded-full flex-shrink-0 bg-yellow-500" style={{ width: 'min(1.5vw,0.375rem)', height: 'min(1.5vw,0.375rem)', marginTop: 'min(1.5vw,0.375rem)', marginRight: 'min(2vw,0.5rem)' }} />
                                           {tip}
                                         </li>
                                       ))}
@@ -1378,12 +1410,12 @@ export default function ThrivingsPage() {
                       <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
                         <div className="flex items-center justify-between mb-6">
                           <div className="flex items-center">
-                            <Package className="w-5 h-5 mr-2 text-rose" />
+                            <Package className="w-5 h-5 mr-2 text-purple-500" />
                             <h2 className="text-xl font-semibold text-gray-900">Additional Recommendations</h2>
                           </div>
                           <button
                             onClick={toggleRecommendations}
-                            className="p-2 rounded-lg hover:bg-gray-50 transition-all touch-feedback touch-manipulation"
+                            className="p-2 rounded-lg hover:bg-gray-50 transition-all touch-feedback touch-manipulation active:scale-95"
                           >
                             {isRecommendationsCollapsed ? (
                               <ChevronDown className="w-5 h-5 text-gray-600" />
@@ -1434,18 +1466,18 @@ export default function ThrivingsPage() {
                               return (
                                 <div
                                   key={index}
-                                  className="group relative rounded-2xl bg-white border border-gray-100 hover:border-rose/30 hover:shadow-lg transition-all overflow-hidden"
+                                  className="group relative rounded-2xl bg-white border border-gray-100 hover:border-purple-300 hover:shadow-lg transition-all overflow-hidden"
                                 >
                                   <div className="p-5">
                                     {/* Header with Icon and Title */}
                                     <div className="flex items-start gap-4">
-                                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose/10 to-burgundy/10 flex items-center justify-center flex-shrink-0 text-2xl shadow-sm">
+                                      <div className="w-14 h-14 rounded-2xl bg-purple-100 flex items-center justify-center flex-shrink-0 text-2xl shadow-sm">
                                         {getIcon()}
                                       </div>
                                       <div className="flex-1">
                                         <h4 className="font-semibold text-gray-900 text-lg">{title}</h4>
                                         {frequency && (
-                                          <span className="inline-block mt-1 text-xs font-medium text-sage-dark bg-sage-light/20 px-2 py-1 rounded-full">
+                                          <span className="inline-block mt-1 text-xs font-medium text-purple-700 bg-purple-100 px-2 py-1 rounded-full">
                                             {frequency.replace('_', ' ')}
                                           </span>
                                         )}
@@ -1460,7 +1492,7 @@ export default function ThrivingsPage() {
                                             <ul className="space-y-1">
                                               {tips.map((tip, tipIndex) => (
                                                 <li key={tipIndex} className="text-sm text-gray-600 flex items-start">
-                                                  <span className="text-rose mr-2">•</span>
+                                                  <span className="text-purple-500 mr-2">•</span>
                                                   <span>{tip}</span>
                                                 </li>
                                               ))}
@@ -1474,9 +1506,10 @@ export default function ThrivingsPage() {
                                                 const searchQuery = rec.videoSearchQuery || title + ' tutorial';
                                                 window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`, '_blank');
                                               }}
-                                              className="inline-flex items-center rounded-full px-4 py-2 text-sm font-medium bg-gradient-to-r from-rose/10 to-dusty-rose/10 text-burgundy hover:from-rose/20 hover:to-dusty-rose/20 transition-all border border-rose/20 shadow-sm hover:shadow-md"
+                                              className="inline-flex items-center rounded-full font-medium transition-all shadow-sm hover:shadow-md touch-feedback active:scale-95"
+                                              style={{ background: 'linear-gradient(135deg, var(--primary-light), var(--secondary-light))', color: 'white', border: '1px solid var(--primary-light)', padding: 'min(2vw,0.5rem) min(4vw,1rem)', fontSize: 'min(3.5vw,0.875rem)' }}
                                             >
-                                              <Play className="w-3.5 h-3.5 mr-2 fill-current" />
+                                              <Play className="fill-current" style={{ width: 'min(3.5vw,0.875rem)', height: 'min(3.5vw,0.875rem)', marginRight: 'min(2vw,0.5rem)' }} />
                                               Tutorial
                                             </button>
                                           </div>
@@ -1497,43 +1530,46 @@ export default function ThrivingsPage() {
                   {/* Info Section */}
                   <div className="space-y-4">
                     {/* Complete and Delete Buttons */}
-                    <div className="rounded-2xl bg-gradient-to-br from-burgundy/10 to-burgundy/5 backdrop-blur-sm p-4 border border-burgundy/10">
-                      <div className="flex gap-3">
+                    <div className="" style={{ borderRadius: 'min(4vw,1rem)', padding: 'min(4vw,1rem)', background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1))', border: '1px solid var(--primary-light)' }}>
+                      <div className="flex" style={{ gap: 'min(3vw,0.75rem)' }}>
                         <button
                           onClick={() => handleCompleteThriving(selectedThriving.id)}
-                          className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 text-sm touch-feedback touch-manipulation"
+                          className="flex-1 text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center touch-feedback touch-manipulation active:scale-95"
+                          style={{ background: 'linear-gradient(135deg, var(--primary), var(--secondary))', padding: 'min(2.5vw,0.625rem) min(4vw,1rem)', borderRadius: 'min(3vw,0.75rem)', gap: 'min(2vw,0.5rem)', fontSize: 'min(3.5vw,0.875rem)' }}
                         >
-                          <CheckCircle2 className="w-4 h-4" />
+                          <CheckCircle2 style={{ width: 'min(4vw,1rem)', height: 'min(4vw,1rem)' }} />
                           <span>Complete</span>
                         </button>
                         
                         <button
                           onClick={() => handleDeleteThriving(selectedThriving.id)}
-                          className="flex-1 px-4 py-2.5 rounded-xl bg-white/80 backdrop-blur-sm text-gray-700 font-medium border border-gray-200 hover:bg-white/90 transition-all flex items-center justify-center gap-2 text-sm touch-feedback touch-manipulation"
+                          className="flex-1 bg-white/80 backdrop-blur-sm text-gray-700 font-medium border border-gray-200 hover:bg-white/90 transition-all flex items-center justify-center touch-feedback touch-manipulation active:scale-95"
+                          style={{ padding: 'min(2.5vw,0.625rem) min(4vw,1rem)', borderRadius: 'min(3vw,0.75rem)', gap: 'min(2vw,0.5rem)', fontSize: 'min(3.5vw,0.875rem)' }}
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 style={{ width: 'min(4vw,1rem)', height: 'min(4vw,1rem)' }} />
                           <span>Delete</span>
                         </button>
                       </div>
                     </div>
                     
                     {/* Thriving Adjustment */}
-                    <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200" data-adjust-section>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                        <Settings className="w-5 h-5 mr-2 text-rose" />
+                    <div className="bg-white shadow-sm border border-gray-200" data-adjust-section style={{ borderRadius: 'min(4vw,1rem)', padding: 'min(6vw,1.5rem)' }}>
+                      <h3 className="font-semibold text-gray-900 flex items-center" style={{ fontSize: 'min(4.5vw,1.125rem)', marginBottom: 'min(4vw,1rem)' }}>
+                        <Settings style={{ width: 'min(5vw,1.25rem)', height: 'min(5vw,1.25rem)', marginRight: 'min(2vw,0.5rem)', color: 'var(--primary)' }} />
                         Adjust Thriving
                       </h3>
                       
                       {!showAdjustmentEditor ? (
                         <div>
-                          <p className="text-sm text-gray-600 mb-4">
+                          <p className="text-gray-600" style={{ fontSize: 'min(3.5vw,0.875rem)', marginBottom: 'min(4vw,1rem)' }}>
                             Need to adjust this thriving to better fit your schedule or preferences?
                           </p>
                           <button
                             ref={adjustButtonRef}
                             data-adjust-button
                             onClick={() => setShowAdjustmentEditor(true)}
-                            className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-rose/10 to-dusty-rose/10 text-burgundy text-sm font-medium hover:from-rose/20 hover:to-dusty-rose/20 transition-all"
+                            className="w-full font-medium transition-all active:scale-95"
+                            style={{ background: 'linear-gradient(135deg, var(--primary-light), var(--secondary-light))', color: 'white', padding: 'min(3vw,0.75rem) min(4vw,1rem)', borderRadius: 'min(3vw,0.75rem)', fontSize: 'min(3.5vw,0.875rem)' }}
                           >
                             Adjust Thriving
                           </button>
@@ -1544,7 +1580,8 @@ export default function ThrivingsPage() {
                             value={adjustmentText}
                             onChange={(e) => setAdjustmentText(e.target.value)}
                             placeholder="Describe how you'd like to adjust this thriving. For example: 'My work hours are 9 AM to 6 PM, so please adjust the thriving timing accordingly...'"
-                            className="w-full p-4 rounded-xl border border-gray-200 focus:border-rose/50 focus:ring-2 focus:ring-rose/20 text-sm resize-none"
+                            className="w-full border border-gray-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-200 resize-none"
+                            style={{ padding: 'min(4vw,1rem)', borderRadius: 'min(3vw,0.75rem)', fontSize: 'min(3.5vw,0.875rem)' }}
                             rows={4}
                           />
                           <div className="flex gap-2">
@@ -1552,7 +1589,8 @@ export default function ThrivingsPage() {
                               onClick={handleAdjustThriving}
                               disabled={!adjustmentText.trim()}
                               isLoading={isAdjusting}
-                              className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose to-burgundy text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all"
+                              className="flex-1 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all active:scale-95"
+                              style={{ padding: 'min(2.5vw,0.625rem) min(4vw,1rem)', borderRadius: 'min(3vw,0.75rem)', fontSize: 'min(3.5vw,0.875rem)', background: 'linear-gradient(135deg, #64d2a0, #5fb88f)' }}
                               loadingMessages={[
                                 'Adjusting...',
                                 'Analyzing...',
@@ -1570,7 +1608,8 @@ export default function ThrivingsPage() {
                                 setAdjustmentText('');
                               }}
                               disabled={isAdjusting}
-                              className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-all"
+                              className="border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-all active:scale-95"
+                              style={{ padding: 'min(2.5vw,0.625rem) min(4vw,1rem)', borderRadius: 'min(3vw,0.75rem)', fontSize: 'min(3.5vw,0.875rem)' }}
                             >
                               Cancel
                             </button>
@@ -1580,31 +1619,31 @@ export default function ThrivingsPage() {
                     </div>
                     
                     {/* Thriving Description & Expected Outcomes */}
-                    <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                        <Target className="w-5 h-5 mr-2 text-rose" />
+                    <div className="bg-white shadow-sm border border-gray-200" style={{ borderRadius: 'min(4vw,1rem)', padding: 'min(6vw,1.5rem)' }}>
+                      <h3 className="font-semibold text-gray-900 flex items-center" style={{ fontSize: 'min(4.5vw,1.125rem)', marginBottom: 'min(4vw,1rem)' }}>
+                        <Target style={{ width: 'min(5vw,1.25rem)', height: 'min(5vw,1.25rem)', marginRight: 'min(2vw,0.5rem)', color: 'var(--primary)' }} />
                         About This Thriving
                       </h3>
                       
                       {/* Description */}
-                      <p className="text-gray-600 leading-relaxed">
+                      <p className="text-gray-600 leading-relaxed" style={{ fontSize: 'min(3.5vw,0.875rem)' }}>
                         {selectedThriving.description}
                       </p>
                     </div>
                     
                     {/* Pro Tips */}
                     {selectedThriving.proTips && selectedThriving.proTips.length > 0 && (
-                      <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                          <Lightbulb className="w-5 h-5 mr-2 text-yellow-500" />
+                      <div className="bg-white shadow-sm border border-gray-200" style={{ borderRadius: 'min(4vw,1rem)', padding: 'min(6vw,1.5rem)' }}>
+                        <h3 className="font-semibold text-gray-900 flex items-center" style={{ fontSize: 'min(4.5vw,1.125rem)', marginBottom: 'min(4vw,1rem)' }}>
+                          <Lightbulb className="text-yellow-500" style={{ width: 'min(5vw,1.25rem)', height: 'min(5vw,1.25rem)', marginRight: 'min(2vw,0.5rem)' }} />
                           Pro Tips
                         </h3>
                         
                         <ul className="space-y-2">
                           {selectedThriving.proTips.map((tip, index) => (
                             <li key={index} className="flex items-start">
-                              <span className="text-rose mr-2">•</span>
-                              <span className="text-sm text-gray-600">{tip}</span>
+                              <span style={{ marginRight: 'min(2vw,0.5rem)', color: 'var(--primary)' }}>•</span>
+                              <span className="text-gray-600" style={{ fontSize: 'min(3.5vw,0.875rem)' }}>{tip}</span>
                             </li>
                           ))}
                         </ul>

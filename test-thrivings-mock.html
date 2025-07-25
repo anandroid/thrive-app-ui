@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Thrivings Mock Data</title>
+</head>
+<body>
+    <h1>Setting Mock Thrivings Data...</h1>
+    <script>
+        // Mock thrivings data
+        const mockThrivings = [
+            {
+                id: 'thriving-1',
+                title: 'Better Sleep & Recovery',
+                description: 'A comprehensive routine to improve your sleep quality and morning recovery',
+                type: 'sleep',
+                isActive: true,
+                createdAt: new Date().toISOString(),
+                steps: [
+                    {
+                        id: 'step-1',
+                        title: 'Wind Down Routine',
+                        description: 'Start dimming lights and reducing screen time',
+                        time: '21:00',
+                        duration: 30,
+                        tips: ['Use blue light filters', 'Try reading a book', 'Practice gentle stretches'],
+                        completed: false
+                    },
+                    {
+                        id: 'step-2',
+                        title: 'Evening Supplements',
+                        description: 'Take your sleep support supplements',
+                        time: '21:30',
+                        duration: 5,
+                        tips: ['Take with water', 'Avoid heavy meals'],
+                        completed: false
+                    },
+                    {
+                        id: 'step-3',
+                        title: 'Bedtime Meditation',
+                        description: 'Practice calming breathing or meditation',
+                        time: '22:00',
+                        duration: 15,
+                        tips: ['Use a meditation app', 'Focus on breathing'],
+                        completed: false
+                    }
+                ],
+                additionalRecommendations: [
+                    { title: 'Blackout curtains', description: 'Block all light for deeper sleep' },
+                    { title: 'White noise machine', description: 'Maintain consistent background sound' }
+                ],
+                proTips: [
+                    'Keep your bedroom temperature between 60-67°F',
+                    'Avoid caffeine after 2 PM'
+                ]
+            },
+            {
+                id: 'thriving-2',
+                title: 'Morning Energy Boost',
+                description: 'Start your day with sustained energy and focus',
+                type: 'energy',
+                isActive: true,
+                createdAt: new Date().toISOString(),
+                steps: [
+                    {
+                        id: 'step-1',
+                        title: 'Morning Hydration',
+                        description: 'Drink 16oz of water upon waking',
+                        time: '06:30',
+                        duration: 5,
+                        tips: ['Add lemon for vitamin C', 'Room temperature is best'],
+                        completed: true
+                    },
+                    {
+                        id: 'step-2',
+                        title: 'Energy Supplements',
+                        description: 'Take your morning vitamins and supplements',
+                        time: '07:00',
+                        duration: 5,
+                        tips: ['Take with breakfast', 'Include B-complex vitamins'],
+                        completed: false
+                    }
+                ]
+            },
+            {
+                id: 'thriving-3',
+                title: 'Stress Relief Practice',
+                description: 'Daily practices to manage stress and anxiety',
+                type: 'stress',
+                isActive: false,
+                createdAt: new Date().toISOString(),
+                steps: [
+                    {
+                        id: 'step-1',
+                        title: 'Midday Breathing',
+                        description: 'Take 5 minutes for deep breathing exercises',
+                        time: '14:00',
+                        duration: 5,
+                        tips: ['4-7-8 breathing technique', 'Find a quiet space'],
+                        completed: false
+                    }
+                ]
+            }
+        ];
+
+        // Save to localStorage
+        localStorage.setItem('thrivings', JSON.stringify(mockThrivings));
+        localStorage.setItem('thrive_onboarding_complete', 'true');
+        localStorage.setItem('thrive_user_name', JSON.stringify('Test User'));
+        
+        document.body.innerHTML = '<h1>Mock data set! Redirecting to thrivings page...</h1>';
+        
+        // Redirect to thrivings page
+        setTimeout(() => {
+            window.location.href = '/thrivings';
+        }, 1000);
+    </script>
+</body>
+</html>

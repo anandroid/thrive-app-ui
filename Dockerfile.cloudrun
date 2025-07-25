@@ -1,0 +1,60 @@
+# Use Node.js official image
+FROM node:20-alpine AS base
+
+# Install dependencies only when needed
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+RUN npm install --legacy-peer-deps --production
+
+# Build the application
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Install all dependencies for building
+RUN npm install --legacy-peer-deps
+
+# Build Next.js application
+ENV NEXT_TELEMETRY_DISABLED 1
+RUN npm run build
+
+# Production image
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copy built application
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+# Create a startup script that finds and runs server.js
+RUN echo '#!/bin/sh' > /app/start.sh && \
+    echo 'if [ -f /app/server.js ]; then' >> /app/start.sh && \
+    echo '  exec node /app/server.js' >> /app/start.sh && \
+    echo 'elif [ -f /app/apps/thrive-app/server.js ]; then' >> /app/start.sh && \
+    echo '  exec node /app/apps/thrive-app/server.js' >> /app/start.sh && \
+    echo 'else' >> /app/start.sh && \
+    echo '  echo "ERROR: server.js not found!"' >> /app/start.sh && \
+    echo '  find /app -name server.js -type f' >> /app/start.sh && \
+    echo '  exit 1' >> /app/start.sh && \
+    echo 'fi' >> /app/start.sh && \
+    chmod +x /app/start.sh
+
+USER nextjs
+
+EXPOSE 8080
+ENV PORT 8080
+ENV HOSTNAME "0.0.0.0"
+
+CMD ["/app/start.sh"]

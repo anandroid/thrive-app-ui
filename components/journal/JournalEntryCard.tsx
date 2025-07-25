@@ -149,7 +149,7 @@ export function JournalEntryCard({ entry, thriving, isLatest = false }: JournalE
     <div className={`
       rounded-2xl bg-white border overflow-hidden transition-all duration-300
       ${isLatest 
-        ? 'border-rose/20 shadow-lg shadow-rose/10' 
+        ? 'border-purple-300/50 shadow-lg shadow-purple-500/10' 
         : 'border-gray-200 shadow-sm hover:shadow-md'
       }
     `}>
@@ -160,7 +160,7 @@ export function JournalEntryCard({ entry, thriving, isLatest = false }: JournalE
             <div className={`
               w-10 h-10 rounded-xl flex items-center justify-center
               ${isLatest 
-                ? 'bg-gradient-to-br from-rose/20 to-burgundy/20 text-burgundy' 
+                ? 'bg-gradient-to-br from-purple-500/20 to-pink-500/20 text-purple-700' 
                 : 'bg-gray-100 text-gray-600'
               }
             `}>
@@ -176,7 +176,7 @@ export function JournalEntryCard({ entry, thriving, isLatest = false }: JournalE
             </div>
           </div>
           {isLatest && (
-            <span className="px-2 py-1 text-xs font-medium bg-rose/10 text-rose rounded-full">
+            <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">
               Latest
             </span>
           )}

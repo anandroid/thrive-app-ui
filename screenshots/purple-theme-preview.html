@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thrivings Page - Purple Theme Preview</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: white;
+            min-height: 812px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        .header-icon {
+            width: 32px;
+            height: 32px;
+            background: #8b5cf6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-left: auto;
+        }
+        .thriving-card {
+            margin: 16px;
+            padding: 20px;
+            background: white;
+            border-radius: 16px;
+            border: 2px solid #e9d5ff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        .thriving-card.selected {
+            border-color: #c084fc;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        .card-header {
+            display: flex;
+            align-items: start;
+            margin-bottom: 16px;
+        }
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            background: #8b5cf6;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 12px;
+        }
+        .pause-button {
+            margin-left: auto;
+            padding: 8px 16px;
+            background: #f3e8ff;
+            color: #7c3aed;
+            border: 1px solid #e9d5ff;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        .progress-bar {
+            background: #f3f4f6;
+            height: 8px;
+            border-radius: 4px;
+            margin: 16px 0;
+        }
+        .progress-fill {
+            background: #8b5cf6;
+            height: 100%;
+            border-radius: 4px;
+            width: 70%;
+        }
+        .next-step {
+            background: #faf5ff;
+            border: 1px solid #e9d5ff;
+            padding: 16px;
+            border-radius: 12px;
+            margin: 16px 0;
+        }
+        .next-step-time {
+            color: #7c3aed;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .journal-button {
+            width: 100%;
+            padding: 12px;
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            border-radius: 24px;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+        .ritual-section {
+            margin: 16px;
+            padding: 24px;
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+        }
+        .ritual-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .ritual-icon {
+            width: 40px;
+            height: 40px;
+            background: #8b5cf6;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 12px;
+        }
+        .step-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+        .step-header {
+            padding: 16px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .step-time {
+            color: #7c3aed;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        .step-content {
+            padding: 16px;
+        }
+        .pro-tips {
+            background: #faf5ff;
+            border: 1px solid #e9d5ff;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+        .pro-tip-item {
+            display: flex;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+        .tip-dot {
+            width: 6px;
+            height: 6px;
+            background: #a78bfa;
+            border-radius: 50%;
+            margin-right: 8px;
+            margin-top: 6px;
+        }
+        .section-title {
+            text-align: center;
+            margin: 40px 0 20px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <span style="font-size: 20px; font-weight: 600;">← Wellness Journey</span>
+            <div class="header-icon">♥</div>
+        </div>
+
+        <!-- Thriving Card -->
+        <div class="thriving-card selected">
+            <div class="card-header">
+                <div class="card-icon">♥</div>
+                <div style="flex: 1;">
+                    <h3 style="margin: 0 0 4px 0; font-size: 18px;">Morning Energy Boost</h3>
+                </div>
+                <button class="pause-button">🔔 Pause</button>
+            </div>
+            
+            <div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px;">
+                    <span style="color: #6b7280;">Today's Progress</span>
+                    <span style="color: #7c3aed; font-weight: 600;">1 more step</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+
+            <div class="next-step">
+                <div class="next-step-time">Next: 6:30 AM</div>
+                <div style="font-weight: 500; margin-top: 4px;">Hydrate with Lemon Water</div>
+            </div>
+
+            <button class="journal-button">📖 Journal</button>
+        </div>
+
+        <!-- Daily Rituals Section -->
+        <div class="ritual-section">
+            <div class="ritual-header">
+                <div class="ritual-icon">🔔</div>
+                <div>
+                    <h2 style="margin: 0; font-size: 20px;">Daily Rituals</h2>
+                    <p style="margin: 4px 0 0; color: #6b7280; font-size: 12px;">Gentle reminders for your wellness journey</p>
+                </div>
+            </div>
+
+            <!-- Step 1 -->
+            <div class="step-card">
+                <div class="step-header">
+                    <div class="step-time">🔔 6:30 AM • ⏱ 5 min</div>
+                    <h4 style="margin: 0; font-size: 16px;">Hydrate with Lemon Water</h4>
+                </div>
+                <div class="step-content">
+                    <p style="color: #6b7280; margin: 0 0 12px;">Start your day with warm lemon water to kickstart metabolism</p>
+                    <button style="background: none; border: none; color: #7c3aed; font-size: 14px; padding: 0;">💡 Pro Tips ▼</button>
+                    <div class="pro-tips">
+                        <div class="pro-tip-item">
+                            <div class="tip-dot"></div>
+                            <span style="font-size: 14px; color: #4b5563;">Use fresh lemon juice</span>
+                        </div>
+                        <div class="pro-tip-item">
+                            <div class="tip-dot"></div>
+                            <span style="font-size: 14px; color: #4b5563;">Add a pinch of sea salt for electrolytes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">Purple Theme Summary</div>
+        <div style="padding: 20px;">
+            <h3>Color Palette Used:</h3>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <div style="width: 60px; height: 60px; background: #8b5cf6; border-radius: 8px;"></div>
+                <div style="width: 60px; height: 60px; background: #7c3aed; border-radius: 8px;"></div>
+                <div style="width: 60px; height: 60px; background: #a78bfa; border-radius: 8px;"></div>
+                <div style="width: 60px; height: 60px; background: #e9d5ff; border-radius: 8px;"></div>
+                <div style="width: 60px; height: 60px; background: #faf5ff; border-radius: 8px;"></div>
+            </div>
+            <ul style="line-height: 1.8;">
+                <li><strong>Primary Purple:</strong> #8b5cf6 (purple-500)</li>
+                <li><strong>Dark Purple:</strong> #7c3aed (purple-700)</li>
+                <li><strong>Light Purple:</strong> #a78bfa (purple-400)</li>
+                <li><strong>Border Purple:</strong> #e9d5ff (purple-200)</li>
+                <li><strong>Background Purple:</strong> #faf5ff (purple-50)</li>
+            </ul>
+            <p><strong>Benefits:</strong> Single cohesive color scheme, no distracting gradients, clean and professional appearance while maintaining friendliness.</p>
+        </div>
+    </div>
+</body>
+</html>

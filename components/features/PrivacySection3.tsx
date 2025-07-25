@@ -30,7 +30,7 @@ export const PrivacySection3: React.FC<PrivacySectionProps> = ({ visible }) => {
         <div className="relative z-10 space-y-3">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-lg bg-white/60 flex items-center justify-center">
-              <Shield className="w-4 h-4 text-lavender" />
+              <Shield className="w-4 h-4 text-bloom-300" />
             </div>
             <h3 className="text-base font-semibold text-primary-text">Your Privacy First</h3>
           </div>

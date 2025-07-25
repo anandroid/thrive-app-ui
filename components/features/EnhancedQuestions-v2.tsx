@@ -201,9 +201,9 @@ export const EnhancedQuestionsV2: React.FC<EnhancedQuestionsV2Props> = ({
           <p className="text-sm text-gray-500 mb-2">Answered:</p>
           {questions.slice(0, currentIndex).map((q) => (
             <div key={q.id} className="flex items-center space-x-2 text-sm text-gray-600">
-              <Check className="w-4 h-4 text-sage" />
+              <Check className="w-4 h-4 text-sage-600" />
               <span>{q.prompt}</span>
-              <span className="text-sage font-medium">{answers[q.id]}</span>
+              <span className="text-sage-600 font-medium">{answers[q.id]}</span>
             </div>
           ))}
         </div>

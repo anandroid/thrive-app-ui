@@ -70,7 +70,7 @@ export default function ChatHistoryPage() {
       header={{
         title: (
           <div className="flex items-center space-x-2">
-            <MessageSquare className="w-5 h-5 text-sage-dark" />
+            <MessageSquare className="w-5 h-5 text-sage-600" />
             <span>Chat History</span>
           </div>
         ),
@@ -88,7 +88,7 @@ export default function ChatHistoryPage() {
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
             placeholder="Search conversations..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:border-sage focus:ring-2 focus:ring-sage/20 transition-all"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:border-sage-400 focus:ring-2 focus:ring-sage-400/20 transition-all"
           />
         </div>
       </div>
@@ -97,14 +97,14 @@ export default function ChatHistoryPage() {
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
-              <div className="w-12 h-12 rounded-full border-3 border-sage border-t-transparent animate-spin mx-auto mb-4" />
+              <div className="w-12 h-12 rounded-full border-3 border-sage-400 border-t-transparent animate-spin mx-auto mb-4" />
               <p className="text-gray-500">Loading conversations...</p>
             </div>
           </div>
         ) : chatHistory.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 px-4">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-sage-light/30 to-sage/20 flex items-center justify-center mb-4">
-              <MessageSquare className="w-10 h-10 text-sage-dark" />
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-sage-300/30 to-sage-400/20 flex items-center justify-center mb-4">
+              <MessageSquare className="w-10 h-10 text-sage-600" />
             </div>
             <h2 className="text-xl font-semibold text-primary-text mb-2">
               {searchQuery ? 'No conversations found' : 'No conversations yet'}
@@ -116,7 +116,7 @@ export default function ChatHistoryPage() {
             </p>
             <Link
               href="/chat/new"
-              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center space-x-2"
+              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-sage-400 to-sage-600 text-white font-medium shadow-lg hover:shadow-xl transition-all flex items-center space-x-2"
             >
               <Plus className="w-5 h-5" />
               <span>Start New Chat</span>
@@ -167,7 +167,7 @@ export default function ChatHistoryPage() {
       {chatHistory.length > 0 && (
         <Link
           href="/chat/new"
-          className="fixed bottom-[min(6vw,1.5rem)] right-[min(6vw,1.5rem)] w-[min(14vw,3.5rem)] h-[min(14vw,3.5rem)] rounded-full bg-gradient-to-br from-sage to-sage-dark shadow-lg hover:shadow-xl transition-all flex items-center justify-center group touch-feedback touch-manipulation z-50"
+          className="fixed bottom-[min(6vw,1.5rem)] right-[min(6vw,1.5rem)] w-[min(14vw,3.5rem)] h-[min(14vw,3.5rem)] rounded-full bg-gradient-to-br from-sage-400 to-sage-600 shadow-lg hover:shadow-xl transition-all flex items-center justify-center group touch-feedback touch-manipulation z-50"
         >
           <Plus className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-white group-hover:rotate-90 transition-transform duration-300" />
         </Link>

@@ -188,25 +188,50 @@ class ReactNativeBridgeManager {
       // Also listen for regular message events
       window.addEventListener('message', (event) => {
         try {
-          const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-          if (data && typeof data === 'object' && 'type' in data) {
-            console.log('[Bridge] Message event received:', data);
+          // Skip Firebase internal messages that start with !_
+          if (typeof event.data === 'string' && event.data.startsWith('!_')) {
+            return; // Ignore Firebase internal iframe messages
+          }
+          
+          let data: unknown;
+          if (typeof event.data === 'string' && (event.data.startsWith('{') || event.data.startsWith('['))) {
+            data = JSON.parse(event.data);
+          } else {
+            data = event.data; // Not JSON, treat as raw data
+          }
+
+          if (data && typeof data === 'object' && 'type' in data && typeof data.type === 'string') {
+            const msg = data as ReactNativeMessage;
+            console.log('[Bridge] Message event received:', msg);
             // Special logging for health permission messages
-            if (data.type === 'health_permission_result' || data.type === 'health_permission_status') {
-              console.log('[Bridge] Got ' + data.type + ':', JSON.stringify(data.payload));
+            if (msg.type === 'health_permission_result' || msg.type === 'health_permission_status') {
+              console.log('[Bridge] Got ' + msg.type + ':', JSON.stringify(msg.payload));
             }
-            const handler = this.messageHandlers.get(data.type);
+            const handler = this.messageHandlers.get(msg.type);
             if (handler) {
-              console.log('[Bridge] Found handler for message type:', data.type);
-              handler(data.payload);
+              console.log('[Bridge] Found handler for message type:', msg.type);
+              handler(msg.payload);
             } else {
-              console.log('[Bridge] No handler found for message type:', data.type);
+              // Only log unknown messages if they might be from React Native
+              if (msg.type && !['pantry-data', 'request-pantry-data', 'resize-iframe'].includes(msg.type)) {
+                console.log('[Bridge] No handler found for message type:', msg.type);
+              }
+            }
+          } else if (typeof data === 'string') {
+            // Handle specific non-JSON string messages
+            if (data === 'recaptcha-setup') {
+              console.log('[Bridge] Received non-JSON recaptcha-setup message.');
+              // You might want to trigger a specific action here if needed
+            } else {
+              console.log('[Bridge] Received unknown non-JSON message:', data);
             }
           }
         } catch (e) {
-          // Log the raw event data for debugging
-          console.log('[Bridge] Raw message event data:', event.data);
-          console.log('[Bridge] Parse error:', e);
+          // Only log parse errors for non-Firebase messages
+          if (typeof event.data === 'string' && !event.data.startsWith('!_')) {
+            console.log('[Bridge] Raw message event data:', event.data);
+            console.log('[Bridge] Parse error:', e);
+          }
         }
       });
     }
@@ -395,10 +420,23 @@ class ReactNativeBridgeManager {
     }
   }
 
-  public postMessage(message: unknown) {
+  public postMessage(message: ReactNativeMessage) {
     if (this.isReactNative && window.ReactNativeBridge) {
       window.ReactNativeBridge.postMessage(message);
+    } else if (this.isReactNative && window.ReactNativeWebView) {
+      // Fallback for older React Native WebView versions
+      window.ReactNativeWebView.postMessage(JSON.stringify(message));
     }
+  }
+
+  public signInWithGoogle() {
+    console.log('[Bridge] Requesting Google Sign-In from native app...');
+    this.postMessage({ type: 'SIGN_IN_GOOGLE' });
+  }
+
+  public signInWithApple() {
+    console.log('[Bridge] Requesting Apple Sign-In from native app...');
+    this.postMessage({ type: 'SIGN_IN_APPLE' });
   }
 
   public async scheduleStepReminders(stepNotifications: Array<{
@@ -531,7 +569,6 @@ class ReactNativeBridgeManager {
         resolve(result.granted);
       };
       
-      // Register for both possible message types
       this.onMessage('health_permission_status', handler);
       this.onMessage('health_permission_result', handler);
       

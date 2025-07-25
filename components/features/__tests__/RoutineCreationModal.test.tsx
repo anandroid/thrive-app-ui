@@ -86,7 +86,7 @@ describe('RoutineCreationModal', () => {
     const sevenDaysButton = screen.getByText('7').closest('button');
     fireEvent.click(sevenDaysButton!);
 
-    expect(sevenDaysButton).toHaveClass('border-rose');
+    expect(sevenDaysButton).toHaveClass('border-rose-500');
   });
 
   test('should navigate through steps', () => {

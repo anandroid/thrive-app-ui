@@ -57,7 +57,7 @@ export const NotificationSettingsCard: React.FC = () => {
       <div className="bg-white rounded-[4vw] max-rounded-[1rem] shadow-sm border border-gray-100 p-[4vw] max-p-[1rem] mb-[4vw] max-mb-[1rem]">
         <div className="flex items-center justify-between mb-[3vw] max-mb-[0.75rem]">
           <h3 className="text-[min(5vw,1.25rem)] font-semibold text-gray-900 flex items-center">
-            <Bell className="w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)] mr-[2vw] max-mr-[0.5rem] text-rose" />
+            <Bell className="w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)] mr-[2vw] max-mr-[0.5rem] text-rose-500" />
             Reminder Notifications
           </h3>
         </div>

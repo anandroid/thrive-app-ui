@@ -18,7 +18,7 @@ import {
 import { generateSupplementRecommendations } from '@/src/services/recommendations/supplementRecommendations';
 import { useThreadMetadata } from '@/src/hooks/useThreadMetadata';
 import { PantryNaturalInput } from '@/components/features/PantryNaturalInput';
-import Button, { IconButton } from '@/components/ui/Button';
+// Removed Button components in favor of inline coral styling
 
 const categoryIcons = {
   supplement: Sparkles,
@@ -32,7 +32,7 @@ const categoryColors = {
   supplement: 'from-purple-500/20 to-purple-600/15',
   medicine: 'from-blue-500/20 to-blue-600/15',
   food: 'from-orange-500/20 to-orange-600/15',
-  remedy: 'from-rose/20 to-burgundy/15',
+  remedy: 'from-orange-200/20 to-orange-300/15',
   other: 'from-gray-400/20 to-gray-500/15'
 };
 
@@ -182,26 +182,13 @@ export function PantryContent() {
         showBackButton: true,
         backHref: "/settings",
         rightElement: (
-          <IconButton
+          <button
             onClick={() => setShowAddModal(true)}
-            variant="gradient"
-            gradient={{
-              from: 'rose',
-              to: 'burgundy',
-              hoverFrom: 'burgundy',
-              hoverTo: 'burgundy',
-              activeFrom: 'rose/80',
-              activeTo: 'burgundy/80'
-            }}
-            springAnimation
-            gradientOverlay
-            cardGlow
-            haptic="medium"
-            shadow="md"
-            className="text-white"
+            className="text-white rounded-full p-3 shadow-md transition-all active:scale-95"
+            style={{background: 'linear-gradient(to right, #e16b47, #c95534)'}}
           >
             <Plus className="w-5 h-5" />
-          </IconButton>
+          </button>
         )
       }}
       className="bg-gray-50"
@@ -209,9 +196,9 @@ export function PantryContent() {
         <div className="px-4 py-6 space-y-6">
           {/* Privacy Notice - Only show when no items */}
           {pantryItems.length === 0 && (
-            <div className="rounded-2xl bg-gradient-to-br from-sage-light/10 to-sage/5 p-4 border border-sage/20">
+            <div className="rounded-2xl bg-gradient-to-br from-sage-300/10 to-sage-400/5 p-4 border border-sage-400/20">
               <div className="flex items-start space-x-3">
-                <Shield className="w-5 h-5 text-sage-dark mt-0.5" />
+                <Shield className="w-5 h-5 text-sage-600 mt-0.5" />
                 <div>
                   <h3 className="font-medium text-primary-text">Your Privacy Matters</h3>
                   <p className="text-sm text-secondary-text-thin mt-1">
@@ -237,55 +224,37 @@ export function PantryContent() {
                 placeholder="Search your pantry..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose/30"
+                className="w-full pl-10 pr-4 py-3 rounded-xl bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
               />
             </div>
 
             {/* Tag Filter - Only show if there are items with tags */}
             {allTags.length > 0 && (
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                <Button
+              <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
+                <button
                   onClick={() => setSelectedTag('all')}
-                  variant={selectedTag === 'all' ? 'gradient' : 'outline'}
-                  gradient={{
-                    from: 'rose',
-                    to: 'burgundy',
-                    hoverFrom: 'burgundy',
-                    hoverTo: 'burgundy',
-                    activeFrom: 'rose/80',
-                    activeTo: 'burgundy/80'
-                  }}
-                  springAnimation
-                  gradientOverlay={selectedTag === 'all'}
-                  cardGlow={selectedTag === 'all'}
-                  haptic="light"
-                  size="sm"
-                  className="text-sm font-medium whitespace-nowrap"
+                  className={`px-4 py-2 rounded-full font-medium transition-all active:scale-95 ${
+                    selectedTag === 'all' 
+                      ? 'text-white shadow-md' 
+                      : 'border border-gray-300 text-gray-700 bg-white'
+                  }`}
+                  style={selectedTag === 'all' ? {background: 'linear-gradient(to right, #e16b47, #c95534)'} : {}}
                 >
                   All Items
-                </Button>
+                </button>
                 {allTags.map((tag) => (
-                  <Button
+                  <button
                     key={tag}
                     onClick={() => setSelectedTag(tag)}
-                    variant={selectedTag === tag ? 'gradient' : 'outline'}
-                    gradient={{
-                      from: 'rose',
-                      to: 'burgundy',
-                      hoverFrom: 'burgundy',
-                      hoverTo: 'burgundy',
-                      activeFrom: 'rose/80',
-                      activeTo: 'burgundy/80'
-                    }}
-                    springAnimation
-                    gradientOverlay={selectedTag === tag}
-                    cardGlow={selectedTag === tag}
-                    haptic="light"
-                    size="sm"
-                    className="text-sm font-medium whitespace-nowrap"
+                    className={`px-4 py-2 rounded-full font-medium transition-all active:scale-95 text-sm whitespace-nowrap ${
+                      selectedTag === tag 
+                        ? 'text-white shadow-md' 
+                        : 'border border-gray-300 text-gray-700 bg-white'
+                    }`}
+                    style={selectedTag === tag ? {background: 'linear-gradient(to right, #e16b47, #c95534)'} : {}}
                   >
                     {tag}
-                  </Button>
+                  </button>
                 ))}
               </div>
             )}
@@ -316,26 +285,13 @@ export function PantryContent() {
                   <p className="text-secondary-text-thin max-w-md mx-auto mb-8">
                     Your companion will use this private inventory to personalize recommendations just for you.
                   </p>
-                  <Button
+                  <button
                     onClick={() => setShowAddModal(true)}
-                    variant="gradient"
-                    gradient={{
-                      from: 'rose',
-                      to: 'burgundy',
-                      hoverFrom: 'burgundy',
-                      hoverTo: 'burgundy',
-                      activeFrom: 'rose/80',
-                      activeTo: 'burgundy/80'
-                    }}
-                    springAnimation
-                    gradientOverlay
-                    cardGlow
-                    haptic="medium"
-                    shadow="lg"
-                    className="font-medium"
+                    className="px-6 py-3 rounded-full text-white font-medium shadow-lg transition-all active:scale-95"
+                    style={{background: 'linear-gradient(to right, #e16b47, #c95534)'}}
                   >
                     Add Your First Item
-                  </Button>
+                  </button>
                 </>
               )}
             </div>
@@ -356,7 +312,7 @@ export function PantryContent() {
                     key={item.id}
                     id={`pantry-item-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
                     className={`rounded-2xl bg-white border border-gray-200 overflow-hidden hover:shadow-md transition-all ${
-                      highlightedItem === item.name.toLowerCase().replace(/\s+/g, '-') ? 'ring-2 ring-burgundy animate-pulse' : ''
+                      highlightedItem === item.name.toLowerCase().replace(/\s+/g, '-') ? 'ring-2 ring-red-400 animate-pulse' : ''
                     }`}
                   >
                     {/* Image or Icon */}
@@ -373,24 +329,12 @@ export function PantryContent() {
                       )}
                       
                       {/* Delete button */}
-                      <IconButton
+                      <button
                         onClick={() => handleDeleteItem(item.id)}
-                        variant="gradient"
-                        gradient={{
-                          from: 'white/90',
-                          to: 'white/90',
-                          hoverFrom: 'white',
-                          hoverTo: 'white',
-                          activeFrom: 'gray-100',
-                          activeTo: 'gray-100'
-                        }}
-                        springAnimation
-                        cardGlow
-                        haptic="light"
-                        className="absolute top-2 right-2 bg-white/90 w-8 h-8"
+                        className="absolute top-2 right-2 bg-white/90 w-8 h-8 rounded-lg shadow-sm transition-all active:scale-95 hover:bg-white"
                       >
-                        <X className="w-5 h-5 text-gray-600" />
-                      </IconButton>
+                        <X className="w-5 h-5 text-gray-600 mx-auto" />
+                      </button>
                     </div>
 
                     {/* Content */}
@@ -431,7 +375,7 @@ export function PantryContent() {
                     Based on your wellness journey and routines
                   </p>
                 </div>
-                <Sparkles className="w-5 h-5 text-rose" />
+                <Sparkles className="w-5 h-5" style={{color: '#e16b47'}} />
               </div>
 
               <div className="space-y-3">
@@ -464,7 +408,7 @@ export function PantryContent() {
                           {rec.benefits.slice(0, 3).map((benefit, idx) => (
                             <span
                               key={idx}
-                              className="text-xs px-3 py-1 rounded-full bg-sage-light/20 text-sage-dark"
+                              className="text-xs px-3 py-1 rounded-full bg-sage-300/20 text-sage-600"
                             >
                               {benefit}
                             </span>
@@ -473,7 +417,7 @@ export function PantryContent() {
                       )}
                     </div>
 
-                    <Button
+                    <button
                       onClick={async () => {
                         const newPantryItem: PantryItem = {
                           id: Date.now().toString(),
@@ -491,24 +435,11 @@ export function PantryContent() {
                         // Update thread metadata for context awareness
                         await onPantryChange();
                       }}
-                      variant="gradient"
-                      gradient={{
-                        from: 'rose/10',
-                        to: 'burgundy/10',
-                        hoverFrom: 'rose/20',
-                        hoverTo: 'burgundy/20',
-                        activeFrom: 'rose/30',
-                        activeTo: 'burgundy/30'
-                      }}
-                      springAnimation
-                      gradientOverlay
-                      cardGlow
-                      haptic="light"
-                      fullWidth
-                      className="mt-3 text-burgundy font-medium text-sm"
+                      className="w-full text-left p-4 rounded-xl transition-all active:scale-98 shadow-sm border border-gray-100 mt-3 font-medium text-sm"
+                      style={{background: 'linear-gradient(to right, #fef6f4, #fdeae5)', color: '#c95534'}}
                     >
                       Add to Pantry
-                    </Button>
+                    </button>
                   </div>
                 ))}
               </div>

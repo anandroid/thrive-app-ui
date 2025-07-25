@@ -37,9 +37,9 @@ export function TouchButton({
   };
 
   const variantClasses = {
-    primary: 'bg-gradient-to-r from-rose to-burgundy text-white shadow-lg hover:shadow-xl',
-    secondary: 'bg-white text-burgundy border border-burgundy/20 shadow-md hover:shadow-lg',
-    ghost: 'bg-transparent text-burgundy hover:bg-burgundy/10',
+    primary: 'bg-gradient-to-r from-rose-500 to-burgundy-700 text-white shadow-lg hover:shadow-xl',
+    secondary: 'bg-white text-burgundy-700 border border-burgundy-700/20 shadow-md hover:shadow-lg',
+    ghost: 'bg-transparent text-burgundy-700 hover:bg-burgundy-700/10',
     danger: 'bg-red-500 text-white hover:bg-red-600 shadow-lg hover:shadow-xl'
   };
 

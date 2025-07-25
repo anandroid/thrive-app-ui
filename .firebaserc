@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "thrive-dev-465922",
+    "dev": "thrive-dev-465922",
+    "prod": "thrive-465618"
+  }
+}

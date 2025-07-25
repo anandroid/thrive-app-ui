@@ -145,8 +145,8 @@ export const SupplementChoiceCard: React.FC<SupplementChoiceCardProps> = ({
           aria-label="Buy this supplement"
         >
           <div className="flex items-center justify-center space-x-2">
-            <ShoppingCart className="w-4 h-4 text-rose" />
-            <span className="text-[13px] font-medium text-rose">
+            <ShoppingCart className="w-4 h-4 text-rose-500" />
+            <span className="text-[13px] font-medium text-rose-500">
               Buy
             </span>
           </div>
@@ -233,8 +233,8 @@ export const SupplementGroupCard: React.FC<SupplementGroupCardProps> = ({
             "
           >
             <div className="flex items-center justify-center space-x-2">
-              <ShoppingCart className="w-4 h-4 text-rose" />
-              <span className="text-[13px] font-medium text-rose">
+              <ShoppingCart className="w-4 h-4 text-rose-500" />
+              <span className="text-[13px] font-medium text-rose-500">
                 Buy
               </span>
             </div>

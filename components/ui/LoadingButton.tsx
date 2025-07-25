@@ -84,13 +84,13 @@ export const LoadingButton: React.FC<LoadingButtonProps> = ({
     <>
       <style dangerouslySetInnerHTML={{ __html: spinnerStyle }} />
       <Button
-        {...buttonProps}
-        onClick={onClick}
-        disabled={disabled || isLoading}
         springAnimation
         gradientOverlay
         cardGlow
         haptic="medium"
+        {...buttonProps}
+        onClick={onClick}
+        disabled={disabled || isLoading}
         className={cn(
           'relative overflow-hidden',
           className,

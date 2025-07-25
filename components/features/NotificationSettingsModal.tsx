@@ -62,8 +62,8 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
 
   const modalHeader = (
     <div className="flex items-center gap-3">
-      <div className="w-12 h-12 bg-gradient-to-br from-sage-light/30 to-soft-lavender/30 rounded-xl flex items-center justify-center">
-        <Bell className="w-6 h-6 text-sage-dark" />
+      <div className="w-12 h-12 bg-gradient-to-br from-zen-100 to-zen-200 rounded-xl flex items-center justify-center">
+        <Bell className="w-6 h-6 text-zen-600" />
       </div>
       <div>
         <h2 className="text-xl font-bold text-gray-900">
@@ -79,7 +79,7 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
   const modalFooter = (
     <button
       onClick={handleSave}
-      className="w-full py-3 rounded-xl bg-gradient-to-r from-sage to-sage-dark text-white font-semibold hover:shadow-lg transition-all touch-feedback touch-manipulation"
+      className="w-full py-3 rounded-xl bg-gradient-to-r from-zen-400 to-zen-600 text-white font-semibold hover:shadow-lg transition-all touch-feedback touch-manipulation"
     >
       Save Settings
     </button>
@@ -112,7 +112,7 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
                 Monday - Friday
               </span>
               <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.enabledWeekdays ? 'bg-sage' : 'bg-gray-300'
+                settings.enabledWeekdays ? 'bg-zen-400' : 'bg-gray-300'
               }`}>
                 <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
                   settings.enabledWeekdays ? 'translate-x-6' : 'translate-x-0.5'
@@ -129,7 +129,7 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
                 Saturday & Sunday
               </span>
               <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.enabledWeekends ? 'bg-sage' : 'bg-gray-300'
+                settings.enabledWeekends ? 'bg-zen-400' : 'bg-gray-300'
               }`}>
                 <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
                   settings.enabledWeekends ? 'translate-x-6' : 'translate-x-0.5'
@@ -158,10 +158,10 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
                 >
                   <div className="flex items-center gap-3 flex-1">
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                      isEnabled ? 'bg-sage-light/30' : 'bg-gray-200'
+                      isEnabled ? 'bg-zen-300/30' : 'bg-gray-200'
                     }`}>
                       {isEnabled ? (
-                        <Bell className="w-4 h-4 text-sage-dark" />
+                        <Bell className="w-4 h-4 text-zen-600" />
                       ) : (
                         <BellOff className="w-4 h-4 text-gray-400" />
                       )}
@@ -182,7 +182,7 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
                   </div>
                   
                   <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                    isEnabled ? 'bg-sage' : 'bg-gray-300'
+                    isEnabled ? 'bg-zen-400' : 'bg-gray-300'
                   }`}>
                     <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
                       isEnabled ? 'translate-x-5' : 'translate-x-0.5'

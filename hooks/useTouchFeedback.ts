@@ -13,9 +13,16 @@ export function useTouchFeedback(options: TouchFeedbackOptions = {}) {
     scale = 0.97 
   } = options;
 
+  // Track if user has interacted with the page
+  const hasUserInteracted = useCallback(() => {
+    return typeof window !== 'undefined' && 
+           (document.hasFocus() || sessionStorage.getItem('userInteracted') === 'true');
+  }, []);
+
   // Trigger haptic feedback if available
   const triggerHaptic = useCallback(() => {
-    if ('vibrate' in navigator) {
+    // Only vibrate if user has interacted with the page
+    if ('vibrate' in navigator && hasUserInteracted()) {
       // Different vibration patterns for different styles
       const patterns = {
         light: 10,
@@ -26,7 +33,7 @@ export function useTouchFeedback(options: TouchFeedbackOptions = {}) {
       try {
         navigator.vibrate(patterns[hapticStyle]);
       } catch (e) {
-        // Silently fail if vibration is not supported
+        // Silently fail if vibration is not supported or blocked
       }
     }
 
@@ -49,7 +56,24 @@ export function useTouchFeedback(options: TouchFeedbackOptions = {}) {
         // Silently fail
       }
     }
-  }, [hapticStyle]);
+  }, [hapticStyle, hasUserInteracted]);
+
+  // Set user interaction flag on first interaction
+  useEffect(() => {
+    const setInteracted = () => {
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('userInteracted', 'true');
+      }
+    };
+    
+    document.addEventListener('click', setInteracted, { once: true });
+    document.addEventListener('touchstart', setInteracted, { once: true });
+    
+    return () => {
+      document.removeEventListener('click', setInteracted);
+      document.removeEventListener('touchstart', setInteracted);
+    };
+  }, []);
 
   // Prevent double tap zoom on iOS
   useEffect(() => {

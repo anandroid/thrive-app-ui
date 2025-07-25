@@ -2,6 +2,7 @@
 
 import React, { ReactNode } from 'react';
 import { ActionBar } from '@/components/ui/ActionBar';
+import { BottomNav } from '@/components/home/BottomNav';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -19,6 +20,7 @@ interface AppLayoutProps {
   stickyBottom?: ReactNode; // For sticky bottom elements (input, buttons, etc)
   className?: string;
   contentClassName?: string;
+  showBottomNav?: boolean; // Control whether to show bottom nav
 }
 
 /**
@@ -42,7 +44,8 @@ export function AppLayout({
   customHeader,
   stickyBottom,
   className = '',
-  contentClassName = ''
+  contentClassName = '',
+  showBottomNav = false
 }: AppLayoutProps) {
   return (
     <div className={`app-layout ${className}`}>
@@ -69,12 +72,21 @@ export function AppLayout({
       {/* Scrollable Content */}
       <div className={`app-content ${contentClassName}`}>
         {children}
-        {stickyBottom && (
-          <div className="app-sticky-bottom">
-            {stickyBottom}
-          </div>
-        )}
       </div>
+      
+      {/* Sticky Bottom - Outside of scrollable content */}
+      {stickyBottom && (
+        <div className="app-sticky-bottom">
+          {stickyBottom}
+        </div>
+      )}
+      
+      {/* Show BottomNav when enabled and no custom stickyBottom */}
+      {showBottomNav && !stickyBottom && (
+        <div className="app-sticky-bottom">
+          <BottomNav />
+        </div>
+      )}
     </div>
   );
 }

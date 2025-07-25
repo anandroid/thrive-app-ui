@@ -58,9 +58,9 @@ export const ExpertConsultationCard: React.FC<ExpertConsultationCardProps> = ({
   };
 
   return (
-    <div className="w-full p-[5vw] max-p-6 rounded-[4vw] max-rounded-2xl bg-gradient-to-br from-sage-light/20 to-sage/10 border border-sage-light/30 shadow-lg hover:shadow-xl transition-shadow">
+    <div className="w-full p-[5vw] max-p-6 rounded-[4vw] max-rounded-2xl bg-gradient-to-br from-sage-300/20 to-sage-400/10 border border-sage-300/30 shadow-lg hover:shadow-xl transition-shadow">
       <div className="flex items-start space-x-[4vw] max-space-x-4">
-        <div className="w-[12vw] h-[12vw] max-w-14 max-h-14 rounded-[3vw] max-rounded-xl bg-gradient-to-br from-sage to-sage-dark flex items-center justify-center flex-shrink-0 shadow-md">
+        <div className="w-[12vw] h-[12vw] max-w-14 max-h-14 rounded-[3vw] max-rounded-xl bg-gradient-to-br from-sage-400 to-sage-600 flex items-center justify-center flex-shrink-0 shadow-md">
           <UserCheck className="w-[6vw] h-[6vw] max-w-7 max-h-7 text-white" />
         </div>
         <div className="flex-1">
@@ -68,7 +68,7 @@ export const ExpertConsultationCard: React.FC<ExpertConsultationCardProps> = ({
             {title}
           </h3>
           {metadata?.highlight && (
-            <p className="text-[min(3.5vw,0.875rem)] font-medium text-sage-dark mb-[2vw] bg-sage-light/20 px-[2vw] py-[1vw] rounded-[2vw] max-rounded-lg inline-block">
+            <p className="text-[min(3.5vw,0.875rem)] font-medium text-sage-600 mb-[2vw] bg-sage-300/20 px-[2vw] py-[1vw] rounded-[2vw] max-rounded-lg inline-block">
               {metadata.highlight}
             </p>
           )}
@@ -84,7 +84,7 @@ export const ExpertConsultationCard: React.FC<ExpertConsultationCardProps> = ({
             <ul className="space-y-[1.5vw] mb-[4vw]">
               {metadata.benefits.map((benefit, idx) => (
                 <li key={idx} className="flex items-start space-x-[2vw] text-[min(3.2vw,0.8rem)] text-gray-600">
-                  <CheckCircle className="w-[4vw] h-[4vw] max-w-4 max-h-4 text-sage flex-shrink-0 mt-[0.5vw]" />
+                  <CheckCircle className="w-[4vw] h-[4vw] max-w-4 max-h-4 text-sage-400 flex-shrink-0 mt-[0.5vw]" />
                   <span>{benefit}</span>
                 </li>
               ))}
@@ -92,7 +92,7 @@ export const ExpertConsultationCard: React.FC<ExpertConsultationCardProps> = ({
           )}
           <button
             onClick={handleBookConsultation}
-            className="w-full py-[3.5vw] max-py-4 px-[5vw] max-px-6 bg-gradient-to-r from-sage to-sage-dark text-white rounded-[3vw] max-rounded-xl font-medium text-[min(4vw,1rem)] hover:from-sage-dark hover:to-sage-dark transition-all shadow-md hover:shadow-lg active:scale-[0.98] touch-feedback touch-manipulation"
+            className="w-full py-[3.5vw] max-py-4 px-[5vw] max-px-6 bg-gradient-to-r from-sage-400 to-sage-600 text-white rounded-[3vw] max-rounded-xl font-medium text-[min(4vw,1rem)] hover:from-sage-600 hover:to-sage-600 transition-all shadow-md hover:shadow-lg active:scale-[0.98] touch-feedback touch-manipulation"
           >
             Book Free Consultation
           </button>

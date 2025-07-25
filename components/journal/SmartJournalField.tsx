@@ -130,7 +130,7 @@ export function SmartJournalField({ field, value, onChange, previousValue }: Sma
         {config.allowCustom && (
           <button
             onClick={() => setShowCustomInput(!showCustomInput)}
-            className="text-[min(3.5vw,0.875rem)] text-rose hover:text-burgundy"
+            className="text-[min(3.5vw,0.875rem)] text-rose-500 hover:text-burgundy-700"
           >
             Use different emoji
           </button>

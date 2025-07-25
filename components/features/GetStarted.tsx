@@ -28,13 +28,13 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
 
   return (
     <>
-      <div className="fixed inset-0 w-full h-[100vh] h-[100dvh] overflow-hidden bg-gradient-to-br from-white via-soft-blush/20 to-sage-light/10">
+      <div className="fixed inset-0 w-full h-[100vh] h-[100dvh] overflow-hidden bg-gradient-to-br from-white via-soft-blush/20 to-sage-300/10">
         {/* Modern gradient background with subtle animation */}
         <div className="absolute inset-0 z-0">
           {/* Animated gradient orbs */}
-          <div className="absolute top-[10%] left-[10%] w-[min(40vw,200px)] h-[min(40vw,200px)] bg-gradient-to-br from-rose/20 to-burgundy/15 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '4s' }} />
-          <div className="absolute bottom-[20%] right-[10%] w-[min(50vw,300px)] h-[min(50vw,300px)] bg-gradient-to-br from-sage-light/20 to-sage/15 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '5s', animationDelay: '1s' }} />
-          <div className="absolute top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 w-[min(60vw,400px)] h-[min(60vw,400px)] bg-gradient-to-br from-soft-lavender/15 to-dusty-rose/10 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '6s', animationDelay: '2s' }} />
+          <div className="absolute top-[10%] left-[10%] w-[min(40vw,200px)] h-[min(40vw,200px)] bg-gradient-to-br from-rose-500/20 to-burgundy-700/15 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '4s' }} />
+          <div className="absolute bottom-[20%] right-[10%] w-[min(50vw,300px)] h-[min(50vw,300px)] bg-gradient-to-br from-sage-300/20 to-sage-400/15 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '5s', animationDelay: '1s' }} />
+          <div className="absolute top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 w-[min(60vw,400px)] h-[min(60vw,400px)] bg-gradient-to-br from-soft-lavender/15 to-dusty-rose-600/10 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '6s', animationDelay: '2s' }} />
           
           {/* Subtle grid pattern */}
           <div className="absolute inset-0" 
@@ -55,13 +55,13 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
               isLoaded ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'
             }`}>
               {/* Enhanced decorative elements */}
-              <div className="absolute -top-[min(3vw,1.5rem)] -right-[min(3vw,1.5rem)] text-rose animate-bounce" style={{ animationDuration: '3s' }}>
+              <div className="absolute -top-[min(3vw,1.5rem)] -right-[min(3vw,1.5rem)] text-rose-500 animate-bounce" style={{ animationDuration: '3s' }}>
                 <div className="relative">
                   <Sparkles className="w-[min(7vw,2rem)] h-[min(7vw,2rem)]" />
                   <div className="absolute inset-0 blur-xl bg-rose/30" />
                 </div>
               </div>
-              <div className="absolute -bottom-[min(2vw,1rem)] -left-[min(2vw,1rem)] text-sage animate-bounce" style={{ animationDelay: '1s', animationDuration: '3s' }}>
+              <div className="absolute -bottom-[min(2vw,1rem)] -left-[min(2vw,1rem)] text-sage-400 animate-bounce" style={{ animationDelay: '1s', animationDuration: '3s' }}>
                 <div className="relative">
                   <Leaf className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)]" />
                   <div className="absolute inset-0 blur-xl bg-sage/30" />
@@ -80,9 +80,9 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
               }`}>
                 <div className="w-full h-full flex items-center justify-center">
                   <div className="relative w-[70%] h-[70%]">
-                    <div className="absolute inset-0 bg-gradient-to-br from-rose/30 to-burgundy/25 rounded-full blur-3xl animate-pulse" />
-                    <div className="absolute inset-0 bg-gradient-to-tl from-sage-light/25 to-sage/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
-                    <div className="absolute inset-0 bg-gradient-to-r from-soft-lavender/20 to-dusty-rose/15 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
+                    <div className="absolute inset-0 bg-gradient-to-br from-rose-500/30 to-burgundy-700/25 rounded-full blur-3xl animate-pulse" />
+                    <div className="absolute inset-0 bg-gradient-to-tl from-sage-300/25 to-sage-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+                    <div className="absolute inset-0 bg-gradient-to-r from-soft-lavender/20 to-dusty-rose-600/15 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
                   </div>
                 </div>
               </div>
@@ -108,7 +108,7 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
               <h1 className={`text-[min(10vw,3rem)] font-extrabold leading-tight transition-all duration-1000 delay-300 ${
                 isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
               }`}>
-                <span className="bg-gradient-to-br from-burgundy via-rose to-sage bg-clip-text text-transparent animate-gradient">
+                <span className="bg-gradient-to-br from-burgundy-700 via-rose-500 to-sage-400 bg-clip-text text-transparent animate-gradient">
                   Welcome to Thrive
                 </span>
               </h1>
@@ -129,15 +129,15 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
               <div className={`flex flex-wrap justify-center gap-[min(3vw,1rem)] pt-[min(3vh,1.5rem)] transition-all duration-1000 delay-900 ${
                 isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
               }`}>
-                <div className="group px-[min(4vw,1rem)] py-[min(2vw,0.5rem)] bg-gradient-to-r from-rose/10 to-burgundy/10 text-rose-600 font-semibold rounded-full border border-rose/20 hover:border-rose/40 transition-all hover:scale-105 cursor-default flex items-center gap-[min(1.5vw,0.375rem)]">
+                <div className="group px-[min(4vw,1rem)] py-[min(2vw,0.5rem)] bg-gradient-to-r from-rose-500/10 to-burgundy-700/10 text-rose-600 font-semibold rounded-full border border-rose-500/20 hover:border-rose-500/40 transition-all hover:scale-105 cursor-default flex items-center gap-[min(1.5vw,0.375rem)]">
                   <Shield className="w-[min(4vw,1rem)] h-[min(4vw,1rem)]" />
                   <span className="text-[min(3.5vw,0.875rem)]">100% Private</span>
                 </div>
-                <div className="group px-[min(4vw,1rem)] py-[min(2vw,0.5rem)] bg-gradient-to-r from-sage/10 to-sage-dark/10 text-sage-dark font-semibold rounded-full border border-sage/20 hover:border-sage/40 transition-all hover:scale-105 cursor-default flex items-center gap-[min(1.5vw,0.375rem)]">
+                <div className="group px-[min(4vw,1rem)] py-[min(2vw,0.5rem)] bg-gradient-to-r from-sage-400/10 to-sage-600/10 text-sage-600 font-semibold rounded-full border border-sage-400/20 hover:border-sage-400/40 transition-all hover:scale-105 cursor-default flex items-center gap-[min(1.5vw,0.375rem)]">
                   <Leaf className="w-[min(4vw,1rem)] h-[min(4vw,1rem)]" />
                   <span className="text-[min(3.5vw,0.875rem)]">Natural First</span>
                 </div>
-                <div className="group px-[min(4vw,1rem)] py-[min(2vw,0.5rem)] bg-gradient-to-r from-dusty-rose/10 to-rose/10 text-burgundy font-semibold rounded-full border border-dusty-rose/20 hover:border-dusty-rose/40 transition-all hover:scale-105 cursor-default flex items-center gap-[min(1.5vw,0.375rem)]">
+                <div className="group px-[min(4vw,1rem)] py-[min(2vw,0.5rem)] bg-gradient-to-r from-dusty-rose-600/10 to-rose-500/10 text-burgundy-700 font-semibold rounded-full border border-dusty-rose-600/20 hover:border-dusty-rose-600/40 transition-all hover:scale-105 cursor-default flex items-center gap-[min(1.5vw,0.375rem)]">
                   <Heart className="w-[min(4vw,1rem)] h-[min(4vw,1rem)]" />
                   <span className="text-[min(3.5vw,0.875rem)]">Personalized</span>
                 </div>
@@ -157,7 +157,7 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
                   By continuing, you accept our{' '}
                   <button
                     onClick={() => setShowTermsModal(true)}
-                    className="text-burgundy font-semibold underline decoration-burgundy/30 hover:decoration-burgundy/60 transition-all active:scale-95 touch-manipulation"
+                    className="text-burgundy-700 font-semibold underline decoration-burgundy-700/30 hover:decoration-burgundy-700/60 transition-all active:scale-95 touch-manipulation"
                   >
                     Terms & Conditions
                   </button>
@@ -176,12 +176,12 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
                 haptic="medium"
                 shadow="xl"
                 gradient={{
-                  from: 'sage-light',
-                  to: 'sage',
-                  hoverFrom: 'sage',
-                  hoverTo: 'sage-dark',
-                  activeFrom: 'sage-light/40',
-                  activeTo: 'sage/30',
+                  from: 'sage-300',
+                  to: 'sage-400',
+                  hoverFrom: 'sage-400',
+                  hoverTo: 'sage-600',
+                  activeFrom: 'sage-300/40',
+                  activeTo: 'sage-400/30',
                   direction: 'to-r'
                 }}
                 rounded="3xl"
@@ -209,7 +209,7 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
             <div className="space-y-[min(4vw,1.5rem)] text-secondary-text">
               <div>
                 <h3 className="font-semibold text-primary-text mb-[min(2vw,0.5rem)] flex items-center text-[min(4vw,1rem)]">
-                  <Shield className="w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)] mr-[min(2vw,0.5rem)] text-sage" />
+                  <Shield className="w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)] mr-[min(2vw,0.5rem)] text-sage-400" />
                   Medical Disclaimer
                 </h3>
                 <p className="text-[min(3.5vw,0.875rem)] leading-relaxed">
@@ -255,10 +255,10 @@ export const GetStarted: React.FC<GetStartedProps> = ({ onComplete }) => {
             cardGlow
             haptic="medium"
             gradient={{
-              from: 'sage-light',
-              to: 'sage',
-              activeFrom: 'sage-light/40',
-              activeTo: 'sage/30'
+              from: 'sage-300',
+              to: 'sage-400',
+              activeFrom: 'sage-300/40',
+              activeTo: 'sage-400/30'
             }}
             className="mt-[min(6vw,2rem)]"
             icon={<Check className="w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)]" />}

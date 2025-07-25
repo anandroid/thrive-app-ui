@@ -107,7 +107,7 @@ export function JournalPromptCard({ prompt, response, onChange, userProfile }: J
               </span>
               {isPersonalized && (
                 <div className="flex items-center space-x-1">
-                  <TrendingUp className="w-3 h-3 text-dusty-rose" />
+                  <TrendingUp className="w-3 h-3 text-dusty-rose-600" />
                   <span className="text-xs text-dusty-rose font-medium">Smart</span>
                 </div>
               )}
@@ -129,7 +129,7 @@ export function JournalPromptCard({ prompt, response, onChange, userProfile }: J
         {isPersonalized && userProfile && (
           <div className="mt-2 p-2 bg-white/60 rounded-lg border border-dusty-rose/20">
             <div className="flex items-center space-x-1">
-              <Sparkles className="w-3 h-3 text-dusty-rose" />
+              <Sparkles className="w-3 h-3 text-dusty-rose-600" />
               <span className="text-xs text-gray-700">
                 Personalized based on your {userProfile.dataPoints} journal entries
               </span>

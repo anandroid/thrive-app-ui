@@ -117,15 +117,15 @@ export const ThrivingTutorial: React.FC<ThrivingTutorialProps> = ({ onClose, act
                   onArrowClick?.();
                 }, 300);
               }}
-              className="w-full p-4 rounded-2xl bg-gradient-to-r from-sage-light/20 to-sage/10 border border-sage-light/30 hover:from-sage-light/30 hover:to-sage/20 transition-all group cursor-pointer touch-feedback touch-manipulation active:scale-[0.98] active:from-sage-light/40 active:to-sage/30"
+              className="w-full p-4 rounded-2xl bg-gradient-to-r from-cosmic-200/20 to-bloom-200/20 border-2 border-cosmic-300 hover:from-cosmic-200/30 hover:to-bloom-200/30 transition-all group cursor-pointer touch-feedback touch-manipulation active:scale-[0.98] active:from-cosmic-200/40 active:to-bloom-200/40"
             >
               <div className="flex flex-col items-center space-y-2">
                 <div className="relative">
                   {/* Animated arrow pointing down */}
-                  <div className="absolute inset-0 w-10 h-10 bg-gradient-to-br from-sage-light to-sage rounded-full shadow-lg group-hover:shadow-xl transition-shadow animate-pulse" />
+                  <div className="absolute inset-0 w-10 h-10 bg-gradient-to-br from-cosmic-500 to-bloom-500 rounded-full shadow-lg group-hover:shadow-xl transition-shadow animate-pulse" />
                   <ArrowDown className="relative w-10 h-10 text-white p-2 animate-bounce z-10" />
                 </div>
-                <p className="text-base font-medium text-sage-dark">
+                <p className="text-base font-medium text-cosmic-700">
                   {actionableItemText}
                 </p>
                 <p className="text-xs text-secondary-text-thin">

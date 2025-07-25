@@ -5,11 +5,12 @@ import {
   Activity, Heart, Moon, Footprints, 
   TrendingUp, TrendingDown, Minus,
   ChevronRight, Sparkles,
-  Zap, Droplets, Brain
+  Zap, Droplets, Brain, Smartphone, Download
 } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
 import { TouchLink } from '@/components/ui/TouchLink';
 import { healthPermissionManager } from '@/src/utils/healthPermissionManager';
+import { Modal } from '@/components/ui/Modal';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -76,6 +77,7 @@ export default function HealthInsights({ showFullView = true }: HealthInsightsPr
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedTimeRange, setSelectedTimeRange] = useState<'day' | 'week' | 'month'>('week');
   const [selectedMetric, setSelectedMetric] = useState<string>('steps');
+  const [showDownloadModal, setShowDownloadModal] = useState<boolean>(false);
   
   console.log('[HealthInsights] Component rendered with showFullView:', showFullView);
 
@@ -127,6 +129,12 @@ export default function HealthInsights({ showFullView = true }: HealthInsightsPr
   const requestHealthPermission = async () => {
     console.log('[HealthInsights] requestHealthPermission called');
     
+    // If on web, show download modal instead
+    if (devicePlatform === 'web') {
+      setShowDownloadModal(true);
+      return;
+    }
+    
     try {
       const granted = await healthPermissionManager.requestPermission();
       console.log('[HealthInsights] Permission result:', granted);
@@ -170,11 +178,11 @@ export default function HealthInsights({ showFullView = true }: HealthInsightsPr
 
   const getMetricColor = (type: string) => {
     const colors: Record<string, { bg: string; border: string }> = {
-      steps: { bg: 'from-sage-light to-sage', border: 'border-sage-light/30' },
-      heart_rate: { bg: 'from-rose to-burgundy', border: 'border-rose/30' }, 
-      sleep: { bg: 'from-soft-lavender to-dusty-rose', border: 'border-soft-lavender/30' },
-      water: { bg: 'from-sage to-sage-dark', border: 'border-sage/30' },
-      calories: { bg: 'from-dusty-rose to-rose', border: 'border-dusty-rose/30' }
+      steps: { bg: 'from-zen-300 to-zen-400', border: 'border-zen-300/30' },
+      heart_rate: { bg: 'from-bloom-400 to-bloom-600', border: 'border-bloom-400/30' }, 
+      sleep: { bg: 'from-cosmic-300 to-cosmic-500', border: 'border-cosmic-300/30' },
+      water: { bg: 'from-blue-400 to-blue-600', border: 'border-blue-400/30' },
+      calories: { bg: 'from-orange-400 to-orange-600', border: 'border-orange-400/30' }
     };
     return colors[type] || { bg: 'from-gray-400 to-gray-500', border: 'border-gray-200' };
   };
@@ -209,34 +217,39 @@ export default function HealthInsights({ showFullView = true }: HealthInsightsPr
                              devicePlatform === 'android' ? 'Google Fit' : 
                              'Health Data';
     
-    const healthServiceIcon = devicePlatform === 'ios' ? '🍎' : 
-                             devicePlatform === 'android' ? '🤖' : 
-                             '❤️';
     return (
-      <div className="mt-8 p-[min(6vw,1.5rem)] rounded-[min(6vw,1.5rem)] bg-gradient-to-br from-sage-light/20 to-rose/10 border border-sage-light/30">
-        <div className="text-center">
-          <div className="w-[min(16vw,4rem)] h-[min(16vw,4rem)] mx-auto mb-[min(4vw,1rem)] rounded-full bg-white/80 flex items-center justify-center text-[min(8vw,2rem)]">
-            {healthServiceIcon}
+      <div 
+        onClick={requestHealthPermission}
+        className="group mt-8 bg-gradient-to-br from-rose-50 to-red-100/70 rounded-[4vw] max-rounded-[1rem] p-[4vw] max-p-[1rem] mb-[4vw] max-mb-[1rem] cursor-pointer hover:shadow-xl hover:scale-[1.02] hover:from-red-100 hover:to-rose-50 active:scale-[0.98] transition-all duration-200 border border-rose-200/50 shadow-lg touch-feedback"
+      >
+        <div className="flex items-center justify-between mb-[3vw] max-mb-[0.75rem]">
+          <div className="flex items-center gap-[3vw] max-gap-[0.75rem]">
+            <div className="w-[10vw] h-[10vw] max-w-[2.5rem] max-h-[2.5rem] bg-white rounded-[2.5vw] max-rounded-[0.625rem] flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+              <Heart className="w-[5vw] h-[5vw] max-w-[1.25rem] max-h-[1.25rem] text-red-500 fill-red-500 group-hover:scale-110 transition-transform" />
+            </div>
+            <div>
+              <h3 className="text-[min(4.5vw,1.125rem)] font-semibold text-gray-800">
+                Connect Health Data
+              </h3>
+              <p className="text-[min(3.5vw,0.875rem)] text-gray-500">
+                {devicePlatform === 'ios' ? 'Apple Health' : devicePlatform === 'android' ? 'Google Fit' : 'Health tracking'}
+              </p>
+            </div>
           </div>
-          <h3 className="text-[min(5vw,1.125rem)] font-semibold text-gray-900 mb-[min(2vw,0.5rem)]">
-            Connect {healthServiceName}
-          </h3>
-          <p className="text-[min(3.5vw,0.875rem)] text-gray-600 mb-[min(6vw,1.5rem)] max-w-md mx-auto">
-            See how your wellness thrivings impact your health metrics. 
-            Track progress and discover insights.
-          </p>
-          <button
-            onClick={requestHealthPermission}
-            className="px-[min(6vw,1.5rem)] py-[min(3vw,0.75rem)] rounded-full bg-gradient-to-r from-sage to-sage-dark text-white font-medium shadow-lg hover:shadow-xl transition-all text-[min(4vw,1rem)]"
-          >
-            Connect {healthServiceName}
-          </button>
-          {devicePlatform === 'web' && (
-            <p className="text-[min(3vw,0.75rem)] text-gray-500 mt-[min(4vw,1rem)]">
-              Health data is available in the mobile app
-            </p>
-          )}
+          <ChevronRight className="w-[5vw] h-[5vw] max-w-[1.25rem] max-h-[1.25rem] text-gray-400 group-hover:text-gray-600 group-hover:translate-x-[0.5vw] transition-all" />
         </div>
+
+        <p className="text-[min(3.5vw,0.875rem)] text-gray-700 px-[1vw]">
+          See how your wellness thrivings impact your health metrics. Track progress and discover insights.
+        </p>
+        
+        {/* Action button area */}
+        <div className="flex items-center justify-center mt-[3vw] max-mt-[0.75rem] pt-[3vw] max-pt-[0.75rem] border-t border-rose-200/30">
+          <div className="px-[4vw] max-px-[1rem] py-[2vw] max-py-[0.5rem] rounded-full bg-gradient-to-r from-rose-400 to-red-500 text-white font-medium text-[min(3.5vw,0.875rem)]">
+            Connect {healthServiceName}
+          </div>
+        </div>
+        
       </div>
     );
   }
@@ -281,7 +294,7 @@ export default function HealthInsights({ showFullView = true }: HealthInsightsPr
       <div className="p-[min(4vw,1rem)] rounded-[min(5vw,1.25rem)] bg-white shadow-sm border border-gray-100">
         <div className="flex items-center justify-between mb-[min(4vw,1rem)]">
           <h3 className="text-[min(4.5vw,1.125rem)] font-semibold text-gray-900 flex items-center gap-[min(2vw,0.5rem)]">
-            <Sparkles className="w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)] text-rose" />
+            <Sparkles className="w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)] text-zen-500" />
             Health Summary
           </h3>
           <div className="text-right">
@@ -347,7 +360,7 @@ export default function HealthInsights({ showFullView = true }: HealthInsightsPr
         <TouchLink
           href="/settings/health"
           variant="subtle"
-          className="flex items-center justify-center gap-[min(2vw,0.5rem)] mt-[min(4vw,1rem)] py-[min(2vw,0.5rem)] text-[min(3.5vw,0.875rem)] text-sage-dark hover:text-sage font-medium"
+          className="flex items-center justify-center gap-[min(2vw,0.5rem)] mt-[min(4vw,1rem)] py-[min(2vw,0.5rem)] text-[min(3.5vw,0.875rem)] text-zen-600 hover:text-zen-700 font-medium"
         >
           View Detailed Analytics
           <ChevronRight className="w-[min(4vw,1rem)] h-[min(4vw,1rem)]" />
@@ -358,11 +371,68 @@ export default function HealthInsights({ showFullView = true }: HealthInsightsPr
 
   // Full view for Thrivings page
   return (
+    <>
+      {/* Download App Modal for Web Users */}
+      <Modal
+        isOpen={showDownloadModal}
+        onClose={() => setShowDownloadModal(false)}
+        title="Download Thrive App"
+        size="md"
+      >
+        <div className="text-center py-[min(4vw,1rem)]">
+          <div className="w-[min(20vw,5rem)] h-[min(20vw,5rem)] mx-auto mb-[min(4vw,1rem)] rounded-[min(5vw,1.25rem)] bg-gradient-to-br from-rose-100 to-sage-100 flex items-center justify-center">
+            <Smartphone className="w-[min(10vw,2.5rem)] h-[min(10vw,2.5rem)] text-sage-600" />
+          </div>
+          
+          <h3 className="text-[min(5vw,1.25rem)] font-semibold text-gray-900 mb-[min(2vw,0.5rem)]">
+            Health Tracking on Mobile
+          </h3>
+          
+          <p className="text-[min(3.5vw,0.875rem)] text-gray-600 mb-[min(6vw,1.5rem)] px-[min(4vw,1rem)]">
+            Connect your health data from Apple Health or Google Fit. Download the Thrive app to sync your wellness journey with your health metrics.
+          </p>
+          
+          <div className="space-y-[min(3vw,0.75rem)]">
+            {/* App Store Button */}
+            <a
+              href={`https://apps.apple.com/app/id${/* TODO: Add App Store ID */'com.thrivenative.app'}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-[min(3vw,0.75rem)] w-full max-w-[280px] mx-auto px-[min(5vw,1.25rem)] py-[min(3vw,0.75rem)] bg-black text-white rounded-[min(3vw,0.75rem)] hover:bg-gray-900 transition-colors"
+            >
+              <Download className="w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)]" />
+              <div className="text-left">
+                <div className="text-[min(2.5vw,0.625rem)] opacity-90">Download on the</div>
+                <div className="text-[min(4vw,1rem)] font-semibold">App Store</div>
+              </div>
+            </a>
+            
+            {/* Google Play Button */}
+            <a
+              href="https://play.google.com/store/apps/details?id=com.thrivenative.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-[min(3vw,0.75rem)] w-full max-w-[280px] mx-auto px-[min(5vw,1.25rem)] py-[min(3vw,0.75rem)] bg-black text-white rounded-[min(3vw,0.75rem)] hover:bg-gray-900 transition-colors"
+            >
+              <Download className="w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)]" />
+              <div className="text-left">
+                <div className="text-[min(2.5vw,0.625rem)] opacity-90">Get it on</div>
+                <div className="text-[min(4vw,1rem)] font-semibold">Google Play</div>
+              </div>
+            </a>
+          </div>
+          
+          <p className="text-[min(3vw,0.75rem)] text-gray-500 mt-[min(6vw,1.5rem)]">
+            Available for iOS and Android devices
+          </p>
+        </div>
+      </Modal>
+
     <div className="mt-8 space-y-[min(6vw,1.5rem)]">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-[min(6vw,1.5rem)] font-bold text-gray-900 flex items-center gap-[min(2vw,0.5rem)]">
-          <Sparkles className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-rose" />
+          <Sparkles className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-zen-500" />
           Health Insights
           {devicePlatform !== 'web' && (
             <span className="text-[min(3.5vw,0.875rem)] font-normal text-gray-500 ml-[min(2vw,0.5rem)]">
@@ -477,9 +547,9 @@ export default function HealthInsights({ showFullView = true }: HealthInsightsPr
 
       {/* Insights & Correlations */}
       {healthData.correlations.length > 0 && (
-        <div className="bg-gradient-to-br from-sage-light/10 to-rose/5 rounded-[min(6vw,1.5rem)] p-[min(6vw,1.5rem)] border border-sage-light/20">
+        <div className="bg-gradient-to-br from-zen-200/10 to-bloom-200/5 rounded-[min(6vw,1.5rem)] p-[min(6vw,1.5rem)] border border-zen-300/20">
           <h3 className="text-[min(5vw,1.125rem)] font-semibold text-gray-900 mb-[min(4vw,1rem)] flex items-center gap-2">
-            <Brain className="w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)] text-sage-dark" />
+            <Brain className="w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)] text-zen-600" />
             Wellness Correlations
           </h3>
           <div className="space-y-[min(3vw,0.75rem)]">
@@ -514,5 +584,6 @@ export default function HealthInsights({ showFullView = true }: HealthInsightsPr
         </div>
       )}
     </div>
+    </>
   );
 }

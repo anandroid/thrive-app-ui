@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "689752906332",
+    "project_id": "thrive-465618",
+    "storage_bucket": "thrive-465618.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:689752906332:android:1c001a72528384f2c62499",
+        "android_client_info": {
+          "package_name": "com.thriveappnative"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "689752906332-mrc81rl2a5g7ji548uljgi2bh1jc5div.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.thriveappnative",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "689752906332-a9bkf53ftqkmeda8vslt8fv3v3poavgm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxP-OCO8d4cpbWF9KO35UQl1jMoou3wIw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "689752906332-a9bkf53ftqkmeda8vslt8fv3v3poavgm.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "689752906332-hs43mec5la1evagi3pstsca3r60o09l6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.thriveappnative"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

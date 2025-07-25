@@ -2,28 +2,27 @@
 
 import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { BookOpen, Plus, Brain, TrendingUp, Sparkles, ChevronRight } from 'lucide-react';
+import { TrendingUp, Pencil } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { 
   getThrivingById, 
   getJournalByThrivingId, 
   createJournalForThriving,
-  addJournalEntry,
- 
+  addJournalEntry
 } from '@/src/utils/thrivingStorage';
 import { Thriving, ThrivingJournal, JournalEntry, UserLearningProfile } from '@/src/types/thriving';
 import { JournalEditor } from '@/components/ui/JournalEditor';
 import { SmartJournalModal } from '@/components/journal/SmartJournalModal';
-import { JournalEntryCard } from '@/components/journal/JournalEntryCard';
 import { UserLearningProfileManager } from '@/src/lib/userLearningProfile';
 import { JournalInsightsEngine } from '@/src/lib/journalInsights';
+import Button from '@/components/ui/Button';
 
 const moodOptions = [
   { type: 'great', emoji: '😊', label: 'Great', color: 'text-green-600' },
-  { type: 'good', emoji: '🙂', label: 'Good', color: 'text-sage-dark' },
-  { type: 'okay', emoji: '😐', label: 'Okay', color: 'text-yellow-600' },
+  { type: 'good', emoji: '🙂', label: 'Good', color: 'text-blue-600' },
+  { type: 'okay', emoji: '😐', label: 'Okay', color: 'text-gray-600' },
   { type: 'difficult', emoji: '😔', label: 'Difficult', color: 'text-orange-600' },
-  { type: 'challenging', emoji: '😰', label: 'Challenging', color: 'text-red-600' }
+  { type: 'challenging', emoji: '😰', label: 'Challenging', color: 'text-red-500' }
 ] as const;
 
 export default function JournalPage({ params }: { params: Promise<{ thrivingId: string }> }) {
@@ -130,7 +129,7 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
 
     // Reset form
     setNewEntry({
-      mood: undefined,
+      mood: '' as JournalEntry['mood'],
       moodEmoji: '',
       content: '',
       painLevel: undefined,
@@ -167,45 +166,6 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
     }
   };
 
-  // Removed unused formatDate and formatTime functions
-  // These are now handled in JournalEntryCard component
-  
-  // Calculate current streak from journal entries
-  const calculateStreak = (entries: JournalEntry[]): number => {
-    if (entries.length === 0) return 0;
-    
-    const sortedEntries = [...entries].sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-    
-    let streak = 1;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const lastEntry = new Date(sortedEntries[0].createdAt);
-    lastEntry.setHours(0, 0, 0, 0);
-    
-    // If last entry isn't today or yesterday, streak is broken
-    const daysDiff = Math.floor((today.getTime() - lastEntry.getTime()) / (1000 * 60 * 60 * 24));
-    if (daysDiff > 1) return 0;
-    
-    // Count consecutive days
-    for (let i = 1; i < sortedEntries.length; i++) {
-      const currentDate = new Date(sortedEntries[i - 1].createdAt);
-      const previousDate = new Date(sortedEntries[i].createdAt);
-      currentDate.setHours(0, 0, 0, 0);
-      previousDate.setHours(0, 0, 0, 0);
-      
-      const diff = Math.floor((currentDate.getTime() - previousDate.getTime()) / (1000 * 60 * 60 * 24));
-      if (diff === 1) {
-        streak++;
-      } else {
-        break;
-      }
-    }
-    
-    return streak;
-  };
 
   if (!thriving || !journal) {
     return null;
@@ -218,324 +178,126 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
   return (
     <AppLayout
       header={{
-        title: 'Journal',
         showBackButton: true,
-        backHref: `/thrivings?id=${thrivingId}`
+        backHref: `/thrivings?id=${thrivingId}`,
+        title: 'Journal'
       }}
     >
-      {/* Hero Section */}
-      <div className="bg-gradient-to-b from-white to-gray-50 border-b border-gray-100">
-        <div className="px-[min(4vw,1rem)] py-[min(6vw,1.5rem)]">
-          <div className="flex items-center space-x-[min(3vw,0.75rem)] mb-[min(2vw,0.5rem)]">
-            <div className="w-[min(12vw,3rem)] h-[min(12vw,3rem)] rounded-2xl bg-gradient-to-br from-rose/20 to-burgundy/20 flex items-center justify-center">
-              <BookOpen className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-burgundy" />
-            </div>
-            <div className="flex-1">
-              <h1 className="text-[min(5vw,1.25rem)] font-bold text-gray-900 leading-tight">
-                {thriving.title}
-              </h1>
-              <div className="flex items-center space-x-[min(4vw,1rem)] mt-[min(1vw,0.25rem)]">
-                <span className="text-[min(3.5vw,0.875rem)] text-gray-600">
-                  {journal.totalEntries} entries
-                </span>
-                {journal.totalEntries > 0 && (
-                  <>
-                    <span className="text-gray-300">•</span>
-                    <span className="text-[min(3.5vw,0.875rem)] text-gray-600">
-                      {calculateStreak(journal.entries)} day streak
-                    </span>
-                  </>
-                )}
-              </div>
-            </div>
+      {/* Thriving Badge Section */}
+      <div className="px-[min(5vw,1.25rem)] pt-[min(6vw,1.5rem)]">
+        <div className="flex justify-center">
+          <div className="inline-flex items-center gap-[min(2vw,0.5rem)] px-[min(5vw,1.25rem)] py-[min(2.5vw,0.625rem)] bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full border border-orange-200">
+            <span className="text-[min(5vw,1.25rem)]">☀️</span>
+            <span className="text-[min(3.75vw,0.9375rem)] font-medium text-gray-800">{thriving.title}</span>
           </div>
-          
-          {/* Quick Stats */}
-          {journal.totalEntries > 0 && (
-            <div className="grid grid-cols-3 gap-[min(3vw,0.75rem)] mt-[min(4vw,1rem)]">
-              <div className="bg-white rounded-xl p-[min(3vw,0.75rem)] border border-gray-200">
-                <div className="text-[min(6vw,1.5rem)] font-bold text-emerald-600">
-                  {calculateStreak(journal.entries)}
-                </div>
-                <div className="text-[min(3vw,0.75rem)] text-gray-600">Day Streak</div>
-              </div>
-              <div className="bg-white rounded-xl p-[min(3vw,0.75rem)] border border-gray-200">
-                <div className="text-[min(6vw,1.5rem)] font-bold text-purple-600">
-                  {userProfile?.confidenceLevel ? Math.round(userProfile.confidenceLevel * 100) : 0}%
-                </div>
-                <div className="text-[min(3vw,0.75rem)] text-gray-600">Insights</div>
-              </div>
-              <div className="bg-white rounded-xl p-[min(3vw,0.75rem)] border border-gray-200">
-                <div className="text-[min(6vw,1.5rem)] font-bold text-rose">
-                  {journal.totalEntries}
-                </div>
-                <div className="text-[min(3vw,0.75rem)] text-gray-600">Total</div>
-              </div>
-            </div>
-          )}
+        </div>
+        
+        {/* Week Summary */}
+        <div className="mt-[min(4vw,1rem)] text-center">
+          <p className="text-[min(4vw,1rem)] text-green-600 font-medium">
+            {journal.totalEntries} {journal.totalEntries === 1 ? 'entry' : 'entries'} this week • Keep it up!
+          </p>
         </div>
       </div>
 
       {/* Main Content */}
-        <div className="px-4 py-6 space-y-4">
-          {/* Add Entry Buttons */}
-          {!showNewEntry && (
-            <div className="space-y-3">
-              {/* Smart Journal Button - Premium Design */}
-              <button
+      <div className="px-[min(5vw,1.25rem)] py-[min(6vw,1.5rem)] space-y-[min(4vw,1rem)]">
+
+        {/* AI Journal Prompt Card */}
+        {!showNewEntry && (
+          <div className="relative overflow-hidden rounded-[min(6vw,1.5rem)] bg-gradient-to-br from-purple-500 via-purple-400 to-pink-400 p-[min(6vw,1.5rem)]">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h3 className="text-[min(5vw,1.25rem)] font-semibold text-white mb-[min(1vw,0.25rem)]">
+                  Ready to reflect?
+                </h3>
+                <p className="text-[min(4vw,1rem)] text-white/90">
+                  AI guides your journey
+                </p>
+              </div>
+              <Button
                 onClick={() => setShowSmartJournal(true)}
-                className="w-full rounded-2xl overflow-hidden relative group transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                springAnimation
+                gradientOverlay
+                cardGlow
+                haptic="medium"
+                className="bg-white text-purple-600 font-semibold px-[min(6vw,1.5rem)] py-[min(3vw,0.75rem)] rounded-full flex items-center gap-[min(2vw,0.5rem)] shadow-lg"
               >
-                {/* Gradient Background */}
-                <div className="absolute inset-0 gradient-ai-journal" />
-                
-                {/* Animated Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                
-                {/* Shimmer Effect */}
-                <div className="absolute inset-0 opacity-30">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent -skew-x-12 -translate-x-full animate-shimmer" />
-                </div>
-                
-                {/* Content */}
-                <div className="relative p-[min(5vw,1.25rem)] flex items-center justify-between">
-                  <div className="flex items-center space-x-[min(4vw,1rem)]">
-                    <div className="relative">
-                      <div className="w-[min(12vw,3rem)] h-[min(12vw,3rem)] rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                        <Brain className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-white" />
-                      </div>
-                      {/* Pulse effect */}
-                      <div className="absolute inset-0 rounded-xl bg-white/20 animate-ping opacity-30" />
-                    </div>
-                    <div className="text-left">
-                      <div className="font-semibold text-white text-[min(4vw,1rem)] flex items-center space-x-[min(2vw,0.5rem)]">
-                        <span>AI Journal</span>
-                        {userProfile && userProfile.dataPoints > 5 && (
-                          <Sparkles className="w-[min(4vw,1rem)] h-[min(4vw,1rem)] text-yellow-300 animate-pulse" />
-                        )}
-                      </div>
-                      <div className="text-[min(3vw,0.75rem)] text-white/80">
-                        {thriving.journalTemplate 
-                          ? 'Guided prompts and smart tracking'
-                          : 'Quick, personalized check-in'
-                        }
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="text-[min(2.5vw,0.625rem)] text-white/60 uppercase tracking-wider">
-                      Recommended
-                    </span>
-                    <ChevronRight className="w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)] text-white/80 mt-1" />
-                  </div>
-                </div>
-              </button>
-
-              {/* Traditional Journal Button */}
-              <button
-                onClick={() => setShowNewEntry(true)}
-                className="w-full rounded-2xl bg-gradient-to-r from-rose/5 via-dusty-rose/5 to-burgundy/5 border border-rose/10 py-3.5 px-6 flex items-center justify-center space-x-3 hover:from-rose/10 hover:via-dusty-rose/10 hover:to-burgundy/10 hover:border-rose/20 transition-all duration-300 group relative"
-              >
-                <div className="flex items-center space-x-3">
-                  <div className="relative">
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose to-burgundy flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300">
-                      <Plus className="w-4 h-4 text-white group-hover:rotate-90 transition-transform duration-500" />
-                    </div>
-                    {/* Subtle glow effect */}
-                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-rose to-burgundy blur-lg opacity-40 group-hover:opacity-60 transition-opacity duration-300" />
-                  </div>
-                  <span className="font-medium text-gray-800 text-[15px]">Quick Entry</span>
-                </div>
-              </button>
+                <span className="text-[min(4.5vw,1.125rem)]">✨</span>
+                <span className="text-[min(4vw,1rem)]">Start Entry</span>
+              </Button>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* New Entry Form */}
-          {showNewEntry && (
-            <div className="rounded-2xl bg-white border border-gray-200 p-6 shadow-lg space-y-5">
-              <h3 className="font-semibold text-primary-text">How are you feeling?</h3>
-              
-              {/* Mood Selection */}
-              <div className="grid grid-cols-5 gap-1.5">
-                {moodOptions.map((mood) => (
-                  <button
-                    key={mood.type}
-                    onClick={() => handleMoodSelect(mood)}
-                    className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all ${
-                      newEntry.mood === mood.type 
-                        ? 'bg-gradient-to-br from-rose/10 to-burgundy/10 border-2 border-rose' 
-                        : 'hover:bg-gray-50 border-2 border-transparent'
-                    }`}
-                  >
-                    <div className="h-7 flex items-center justify-center">
-                      <span className="text-xl">{mood.emoji}</span>
-                    </div>
-                    <span className={`text-[10px] font-medium ${mood.color} text-center leading-tight mt-0.5`}>{mood.label}</span>
-                  </button>
-                ))}
-              </div>
+        {/* Quick Action Button */}
+        {!showNewEntry && (
+          <div className="flex justify-center">
+            <Button
+              onClick={() => setShowNewEntry(true)}
+              variant="outline"
+              springAnimation
+              gradientOverlay
+              cardGlow
+              haptic="light"
+              className="bg-white border border-gray-200 text-gray-700 px-[min(8vw,2rem)] py-[min(3.5vw,0.875rem)] rounded-[min(4vw,1rem)] flex items-center justify-center gap-[min(2vw,0.5rem)] shadow-sm"
+            >
+              <Pencil className="w-[min(4vw,1rem)] h-[min(4vw,1rem)]" />
+              <span className="text-[min(3.75vw,0.9375rem)] font-medium">Quick Note</span>
+            </Button>
+          </div>
+        )}
 
-              {/* Journal Content */}
-              <JournalEditor
-                value={newEntry.content}
-                onChange={(content) => setNewEntry({ ...newEntry, content })}
-                placeholder="Write about your day, how you're feeling, any observations... (optional)"
-                rows={6}
-              />
-
-              {/* Pain Level (if relevant) */}
-              {thriving.type === 'pain_management' && (
-                <div>
-                  <label className="text-sm font-medium text-primary-text mb-2 block">
-                    Pain Level (1-10)
-                  </label>
-                  <input
-                    type="range"
-                    min="1"
-                    max="10"
-                    value={newEntry.painLevel || 5}
-                    onChange={(e) => setNewEntry({ ...newEntry, painLevel: parseInt(e.target.value) })}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>Low</span>
-                    <span className="font-medium text-primary-text">{newEntry.painLevel || 5}</span>
-                    <span>High</span>
+        {/* Progress Insights - Show First When Available */}
+        {journal.totalEntries > 0 && journal.insights && userProfile && userProfile.dataPoints >= 5 && !showNewEntry && (
+          <div className="mb-[min(6vw,1.5rem)]">
+            <div className="rounded-[min(4vw,1rem)] bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-[min(5vw,1.25rem)]">
+              <div className="flex items-center justify-between mb-[min(4vw,1rem)]">
+                <div className="flex items-center gap-[min(3vw,0.75rem)]">
+                  <div className="w-[min(10vw,2.5rem)] h-[min(10vw,2.5rem)] rounded-[min(2.5vw,0.625rem)] bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center">
+                    <TrendingUp className="w-[min(5vw,1.25rem)] h-[min(5vw,1.25rem)] text-white" />
                   </div>
-                </div>
-              )}
-
-              {/* Symptoms */}
-              <div>
-                <label className="text-sm font-medium text-primary-text mb-2 block">
-                  Symptoms (optional)
-                </label>
-                <div className="flex space-x-2">
-                  <input
-                    type="text"
-                    value={currentSymptom}
-                    onChange={(e) => setCurrentSymptom(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleAddSymptom()}
-                    placeholder="Add a symptom"
-                    className="flex-1 px-3 py-2 rounded-xl border border-gray-200 focus:border-rose focus:ring-2 focus:ring-rose/20"
-                  />
-                  <button
-                    onClick={handleAddSymptom}
-                    className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors"
-                  >
-                    Add
-                  </button>
-                </div>
-                {newEntry.symptoms.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {newEntry.symptoms.map((symptom, index) => (
-                      <span
-                        key={index}
-                        className="px-3 py-1 rounded-full bg-red-50 text-red-600 text-sm"
-                      >
-                        {symptom}
-                      </span>
-                    ))}
+                  <div>
+                    <h3 className="font-semibold text-[min(4vw,1rem)] text-gray-900">Your Progress</h3>
+                    <p className="text-[min(3vw,0.75rem)] text-gray-600">AI-powered insights</p>
                   </div>
-                )}
-              </div>
-
-              {/* Gratitude */}
-              <div>
-                <label className="text-sm font-medium text-primary-text mb-2 block">
-                  Gratitude (optional)
-                </label>
-                <div className="flex space-x-2">
-                  <input
-                    type="text"
-                    value={currentGratitude}
-                    onChange={(e) => setCurrentGratitude(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleAddGratitude()}
-                    placeholder="What are you grateful for?"
-                    className="flex-1 px-3 py-2 rounded-xl border border-gray-200 focus:border-rose focus:ring-2 focus:ring-rose/20"
-                  />
-                  <button
-                    onClick={handleAddGratitude}
-                    className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors"
-                  >
-                    Add
-                  </button>
-                </div>
-                {newEntry.gratitude.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {newEntry.gratitude.map((item, index) => (
-                      <span
-                        key={index}
-                        className="px-3 py-1 rounded-full bg-green-50 text-green-600 text-sm"
-                      >
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex space-x-3">
-                <button
-                  onClick={handleSaveEntry}
-                  disabled={!newEntry.mood}
-                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-rose/90 to-burgundy/90 text-white font-medium shadow-sm hover:from-rose hover:to-burgundy transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Save Entry
-                </button>
-                <button
-                  onClick={() => setShowNewEntry(false)}
-                  className="px-6 py-3 rounded-xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Insights Section - Now shown first */}
-          {journal.insights && userProfile && userProfile.dataPoints >= 5 && (
-            <div className="rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-2">
-                  <TrendingUp className="w-5 h-5 text-emerald-600" />
-                  <h3 className="font-semibold text-emerald-900">Your Progress Insights</h3>
                 </div>
                 <button
                   onClick={() => setShowInsights(!showInsights)}
-                  className="text-xs text-emerald-700 hover:text-emerald-800"
+                  className="text-[min(3.5vw,0.875rem)] text-blue-600 font-medium touch-feedback"
                 >
-                  {showInsights ? 'Hide' : 'Show'} Details
+                  {showInsights ? 'Less' : 'More'}
                 </button>
               </div>
               
               {journal.insights.celebratoryInsights.length > 0 && (
-                <div className="space-y-2">
-                  {journal.insights.celebratoryInsights.slice(0, 2).map((insight, index) => (
-                    <p key={index} className="text-sm text-emerald-800 bg-emerald-50 p-3 rounded-lg">
-                      {insight}
-                    </p>
+                <div className="space-y-[min(3vw,0.75rem)]">
+                  {journal.insights.celebratoryInsights.slice(0, showInsights ? undefined : 1).map((insight, index) => (
+                    <div key={index} className="bg-white/70 backdrop-blur-sm p-[min(4vw,1rem)] rounded-[min(3vw,0.75rem)]">
+                      <p className="text-[min(3.5vw,0.875rem)] text-gray-700 leading-relaxed">
+                        {insight}
+                      </p>
+                    </div>
                   ))}
                 </div>
               )}
 
               {showInsights && journal.insights.recommendations.length > 0 && (
-                <div className="mt-4 space-y-2">
-                  <h4 className="font-medium text-emerald-900 text-sm">Personalized Recommendations:</h4>
+                <div className="mt-[min(4vw,1rem)] space-y-[min(3vw,0.75rem)]">
+                  <h4 className="font-medium text-[min(3.5vw,0.875rem)] text-gray-700">Personalized Recommendations</h4>
                   {journal.insights.recommendations.slice(0, 3).map((rec, index) => (
-                    <div key={index} className="bg-white/60 p-3 rounded-lg">
-                      <p className="text-sm text-emerald-800 font-medium">{rec.suggestion}</p>
-                      <p className="text-xs text-emerald-600 mt-1">{rec.reasoning}</p>
-                      <div className="flex items-center mt-2">
-                        <div className="w-full bg-emerald-100 rounded-full h-1">
+                    <div key={index} className="bg-white/70 backdrop-blur-sm p-[min(4vw,1rem)] rounded-[min(3vw,0.75rem)] space-y-[min(2vw,0.5rem)]">
+                      <p className="text-[min(3.5vw,0.875rem)] text-gray-800 font-medium">{rec.suggestion}</p>
+                      <p className="text-[min(3vw,0.75rem)] text-gray-600">{rec.reasoning}</p>
+                      <div className="flex items-center gap-[min(2vw,0.5rem)]">
+                        <div className="flex-1 bg-gray-200 rounded-full h-[min(1.5vw,0.375rem)]">
                           <div 
-                            className="bg-emerald-500 h-1 rounded-full" 
+                            className="bg-gradient-to-r from-blue-400 to-indigo-600 h-full rounded-full transition-all duration-500" 
                             style={{ width: `${rec.confidence * 100}%` }}
                           />
                         </div>
-                        <span className="text-xs text-emerald-600 ml-2">
-                          {Math.round(rec.confidence * 100)}% confident
+                        <span className="text-[min(3vw,0.75rem)] text-gray-600 font-medium">
+                          {Math.round(rec.confidence * 100)}%
                         </span>
                       </div>
                     </div>
@@ -543,60 +305,280 @@ export default function JournalPage({ params }: { params: Promise<{ thrivingId: 
                 </div>
               )}
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Privacy Notice - Only show when no entries exist */}
-          {journal.totalEntries === 0 && !showNewEntry && (
-            <div className="rounded-2xl bg-gradient-to-br from-sage-light/20 to-sage/10 border border-sage-light/30 p-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 rounded-full bg-sage/20 flex items-center justify-center flex-shrink-0">
-                  <span className="text-sm">🔒</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-sage-dark mb-1">Your Privacy Matters</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    Your journal entries are stored locally on your device for complete privacy. 
-                    We never access, track, or share your personal reflections. 
-                    Your healing journey remains yours alone.
-                  </p>
-                </div>
+        {/* Beautiful Entry Form */}
+        {showNewEntry && (
+          <div className="pb-[min(6vw,1.5rem)]">
+            <div className="bg-white rounded-[min(5vw,1.25rem)] p-[min(6vw,1.5rem)] space-y-[min(5vw,1.25rem)] shadow-lg border border-gray-100">
+              <div className="text-center mb-[min(2vw,0.5rem)]">
+                <h3 className="font-bold text-[min(5.5vw,1.375rem)] text-gray-900">How are you feeling?</h3>
+                <p className="text-[min(3.5vw,0.875rem)] text-gray-600 mt-[min(1vw,0.25rem)]">Select your mood to begin</p>
               </div>
-            </div>
-          )}
-
-          {/* Journal Entries with New Design */}
-          <div className="space-y-4">
-            {recentEntries.map((entry, index) => (
-              <JournalEntryCard 
-                key={entry.id} 
-                entry={entry} 
-                thriving={thriving}
-                isLatest={index === 0}
-              />
-            ))}
-
-            {recentEntries.length === 0 && !showNewEntry && (
-              <div className="rounded-2xl bg-gradient-to-br from-gray-50 to-white border border-gray-200 p-8 text-center">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-rose/10 to-burgundy/10 flex items-center justify-center mx-auto mb-4">
-                  <BookOpen className="w-10 h-10 text-burgundy" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Start Your Journal Journey
-                </h3>
-                <p className="text-sm text-gray-600 mb-6 max-w-xs mx-auto">
-                  Track your progress, capture insights, and watch your wellness patterns emerge over time.
-                </p>
+            
+            {/* Mood Selection - Beautiful grid */}
+            <div className="grid grid-cols-5 gap-[min(2vw,0.5rem)]">
+              {moodOptions.map((mood) => (
                 <button
-                  onClick={() => setShowSmartJournal(true)}
-                  className="px-6 py-3 rounded-full bg-gradient-to-r from-rose to-burgundy text-white font-medium shadow-lg hover:shadow-xl transition-all inline-flex items-center space-x-2"
+                  key={mood.type}
+                  onClick={() => handleMoodSelect(mood)}
+                  className={`relative flex flex-col items-center justify-center rounded-[min(3vw,0.75rem)] transition-all active:scale-95 touch-feedback ${
+                    newEntry.mood === mood.type 
+                      ? 'bg-gradient-to-br from-purple-100 to-pink-100 border-2 border-purple-300 shadow-md' 
+                      : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+                  }`}
+                  style={{ padding: 'min(2vw,0.5rem)', minHeight: 'min(18vw,4.5rem)' }}
                 >
-                  <Brain className="w-4 h-4" />
-                  <span>Start with AI Journal</span>
+                  {newEntry.mood === mood.type && (
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-[min(3vw,0.75rem)]" />
+                  )}
+                  <div className="relative flex items-center justify-center mb-[min(1vw,0.25rem)]">
+                    <span className="text-[min(6vw,1.5rem)]">{mood.emoji}</span>
+                  </div>
+                  <span className={`relative text-[min(2.5vw,0.625rem)] font-semibold ${newEntry.mood === mood.type ? 'text-purple-700' : 'text-gray-700'} text-center`}>{mood.label}</span>
                 </button>
+              ))}
+            </div>
+
+            {/* Journal Content */}
+            <JournalEditor
+              value={newEntry.content}
+              onChange={(content) => setNewEntry({ ...newEntry, content })}
+              placeholder="Write about your day, how you're feeling, any observations... (optional)"
+              rows={6}
+            />
+
+            {/* Pain Level (if relevant) */}
+            {thriving.type === 'pain_management' && (
+              <div>
+                <label className="text-[min(3.5vw,0.875rem)] font-medium text-gray-700 mb-[min(2vw,0.5rem)] block">
+                  Pain Level (1-10)
+                </label>
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  value={newEntry.painLevel || 5}
+                  onChange={(e) => setNewEntry({ ...newEntry, painLevel: parseInt(e.target.value) })}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-[min(3vw,0.75rem)] text-gray-500 mt-[min(1vw,0.25rem)]">
+                  <span>Low</span>
+                  <span className="font-medium text-rose-600">{newEntry.painLevel || 5}</span>
+                  <span>High</span>
+                </div>
               </div>
             )}
+
+            {/* Symptoms */}
+            <div>
+              <label className="text-[min(3.5vw,0.875rem)] font-medium text-gray-700 mb-[min(2vw,0.5rem)] block">
+                Symptoms (optional)
+              </label>
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={currentSymptom}
+                  onChange={(e) => setCurrentSymptom(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddSymptom()}
+                  placeholder="Add a symptom"
+                  className="flex-1 rounded-[min(2vw,0.5rem)] border border-gray-200 focus:border-purple-300 focus:ring-1 focus:ring-purple-200"
+                  style={{ padding: 'min(2vw,0.5rem) min(3vw,0.75rem)' }}
+                />
+                <Button
+                  onClick={handleAddSymptom}
+                  size="sm"
+                  haptic="light"
+                  className="font-medium min-w-[min(16vw,4rem)]"
+                  style={{
+                    backgroundColor: '#e5e7eb',
+                    color: '#374151'
+                  }}
+                >
+                  Add
+                </Button>
+              </div>
+              {newEntry.symptoms.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {newEntry.symptoms.map((symptom, index) => (
+                    <span
+                      key={index}
+                      className="rounded-full bg-gray-100 text-gray-700 border border-gray-200"
+                      style={{ padding: 'min(1.5vw,0.375rem) min(3vw,0.75rem)', fontSize: 'min(3.5vw,0.875rem)' }}
+                    >
+                      {symptom}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Gratitude */}
+            <div>
+              <label className="text-[min(3.5vw,0.875rem)] font-medium text-gray-700 mb-[min(2vw,0.5rem)] block">
+                Gratitude (optional)
+              </label>
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={currentGratitude}
+                  onChange={(e) => setCurrentGratitude(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddGratitude()}
+                  placeholder="What are you grateful for?"
+                  className="flex-1 rounded-[min(2vw,0.5rem)] border border-gray-200 focus:border-purple-300 focus:ring-1 focus:ring-purple-200"
+                  style={{ padding: 'min(2vw,0.5rem) min(3vw,0.75rem)' }}
+                />
+                <Button
+                  onClick={handleAddGratitude}
+                  size="sm"
+                  haptic="light"
+                  className="font-medium min-w-[min(16vw,4rem)]"
+                  style={{
+                    backgroundColor: '#e5e7eb',
+                    color: '#374151'
+                  }}
+                >
+                  Add
+                </Button>
+              </div>
+              {newEntry.gratitude.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {newEntry.gratitude.map((item, index) => (
+                    <span
+                      key={index}
+                      className="rounded-full bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 border border-purple-200"
+                      style={{ padding: 'min(1.5vw,0.375rem) min(3vw,0.75rem)', fontSize: 'min(3.5vw,0.875rem)' }}
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-[min(3vw,0.75rem)] pt-[min(2vw,0.5rem)]">
+              <Button
+                onClick={handleSaveEntry}
+                disabled={!newEntry.mood}
+                fullWidth
+                springAnimation
+                gradientOverlay
+                cardGlow
+                haptic="medium"
+                className="font-semibold h-[min(12vw,3rem)]"
+                style={{
+                  background: 'linear-gradient(135deg, #c084fc, #f9a8d4)',
+                  color: '#ffffff'
+                }}
+              >
+                <span className="text-[min(4vw,1rem)]">Save Entry</span>
+              </Button>
+              <Button
+                onClick={() => setShowNewEntry(false)}
+                haptic="light"
+                className="min-w-[min(30vw,7.5rem)] h-[min(12vw,3rem)] font-medium"
+                style={{
+                  backgroundColor: '#f3f4f6',
+                  color: '#4b5563'
+                }}
+              >
+                <span className="text-[min(4vw,1rem)]">Cancel</span>
+              </Button>
+            </div>
           </div>
-        </div>
+          </div>
+        )}
+
+        {/* Empty State Message */}
+        {journal.totalEntries === 0 && !showNewEntry && (
+          <div className="text-center py-[min(8vw,2rem)]">
+            <p className="text-[min(4vw,1rem)] text-gray-500">
+              No entries yet. Start your wellness journey today!
+            </p>
+          </div>
+        )}
+
+        {/* Journal Entries Section */}
+        {journal.totalEntries > 0 && !showNewEntry && (
+          <div className="pb-[min(8vw,2rem)]">
+            <div className="flex items-center justify-between mb-[min(4vw,1rem)]">
+              <h2 className="text-[min(5.5vw,1.375rem)] font-bold text-gray-900">Your Entries</h2>
+              <div className="flex gap-[min(2vw,0.5rem)]">
+                <button className="text-[min(3.75vw,0.9375rem)] font-medium text-purple-600 px-[min(4vw,1rem)] py-[min(2vw,0.5rem)] rounded-full bg-purple-50 border border-purple-200">
+                  All
+                </button>
+              </div>
+            </div>
+            
+            {/* Entries List */}
+            <div className="space-y-[min(4vw,1rem)]">
+              {recentEntries.map((entry, index) => (
+                <div key={entry.id} className="bg-white rounded-[min(5vw,1.25rem)] border border-gray-100 p-[min(5vw,1.25rem)] shadow-md">
+                  {/* Entry Header */}
+                  <div className="flex items-center justify-between mb-[min(3vw,0.75rem)]">
+                    <div>
+                      <p className="text-[min(4vw,1rem)] font-semibold text-gray-900">
+                        {new Date(entry.createdAt).toLocaleDateString('en-US', { 
+                          weekday: 'long',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </p>
+                      <p className="text-[min(3vw,0.75rem)] text-gray-500">
+                        {new Date(entry.createdAt).toLocaleTimeString('en-US', {
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          hour12: true
+                        })}
+                      </p>
+                    </div>
+                    {entry.mood && (
+                      <div className="flex items-center gap-[min(2vw,0.5rem)]">
+                        <span className="text-[min(5vw,1.25rem)]">{entry.moodEmoji || moodOptions.find(m => m.type === entry.mood)?.emoji}</span>
+                        <span className="text-[min(3.75vw,0.9375rem)] font-medium capitalize" 
+                          style={{ color: entry.mood === 'difficult' ? '#ea580c' : moodOptions.find(m => m.type === entry.mood)?.color.replace('text-', '').replace('-600', '').replace('-500', '') || '#666' }}>
+                          {entry.mood.charAt(0).toUpperCase() + entry.mood.slice(1)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Entry Content Preview */}
+                  {entry.content && (
+                    <p className="text-[min(3.5vw,0.875rem)] text-gray-700 line-clamp-3 mb-[min(3vw,0.75rem)]">
+                      {typeof entry.content === 'string' ? entry.content : 'Journal entry'}
+                    </p>
+                  )}
+                  
+                  {/* Entry Tags */}
+                  <div className="flex flex-wrap gap-[min(2vw,0.5rem)]">
+                    {/* Default tags for demo - Energy and Workout */}
+                    <span className="inline-flex items-center px-[min(3.5vw,0.875rem)] py-[min(1.5vw,0.375rem)] bg-green-50 text-green-600 rounded-full text-[min(3.25vw,0.8125rem)] font-medium border border-green-100">
+                      Energy
+                    </span>
+                    <span className="inline-flex items-center px-[min(3.5vw,0.875rem)] py-[min(1.5vw,0.375rem)] bg-green-50 text-green-600 rounded-full text-[min(3.25vw,0.8125rem)] font-medium border border-green-100">
+                      Workout
+                    </span>
+                    {entry.symptoms?.map((symptom, i) => (
+                      <span key={i} className="inline-flex items-center px-[min(3.5vw,0.875rem)] py-[min(1.5vw,0.375rem)] bg-orange-50 text-orange-600 rounded-full text-[min(3.25vw,0.8125rem)] font-medium border border-orange-100">
+                        {symptom}
+                      </span>
+                    ))}
+                    {index === 0 && (
+                      <span className="inline-flex items-center px-[min(3.5vw,0.875rem)] py-[min(1.5vw,0.375rem)] bg-purple-50 text-purple-600 rounded-full text-[min(3.25vw,0.8125rem)] font-medium border border-purple-100">
+                        <span className="w-[min(1.5vw,0.375rem)] h-[min(1.5vw,0.375rem)] bg-purple-500 rounded-full mr-[min(1.5vw,0.375rem)]"></span>
+                        Latest
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Smart Journal Modal */}
       {thriving && (

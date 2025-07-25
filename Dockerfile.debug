@@ -1,0 +1,58 @@
+# Use Node.js official image
+FROM node:20-alpine AS base
+
+# Install dependencies only when needed
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
+
+# Build the application
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Build Next.js application
+ENV NEXT_TELEMETRY_DISABLED 1
+RUN npm run build
+
+# List the standalone output to debug
+RUN echo "=== Standalone output structure ===" && \
+    ls -la /app/.next/standalone/ && \
+    echo "=== Root of standalone ===" && \
+    ls -la /app/.next/standalone/
+
+# Production image
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copy built application - ensure server.js is at the root
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone/* ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone/.next ./.next
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+# Debug: List what's in the working directory
+RUN echo "=== Final container structure ===" && \
+    ls -la /app/ && \
+    echo "=== Checking for server.js ===" && \
+    ls -la /app/server.js || echo "server.js not found!"
+
+USER nextjs
+
+EXPOSE 8080
+ENV PORT 8080
+ENV HOSTNAME "0.0.0.0"
+
+# Start command - ensure we're running the correct file
+CMD ["node", "/app/server.js"]

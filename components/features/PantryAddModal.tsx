@@ -231,7 +231,7 @@ export function PantryAddModal({ isOpen, onClose, onAddItem, initialData, contex
                     {isAnalyzing && (
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                         <div className="bg-white rounded-lg px-4 py-3 flex items-center gap-3">
-                          <Loader2 className="w-4 h-4 animate-spin text-rose" />
+                          <Loader2 className="w-4 h-4 animate-spin text-rose-500" />
                           <span className="text-sm font-medium">Analyzing...</span>
                         </div>
                       </div>

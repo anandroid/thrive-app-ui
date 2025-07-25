@@ -149,6 +149,20 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('API Route v2 Error:', error);
+    
+    // Check for API key error
+    if (error instanceof Error && error.message.includes('401 Incorrect API key')) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid OpenAI API key. Please ensure THRIVE_OPENAI_API_KEY or OPENAI_API_KEY in .env.local contains a valid API key (not "sk-...")' 
+        }), 
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
     return new Response(
       JSON.stringify({ 
         error: error instanceof Error ? error.message : 'Internal server error' 

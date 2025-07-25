@@ -62,7 +62,7 @@ export class ContextCache {
         // Try to parse JSON response to extract key info
         try {
           const parsed = JSON.parse(msg.content);
-          if (parsed.actionableItems && parsed.actionableItems.length > 0) {
+          if (parsed.actionableItems && Array.isArray(parsed.actionableItems) && parsed.actionableItems.length > 0) {
             const items = parsed.actionableItems.map((item: {title: string}) => item.title).join(', ');
             return `${roleLabel} recommended: ${items}`;
           }
@@ -104,7 +104,7 @@ export class ContextCache {
         // Track what the assistant has already recommended
         try {
           const parsed = JSON.parse(msg.content);
-          if (parsed.actionableItems) {
+          if (parsed.actionableItems && Array.isArray(parsed.actionableItems)) {
             parsed.actionableItems.forEach((item: {title?: string}) => {
               if (item.title) assistantRecommendations.add(item.title);
             });

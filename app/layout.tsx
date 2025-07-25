@@ -11,6 +11,7 @@ import { PermissionSyncProvider } from "@/src/providers/PermissionSyncProvider";
 import "@/src/utils/clearCorruptedData";
 import { Toaster } from 'react-hot-toast';
 import { SessionInitializer } from '@/components/features/SessionInitializer';
+import { AuthProvider } from '@/src/contexts/AuthContext';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -62,18 +63,20 @@ export default function RootLayout({
       >
         <ServiceWorkerProvider>
           <TouchFeedbackProvider>
-            <NotificationProvider>
-              <JournalMigrationProvider>
-                <PermissionSyncProvider>
-                  <NotificationSyncProvider>
-                    <SessionInitializer />
-                    <OfflineIndicator />
-                    <Toaster position="top-center" />
-                    {children}
-                  </NotificationSyncProvider>
-                </PermissionSyncProvider>
-              </JournalMigrationProvider>
-            </NotificationProvider>
+            <AuthProvider>
+              <NotificationProvider>
+                <JournalMigrationProvider>
+                  <PermissionSyncProvider>
+                    <NotificationSyncProvider>
+                      <SessionInitializer />
+                      <OfflineIndicator />
+                      <Toaster position="top-center" />
+                      {children}
+                    </NotificationSyncProvider>
+                  </PermissionSyncProvider>
+                </JournalMigrationProvider>
+              </NotificationProvider>
+            </AuthProvider>
           </TouchFeedbackProvider>
         </ServiceWorkerProvider>
       </body>

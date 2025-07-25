@@ -18,7 +18,7 @@ export const PrivacySection2: React.FC<PrivacySectionProps> = ({ visible }) => {
         {/* Privacy Text - Left side */}
         <div className="flex-1 space-y-2 pr-4">
           <div className="flex items-center space-x-2">
-            <Shield className="w-4 h-4 text-lavender" />
+            <Shield className="w-4 h-4 text-bloom-300" />
             <h3 className="text-base font-semibold text-primary-text">Your Privacy First</h3>
           </div>
           <p className="text-xs text-secondary-text-thin leading-relaxed">

@@ -66,14 +66,16 @@ export const ActionItemCard: React.FC<ActionItemCardProps> = ({
       <div 
         className="
           w-10 h-10 rounded-xl 
-          bg-gradient-to-br from-sage-light/40 to-sage/30 
           flex items-center justify-center 
-          flex-shrink-0 
-          shadow-lg shadow-sage/25
+          flex-shrink-0
         "
+        style={{
+          background: 'linear-gradient(to bottom right, rgba(167, 195, 167, 0.4), rgba(143, 173, 143, 0.3))',
+          boxShadow: '0 10px 15px -3px rgba(143, 173, 143, 0.25)'
+        }}
         aria-hidden="true"
       >
-        <Icon className="w-5 h-5 text-sage-dark" />
+        <Icon className="w-5 h-5" style={{ color: 'var(--sage-dark)' }} />
       </div>
       
       {/* Content */}

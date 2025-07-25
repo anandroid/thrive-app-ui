@@ -1,0 +1,1208 @@
+@import "tailwindcss";
+@import "../styles/touch-feedback.css";
+@import "../styles/button-enhancements.css";
+@import "./action-bar.css";
+@import "./chat-simple.css";
+@import "./page-simple.css";
+@import "./app-layout.css";
+@import "./chat-content.css";
+
+/* Premium Wellness Color System - Sophisticated & Therapeutic */
+:root {
+  /* Primary - Deep Forest (Grounding, Natural) */
+  --color-forest-50: #f5f7f5;
+  --color-forest-100: #e6ebe6;
+  --color-forest-200: #c8d4c8;
+  --color-forest-300: #9fb39f;
+  --color-forest-400: #738f73;
+  --color-forest-500: #4d6f4d;
+  --color-forest-600: #3d583d;
+  --color-forest-700: #314531;
+  --color-forest-800: #283828;
+  --color-forest-900: #1f2d1f;
+  
+  /* Secondary - Soft Sky (Calming, Peaceful) */
+  --color-sky-50: #f7fbfc;
+  --color-sky-100: #ebf4f7;
+  --color-sky-200: #d7e9ef;
+  --color-sky-300: #b5d5e0;
+  --color-sky-400: #8bb9cc;
+  --color-sky-500: #6a9fb5;
+  --color-sky-600: #518299;
+  --color-sky-700: #41677a;
+  --color-sky-800: #365464;
+  --color-sky-900: #2c4451;
+  
+  /* Accent - Warm Sand (Comfort, Warmth) */
+  --color-sand-50: #faf9f7;
+  --color-sand-100: #f4f0e9;
+  --color-sand-200: #e7dfd0;
+  --color-sand-300: #d5c4a8;
+  --color-sand-400: #c0a57d;
+  --color-sand-500: #a88b5a;
+  --color-sand-600: #8f7346;
+  --color-sand-700: #745c39;
+  --color-sand-800: #5e4a30;
+  --color-sand-900: #4d3d28;
+  
+  /* Neutral - Warm Gray (Sophisticated, Modern) */
+  --color-stone-50: #fafaf9;
+  --color-stone-100: #f5f5f4;
+  --color-stone-200: #e7e5e4;
+  --color-stone-300: #d6d3d1;
+  --color-stone-400: #a8a29e;
+  --color-stone-500: #78716c;
+  --color-stone-600: #57534e;
+  --color-stone-700: #44403c;
+  --color-stone-800: #292524;
+  --color-stone-900: #1c1917;
+  
+  /* Supporting - Soft Coral (Joy, Energy) */
+  --color-coral-50: #fef6f4;
+  --color-coral-100: #fdeae5;
+  --color-coral-200: #fad3c8;
+  --color-coral-300: #f5b19f;
+  --color-coral-400: #ed8a6e;
+  --color-coral-500: #e16b47;
+  --color-coral-600: #c95534;
+  --color-coral-700: #a6442a;
+  --color-coral-800: #883826;
+  --color-coral-900: #722f23;
+}
+
+/* Tailwind Color Classes for Premium Wellness Palette */
+@layer utilities {
+  /* Forest Green */
+  .bg-forest-50 { background-color: var(--color-forest-50); }
+  .bg-forest-100 { background-color: var(--color-forest-100); }
+  .bg-forest-200 { background-color: var(--color-forest-200); }
+  .bg-forest-300 { background-color: var(--color-forest-300); }
+  .bg-forest-400 { background-color: var(--color-forest-400); }
+  .bg-forest-500 { background-color: var(--color-forest-500); }
+  .bg-forest-600 { background-color: var(--color-forest-600); }
+  .bg-forest-700 { background-color: var(--color-forest-700); }
+  .bg-forest-800 { background-color: var(--color-forest-800); }
+  .bg-forest-900 { background-color: var(--color-forest-900); }
+  
+  .text-forest-50 { color: var(--color-forest-50); }
+  .text-forest-100 { color: var(--color-forest-100); }
+  .text-forest-200 { color: var(--color-forest-200); }
+  .text-forest-300 { color: var(--color-forest-300); }
+  .text-forest-400 { color: var(--color-forest-400); }
+  .text-forest-500 { color: var(--color-forest-500); }
+  .text-forest-600 { color: var(--color-forest-600); }
+  .text-forest-700 { color: var(--color-forest-700); }
+  .text-forest-800 { color: var(--color-forest-800); }
+  .text-forest-900 { color: var(--color-forest-900); }
+  
+  .border-sage-50 { border-color: var(--color-sage-50); }
+  .border-sage-100 { border-color: var(--color-sage-100); }
+  .border-sage-200 { border-color: var(--color-sage-200); }
+  .border-sage-300 { border-color: var(--color-sage-300); }
+  .border-sage-400 { border-color: var(--color-sage-400); }
+  .border-sage-500 { border-color: var(--color-sage-500); }
+  .border-sage-600 { border-color: var(--color-sage-600); }
+  
+  /* Lavender */
+  .bg-lavender-50 { background-color: var(--color-lavender-50); }
+  .bg-lavender-100 { background-color: var(--color-lavender-100); }
+  .bg-lavender-200 { background-color: var(--color-lavender-200); }
+  .bg-lavender-300 { background-color: var(--color-lavender-300); }
+  .bg-lavender-400 { background-color: var(--color-lavender-400); }
+  .bg-lavender-500 { background-color: var(--color-lavender-500); }
+  .bg-lavender-600 { background-color: var(--color-lavender-600); }
+  .bg-lavender-700 { background-color: var(--color-lavender-700); }
+  .bg-lavender-800 { background-color: var(--color-lavender-800); }
+  .bg-lavender-900 { background-color: var(--color-lavender-900); }
+  
+  .text-lavender-50 { color: var(--color-lavender-50); }
+  .text-lavender-100 { color: var(--color-lavender-100); }
+  .text-lavender-200 { color: var(--color-lavender-200); }
+  .text-lavender-300 { color: var(--color-lavender-300); }
+  .text-lavender-400 { color: var(--color-lavender-400); }
+  .text-lavender-500 { color: var(--color-lavender-500); }
+  .text-lavender-600 { color: var(--color-lavender-600); }
+  .text-lavender-700 { color: var(--color-lavender-700); }
+  .text-lavender-800 { color: var(--color-lavender-800); }
+  .text-lavender-900 { color: var(--color-lavender-900); }
+  
+  .border-lavender-50 { border-color: var(--color-lavender-50); }
+  .border-lavender-100 { border-color: var(--color-lavender-100); }
+  .border-lavender-200 { border-color: var(--color-lavender-200); }
+  .border-lavender-300 { border-color: var(--color-lavender-300); }
+  .border-lavender-400 { border-color: var(--color-lavender-400); }
+  .border-lavender-500 { border-color: var(--color-lavender-500); }
+  .border-lavender-600 { border-color: var(--color-lavender-600); }
+  
+  /* Terracotta */
+  .bg-terracotta-50 { background-color: var(--color-terracotta-50); }
+  .bg-terracotta-100 { background-color: var(--color-terracotta-100); }
+  .bg-terracotta-200 { background-color: var(--color-terracotta-200); }
+  .bg-terracotta-300 { background-color: var(--color-terracotta-300); }
+  .bg-terracotta-400 { background-color: var(--color-terracotta-400); }
+  .bg-terracotta-500 { background-color: var(--color-terracotta-500); }
+  .bg-terracotta-600 { background-color: var(--color-terracotta-600); }
+  .bg-terracotta-700 { background-color: var(--color-terracotta-700); }
+  .bg-terracotta-800 { background-color: var(--color-terracotta-800); }
+  .bg-terracotta-900 { background-color: var(--color-terracotta-900); }
+  
+  .text-terracotta-50 { color: var(--color-terracotta-50); }
+  .text-terracotta-100 { color: var(--color-terracotta-100); }
+  .text-terracotta-200 { color: var(--color-terracotta-200); }
+  .text-terracotta-300 { color: var(--color-terracotta-300); }
+  .text-terracotta-400 { color: var(--color-terracotta-400); }
+  .text-terracotta-500 { color: var(--color-terracotta-500); }
+  .text-terracotta-600 { color: var(--color-terracotta-600); }
+  .text-terracotta-700 { color: var(--color-terracotta-700); }
+  .text-terracotta-800 { color: var(--color-terracotta-800); }
+  .text-terracotta-900 { color: var(--color-terracotta-900); }
+  
+  .border-terracotta-50 { border-color: var(--color-terracotta-50); }
+  .border-terracotta-100 { border-color: var(--color-terracotta-100); }
+  .border-terracotta-200 { border-color: var(--color-terracotta-200); }
+  .border-terracotta-300 { border-color: var(--color-terracotta-300); }
+  .border-terracotta-400 { border-color: var(--color-terracotta-400); }
+  .border-terracotta-500 { border-color: var(--color-terracotta-500); }
+  .border-terracotta-600 { border-color: var(--color-terracotta-600); }
+}
+
+/* Line clamp utility for text truncation */
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  line-height: 1.4;
+}
+
+/* Animated gradient text effect */
+@keyframes gradient {
+  0%, 100% {
+    background-size: 200% 200%;
+    background-position: left center;
+  }
+  50% {
+    background-size: 200% 200%;
+    background-position: right center;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 6s ease infinite;
+}
+
+/* Dynamic Recommendation Widget Styles */
+.recommendation-widget {
+  @apply p-5 rounded-2xl cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98];
+}
+
+/* Widget background styles with proper visibility */
+.widget-bg-action {
+  background: linear-gradient(135deg, rgba(163, 191, 160, 0.5), rgba(135, 168, 120, 0.4)) !important;
+  border: 1px solid rgba(163, 191, 160, 0.6) !important;
+}
+
+.widget-bg-purchase {
+  background: linear-gradient(135deg, rgba(251, 113, 133, 0.5), rgba(145, 67, 114, 0.4)) !important;
+  border: 1px solid rgba(251, 113, 133, 0.6) !important;
+}
+
+.widget-bg-appointment {
+  background: linear-gradient(135deg, rgba(223, 186, 216, 0.5), rgba(218, 160, 169, 0.4)) !important;
+  border: 1px solid rgba(223, 186, 216, 0.6) !important;
+}
+
+.widget-bg-content {
+  background: linear-gradient(135deg, rgba(218, 160, 169, 0.5), rgba(251, 113, 133, 0.4)) !important;
+  border: 1px solid rgba(218, 160, 169, 0.6) !important;
+}
+
+.widget-bg-reminder {
+  background: linear-gradient(135deg, #fef3c7, #fed7aa) !important;
+  border: 1px solid #fde68a !important;
+}
+
+.widget-bg-insight {
+  background: linear-gradient(135deg, #dbeafe, #e9d5ff) !important;
+  border: 1px solid #bfdbfe !important;
+}
+
+/* Fallback for all dynamic widgets */
+.dynamic-widget-container {
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb) !important;
+  border: 1px solid #d1d5db !important;
+  min-height: 100px !important;
+}
+
+.widget-header {
+  @apply flex items-center justify-between mb-3;
+}
+
+.widget-icon {
+  @apply w-10 h-10 rounded-xl flex items-center justify-center shadow-sm;
+}
+
+.widget-icon.gradient-rose {
+  @apply bg-gradient-to-br from-rose to-burgundy;
+}
+
+.widget-icon.gradient-sage {
+  @apply bg-gradient-to-br from-sage-light to-sage;
+}
+
+.widget-icon.gradient-lavender {
+  @apply bg-gradient-to-br from-soft-lavender to-dusty-rose;
+}
+
+.widget-content {
+  @apply space-y-2;
+}
+
+.widget-title {
+  @apply font-semibold text-gray-900 text-lg;
+}
+
+.widget-description {
+  @apply text-sm text-gray-600;
+}
+
+.widget-action {
+  @apply flex items-center justify-between mt-4 text-sm font-medium text-burgundy;
+}
+
+.widget-metric {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+.widget-tag {
+  @apply px-2 py-1 text-xs font-medium rounded-full bg-white/80 text-gray-700;
+}
+
+.dynamic-widget-container {
+  @apply rounded-2xl overflow-hidden;
+}
+
+:root {
+  /* Base Colors */
+  --root-bg: #f7e1e5; /* soft blush pink */
+  --primary-text: #000000; /* black */
+  --secondary-text: #2d3748; /* darker slate for better readability */
+  --secondary-text-thin: #4a5568; /* darker gray (was too light at #3a5163) */
+  --light-text: #6b7280; /* medium gray for better contrast */
+  
+  /* Rose/Burgundy Family (Primary) */
+  --strong-rose: #e11d48;
+  --rose: #fb7185;
+  --dusty-rose: #daa0a9;
+  --burgundy: #914372; /* branch color */
+  --dark-burgundy: #6d335a;
+  
+  /* Soft Accents */
+  --soft-lavender: #dfbad8;
+  --soft-blush: #f7e1e5;
+  
+  /* Sage Green Family (Secondary) */
+  --sage-light: #a3bfa0;
+  --sage: #87a878;
+  --sage-dark: #6b8c5f;
+  
+  /* Purple/Blue Family (AI/Smart Features) */
+  --soft-purple: #c084fc;
+  --muted-blue: #60a5fa;
+  --deep-purple: #9333ea;
+  --steel-blue: #3b82f6;
+  
+  /* Luxury Wellness Colors */
+  --rose-gold: #c7758a;
+  --champagne: #b8a172;
+  --warm-lavender: #a08bb3;
+  --sage-mist: #7ea57d;
+  
+  /* Default theme */
+  --background: var(--root-bg);
+  --foreground: var(--primary-text);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary-text: var(--primary-text);
+  --color-secondary-text: var(--secondary-text);
+  --color-secondary-text-thin: var(--secondary-text-thin);
+  --color-light-text: var(--light-text);
+  --color-strong-rose: var(--strong-rose);
+  --color-rose: var(--rose);
+  --color-dusty-rose: var(--dusty-rose);
+  --color-burgundy: var(--burgundy);
+  --color-dark-burgundy: var(--dark-burgundy);
+  --color-soft-lavender: var(--soft-lavender);
+  --color-soft-blush: var(--soft-blush);
+  --color-sage-light: var(--sage-light);
+  --color-sage: var(--sage);
+  --color-sage-dark: var(--sage-dark);
+  --color-soft-purple: var(--soft-purple);
+  --color-muted-blue: var(--muted-blue);
+  --color-deep-purple: var(--deep-purple);
+  --color-steel-blue: var(--steel-blue);
+  --color-rose-gold: var(--rose-gold);
+  --color-champagne: var(--champagne);
+  --color-warm-lavender: var(--warm-lavender);
+  --color-sage-mist: var(--sage-mist);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  background: #fefefe;
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  min-height: 100%;
+  /* Eliminates 300ms delay on all touch interactions */
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Ensure modal portal is always on top and isolated from page scroll */
+#modal-portal {
+  isolation: isolate;
+  position: fixed;
+  z-index: 10000;
+}
+
+/* Enable text selection only where needed */
+input, textarea, [contenteditable] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Spinner animation - Fixed */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+  transform-origin: center;
+}
+
+.spinner-explicit {
+  animation: spin 1s linear infinite !important;
+  transform-origin: center !important;
+}
+
+/* Thrive-specific spin animation for streaming indicator */
+@keyframes thrive-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* WebView and Keyboard Handling */
+@supports (-webkit-touch-callout: none) {
+  /* iOS/WebView specific adjustments */
+  html, body {
+    /* Allow body to shrink when keyboard appears */
+    height: 100%;
+    min-height: 100%;
+  }
+}
+
+
+/* Hide scrollbar for horizontal scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
+/* Gradient Utilities */
+.gradient-primary {
+  background: linear-gradient(135deg, var(--strong-rose), var(--rose), var(--dusty-rose), var(--burgundy));
+}
+
+.gradient-ai-journal {
+  background: linear-gradient(120deg, var(--rose-gold), var(--burgundy), var(--warm-lavender));
+}
+
+.gradient-primary-hover {
+  background: linear-gradient(135deg, var(--rose), var(--burgundy), var(--dark-burgundy));
+}
+
+.gradient-secondary {
+  background: linear-gradient(135deg, var(--sage-light), var(--sage), var(--sage-dark));
+}
+
+.gradient-background {
+  background: linear-gradient(135deg, var(--soft-blush), var(--soft-lavender), var(--dusty-rose));
+}
+
+/* Page backgrounds */
+.page-gradient {
+  background: #fafafa;
+  min-height: 100vh;
+}
+
+/* Subtle gradient accents */
+.gradient-text {
+  background: linear-gradient(135deg, var(--strong-rose), var(--burgundy));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-accent {
+  background: linear-gradient(135deg, var(--rose), var(--dusty-rose));
+}
+
+/* Subtle Border Utilities */
+.subtle-border {
+  border: 1px solid #f0f0f0;
+}
+
+.gradient-border-subtle {
+  position: relative;
+  background: white;
+}
+
+.gradient-border-subtle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--rose), var(--dusty-rose));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.3;
+}
+
+/* Card Shadows with Theme Colors */
+.card-shadow-rose {
+  box-shadow: 0 4px 6px -1px rgba(225, 29, 72, 0.1), 0 2px 4px -1px rgba(225, 29, 72, 0.06);
+}
+
+.card-shadow-sage {
+  box-shadow: 0 4px 6px -1px rgba(135, 168, 120, 0.1), 0 2px 4px -1px rgba(135, 168, 120, 0.06);
+}
+
+.card-shadow-lavender {
+  box-shadow: 0 4px 6px -1px rgba(223, 186, 216, 0.1), 0 2px 4px -1px rgba(223, 186, 216, 0.06);
+}
+
+/* Typography Utilities */
+.text-gradient-primary {
+  background: linear-gradient(135deg, var(--strong-rose), var(--burgundy));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-secondary {
+  background: linear-gradient(135deg, var(--sage), var(--sage-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Premium Glass Effects */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Page transition optimizations */
+@media (prefers-reduced-motion: no-preference) {
+  /* Enable hardware acceleration for smoother transitions */
+  * {
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+  }
+}
+
+/* Ensure minimum height to prevent layout shift */
+.layout-wrapper {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Prevent flash of content during navigation */
+.chat-container {
+  position: relative;
+  z-index: 1;
+}
+
+.glass-effect-rose {
+  background: rgba(251, 113, 133, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(251, 113, 133, 0.2);
+}
+
+/* Premium Shadows */
+.shadow-elegant {
+  box-shadow: 0 10px 40px -10px rgba(145, 67, 114, 0.15);
+}
+
+.shadow-elegant-sm {
+  box-shadow: 0 4px 20px -4px rgba(145, 67, 114, 0.1);
+}
+
+/* Hide scrollbars for native feel */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Spinner animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Subtle bounce animation */
+@keyframes bounce-subtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Camera capture animation */
+@keyframes flash {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-flash {
+  animation: flash 0.3s ease-out;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Snap scrolling for card carousels */
+.snap-x {
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.snap-center {
+  scroll-snap-align: center;
+}
+
+.snap-always {
+  scroll-snap-stop: always;
+}
+
+/* Prevent momentum scrolling on iOS for better control */
+.snap-mandatory {
+  -webkit-overflow-scrolling: auto;
+  overscroll-behavior-x: contain;
+}
+
+/* Native app utilities */
+/* Prevent overscroll and bounce on iOS */
+.overscroll-contain {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Native-like transitions - Smoother, more deliberate */
+.native-transition {
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Legacy app screen support - uses page layout */
+.app-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* When using app-screen with sticky ActionBar, add padding to next element */
+.app-screen > .action-bar + * {
+  /* Account for sticky ActionBar height */
+  padding-top: calc(3.5rem + env(safe-area-inset-top, 0));
+}
+
+.app-header {
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding-top: env(safe-area-inset-top, 0);
+  background: white;
+  min-height: 3.5rem;
+}
+
+/* Action Bar Styles */
+.action-bar-container {
+  background: linear-gradient(to top, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.95) 50%, rgba(255, 255, 255, 0) 100%);
+  padding-top: 20px;
+  position: relative;
+  z-index: 10;
+}
+
+.action-bar-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.1) 20%, rgba(0, 0, 0, 0.1) 80%, transparent);
+}
+
+/* Bottom sheet animation */
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+.slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-down {
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* iOS-style active states - More deliberate animation */
+.ios-active {
+  transition: all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.ios-active:active {
+  opacity: 0.85;
+  transform: scale(0.97);
+  transition-duration: 100ms;
+}
+
+/* Wave animation for chat typing dots */
+@keyframes wave {
+  0%, 60%, 100% { transform: translateY(0); opacity: 1; }
+  30% { transform: translateY(-6px); }
+}
+
+.animate-wave {
+  animation: wave 1.2s infinite ease-in-out;
+  display: inline-block;
+}
+
+/* Slide in from right animation */
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-from-right {
+  animation: slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Pulse slow animation for decorative elements */
+@keyframes pulseSlow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 4s ease-in-out infinite;
+}
+
+/* Fade animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-fade-out {
+  animation: fadeOut 0.3s ease-in-out;
+}
+
+/* Custom range slider styling for pain intensity */
+input[type="range"].slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right, 
+    #10b981 0%,     /* green for low pain */
+    #fbbf24 25%,    /* yellow-orange transition */
+    #f59e0b 50%,    /* orange for medium */
+    #ef4444 75%,    /* red-orange transition */
+    #dc2626 100%    /* red for high pain */
+  );
+  outline: none;
+  opacity: 0.9;
+  transition: opacity 0.2s;
+}
+
+input[type="range"].slider:hover {
+  opacity: 1;
+}
+
+input[type="range"].slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border: 2px solid var(--rose);
+  transition: all 0.2s;
+}
+
+input[type="range"].slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border: 2px solid var(--rose);
+  transition: all 0.2s;
+}
+
+input[type="range"].slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+}
+
+input[type="range"].slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Scale animations */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Prose styling for rich content */
+.prose {
+  color: inherit;
+}
+
+.prose strong {
+  color: var(--burgundy);
+  font-weight: 600;
+}
+
+.prose em {
+  color: var(--rose);
+  font-style: italic;
+}
+
+.prose code {
+  background-color: rgba(145, 67, 114, 0.1);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  color: var(--burgundy);
+}
+
+.prose ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose li {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.prose p {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose p:first-child {
+  margin-top: 0;
+}
+
+.prose p:last-child {
+  margin-bottom: 0;
+}
+
+/* Card Gradient Border System */
+.card-gradient-border {
+  position: relative;
+  background: white;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.card-gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, 
+    var(--rose) 0%, 
+    var(--dusty-rose) 25%, 
+    var(--soft-blush) 50%, 
+    var(--soft-lavender) 75%, 
+    var(--rose) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Variant: Peachy Bronze for white cards */
+.card-gradient-border-peach::before {
+  background: linear-gradient(135deg, 
+    #FFD4B5 0%, 
+    #FFE8DC 25%, 
+    #FFDAB9 50%, 
+    #FFB5BA 75%, 
+    #FFD4B5 100%);
+}
+
+/* Variant: Sage Green */
+.card-gradient-border-sage::before {
+  background: linear-gradient(135deg, 
+    var(--sage-light) 0%, 
+    var(--sage) 50%, 
+    var(--sage-dark) 100%);
+}
+
+/* Variant: Lavender */
+.card-gradient-border-lavender::before {
+  background: linear-gradient(135deg, 
+    var(--soft-lavender) 0%, 
+    var(--dusty-rose) 50%, 
+    var(--soft-blush) 100%);
+}
+
+/* Subtle variant with lower opacity */
+.card-gradient-border-subtle::before {
+  opacity: 0.5;
+}
+
+/* Animated gradient border */
+.card-gradient-border-animated::before {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Alternative approach using box-shadow for softer effect */
+.card-soft-glow {
+  box-shadow: 
+    0 1px 2px rgba(255, 212, 181, 0.3),
+    0 2px 4px rgba(200, 200, 200, 0.15);
+  transition: all 0.3s ease;
+}
+
+.card-soft-glow:hover {
+  box-shadow: 
+    0 1px 3px rgba(255, 212, 181, 0.4),
+    0 3px 6px rgba(180, 180, 180, 0.2);
+  transform: translateY(-0.5px);
+}
+
+/* Illustration Layout for Onboarding and Welcome */
+.layout-wrapper {
+  position: fixed;
+  inset: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.illustration-layout,
+.welcome-layout {
+  display: flex;
+  flex-direction: column;
+  background: white;
+  height: 100%;
+  /* Use dynamic viewport height to account for browser UI */
+  min-height: 100vh;
+  min-height: 100dvh;
+  /* Ensure proper sizing on all devices */
+  position: relative;
+}
+
+.illustration-layout .layout-header,
+.welcome-layout .layout-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  flex-shrink: 0;
+}
+
+.illustration-layout .layout-content,
+.welcome-layout .layout-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure content fits on smaller screens */
+@media (max-height: 700px) {
+  .welcome-layout .layout-content {
+    align-items: flex-start;
+    padding-top: 1rem;
+  }
+}
+
+.illustration-layout .layout-footer,
+.welcome-layout .layout-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  padding: 1rem;
+  background: linear-gradient(to top, white 0%, white 80%, rgba(255, 255, 255, 0.98) 100%);
+  flex-shrink: 0;
+  /* Use a larger minimum padding and add extra space for browsers with bottom UI */
+  padding-bottom: max(2rem, calc(env(safe-area-inset-bottom) + 1rem));
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+  /* Ensure the footer is always accessible */
+  min-height: fit-content;
+}
+
+/* Additional padding for browsers with persistent bottom UI (like iOS Safari) */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .illustration-layout .layout-footer,
+  .welcome-layout .layout-footer {
+    /* Add extra padding when safe area is detected */
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 2.5rem);
+  }
+}
+
+/* For browsers with bottom navigation bars */
+@media (display-mode: browser) {
+  .illustration-layout .layout-footer,
+  .welcome-layout .layout-footer {
+    /* Add extra bottom margin to ensure visibility above browser UI */
+    margin-bottom: env(safe-area-inset-bottom, 0);
+    padding-bottom: calc(env(safe-area-inset-bottom, 1rem) + 3rem);
+  }
+}
+
+/* Additional helper class for dynamic bottom spacing */
+.pb-safe-extra {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 3rem);
+}
+
+/* Detect iOS Safari specifically for additional adjustments */
+@supports (-webkit-touch-callout: none) {
+  .illustration-layout .layout-footer,
+  .welcome-layout .layout-footer {
+    /* iOS Safari specific adjustments */
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 3.5rem);
+  }
+}
+
+/* Onboarding animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33% { transform: translateY(-10px) rotate(2deg); }
+  66% { transform: translateY(10px) rotate(-2deg); }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+/* Answer Batcher Animations */
+@keyframes slide-in-from-bottom {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes zoom-in-95 {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-in {
+  animation-fill-mode: both;
+}
+
+.slide-in-from-bottom-2 {
+  animation: slide-in-from-bottom 0.2s ease-out;
+}
+
+.zoom-in-95 {
+  animation: zoom-in-95 0.2s ease-out;
+}
+
+/* Fade in animation for toast messages */
+@keyframes toast-fade-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.animate-toast-fade-in {
+  animation: toast-fade-in 0.3s ease-out;
+}
+
+/* Shimmer animation for AI Journal button */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) skewX(-12deg);
+  }
+  100% {
+    transform: translateX(200%) skewX(-12deg);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 3s infinite;
+}

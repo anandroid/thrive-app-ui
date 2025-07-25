@@ -13,10 +13,10 @@ interface JourneyChatProps {
 
 const DEFAULT_MOOD_OPTIONS: MoodOption[] = [
   { type: 'great', emoji: '😊', label: 'Great', color: 'from-green-400 to-green-500' },
-  { type: 'good', emoji: '🙂', label: 'Good', color: 'from-sage-light to-sage' },
+  { type: 'good', emoji: '🙂', label: 'Good', color: 'from-sage-300 to-sage-400' },
   { type: 'okay', emoji: '😐', label: 'Okay', color: 'from-amber-400 to-amber-500' },
   { type: 'not_great', emoji: '😔', label: 'Not Great', color: 'from-orange-400 to-orange-500' },
-  { type: 'struggling', emoji: '😢', label: 'Struggling', color: 'from-rose to-burgundy' }
+  { type: 'struggling', emoji: '😢', label: 'Struggling', color: 'from-rose-500 to-burgundy-700' }
 ];
 
 export const JourneyChat: React.FC<JourneyChatProps> = ({ journey, onBack, onJourneyUpdated }) => {
@@ -144,7 +144,7 @@ export const JourneyChat: React.FC<JourneyChatProps> = ({ journey, onBack, onJou
             <ChevronLeft className="w-5 h-5 text-gray-700" />
           </button>
           <div className="flex items-center space-x-2">
-            <Edit3 className="w-5 h-5 text-sage" />
+            <Edit3 className="w-5 h-5 text-sage-600" />
             <h1 className="text-lg font-semibold text-secondary-text">{journey.title}</h1>
           </div>
           <div className="w-10" />
@@ -162,7 +162,7 @@ export const JourneyChat: React.FC<JourneyChatProps> = ({ journey, onBack, onJou
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium text-burgundy">Wellness Companion</p>
+                  <p className="text-sm font-medium text-burgundy-700">Wellness Companion</p>
                   <p className="text-xs text-secondary-text-thin italic">Track your story</p>
                 </div>
                 <div className="bg-white rounded-2xl p-5 shadow-md">

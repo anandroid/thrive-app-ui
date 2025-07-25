@@ -5,7 +5,7 @@ import { useTouchFeedback } from '@/hooks/useTouchFeedback';
 import { cn } from '@/lib/utils';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'gradient' | 'soft' | 'outline';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'gradient' | 'soft' | 'outline' | 'sage';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
   haptic?: 'light' | 'medium' | 'heavy';
@@ -102,20 +102,98 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
     full: 'rounded-full'
   };
 
-  // Base variant styles
-  const variantStyles = {
-    primary: 'bg-primary-text text-white hover:opacity-90',
-    secondary: 'bg-white text-primary-text border border-gray-200 hover:bg-gray-50',
-    ghost: 'bg-transparent text-primary-text hover:bg-gray-100',
-    danger: 'bg-red-500 text-white hover:bg-red-600',
-    soft: 'bg-gray-100 text-gray-800 hover:bg-gray-200',
-    outline: 'bg-transparent border-2 border-primary-text text-primary-text hover:bg-primary-text hover:text-white',
-    gradient: gradient 
-      ? `bg-gradient-${gradient.direction || 'to-r'} from-${gradient.from} to-${gradient.to} text-white ${
-          gradient.hoverFrom ? `hover:from-${gradient.hoverFrom}` : ''
-        } ${gradient.hoverTo ? `hover:to-${gradient.hoverTo}` : ''}`
-      : 'bg-gradient-to-r from-rose to-burgundy text-white hover:from-burgundy hover:to-burgundy'
-  };
+
+  // Build gradient styles for inline styling
+  const gradientStyle: React.CSSProperties = {};
+  
+  if (variant === 'gradient' && gradient) {
+    const direction = gradient.direction || 'to-r';
+    const directionMap: Record<string, string> = {
+      'to-r': 'to right',
+      'to-br': 'to bottom right',
+      'to-b': 'to bottom',
+      'to-bl': 'to bottom left',
+      'to-l': 'to left',
+      'to-tl': 'to top left',
+      'to-t': 'to top',
+      'to-tr': 'to top right'
+    };
+    
+    // Map color names to actual colors
+    const colorMap: Record<string, string> = {
+      'rose': '#f43f5e',
+      'rose-500': '#f43f5e',
+      'burgundy': '#8b2c5f',
+      'burgundy-700': '#8b2c5f',
+      'rose/40': 'rgba(244, 63, 94, 0.4)',
+      'burgundy/30': 'rgba(139, 44, 95, 0.3)',
+      'primary': '#a855f7',
+      'secondary': '#f472b6',
+      'purple-500': '#a855f7',
+      'pink-500': '#ec4899',
+      'purple-400': '#c084fc',
+      'pink-400': '#f9a8d4',
+      'blue-400': '#60a5fa',
+      'blue-500': '#3b82f6',
+      'indigo-500': '#6366f1',
+      'green-400': '#4ade80',
+      'emerald-500': '#10b981',
+      'slate-600': '#475569',
+      'slate-700': '#334155',
+      'blue-600': '#2563eb',
+      'blue-700': '#1d4ed8'
+    };
+    
+    const fromColor = colorMap[gradient.from] || gradient.from;
+    const toColor = colorMap[gradient.to] || gradient.to;
+    
+    gradientStyle.background = `linear-gradient(${directionMap[direction] || direction}, ${fromColor}, ${toColor})`;
+  } else if (variant === 'gradient') {
+    // Default gradient
+    gradientStyle.background = 'linear-gradient(to right, #f43f5e, #8b2c5f)';
+  }
+
+  // Build inline styles for variants
+  const variantInlineStyles: React.CSSProperties = {};
+  
+  // Apply default variant styles only if no custom className overrides them
+  if (!className?.includes('bg-') && !className?.includes('text-')) {
+    switch (variant) {
+      case 'primary':
+        variantInlineStyles.backgroundColor = '#111827'; // gray-900
+        variantInlineStyles.color = '#ffffff';
+        break;
+      case 'secondary':
+        variantInlineStyles.backgroundColor = '#ffffff';
+        variantInlineStyles.color = '#111827';
+        variantInlineStyles.border = '1px solid #e5e7eb';
+        break;
+      case 'ghost':
+        variantInlineStyles.backgroundColor = 'transparent';
+        variantInlineStyles.color = '#111827';
+        break;
+      case 'danger':
+        variantInlineStyles.backgroundColor = '#ef4444';
+        variantInlineStyles.color = '#ffffff';
+        break;
+      case 'soft':
+        variantInlineStyles.backgroundColor = '#f3f4f6';
+        variantInlineStyles.color = '#1f2937';
+        break;
+      case 'outline':
+        variantInlineStyles.backgroundColor = 'transparent';
+        variantInlineStyles.border = '2px solid #111827';
+        variantInlineStyles.color = '#111827';
+        break;
+      case 'sage':
+        variantInlineStyles.backgroundColor = '#8fad8f';
+        variantInlineStyles.color = '#ffffff';
+        break;
+      case 'gradient':
+        variantInlineStyles.color = '#ffffff';
+        break;
+    }
+  }
 
   // Build all classes
   const buttonClasses = cn(
@@ -145,9 +223,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
     // Width
     fullWidth && 'w-full',
     
-    // Variant
-    variantStyles[variant],
-    
     // Shadow
     shadowClasses[shadow],
     
@@ -169,7 +244,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
     // States
     (disabled || loading) && 'opacity-50 cursor-not-allowed pointer-events-none',
     
-    // Custom classes
+    // Custom classes (applied last to override defaults)
     className
   );
 
@@ -181,6 +256,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
       disabled={disabled || loading}
       {...touchHandlers}
       {...props}
+      style={{...props.style, ...variantInlineStyles, ...gradientStyle}}
     >
       {/* Gradient overlay for hover effect */}
       {(variant === 'gradient' || gradientOverlay) && (
@@ -242,10 +318,10 @@ export const SageGradientButton = forwardRef<HTMLButtonElement, Omit<ButtonProps
       ref={ref} 
       variant="gradient"
       gradient={{
-        from: 'sage',
-        to: 'sage-dark',
-        hoverFrom: 'sage-dark',
-        hoverTo: 'sage-dark'
+        from: 'sage-400',
+        to: 'sage-600',
+        hoverFrom: 'sage-600',
+        hoverTo: 'sage-600'
       }}
       {...props} 
     />
@@ -258,10 +334,10 @@ export const RoseGradientButton = forwardRef<HTMLButtonElement, Omit<ButtonProps
       ref={ref} 
       variant="gradient"
       gradient={{
-        from: 'rose',
-        to: 'burgundy',
-        hoverFrom: 'burgundy',
-        hoverTo: 'burgundy'
+        from: 'rose-500',
+        to: 'burgundy-700',
+        hoverFrom: 'burgundy-700',
+        hoverTo: 'burgundy-700'
       }}
       {...props} 
     />
@@ -370,12 +446,12 @@ export const ConsultationButton = forwardRef<HTMLButtonElement, Omit<ButtonProps
       ref={ref} 
       variant="gradient"
       gradient={{
-        from: 'sage',
-        to: 'sage-dark',
-        hoverFrom: 'sage-dark',
-        hoverTo: 'sage-dark',
-        activeFrom: 'sage-light/40',
-        activeTo: 'sage/30'
+        from: 'sage-400',
+        to: 'sage-600',
+        hoverFrom: 'sage-600',
+        hoverTo: 'sage-600',
+        activeFrom: 'sage-300/40',
+        activeTo: 'sage-400/30'
       }}
       shadow="md"
       fullWidth

@@ -117,7 +117,7 @@ export const ThrivingNotificationCard: React.FC<ThrivingNotificationCardProps> =
             setPermissionsGranted(currentStatus);
           }
         }}
-        className="bg-gradient-to-r from-orange-100 to-yellow-100 rounded-[4vw] max-rounded-[1rem] p-[4vw] max-p-[1rem] mb-[4vw] max-mb-[1rem] cursor-pointer hover:shadow-md transition-shadow touch-feedback border border-orange-200"
+        className="bg-gradient-to-br from-orange-50 to-amber-100/70 rounded-[4vw] max-rounded-[1rem] p-[4vw] max-p-[1rem] mb-[4vw] max-mb-[1rem] cursor-pointer hover:shadow-md transition-shadow touch-feedback border border-orange-200/50"
       >
         <div className="flex items-center justify-between mb-[3vw] max-mb-[0.75rem]">
           <div className="flex items-center gap-[3vw] max-gap-[0.75rem]">
@@ -136,11 +136,9 @@ export const ThrivingNotificationCard: React.FC<ThrivingNotificationCardProps> =
           <ChevronRight className="w-[5vw] h-[5vw] max-w-[1.25rem] max-h-[1.25rem] text-gray-400" />
         </div>
 
-        <div className="bg-white/50 rounded-[3vw] max-rounded-[0.75rem] p-[3vw] max-p-[0.75rem]">
-          <p className="text-[min(3.5vw,0.875rem)] text-gray-700">
-            Tap to enable notifications and never miss your wellness routine steps.
-          </p>
-        </div>
+        <p className="text-[min(3.5vw,0.875rem)] text-gray-700 px-[1vw]">
+          Tap to enable notifications and never miss your wellness routine steps.
+        </p>
       </div>
     );
   }
@@ -149,23 +147,23 @@ export const ThrivingNotificationCard: React.FC<ThrivingNotificationCardProps> =
     <>
       <div
         onClick={() => setIsModalOpen(true)}
-        className="bg-gradient-to-r from-sage-light/20 to-soft-lavender/20 rounded-[4vw] max-rounded-[1rem] p-[4vw] max-p-[1rem] mb-[4vw] max-mb-[1rem] cursor-pointer hover:shadow-md transition-shadow touch-feedback"
+        className="group bg-gradient-to-br from-sage-50 to-sage-100/70 rounded-[4vw] max-rounded-[1rem] p-[4vw] max-p-[1rem] mb-[4vw] max-mb-[1rem] cursor-pointer hover:shadow-xl hover:scale-[1.02] hover:from-sage-100 hover:to-sage-50 active:scale-[0.98] transition-all duration-200 border border-sage-200/50 shadow-lg touch-feedback"
       >
         <div className="flex items-center justify-between mb-[3vw] max-mb-[0.75rem]">
           <div className="flex items-center gap-[3vw] max-gap-[0.75rem]">
-            <div className="w-[10vw] h-[10vw] max-w-[2.5rem] max-h-[2.5rem] bg-white rounded-[2.5vw] max-rounded-[0.625rem] flex items-center justify-center">
-              <Bell className="w-[5vw] h-[5vw] max-w-[1.25rem] max-h-[1.25rem] text-sage-dark" />
+            <div className="w-[10vw] h-[10vw] max-w-[2.5rem] max-h-[2.5rem] bg-white rounded-[2.5vw] max-rounded-[0.625rem] flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+              <Bell className="w-[5vw] h-[5vw] max-w-[1.25rem] max-h-[1.25rem] text-sage-600 fill-sage-600 group-hover:scale-110 transition-transform" />
             </div>
             <div>
-              <h3 className="text-[min(4.5vw,1.125rem)] font-semibold text-gray-900">
+              <h3 className="text-[min(4.5vw,1.125rem)] font-semibold text-gray-800">
                 Reminders
               </h3>
-              <p className="text-[min(3.5vw,0.875rem)] text-gray-600">
+              <p className="text-[min(3.5vw,0.875rem)] text-gray-500">
                 {enabledCount} of {stepTimes.length} active
               </p>
             </div>
           </div>
-          <ChevronRight className="w-[5vw] h-[5vw] max-w-[1.25rem] max-h-[1.25rem] text-gray-400" />
+          <ChevronRight className="w-[5vw] h-[5vw] max-w-[1.25rem] max-h-[1.25rem] text-gray-400 group-hover:text-gray-600 group-hover:translate-x-[0.5vw] transition-all" />
         </div>
 
         {/* Time pills */}
@@ -177,8 +175,8 @@ export const ThrivingNotificationCard: React.FC<ThrivingNotificationCardProps> =
                 key={stepTime.id}
                 className={`flex items-center gap-[1.5vw] max-gap-[0.375rem] px-[3vw] max-px-[0.75rem] py-[1.5vw] max-py-[0.375rem] rounded-full text-[min(3.5vw,0.875rem)] ${
                   isEnabled
-                    ? 'bg-sage-light/30 text-sage-dark'
-                    : 'bg-gray-100 text-gray-400 line-through'
+                    ? 'bg-sage-100 text-sage-600'
+                    : 'bg-gray-100 text-gray-500 line-through'
                 }`}
               >
                 <Clock className="w-[3.5vw] h-[3.5vw] max-w-[0.875rem] max-h-[0.875rem]" />
@@ -187,15 +185,15 @@ export const ThrivingNotificationCard: React.FC<ThrivingNotificationCardProps> =
             );
           })}
           {stepTimes.length > 4 && (
-            <div className="px-[3vw] max-px-[0.75rem] py-[1.5vw] max-py-[0.375rem] rounded-full bg-gray-100 text-gray-500 text-[min(3.5vw,0.875rem)]">
+            <div className="px-[3vw] max-px-[0.75rem] py-[1.5vw] max-py-[0.375rem] rounded-full bg-gray-200 text-gray-700 text-[min(3.5vw,0.875rem)]">
               +{stepTimes.length - 4} more
             </div>
           )}
         </div>
 
         {/* Weekday settings preview */}
-        <div className="flex items-center gap-[3vw] max-gap-[0.75rem] mt-[3vw] max-mt-[0.75rem]">
-          <Calendar className="w-[3.5vw] h-[3.5vw] max-w-[0.875rem] max-h-[0.875rem] text-gray-500" />
+        <div className="flex items-center gap-[3vw] max-gap-[0.75rem] mt-[3vw] max-mt-[0.75rem] pt-[3vw] max-pt-[0.75rem] border-t border-gray-200">
+          <Calendar className="w-[3.5vw] h-[3.5vw] max-w-[0.875rem] max-h-[0.875rem] text-sage-600" />
           <span className="text-[min(3.5vw,0.875rem)] text-gray-600">
             {settings.enabledWeekdays && settings.enabledWeekends && 'Every day'}
             {settings.enabledWeekdays && !settings.enabledWeekends && 'Weekdays only'}

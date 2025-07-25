@@ -208,7 +208,7 @@ export const EnhancedQuestions: React.FC<EnhancedQuestionsProps> = ({
                            transition-all duration-200 touch-feedback
                            active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-gray-900/20
                            ${option === 'Yes' || option.toLowerCase().includes('yes')
-                             ? 'bg-gray-900 text-white hover:bg-gray-800'
+                             ? 'bg-gray-900 text-white hover:bg-gray-800 active:bg-gray-700'
                              : option === 'Not sure'
                              ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                              : 'bg-white border border-gray-300 text-gray-700 hover:border-gray-900 hover:text-gray-900'

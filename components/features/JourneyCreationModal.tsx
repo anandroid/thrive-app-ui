@@ -109,7 +109,7 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
 
   const modalHeader = (
     <div className="flex items-center space-x-3">
-      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sage-light to-sage flex items-center justify-center">
+      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sage-300 to-sage-400 flex items-center justify-center">
         <Edit3 className="w-6 h-6 text-white" />
       </div>
       <div>
@@ -125,7 +125,7 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
         onClick={handleCreateJourney}
         isLoading={isCreating}
         disabled={isCreating}
-        className="w-full py-4 rounded-2xl bg-gradient-to-r from-sage to-sage-dark text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all touch-feedback touch-manipulation"
+        className="w-full py-4 rounded-2xl bg-gradient-to-r from-sage-400 to-sage-600 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all touch-feedback touch-manipulation"
         loadingMessages={[
           'Creating Journal...',
           'Setting up your wellness space...',
@@ -159,9 +159,9 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
     >
       <div className="space-y-6">
             {/* Journey Type Info */}
-            <div className="rounded-2xl bg-gradient-to-br from-sage-light/10 to-sage/5 p-5 border border-sage/20">
+            <div className="rounded-2xl bg-gradient-to-br from-sage-300/10 to-sage-400/5 p-5 border border-sage-400/20">
               <div className="flex items-start space-x-4">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sage-light to-sage flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sage-300 to-sage-400 flex items-center justify-center flex-shrink-0">
                   <Icon className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -186,7 +186,7 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
                   value={specificCondition}
                   onChange={(e) => setSpecificCondition(e.target.value)}
                   placeholder="e.g., Diabetes, Arthritis, IBS..."
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-sage focus:ring-2 focus:ring-sage/20 transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-sage-400 focus:ring-2 focus:ring-sage-400/20 transition-all"
                 />
               </div>
             )}
@@ -200,7 +200,7 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
                 <div className="bg-gray-50 rounded-xl p-4">
                   <div className="flex justify-between items-center mb-3">
                     <span className="text-xs text-gray-500">No Pain</span>
-                    <span className="text-2xl font-bold text-rose">{painIntensity}</span>
+                    <span className="text-2xl font-bold text-rose-500">{painIntensity}</span>
                     <span className="text-xs text-gray-500">Worst Pain</span>
                   </div>
                   <input
@@ -239,7 +239,7 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
                       value={goal}
                       onChange={(e) => updateGoal(index, e.target.value)}
                       placeholder={`Goal ${index + 1}`}
-                      className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:border-sage focus:ring-2 focus:ring-sage/20 transition-all"
+                      className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:border-sage-400 focus:ring-2 focus:ring-sage-400/20 transition-all"
                     />
                     {goals.length > 1 && (
                       <button
@@ -254,14 +254,14 @@ export const JourneyCreationModal: React.FC<JourneyCreationModalProps> = ({
               </div>
               <button
                 onClick={addGoal}
-                className="mt-3 text-sm text-sage hover:text-sage-dark transition-colors"
+                className="mt-3 text-sm text-sage-400 hover:text-sage-600 transition-colors"
               >
                 + Add another goal
               </button>
             </div>
 
             {/* What is a Journey? */}
-            <div className="rounded-xl bg-gradient-to-br from-sage-light/10 to-sage/5 p-4 border border-sage/20">
+            <div className="rounded-xl bg-gradient-to-br from-sage-300/10 to-sage-400/5 p-4 border border-sage-400/20">
               <h4 className="text-sm font-semibold text-primary-text mb-2">
                 What is a Journey?
               </h4>

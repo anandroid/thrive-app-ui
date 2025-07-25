@@ -1,0 +1,83 @@
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: 
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/thrive-app-ui:${BUILD_ID}'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/thrive-app-ui:latest'
+      - '-f'
+      - '${_DOCKERFILE}'
+      - '.'
+
+  # Push the container image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '--all-tags'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/thrive-app-ui'
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'thrive-app-ui'
+      - '--image'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/thrive-app-ui:${BUILD_ID}'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--port'
+      - '8080'
+      - '--memory'
+      - '1Gi'
+      - '--timeout'
+      - '300'
+      - '--concurrency'
+      - '80'
+      - '--max-instances'
+      - '100'
+      - '--allow-unauthenticated'
+      - '--set-secrets'
+      - 'ENABLE_ASSISTANT_FUNCTIONS=ENABLE_ASSISTANT_FUNCTIONS:latest'
+      - '--set-secrets'
+      - 'NEXT_PUBLIC_APP_URL=NEXT_PUBLIC_APP_URL:latest'
+      - '--set-secrets'
+      - 'NEXT_PUBLIC_ENABLE_ASSISTANT_FUNCTIONS=NEXT_PUBLIC_ENABLE_ASSISTANT_FUNCTIONS:latest'
+      - '--set-secrets'
+      - 'NEXT_PUBLIC_SHOP_URL=NEXT_PUBLIC_SHOP_URL:latest'
+      - '--set-secrets'
+      - 'NODE_ENV=NODE_ENV:latest'
+      - '--set-secrets'
+      - 'OPENAI_API_KEY=OPENAI_API_KEY:latest'
+      - '--set-secrets'
+      - 'THRIVE_CHAT_ASSISTANT_ID=THRIVE_CHAT_ASSISTANT_ID:latest'
+      - '--set-secrets'
+      - 'THRIVE_GEMINI_API_KEY=THRIVE_GEMINI_API_KEY:latest'
+      - '--set-secrets'
+      - 'THRIVE_OPENAI_API_KEY=THRIVE_OPENAI_API_KEY:latest'
+      - '--set-secrets'
+      - 'THRIVE_PANTRY_ASSISTANT_ID=THRIVE_PANTRY_ASSISTANT_ID:latest'
+      - '--set-secrets'
+      - 'THRIVE_ROUTINE_ASSISTANT_ID=THRIVE_ROUTINE_ASSISTANT_ID:latest'
+      - '--set-secrets'
+      - 'THRIVE_RECOMMENDATION_ASSISTANT_ID=THRIVE_RECOMMENDATION_ASSISTANT_ID:latest'
+
+# Build timeout
+timeout: 1800s
+
+# Use Artifact Registry for storing images
+options:
+  logging: CLOUD_LOGGING_ONLY
+  
+# Default substitutions
+substitutions:
+  _DOCKERFILE: 'Dockerfile'
+  
+images:
+  - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/thrive-app-ui:${BUILD_ID}'
+  - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/thrive-app-ui:latest'

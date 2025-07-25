@@ -1027,7 +1027,7 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
       return (
         <div className="flex justify-end mb-6" data-message-index={messageIndex}>
           <div className="max-w-[90%] md:max-w-[85%]">
-            <div className="rounded-3xl px-6 py-4 bg-gradient-to-br from-sage-light/20 to-sage/15 shadow-xl shadow-sage/25 border border-sage/20">
+            <div className="rounded-3xl px-6 py-4 bg-gradient-to-br from-sage-300/20 to-sage-400/15 shadow-xl shadow-sage-400/25 border border-sage-400/20">
               <p className="text-[15px] leading-[1.6] font-normal text-primary-text">{message.content}</p>
               <p className="text-[13px] text-gray-500 mt-2">
                 {message.timestamp.toLocaleTimeString('en-US', { 
@@ -1053,18 +1053,18 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
           {(hasPartialContent || !message.isStreaming) ? (
             <div className="relative rounded-3xl bg-white shadow-2xl shadow-gray-300/80 overflow-hidden border-2 border-gray-200/70">
               {/* Gradient accent line */}
-              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-rose via-dusty-rose to-burgundy" />
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-rose-500 via-dusty-rose-600 to-burgundy-700" />
               <div className="p-5 pt-6 space-y-5">
                 {/* Sender Label */}
                 <div className="mb-3">
-                  <span className="text-sm font-semibold text-burgundy">Wellness Companion</span>
+                  <span className="text-sm font-semibold text-burgundy-700">Wellness Companion</span>
                 </div>
                 {/* Emergency Alert */}
                 {parsed?.attentionRequired === 'emergency' && (
-                  <div className="rounded-2xl bg-gradient-to-r from-rose/15 to-burgundy/15 border border-rose/30 p-4 shadow-xl shadow-rose/20">
+                  <div className="rounded-2xl bg-gradient-to-r from-rose-500/15 to-burgundy-700/15 border border-rose-500/30 p-4 shadow-xl shadow-rose-500/20">
                     <div className="flex items-start space-x-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose/30 to-burgundy/20 flex items-center justify-center shadow-lg shadow-rose/30">
-                        <AlertCircle className="w-5 h-5 text-burgundy" />
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500/30 to-burgundy-700/20 flex items-center justify-center shadow-lg shadow-rose-500/30">
+                        <AlertCircle className="w-5 h-5 text-burgundy-700" />
                       </div>
                       <div>
                         <h4 className="font-bold text-primary-text mb-1 text-lg">Immediate Attention Required</h4>
@@ -1181,15 +1181,15 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                                       activeFrom: 'sage-light/40',
                                       activeTo: 'sage/30'
                                     }}
-                                    className="flex-1 border border-sage/20 hover:border-sage/40"
+                                    className="flex-1 border border-sage-400/20 hover:border-sage-400/40"
                                     springAnimation
                                     gradientOverlay
                                     cardGlow
                                     haptic="medium"
                                   >
                                     <div className="flex items-center justify-center space-x-2">
-                                      <PlusCircle className="w-4 h-4 text-sage-dark" />
-                                      <span className="text-[13px] font-medium text-sage-dark">I already have it</span>
+                                      <PlusCircle className="w-4 h-4 text-sage-600" />
+                                      <span className="text-[13px] font-medium text-sage-600">I already have it</span>
                                     </div>
                                   </Button>
                                 )}
@@ -1212,8 +1212,8 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                                     haptic="medium"
                                   >
                                     <div className="flex items-center justify-center space-x-2">
-                                      <ShoppingCart className="w-4 h-4 text-rose" />
-                                      <span className="text-[13px] font-medium text-rose">Buy</span>
+                                      <ShoppingCart className="w-4 h-4 text-rose-500" />
+                                      <span className="text-[13px] font-medium text-rose-500">Buy</span>
                                     </div>
                                   </Button>
                                 )}
@@ -1257,15 +1257,15 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                                       activeFrom: 'sage-light/40',
                                       activeTo: 'sage/30'
                                     }}
-                                    className="flex-1 border border-sage/20 hover:border-sage/40"
+                                    className="flex-1 border border-sage-400/20 hover:border-sage-400/40"
                                     springAnimation
                                     gradientOverlay
                                     cardGlow
                                     haptic="medium"
                                   >
                                     <div className="flex items-center justify-center space-x-2">
-                                      <PlusCircle className="w-4 h-4 text-sage-dark" />
-                                      <span className="text-[13px] font-medium text-sage-dark">I already have it</span>
+                                      <PlusCircle className="w-4 h-4 text-sage-600" />
+                                      <span className="text-[13px] font-medium text-sage-600">I already have it</span>
                                     </div>
                                   </Button>
                                   <Button
@@ -1291,8 +1291,8 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                                     haptic="medium"
                                   >
                                     <div className="flex items-center justify-center space-x-2">
-                                      <ShoppingCart className="w-4 h-4 text-rose" />
-                                      <span className="text-[13px] font-medium text-rose">Buy</span>
+                                      <ShoppingCart className="w-4 h-4 text-rose-500" />
+                                      <span className="text-[13px] font-medium text-rose-500">Buy</span>
                                     </div>
                                   </Button>
                                 </div>
@@ -1365,18 +1365,18 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                       
                       if (colorIndex === 0) {
                         // Light sage green
-                        gradientClass = "from-sage-light/30 to-sage/20";
-                        iconColorClass = "text-sage-dark";
-                        backgroundClass = "from-sage-light/10 to-sage/5";
-                        shadowClass = "shadow-sage/15";
-                        borderColorHover = "hover:border-sage/30";
+                        gradientClass = "from-sage-300/30 to-sage-400/20";
+                        iconColorClass = "text-sage-600";
+                        backgroundClass = "from-sage-300/10 to-sage-400/5";
+                        shadowClass = "shadow-sage-400/15";
+                        borderColorHover = "hover:border-sage-400/30";
                       } else if (colorIndex === 1) {
                         // Light pink/bronze
-                        gradientClass = "from-rose/20 to-dusty-rose/15";
-                        iconColorClass = "text-rose";
-                        backgroundClass = "from-rose/5 to-dusty-rose/5";
-                        shadowClass = "shadow-rose/10";
-                        borderColorHover = "hover:border-rose/25";
+                        gradientClass = "from-rose-500/20 to-dusty-rose-600/15";
+                        iconColorClass = "text-rose-500";
+                        backgroundClass = "from-rose-500/5 to-dusty-rose-600/5";
+                        shadowClass = "shadow-rose-500/10";
+                        borderColorHover = "hover:border-rose-500/25";
                       } else {
                         // Light slate blue
                         gradientClass = "from-slate-300/30 to-slate-400/20";
@@ -1435,9 +1435,9 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
                 {message.isStreaming && (
                   <div className="mt-4" data-testid="typing-indicator">
                     <div className="flex space-x-1">
-                      <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0s' }} />
-                      <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0.15s' }} />
-                      <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0.3s' }} />
+                      <span className="w-3 h-3 bg-gradient-to-r from-sage-400 to-sage-600 rounded-full animate-wave" style={{ animationDelay: '0s' }} />
+                      <span className="w-3 h-3 bg-gradient-to-r from-sage-400 to-sage-600 rounded-full animate-wave" style={{ animationDelay: '0.15s' }} />
+                      <span className="w-3 h-3 bg-gradient-to-r from-sage-400 to-sage-600 rounded-full animate-wave" style={{ animationDelay: '0.3s' }} />
                     </div>
                   </div>
                 )}
@@ -1498,9 +1498,9 @@ export const SmartCardChat: React.FC<SmartCardChatProps> = ({
             >
               <div className="flex items-center space-x-3">
                 <div className="flex space-x-1">
-                  <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0s' }} />
-                  <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0.15s' }} />
-                  <span className="w-3 h-3 bg-gradient-to-r from-sage to-sage-dark rounded-full animate-wave" style={{ animationDelay: '0.3s' }} />
+                  <span className="w-3 h-3 bg-gradient-to-r from-sage-400 to-sage-600 rounded-full animate-wave" style={{ animationDelay: '0s' }} />
+                  <span className="w-3 h-3 bg-gradient-to-r from-sage-400 to-sage-600 rounded-full animate-wave" style={{ animationDelay: '0.15s' }} />
+                  <span className="w-3 h-3 bg-gradient-to-r from-sage-400 to-sage-600 rounded-full animate-wave" style={{ animationDelay: '0.3s' }} />
                 </div>
                 <span className="text-sm text-gray-500">Companion is typing...</span>
               </div>

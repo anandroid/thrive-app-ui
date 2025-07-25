@@ -130,7 +130,7 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
         
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-lg bg-dusty-rose/20 flex items-center justify-center flex-shrink-0">
-            <Sparkles className="w-5 h-5 text-dusty-rose" />
+            <Sparkles className="w-5 h-5 text-dusty-rose-600" />
           </div>
           <div>
             <h3 className="font-semibold text-gray-900">Build Healthy Habits</h3>

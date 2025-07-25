@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thrivings Page - Purple-Pink Theme Preview</title>
+    <style>
+        :root {
+            /* Purple-Pink Theme Colors */
+            --primary: #8b5cf6;           /* Vibrant Purple */
+            --primary-dark: #7c3aed;      /* Darker purple */
+            --primary-light: #a78bfa;     /* Lighter purple */
+            --secondary: #ec4899;         /* Vibrant Pink */
+            --secondary-dark: #db2777;    /* Darker pink */
+            --secondary-light: #f9a8d4;   /* Lighter pink */
+            --gradient-start: #8b5cf6;    /* Purple */
+            --gradient-mid: #d946ef;      /* Purple-Pink */
+            --gradient-end: #ec4899;      /* Pink */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-title {
+            font-size: 1.375rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-icon {
+            width: 2.75rem;
+            height: 2.75rem;
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 1rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Thriving Cards Container */
+        .cards-container {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .cards-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Thriving Card */
+        .thriving-card {
+            flex-shrink: 0;
+            width: 320px;
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .thriving-card.active {
+            border-color: var(--primary-light);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .thriving-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom right, rgba(139, 92, 246, 0.05), transparent, rgba(236, 72, 153, 0.02));
+            pointer-events: none;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .card-title-section {
+            display: flex;
+            align-items: start;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .card-icon {
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(to bottom right, #8b5cf6, #ec4899);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.3);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+        }
+
+        .pause-button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            border: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pause-button.active {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1));
+            color: var(--primary);
+        }
+
+        .pause-button.paused {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        /* Progress Bar */
+        .progress-section {
+            margin-bottom: 1rem;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.375rem;
+            font-size: 0.75rem;
+        }
+
+        .progress-bar {
+            height: 0.5rem;
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #8b5cf6, #ec4899);
+            transition: width 0.5s ease;
+        }
+
+        /* Next Step */
+        .next-step {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1));
+            border: 1px solid var(--primary-light);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .next-step:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Journal Button */
+        .journal-button {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1));
+            border: none;
+            border-radius: 0.75rem;
+            color: #be185d;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        /* Add New Card */
+        .add-new-card {
+            flex-shrink: 0;
+            width: 320px;
+            border: 2px dashed #fbbf24;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+        }
+
+        .add-new-card:hover {
+            border-color: #f472b6;
+            background: linear-gradient(to bottom right, #fce7f3, #fef3c7);
+        }
+
+        /* Daily Rituals Section */
+        .rituals-section {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .rituals-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .rituals-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: linear-gradient(to bottom right, #f472b6, #f43f5e);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 15px -3px rgba(244, 63, 94, 0.3);
+        }
+
+        /* Step Card */
+        .step-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 1.25rem;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .step-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom right, rgba(244, 114, 182, 0.05), transparent);
+            pointer-events: none;
+        }
+
+        .step-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .step-time-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .step-time {
+            color: #db2777;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .step-content {
+            padding: 1rem 1.5rem;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 0.5rem;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .nav-item {
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1));
+            color: var(--primary);
+        }
+
+        /* Icons */
+        .icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .icon-filled {
+            fill: currentColor;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <span class="header-title">Wellness Journey</span>
+            <div class="header-icon">
+                <svg class="icon icon-filled" style="color: white;" viewBox="0 0 24 24">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Thriving Cards -->
+        <div class="cards-container">
+            <!-- Card 1: Active -->
+            <div class="thriving-card active">
+                <div class="card-header">
+                    <div class="card-title-section">
+                        <div class="card-icon">
+                            <svg class="icon icon-filled" style="color: white;" viewBox="0 0 24 24">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                        </div>
+                        <h3 class="card-title">Better Sleep & Recovery</h3>
+                    </div>
+                    <button class="pause-button active">
+                        <svg class="icon" style="width: 1rem; height: 1rem;" viewBox="0 0 24 24">
+                            <path d="M18.364 5.636l-1.414 1.414M12 3v3m5.657.343l1.414-1.414M21 12h-3m-.343 5.657l1.414 1.414M18 18.364l-1.414-1.414M12 18v3m-5.657-.343l-1.414 1.414M6 12H3m.343-5.657L4.757 4.93"/>
+                        </svg>
+                        Pause
+                    </button>
+                </div>
+
+                <div class="progress-section">
+                    <div class="progress-header">
+                        <span style="color: #6b7280;">Today's Progress</span>
+                        <span style="color: var(--primary); font-weight: 500;">3 more steps</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 40%;"></div>
+                    </div>
+                </div>
+
+                <div class="next-step">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                        <span style="font-size: 0.75rem; color: var(--primary); font-weight: 500;">Next: 9:00 PM</span>
+                        <span style="font-size: 0.75rem; color: #6b7280;">+2 more</span>
+                    </div>
+                    <p style="font-weight: 500; color: #111827; font-size: 0.875rem;">Digital Sunset</p>
+                </div>
+
+                <button class="journal-button">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                    Journal
+                </button>
+            </div>
+
+            <!-- Card 2: Active -->
+            <div class="thriving-card">
+                <div class="card-header">
+                    <div class="card-title-section">
+                        <div class="card-icon">
+                            <svg class="icon icon-filled" style="color: white;" viewBox="0 0 24 24">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                        </div>
+                        <h3 class="card-title">Morning Energy & Focus</h3>
+                    </div>
+                    <button class="pause-button active">
+                        <svg class="icon" style="width: 1rem; height: 1rem;" viewBox="0 0 24 24">
+                            <path d="M18.364 5.636l-1.414 1.414M12 3v3m5.657.343l1.414-1.414M21 12h-3m-.343 5.657l1.414 1.414M18 18.364l-1.414-1.414M12 18v3m-5.657-.343l-1.414 1.414M6 12H3m.343-5.657L4.757 4.93"/>
+                        </svg>
+                        Pause
+                    </button>
+                </div>
+
+                <div class="progress-section">
+                    <div class="progress-header">
+                        <span style="color: #6b7280;">Today's Progress</span>
+                        <span style="color: var(--primary); font-weight: 500;">✓ All done for today!</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%;"></div>
+                    </div>
+                </div>
+
+                <div class="next-step">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                        <span style="font-size: 0.75rem; color: var(--primary); font-weight: 500;">Tomorrow: 7:00 AM</span>
+                    </div>
+                    <p style="font-weight: 500; color: #111827; font-size: 0.875rem;">Hydrate First Thing</p>
+                </div>
+
+                <button class="journal-button">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                    Journal
+                </button>
+            </div>
+
+            <!-- Card 3: Paused -->
+            <div class="thriving-card">
+                <div class="card-header">
+                    <div class="card-title-section">
+                        <div class="card-icon">
+                            <svg class="icon icon-filled" style="color: white;" viewBox="0 0 24 24">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                        </div>
+                        <h3 class="card-title">Stress Relief & Calm</h3>
+                    </div>
+                    <button class="pause-button paused">
+                        <svg class="icon" style="width: 1rem; height: 1rem;" viewBox="0 0 24 24">
+                            <path d="M18.364 5.636l-1.414 1.414M12 3v3m5.657.343l1.414-1.414M21 12h-3m-.343 5.657l1.414 1.414M18 18.364l-1.414-1.414M12 18v3m-5.657-.343l-1.414 1.414M6 12H3m.343-5.657L4.757 4.93"/>
+                        </svg>
+                        Resume
+                    </button>
+                </div>
+
+                <div class="progress-section">
+                    <div class="progress-header">
+                        <span style="color: #6b7280;">Today's Progress</span>
+                        <span style="color: #6b7280; font-weight: 500;">Paused</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <div style="padding: 1rem; background: #f3f4f6; border-radius: 1rem; text-align: center; color: #6b7280; font-size: 0.875rem;">
+                    Thriving is paused
+                </div>
+
+                <button class="journal-button">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                    Journal
+                </button>
+            </div>
+
+            <!-- Add New Card -->
+            <div class="add-new-card">
+                <svg style="width: 3rem; height: 3rem; color: #f472b6; margin-bottom: 0.75rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                <p style="color: #111827; font-weight: 500;">Create New Thriving</p>
+                <p style="color: #6b7280; text-align: center; margin-top: 0.25rem; font-size: 0.875rem;">
+                    Add a personalized thriving to your wellness journey
+                </p>
+            </div>
+        </div>
+
+        <!-- Swipe Indicator -->
+        <div style="text-align: center; color: #9ca3af; font-size: 0.75rem; margin-bottom: 1.5rem; animation: pulse 2s infinite;">
+            swipe to see more →
+        </div>
+
+        <!-- Daily Rituals Section -->
+        <div class="rituals-section">
+            <div style="position: absolute; inset: 0; background: linear-gradient(to bottom right, rgba(244, 114, 182, 0.05), transparent); pointer-events: none;"></div>
+            
+            <div style="position: relative; z-index: 10;">
+                <div class="rituals-header">
+                    <div class="rituals-icon">
+                        <svg class="icon icon-filled" style="color: white;" viewBox="0 0 24 24">
+                            <path d="M18.364 5.636l-1.414 1.414M12 3v3m5.657.343l1.414-1.414M21 12h-3m-.343 5.657l1.414 1.414M18 18.364l-1.414-1.414M12 18v3m-5.657-.343l-1.414 1.414M6 12H3m.343-5.657L4.757 4.93"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 style="font-size: 1.25rem; font-weight: 600; color: #111827;">Daily Rituals</h2>
+                        <p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">Gentle reminders for your wellness journey</p>
+                    </div>
+                </div>
+
+                <!-- Step Cards -->
+                <div class="step-card">
+                    <div class="step-header">
+                        <div class="step-time-info">
+                            <div class="step-time">
+                                <svg class="icon" style="width: 1rem; height: 1rem;" viewBox="0 0 24 24">
+                                    <path d="M18.364 5.636l-1.414 1.414M12 3v3m5.657.343l1.414-1.414M21 12h-3m-.343 5.657l1.414 1.414M18 18.364l-1.414-1.414M12 18v3m-5.657-.343l-1.414 1.414M6 12H3m.343-5.657L4.757 4.93"/>
+                                </svg>
+                                9:00 PM
+                            </div>
+                            <span style="color: #d1d5db;">•</span>
+                            <span style="color: #6b7280; display: flex; align-items: center; gap: 0.375rem;">
+                                <svg class="icon" style="width: 1rem; height: 1rem;" viewBox="0 0 24 24">
+                                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                15 min
+                            </span>
+                        </div>
+                        <h4 style="font-size: 1.125rem; font-weight: 600; color: #111827;">Digital Sunset</h4>
+                    </div>
+                    <div class="step-content">
+                        <p style="color: #6b7280; font-size: 0.875rem;">Turn off all screens and devices to signal your brain it's time to wind down.</p>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header">
+                        <div class="step-time-info">
+                            <div class="step-time">
+                                <svg class="icon" style="width: 1rem; height: 1rem;" viewBox="0 0 24 24">
+                                    <path d="M18.364 5.636l-1.414 1.414M12 3v3m5.657.343l1.414-1.414M21 12h-3m-.343 5.657l1.414 1.414M18 18.364l-1.414-1.414M12 18v3m-5.657-.343l-1.414 1.414M6 12H3m.343-5.657L4.757 4.93"/>
+                                </svg>
+                                9:15 PM
+                            </div>
+                            <span style="color: #d1d5db;">•</span>
+                            <span style="color: #6b7280; display: flex; align-items: center; gap: 0.375rem;">
+                                <svg class="icon" style="width: 1rem; height: 1rem;" viewBox="0 0 24 24">
+                                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                10 min
+                            </span>
+                        </div>
+                        <h4 style="font-size: 1.125rem; font-weight: 600; color: #111827;">Calming Tea Ritual</h4>
+                    </div>
+                    <div class="step-content">
+                        <p style="color: #6b7280; font-size: 0.875rem;">Prepare and enjoy a cup of chamomile or passionflower tea.</p>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header">
+                        <div class="step-time-info">
+                            <div class="step-time">
+                                <svg class="icon" style="width: 1rem; height: 1rem;" viewBox="0 0 24 24">
+                                    <path d="M18.364 5.636l-1.414 1.414M12 3v3m5.657.343l1.414-1.414M21 12h-3m-.343 5.657l1.414 1.414M18 18.364l-1.414-1.414M12 18v3m-5.657-.343l-1.414 1.414M6 12H3m.343-5.657L4.757 4.93"/>
+                                </svg>
+                                9:30 PM
+                            </div>
+                            <span style="color: #d1d5db;">•</span>
+                            <span style="color: #6b7280; display: flex; align-items: center; gap: 0.375rem;">
+                                <svg class="icon" style="width: 1rem; height: 1rem;" viewBox="0 0 24 24">
+                                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                15 min
+                            </span>
+                        </div>
+                        <h4 style="font-size: 1.125rem; font-weight: 600; color: #111827;">Gentle Stretching</h4>
+                    </div>
+                    <div class="step-content">
+                        <p style="color: #6b7280; font-size: 0.875rem;">Do light stretches focusing on neck, shoulders, and lower back.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item">Home</div>
+        <div class="nav-item active">Thrivings</div>
+        <div class="nav-item">Discover</div>
+        <div class="nav-item">Pantry</div>
+        <div class="nav-item">Settings</div>
+    </div>
+
+    <style>
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</body>
+</html>

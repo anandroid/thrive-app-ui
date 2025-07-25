@@ -120,7 +120,7 @@ export function ChatEditor({
       <style dangerouslySetInnerHTML={{ __html: spinnerStyle }} />
       <div ref={containerRef} className={`chat-input-wrapper ${className} relative`}>
         <div className="px-4 py-3">
-          <div className="flex items-start gap-2 bg-gray-50 rounded-2xl p-3 transition-all focus-within:bg-white focus-within:ring-2 focus-within:ring-rose/20">
+          <div className="flex items-start gap-2 bg-gray-50 rounded-2xl p-3 transition-all focus-within:bg-white focus-within:ring-2 focus-within:ring-sky-500/20">
             <textarea
               ref={textareaRef}
               value={value}
@@ -141,7 +141,7 @@ export function ChatEditor({
             <button
               onClick={() => onSubmit()}
               disabled={!value.trim() || isLoading || disabled}
-              className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-rose to-burgundy text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed native-transition ios-active shadow-md hover:shadow-lg transition-shadow touch-feedback touch-manipulation"
+              className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-sky-500 to-sky-600 text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed native-transition ios-active shadow-md hover:shadow-lg transition-shadow touch-feedback touch-manipulation"
             >
               {isLoading ? (
                 <div 

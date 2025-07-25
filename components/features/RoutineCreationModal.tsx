@@ -178,7 +178,7 @@ export const RoutineCreationModal: React.FC<RoutineCreationModalProps> = ({
               </button>
               <button
                 onClick={() => setCurrentStep(2)}
-                className="px-[min(5vw,1.5rem)] py-[min(3vw,0.75rem)] rounded-full bg-primary-text text-white hover:opacity-90 transition-all"
+                className="px-[min(5vw,1.5rem)] py-[min(3vw,0.75rem)] rounded-full bg-zen-400 text-white hover:bg-zen-500 active:bg-zen-600 transition-all"
               >
                 Continue
               </button>
@@ -235,7 +235,7 @@ export const RoutineCreationModal: React.FC<RoutineCreationModalProps> = ({
             <div className="flex justify-end">
               <button
                 onClick={() => setCurrentStep(3)}
-                className="px-[min(5vw,1.5rem)] py-[min(3vw,0.75rem)] rounded-full bg-primary-text text-white hover:opacity-90 transition-all"
+                className="px-[min(5vw,1.5rem)] py-[min(3vw,0.75rem)] rounded-full bg-zen-400 text-white hover:bg-zen-500 active:bg-zen-600 transition-all"
               >
                 Continue
               </button>
@@ -297,7 +297,7 @@ export const RoutineCreationModal: React.FC<RoutineCreationModalProps> = ({
                 onClick={handleCreate}
                 isLoading={isCreating}
                 disabled={isCreating}
-                className="px-[min(5vw,1.5rem)] py-[min(3vw,0.75rem)] rounded-full bg-primary-text text-white hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[min(50vw,12.5rem)]"
+                className="px-[min(5vw,1.5rem)] py-[min(3vw,0.75rem)] rounded-full bg-zen-400 text-white hover:bg-zen-500 active:bg-zen-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[min(50vw,12.5rem)]"
                 loadingMessages={[
                   'Creating...',
                   'Analyzing...',

@@ -7,16 +7,16 @@ import { Heart, Shield, Sparkles, BookOpen, Package } from 'lucide-react';
 const features = [
   {
     icon: BookOpen,
-    iconColor: 'text-sage-dark',
-    iconBg: 'from-sage-light/30 to-sage/20',
+    iconColor: 'text-sage-600',
+    iconBg: 'from-sage-300/30 to-sage-400/20',
     title: 'Your Wellness Journey',
     description: 'Track your health story with daily journals. No judgment, just insights.',
     image: '/illustrations/journey_story_illustration.png'
   },
   {
     icon: Heart,
-    iconColor: 'text-rose',
-    iconBg: 'from-rose/20 to-dusty-rose/15',
+    iconColor: 'text-rose-500',
+    iconBg: 'from-rose-500/20 to-dusty-rose-600/15',
     title: 'Stress-Free Routines',
     description: 'Gentle reminders without guilt. Life is hard enough - we\'re here to help, not judge.',
     image: '/illustrations/routine.png'
@@ -31,7 +31,7 @@ const features = [
   },
   {
     icon: Sparkles,
-    iconColor: 'text-rose',
+    iconColor: 'text-rose-500',
     iconBg: 'from-rose/20 to-burgundy/15',
     title: 'Natural Wellness Support',
     description: 'Herbs, supplements, and holistic practices - shared as wisdom, not sales.',
@@ -59,7 +59,7 @@ export const AboutSection: React.FC = () => {
       </div>
 
       {/* Wellness Companion Card */}
-      <div className="rounded-3xl bg-gradient-to-br from-dusty-rose/10 to-sage-light/5 p-8 border border-dusty-rose/20">
+      <div className="rounded-3xl bg-gradient-to-br from-dusty-rose-600/10 to-sage-300/5 p-8 border border-dusty-rose-600/20">
         <div className="flex flex-col md:flex-row md:items-start md:space-x-6">
           <div className="flex-1">
             <h3 className="text-xl font-semibold text-primary-text mb-4">Your Wellness Companion</h3>
@@ -85,7 +85,7 @@ export const AboutSection: React.FC = () => {
       </div>
 
       {/* Philosophy Card - Hidden for now */}
-      {/* <div className="rounded-3xl bg-gradient-to-br from-sage-light/10 to-sage/5 p-8 border border-sage/20">
+      {/* <div className="rounded-3xl bg-gradient-to-br from-sage-300/10 to-sage-400/5 p-8 border border-sage-400/20">
         <h3 className="text-xl font-semibold text-primary-text mb-4">Our Philosophy</h3>
         <blockquote className="text-lg text-secondary-text italic">
           &ldquo;Life is hard enough - your wellness app should be a source of comfort, not another thing to &apos;fail&apos; at.&rdquo;
@@ -149,7 +149,7 @@ export const AboutSection: React.FC = () => {
         <h3 className="text-xl font-semibold text-primary-text mb-6">What Makes Us Different</h3>
         <div className="space-y-4">
           <div className="flex items-start space-x-3">
-            <div className="w-2 h-2 rounded-full bg-sage mt-2 flex-shrink-0" />
+            <div className="w-2 h-2 rounded-full bg-sage-400 mt-2 flex-shrink-0" />
             <div>
               <h5 className="font-medium text-primary-text mb-1">No Guilt, No Shame</h5>
               <p className="text-sm text-secondary-text-thin">
@@ -159,7 +159,7 @@ export const AboutSection: React.FC = () => {
           </div>
           
           <div className="flex items-start space-x-3">
-            <div className="w-2 h-2 rounded-full bg-sage mt-2 flex-shrink-0" />
+            <div className="w-2 h-2 rounded-full bg-sage-400 mt-2 flex-shrink-0" />
             <div>
               <h5 className="font-medium text-primary-text mb-1">Privacy by Design</h5>
               <p className="text-sm text-secondary-text-thin">
@@ -169,7 +169,7 @@ export const AboutSection: React.FC = () => {
           </div>
           
           <div className="flex items-start space-x-3">
-            <div className="w-2 h-2 rounded-full bg-sage mt-2 flex-shrink-0" />
+            <div className="w-2 h-2 rounded-full bg-sage-400 mt-2 flex-shrink-0" />
             <div>
               <h5 className="font-medium text-primary-text mb-1">Honest Guidance</h5>
               <p className="text-sm text-secondary-text-thin">
@@ -179,7 +179,7 @@ export const AboutSection: React.FC = () => {
           </div>
           
           <div className="flex items-start space-x-3">
-            <div className="w-2 h-2 rounded-full bg-sage mt-2 flex-shrink-0" />
+            <div className="w-2 h-2 rounded-full bg-sage-400 mt-2 flex-shrink-0" />
             <div>
               <h5 className="font-medium text-primary-text mb-1">Celebrate Small Wins</h5>
               <p className="text-sm text-secondary-text-thin">

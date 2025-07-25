@@ -75,14 +75,14 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
         {/* Feature icons */}
         <div className="grid grid-cols-2 gap-[min(4vw,1rem)] mb-[min(4vw,1rem)]">
           <div className="text-center">
-            <div className="w-[min(12vw,3rem)] h-[min(12vw,3rem)] mx-auto mb-[min(2vw,0.5rem)] rounded-xl bg-gradient-to-br from-sage-light/30 to-sage/20 flex items-center justify-center">
-              <Plus className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-sage-dark" />
+            <div className="w-[min(12vw,3rem)] h-[min(12vw,3rem)] mx-auto mb-[min(2vw,0.5rem)] rounded-xl bg-gradient-to-br from-zen-300/30 to-zen-400/20 flex items-center justify-center">
+              <Plus className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-zen-600" />
             </div>
             <p className="text-[min(3vw,0.75rem)] text-gray-700">Add Steps</p>
           </div>
           <div className="text-center">
             <div className="w-[min(12vw,3rem)] h-[min(12vw,3rem)] mx-auto mb-[min(2vw,0.5rem)] rounded-xl bg-gradient-to-br from-rose/20 to-dusty-rose/15 flex items-center justify-center">
-              <Minus className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-rose" />
+              <Minus className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-rose-500" />
             </div>
             <p className="text-[min(3vw,0.75rem)] text-gray-700">Remove Steps</p>
           </div>
@@ -119,15 +119,15 @@ export const AdjustmentTutorial: React.FC<AdjustmentTutorialProps> = ({ onClose,
                 onArrowClick?.();
               }, 300);
             }}
-            className="w-full p-[min(4vw,1rem)] rounded-2xl bg-gradient-to-r from-sage-light/20 to-sage/10 border border-sage-light/30 hover:from-sage-light/30 hover:to-sage/20 transition-all group cursor-pointer touch-feedback touch-manipulation active:scale-[0.98] active:from-sage-light/40 active:to-sage/30"
+            className="w-full p-[min(4vw,1rem)] rounded-2xl bg-zen-400 text-white border-2 border-zen-500 hover:bg-zen-500 transition-all group cursor-pointer touch-feedback touch-manipulation active:scale-[0.98] active:bg-zen-600"
           >
             <div className="flex flex-col items-center space-y-[min(2vw,0.5rem)]">
               <div className="relative">
                 {/* Animated arrow pointing down */}
-                <div className="absolute inset-0 w-[min(10vw,2.5rem)] h-[min(10vw,2.5rem)] bg-gradient-to-br from-sage-light to-sage rounded-full shadow-lg group-hover:shadow-xl transition-shadow animate-pulse" />
+                <div className="absolute inset-0 w-[min(10vw,2.5rem)] h-[min(10vw,2.5rem)] bg-white/20 rounded-full shadow-lg group-hover:shadow-xl transition-shadow animate-pulse" />
                 <ArrowDown className="relative w-[min(10vw,2.5rem)] h-[min(10vw,2.5rem)] text-white p-[min(2vw,0.5rem)] animate-bounce z-10" />
               </div>
-              <p className="text-[min(4vw,1rem)] font-medium text-sage-dark">
+              <p className="text-[min(4vw,1rem)] font-medium text-white">
                 Adjust Routine
               </p>
               <p className="text-[min(3vw,0.75rem)] text-secondary-text-thin">

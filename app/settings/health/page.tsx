@@ -171,11 +171,11 @@ export default function HealthSettingsPage() {
 
   const getMetricColor = (type: string) => {
     const colors: Record<string, { bg: string; border: string; chart: string }> = {
-      steps: { bg: 'from-sage-light to-sage', border: 'border-sage-light/30', chart: '#8B9467' },
-      heart_rate: { bg: 'from-rose to-burgundy', border: 'border-rose/30', chart: '#D18B92' }, 
-      sleep: { bg: 'from-soft-lavender to-dusty-rose', border: 'border-soft-lavender/30', chart: '#C3A0C9' },
-      water: { bg: 'from-sage to-sage-dark', border: 'border-sage/30', chart: '#6B7353' },
-      calories: { bg: 'from-dusty-rose to-rose', border: 'border-dusty-rose/30', chart: '#C68FA0' },
+      steps: { bg: 'from-sage-300 to-sage-400', border: 'border-sage-300/30', chart: '#8B9467' },
+      heart_rate: { bg: 'from-rose-500 to-burgundy-700', border: 'border-rose-500/30', chart: '#D18B92' }, 
+      sleep: { bg: 'from-soft-lavender to-dusty-rose-600', border: 'border-soft-lavender/30', chart: '#C3A0C9' },
+      water: { bg: 'from-sage-400 to-sage-600', border: 'border-sage-400/30', chart: '#6B7353' },
+      calories: { bg: 'from-dusty-rose-600 to-rose-500', border: 'border-dusty-rose-600/30', chart: '#C68FA0' },
       mindfulness: { bg: 'from-soft-lavender to-soft-lavender/80', border: 'border-soft-lavender/30', chart: '#E6D7EA' }
     };
     return colors[type] || { bg: 'from-gray-400 to-gray-500', border: 'border-gray-200', chart: '#6B7280' };
@@ -201,9 +201,9 @@ export default function HealthSettingsPage() {
         }}
       >
         <div className="max-w-7xl mx-auto p-[min(5vw,1.25rem)]">
-          <div className="bg-gradient-to-br from-white via-sage-light/5 to-rose/5 rounded-[min(6vw,1.5rem)] p-[min(8vw,2rem)] text-center border border-sage-light/20">
-            <div className="w-[min(20vw,5rem)] h-[min(20vw,5rem)] mx-auto mb-[min(6vw,1.5rem)] rounded-full bg-gradient-to-br from-rose/20 to-sage/20 flex items-center justify-center">
-              <Heart className="w-[min(10vw,2.5rem)] h-[min(10vw,2.5rem)] text-rose" />
+          <div className="bg-gradient-to-br from-white via-sage-300/5 to-rose-500/5 rounded-[min(6vw,1.5rem)] p-[min(8vw,2rem)] text-center border border-sage-300/20">
+            <div className="w-[min(20vw,5rem)] h-[min(20vw,5rem)] mx-auto mb-[min(6vw,1.5rem)] rounded-full bg-gradient-to-br from-rose-500/20 to-sage-400/20 flex items-center justify-center">
+              <Heart className="w-[min(10vw,2.5rem)] h-[min(10vw,2.5rem)] text-rose-500" />
             </div>
             
             <h2 className="text-[min(6vw,1.5rem)] font-bold text-gray-900 mb-[min(4vw,1rem)]">
@@ -239,12 +239,12 @@ export default function HealthSettingsPage() {
               cardGlow
               haptic="medium"
               gradient={{
-                from: 'sage',
-                to: 'sage-dark',
-                hoverFrom: 'sage-dark',
-                hoverTo: 'sage-dark',
-                activeFrom: 'sage/40',
-                activeTo: 'sage-dark/30'
+                from: 'sage-400',
+                to: 'sage-600',
+                hoverFrom: 'sage-600',
+                hoverTo: 'sage-600',
+                activeFrom: 'sage-400/40',
+                activeTo: 'sage-600/30'
               }}
               loading={isConnecting}
             >
@@ -441,9 +441,9 @@ export default function HealthSettingsPage() {
         </div>
 
         {/* Achievements Section */}
-        <div className="bg-gradient-to-br from-sage-light/10 to-rose/5 rounded-[min(6vw,1.5rem)] p-[min(6vw,1.5rem)] border border-sage-light/20 mb-[min(8vw,2rem)]">
+        <div className="bg-gradient-to-br from-sage-300/10 to-rose-500/5 rounded-[min(6vw,1.5rem)] p-[min(6vw,1.5rem)] border border-sage-300/20 mb-[min(8vw,2rem)]">
           <h3 className="text-[min(5vw,1.25rem)] font-semibold text-gray-900 mb-[min(4vw,1rem)] flex items-center gap-[min(2vw,0.5rem)]">
-            <Award className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-sage-dark" />
+            <Award className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-sage-600" />
             This Week&apos;s Achievements
           </h3>
           <div className="grid grid-cols-2 gap-[min(3vw,0.75rem)]">
@@ -466,7 +466,7 @@ export default function HealthSettingsPage() {
         {healthData.correlations.length > 0 && (
           <div className="space-y-[min(3vw,0.75rem)]">
             <h3 className="text-[min(5vw,1.25rem)] font-semibold text-gray-900 flex items-center gap-[min(2vw,0.5rem)]">
-              <Brain className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-sage-dark" />
+              <Brain className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-sage-600" />
               Wellness Insights
             </h3>
             {healthData.correlations.map((correlation, index) => (

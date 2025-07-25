@@ -406,15 +406,15 @@ export const WIDGET_CSS = `
 }
 
 .widget-icon.gradient-rose {
-  @apply bg-gradient-to-br from-rose to-burgundy;
+  @apply bg-gradient-to-br from-rose-500 to-burgundy-700;
 }
 
 .widget-icon.gradient-sage {
-  @apply bg-gradient-to-br from-sage-light to-sage;
+  @apply bg-gradient-to-br from-sage-300 to-sage-400;
 }
 
 .widget-icon.gradient-lavender {
-  @apply bg-gradient-to-br from-lavender to-dusty-rose;
+  @apply bg-gradient-to-br from-bloom-300 to-dusty-rose-600;
 }
 
 .widget-content {
