@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Button from '@/components/ui/Button';
 import { Input, Textarea } from '@/components/ui/form-inputs';
 import { Save, Plus, X, GripVertical } from 'lucide-react';
@@ -21,23 +21,24 @@ export default function ShopSettings() {
     updatedAt: new Date(),
   });
 
-  useEffect(() => {
-    fetchSettings();
-  }, []);
-
-  const fetchSettings = async () => {
+  const fetchSettings = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/admin/settings');
       if (!response.ok) throw new Error('Failed to fetch settings');
       const data = await response.json();
       setSettings(data);
-    } catch (error) {
+    } catch {
       showToast('Failed to load settings', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
+
 
   const handleSave = async () => {
     try {
@@ -51,7 +52,7 @@ export default function ShopSettings() {
       if (!response.ok) throw new Error('Failed to save settings');
       
       showToast('Settings saved successfully', 'success');
-    } catch (error) {
+    } catch {
       showToast('Failed to save settings', 'error');
     } finally {
       setSaving(false);
@@ -74,7 +75,7 @@ export default function ShopSettings() {
     });
   };
 
-  const updateBanner = (index: number, field: string, value: any) => {
+  const updateBanner = (index: number, field: string, value: unknown) => {
     const newBanners = [...settings.banners];
     newBanners[index] = { ...newBanners[index], [field]: value };
     setSettings({ ...settings, banners: newBanners });

@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { ShopSettings } from '@/src/types/shop';
 
 // GET /api/shop/settings - Get shop settings for display
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const doc = await adminDb.collection('shop_settings').doc('settings').get();
     

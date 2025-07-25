@@ -55,7 +55,7 @@ export interface Product {
   isActive: boolean;
   isFeatured: boolean;
   searchKeywords?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   
   // Analytics
   viewCount: number;
@@ -130,6 +130,7 @@ export interface CreateProductRequest {
   shopifyProductId?: string;
   shopifyVariantId?: string;
   affiliateUrl?: string;
+  affiliateId?: string;
   brand?: string;
   isFeatured?: boolean;
   searchKeywords?: string[];

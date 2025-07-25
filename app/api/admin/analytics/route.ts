@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from '@/src/lib/auth';
 import { adminDb } from '@/lib/firebase-admin';
-import { VendorStats } from '@/src/types/shop';
+import { VendorStats, Vendor } from '@/src/types/shop';
 
 // GET /api/admin/analytics - Get analytics data
 export async function GET(request: NextRequest) {
@@ -15,8 +15,7 @@ export async function GET(request: NextRequest) {
     const range = searchParams.get('range') || '7d';
 
     // Calculate date range
-    const now = new Date();
-    let startDate = new Date();
+    const startDate = new Date();
     
     switch (range) {
       case '24h':
@@ -35,10 +34,10 @@ export async function GET(request: NextRequest) {
 
     // Get all vendors
     const vendorsSnapshot = await adminDb.collection('vendors').get();
-    const vendors = vendorsSnapshot.docs.map(doc => ({
+    const vendors: Vendor[] = vendorsSnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
-    }));
+    } as Vendor));
 
     // Get analytics for each vendor
     const stats: VendorStats[] = [];
@@ -74,7 +73,8 @@ export async function GET(request: NextRequest) {
         
         revenue = conversions.reduce((sum, doc) => {
           const click = doc.data();
-          const commission = (click.conversionValue || 0) * (vendor.affiliateData?.commissionRate || 0) / 100;
+          const vendorData = vendor as Vendor;
+          const commission = (click.conversionValue || 0) * (vendorData.affiliateData?.commissionRate || 0) / 100;
           return sum + commission;
         }, 0);
       }

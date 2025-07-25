@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Button from '@/components/ui/Button';
 import { Plus, Edit, Trash2, Store } from 'lucide-react';
 import { Vendor } from '@/src/types/shop';
@@ -14,23 +14,24 @@ export default function VendorManager() {
   const [showVendorModal, setShowVendorModal] = useState(false);
   const { showToast } = useToast();
 
-  useEffect(() => {
-    fetchVendors();
-  }, []);
-
-  const fetchVendors = async () => {
+  const fetchVendors = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/admin/vendors');
       if (!response.ok) throw new Error('Failed to fetch vendors');
       const data = await response.json();
       setVendors(data.vendors);
-    } catch (error) {
+    } catch {
       showToast('Failed to load vendors', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    fetchVendors();
+  }, [fetchVendors]);
+
 
   const handleDeleteVendor = async (vendorId: string) => {
     if (!confirm('Are you sure you want to delete this vendor? All associated products will be affected.')) return;
@@ -43,7 +44,7 @@ export default function VendorManager() {
       
       showToast('Vendor deleted successfully', 'success');
       fetchVendors();
-    } catch (error) {
+    } catch {
       showToast('Failed to delete vendor', 'error');
     }
   };
@@ -99,11 +100,14 @@ export default function VendorManager() {
               <div className="flex items-start justify-between mb-[min(3vw,0.75rem)]">
                 <div className="flex items-center gap-[min(3vw,0.75rem)]">
                   {vendor.logo ? (
-                    <img
-                      src={vendor.logo}
-                      alt={vendor.name}
-                      className="w-[min(12vw,3rem)] h-[min(12vw,3rem)] rounded-[min(2vw,0.5rem)] object-cover"
-                    />
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={vendor.logo}
+                        alt={vendor.name}
+                        className="w-[min(12vw,3rem)] h-[min(12vw,3rem)] rounded-[min(2vw,0.5rem)] object-cover"
+                      />
+                    </>
                   ) : (
                     <div className="w-[min(12vw,3rem)] h-[min(12vw,3rem)] bg-gray-100 rounded-[min(2vw,0.5rem)] flex items-center justify-center">
                       <Store className="w-[min(6vw,1.5rem)] h-[min(6vw,1.5rem)] text-gray-400" />

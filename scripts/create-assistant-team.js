@@ -52,13 +52,15 @@ const envConfig = {
     apiKey: process.env.THRIVE_OPENAI_API_KEY, // Dev environment uses the dev API key
     project: 'thrive-dev-465922',
     assistantSuffix: ' (Dev)',
-    envPrefix: 'THRIVE_'
+    envPrefix: 'THRIVE_',
+    feedEnvKey: 'THRIVE_DEV_FEED_ASSISTANT_ID'
   },
   production: {
     apiKey: null, // Will be set dynamically from Google Cloud
     project: 'thrive-465618', 
     assistantSuffix: '',
-    envPrefix: 'THRIVE_'
+    envPrefix: 'THRIVE_',
+    feedEnvKey: 'THRIVE_FEED_ASSISTANT_ID'
   }
 };
 
@@ -282,10 +284,19 @@ async function getAssistantIdFromCloud(secretName) {
  * Create or update an assistant
  */
 async function createOrUpdateAssistant(role, assistantConfig) {
-  const envKey = `${config.envPrefix}${role.toUpperCase()}_ASSISTANT_ID`;
+  // Special handling for feed assistant env key
+  const envKey = role === 'feed' 
+    ? config.feedEnvKey 
+    : `${config.envPrefix}${role.toUpperCase()}_ASSISTANT_ID`;
   
   // Get existing ID from appropriate source (cloud for dev, env for prod)
-  const existingId = await getAssistantIdFromCloud(envKey);
+  let existingId = await getAssistantIdFromCloud(envKey);
+  
+  // If the ID is "placeholder", treat it as if it doesn't exist
+  if (existingId === 'placeholder') {
+    console.log(`   ℹ️  Found placeholder ID for ${role}, will create new assistant`);
+    existingId = null;
+  }
   
   console.log(`\n🤖 Processing ${role} assistant for ${environment}...`);
   if (existingId) {
@@ -333,7 +344,7 @@ async function createOrUpdateAssistant(role, assistantConfig) {
                 } 
               }
             },
-            required: ['greeting', 'actionItems', 'actionableItems', 'questions'],
+            required: ['greeting', 'attentionRequired', 'emergencyReasoning', 'actionItems', 'additionalInformation', 'actionableItems', 'questions'],
             additionalProperties: false
           },
           strict: true
@@ -372,7 +383,7 @@ async function createOrUpdateAssistant(role, assistantConfig) {
                 } 
               }
             },
-            required: ['greeting', 'actionItems', 'actionableItems', 'questions'],
+            required: ['greeting', 'attentionRequired', 'emergencyReasoning', 'actionItems', 'additionalInformation', 'actionableItems', 'questions'],
             additionalProperties: false
           },
           strict: true
@@ -411,13 +422,16 @@ async function createOrUpdateAssistant(role, assistantConfig) {
                 } 
               }
             },
-            required: ['greeting', 'actionItems', 'actionableItems', 'questions'],
+            required: ['greeting', 'attentionRequired', 'emergencyReasoning', 'actionItems', 'additionalInformation', 'actionableItems', 'questions'],
             additionalProperties: false
           },
           strict: true
         }
       },
       recommendation: {
+        type: 'json_object'
+      },
+      feed: {
         type: 'json_object'
       }
     };
@@ -462,7 +476,7 @@ async function createOrUpdateAssistant(role, assistantConfig) {
       model: assistantConfig.model,
       instructions: assistantConfig.instructions,
       tools: tools,
-      response_format: { type: 'json_object' },
+      response_format: { type: 'json_object' }, // Temporarily simplified for all roles
       temperature: assistantConfig.temperature,
       metadata: {
         role,
@@ -563,7 +577,12 @@ async function updateEnvFile(assistants) {
     
     for (const assistant of assistants) {
       if (assistant.isNew) {
-        const envKey = `THRIVE_${assistant.role.toUpperCase()}_ASSISTANT_ID`;
+        // Special handling for feed assistant env key
+        const envKey = assistant.role === 'feed' && !isProduction
+          ? 'THRIVE_DEV_FEED_ASSISTANT_ID'
+          : assistant.role === 'feed' && isProduction
+          ? 'THRIVE_FEED_ASSISTANT_ID'
+          : `THRIVE_${assistant.role.toUpperCase()}_ASSISTANT_ID`;
         const envLine = `${envKey}=${assistant.id}`;
         
         // Check if the key already exists
@@ -636,7 +655,8 @@ async function main() {
       chat: path.join(__dirname, '../src/services/openai/assistant/team/chatAssistant.ts'),
       routine: path.join(__dirname, '../src/services/openai/assistant/team/routineAssistant.ts'),
       pantry: path.join(__dirname, '../src/services/openai/assistant/team/pantryAssistant.ts'),
-      recommendation: path.join(__dirname, '../src/services/openai/assistant/team/recommendationAssistant.ts')
+      recommendation: path.join(__dirname, '../src/services/openai/assistant/team/recommendationAssistant.ts'),
+      feed: path.join(__dirname, '../src/assistants/instructions/feedAssistantInstructions.ts')
     };
     
     const results = [];
@@ -646,18 +666,46 @@ async function main() {
       console.log(`\n📄 Loading ${role} assistant from TypeScript files...`);
       
       try {
-        const specificInstructions = await extractInstructionsFromTS(filePath);
-        const config = await extractConfigFromTS(filePath);
+        let fullInstructions;
+        let config;
+        let functions = [];
         
-        // Combine instructions
-        const fullInstructions = commonInstructions + '\n' + specificInstructions;
-        
-        // Add appropriate functions
-        let functions = [...SHARED_FUNCTIONS];
-        if (role === 'routine') {
-          functions = [...functions, ...ROUTINE_FUNCTIONS];
-        } else if (role === 'pantry') {
-          functions = [...functions, ...PANTRY_FUNCTIONS];
+        // Special handling for feed assistant
+        if (role === 'feed') {
+          // Feed assistant has a different structure
+          const fileContent = await fs.readFile(filePath, 'utf-8');
+          const instructionsMatch = fileContent.match(/export\s+const\s+feedAssistantInstructions\s*=\s*`([\s\S]*?)`;/);
+          if (instructionsMatch) {
+            fullInstructions = instructionsMatch[1];
+          } else {
+            throw new Error('Could not extract feed assistant instructions');
+          }
+          
+          // Create config for feed assistant
+          config = {
+            name: 'Thrive Feed Moderator',
+            description: 'Reviews and moderates user posts for the Thrive wellness community feed',
+            model: 'gpt-4.1-nano-2025-04-14',
+            temperature: 0.3
+          };
+          // Feed assistant doesn't use functions
+        } else {
+          // Regular assistants
+          const specificInstructions = await extractInstructionsFromTS(filePath);
+          config = await extractConfigFromTS(filePath);
+          
+          // Combine instructions (skip common for recommendation assistant)
+          fullInstructions = role === 'recommendation' 
+            ? specificInstructions 
+            : commonInstructions + '\n' + specificInstructions;
+          
+          // Add appropriate functions
+          functions = [...SHARED_FUNCTIONS];
+          if (role === 'routine') {
+            functions = [...functions, ...ROUTINE_FUNCTIONS];
+          } else if (role === 'pantry') {
+            functions = [...functions, ...PANTRY_FUNCTIONS];
+          }
         }
         
         // Create/update assistant

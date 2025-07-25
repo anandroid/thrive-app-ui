@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Button from '@/components/ui/Button';
 import { Plus, Search, Edit, Trash2, ExternalLink, Package } from 'lucide-react';
 import { Product } from '@/src/types/shop';
@@ -16,23 +16,24 @@ export default function ProductManager() {
   const [filterVendorType, setFilterVendorType] = useState<'all' | 'thrive' | 'affiliate'>('all');
   const { showToast } = useToast();
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/admin/products');
       if (!response.ok) throw new Error('Failed to fetch products');
       const data = await response.json();
       setProducts(data.products);
-    } catch (error) {
+    } catch {
       showToast('Failed to load products', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
 
   const handleDeleteProduct = async (productId: string) => {
     if (!confirm('Are you sure you want to delete this product?')) return;
@@ -45,7 +46,7 @@ export default function ProductManager() {
       
       showToast('Product deleted successfully', 'success');
       fetchProducts();
-    } catch (error) {
+    } catch {
       showToast('Failed to delete product', 'error');
     }
   };
@@ -64,27 +65,56 @@ export default function ProductManager() {
         <h2 className="text-[min(5vw,1.25rem)] font-bold text-gray-900">
           Products ({filteredProducts.length})
         </h2>
-        <Button
-          onClick={() => {
-            setSelectedProduct(null);
-            setShowProductModal(true);
-          }}
-          variant="gradient"
-          springAnimation
-          gradientOverlay
-          cardGlow
-          haptic="medium"
-          gradient={{
-            from: 'rose',
-            to: 'burgundy',
-            activeFrom: 'rose/40',
-            activeTo: 'burgundy/30'
-          }}
-          className="flex items-center gap-[min(2vw,0.5rem)]"
-        >
-          <Plus className="w-[min(4vw,1rem)] h-[min(4vw,1rem)]" />
-          Add Product
-        </Button>
+        <div className="flex gap-[min(3vw,0.75rem)]">
+          <Button
+            onClick={async () => {
+              try {
+                const response = await fetch('/api/admin/shopify/sync', {
+                  method: 'POST',
+                });
+                const data = await response.json();
+                if (data.success) {
+                  showToast(`${data.syncedCount} products synced from Shopify`, 'success');
+                  fetchProducts();
+                } else {
+                  showToast(data.error || 'Failed to sync products', 'error');
+                }
+              } catch {
+                showToast('Failed to sync products', 'error');
+              }
+            }}
+            variant="soft"
+            springAnimation
+            haptic="light"
+            className="flex items-center gap-[min(2vw,0.5rem)]"
+          >
+            <svg className="w-[min(4vw,1rem)] h-[min(4vw,1rem)]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Sync Shopify
+          </Button>
+          <Button
+            onClick={() => {
+              setSelectedProduct(null);
+              setShowProductModal(true);
+            }}
+            variant="gradient"
+            springAnimation
+            gradientOverlay
+            cardGlow
+            haptic="medium"
+            gradient={{
+              from: 'rose',
+              to: 'burgundy',
+              activeFrom: 'rose/40',
+              activeTo: 'burgundy/30'
+            }}
+            className="flex items-center gap-[min(2vw,0.5rem)]"
+          >
+            <Plus className="w-[min(4vw,1rem)] h-[min(4vw,1rem)]" />
+            Add Product
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -105,7 +135,7 @@ export default function ProductManager() {
           {/* Filter by type */}
           <select
             value={filterVendorType}
-            onChange={(e) => setFilterVendorType(e.target.value as any)}
+            onChange={(e) => setFilterVendorType(e.target.value as 'all' | 'thrive' | 'affiliate')}
             className="px-[min(4vw,1rem)] py-[min(2.5vw,0.625rem)] border border-gray-300 rounded-[min(2vw,0.5rem)] text-[min(3.75vw,0.9375rem)]"
           >
             <option value="all">All Products</option>
@@ -136,11 +166,14 @@ export default function ProductManager() {
               {/* Product Image */}
               <div className="aspect-square bg-gray-100 relative">
                 {product.images[0] ? (
-                  <img
-                    src={product.images[0]}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <Package className="w-[min(12vw,3rem)] h-[min(12vw,3rem)] text-gray-300" />

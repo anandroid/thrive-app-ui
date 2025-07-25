@@ -5,15 +5,16 @@ import { adminDb, FieldValue } from '@/lib/firebase-admin';
 // GET /api/admin/vendors/[vendorId] - Get a single vendor
 export async function GET(
   request: NextRequest,
-  { params }: { params: { vendorId: string } }
+  { params }: { params: Promise<{ vendorId: string }> }
 ) {
   try {
+    const { vendorId } = await params;
     const { userId } = await getAuth(request);
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const doc = await adminDb.collection('vendors').doc(params.vendorId).get();
+    const doc = await adminDb.collection('vendors').doc(vendorId).get();
     
     if (!doc.exists) {
       return NextResponse.json({ error: 'Vendor not found' }, { status: 404 });
@@ -36,9 +37,10 @@ export async function GET(
 // PUT /api/admin/vendors/[vendorId] - Update a vendor
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { vendorId: string } }
+  { params }: { params: Promise<{ vendorId: string }> }
 ) {
   try {
+    const { vendorId } = await params;
     const { userId } = await getAuth(request);
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -47,7 +49,7 @@ export async function PUT(
     const body = await request.json();
     
     // Check if vendor exists
-    const doc = await adminDb.collection('vendors').doc(params.vendorId).get();
+    const doc = await adminDb.collection('vendors').doc(vendorId).get();
     if (!doc.exists) {
       return NextResponse.json({ error: 'Vendor not found' }, { status: 404 });
     }
@@ -70,7 +72,7 @@ export async function PUT(
     }
 
     // Update vendor
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       ...body,
       updatedAt: FieldValue.serverTimestamp()
     };
@@ -92,7 +94,7 @@ export async function PUT(
       }
     }
 
-    await adminDb.collection('vendors').doc(params.vendorId).update(updateData);
+    await adminDb.collection('vendors').doc(vendorId).update(updateData);
 
     return NextResponse.json({
       success: true,
@@ -111,23 +113,24 @@ export async function PUT(
 // DELETE /api/admin/vendors/[vendorId] - Delete a vendor
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { vendorId: string } }
+  { params }: { params: Promise<{ vendorId: string }> }
 ) {
   try {
+    const { vendorId } = await params;
     const { userId } = await getAuth(request);
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check if vendor exists
-    const doc = await adminDb.collection('vendors').doc(params.vendorId).get();
+    const doc = await adminDb.collection('vendors').doc(vendorId).get();
     if (!doc.exists) {
       return NextResponse.json({ error: 'Vendor not found' }, { status: 404 });
     }
 
     // Check if vendor has products
     const productsSnapshot = await adminDb.collection('products')
-      .where('vendorId', '==', params.vendorId)
+      .where('vendorId', '==', vendorId)
       .limit(1)
       .get();
 
@@ -139,7 +142,7 @@ export async function DELETE(
     }
 
     // Delete vendor
-    await adminDb.collection('vendors').doc(params.vendorId).delete();
+    await adminDb.collection('vendors').doc(vendorId).delete();
 
     return NextResponse.json({
       success: true,

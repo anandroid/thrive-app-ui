@@ -30,8 +30,8 @@ export async function GET(
     return NextResponse.json({
       status: post.status,
       approvalProgress: post.approvalData?.approvalProgress || 0,
-      approvalMessage: post.approvalData?.approvalMessage,
-      approvedAt: post.approvalData?.approvedAt
+      feedback: post.status === 'rejected' ? post.approvalData?.approvalMessage : undefined,
+      suggestions: post.status === 'rejected' ? post.approvalData?.suggestions : undefined
     });
 
   } catch (error) {

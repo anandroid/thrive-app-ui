@@ -243,35 +243,152 @@ import { TouchLink } from '@/components/ui/TouchLink';
 - Redirects to `/thrivings?id={id}&showAdjustment=true`
 - Natural language adjustment instructions
 
-## 🔐 Environment Variables
+## 🔐 Environment Variables & Google Cloud Secrets
 
-### Required
+### 🚨 CRITICAL: Two-Project Architecture
+Thrive uses TWO separate projects for development and production:
+- **Development**: `thrive-dev-465922` (OpenAI project: `thrive-dev`)
+- **Production**: `thrive-465618` (OpenAI project: `thrive`)
+
+### 📋 Complete List of Secrets
+
+#### Core API Keys (Required in BOTH projects)
 ```bash
-THRIVE_OPENAI_API_KEY=sk-...
-OPENAI_API_KEY=sk-...               # Same as above (SDK requirement)
-THRIVE_OPENAI_ASSISTANT_ID=asst_... 
+# OpenAI
+THRIVE_OPENAI_API_KEY               # Main API key for assistants
+OPENAI_API_KEY                      # Same as above (SDK requirement)
+THRIVE_GEMINI_API_KEY               # Google Gemini API
 
-# Multi-Assistant IDs
-THRIVE_CHAT_ASSISTANT_ID=asst_...
-THRIVE_ROUTINE_ASSISTANT_ID=asst_...
-THRIVE_PANTRY_ASSISTANT_ID=asst_...
-THRIVE_RECOMMENDATION_ASSISTANT_ID=asst_...
-
-# Shop Integration
-NEXT_PUBLIC_SHOP_URL=https://shop.example.com
-
-# Firebase Authentication
-NEXT_PUBLIC_FIREBASE_API_KEY=
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
-NEXT_PUBLIC_FIREBASE_APP_ID=
+# Shopify
+THRIVE_SHOPIFY_API_KEY
+THRIVE_SHOPIFY_API_SECRET_KEY
+THRIVE_SHOPIFY_STOREFRONT_API_TOKEN
+THRIVE_SHOPIFY_STORE_DOMAIN
 ```
 
-### Deployment
+#### Assistant IDs (Different values per environment!)
 ```bash
-./scripts/upload-secrets.sh  # Uploads to Google Cloud
+# Multi-Assistant IDs (ALL must be different between dev/prod)
+THRIVE_CHAT_ASSISTANT_ID            # Chat wellness assistant
+THRIVE_ROUTINE_ASSISTANT_ID         # Routine creation assistant
+THRIVE_PANTRY_ASSISTANT_ID          # Pantry/supplement assistant
+THRIVE_RECOMMENDATION_ASSISTANT_ID  # Home screen widget assistant
+
+# Feed Assistant (Different env var names!)
+THRIVE_DEV_FEED_ASSISTANT_ID        # DEV ONLY - Community feed moderator
+THRIVE_FEED_ASSISTANT_ID            # PROD ONLY - Community feed moderator
+
+# Legacy (being phased out)
+THRIVE_OPENAI_ASSISTANT_ID          # Original single assistant
+THRIVE_DISCOVERY_ASSISTANT_ID       # Old discovery assistant (prod only)
+```
+
+#### Public Environment Variables
+```bash
+# App URLs
+NEXT_PUBLIC_APP_URL                 # Main app URL
+NEXT_PUBLIC_SHOP_URL                # Shop iframe URL
+
+# Feature Flags
+NEXT_PUBLIC_ENABLE_ASSISTANT_FUNCTIONS
+NEXT_PUBLIC_ENABLE_EXPERT_CONSULTATION
+ENABLE_ASSISTANT_FUNCTIONS
+NODE_ENV
+
+# Shopify Public
+NEXT_PUBLIC_THRIVE_SHOPIFY_STORE_DOMAIN
+```
+
+#### Firebase Configuration (Production Only)
+```bash
+# Firebase Admin SDK
+FIREBASE_ADMIN_CLIENT_EMAIL
+FIREBASE_ADMIN_PRIVATE_KEY
+FIREBASE_PROJECT_ID
+FIREBASE_SERVICE_ACCOUNT_JSON
+
+# Firebase Client SDK
+NEXT_PUBLIC_FIREBASE_API_KEY
+NEXT_PUBLIC_FIREBASE_APP_ID
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+NEXT_PUBLIC_FIREBASE_PROJECT_ID
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+```
+
+### 🔄 Secret Management Rules
+
+#### When Adding New Secrets:
+1. **ALWAYS add to BOTH projects** (dev and prod)
+2. **Use consistent naming** (except feed assistant which has dev-specific naming)
+3. **Document in this file immediately**
+4. **Update upload-secrets.sh if needed**
+
+#### Creating/Updating Secrets:
+```bash
+# Add to DEV
+echo -n "your-secret-value" | gcloud secrets create SECRET_NAME --data-file=- --project=thrive-dev-465922
+
+# Add to PROD
+echo -n "your-secret-value" | gcloud secrets create SECRET_NAME --data-file=- --project=thrive-465618
+
+# Update existing secret
+echo -n "new-value" | gcloud secrets versions add SECRET_NAME --data-file=- --project=PROJECT_ID
+```
+
+### 🤖 OpenAI Assistant Management
+
+#### Two OpenAI Projects:
+- **thrive-dev**: Development assistants (use dev API key)
+- **thrive**: Production assistants (use prod API key)
+
+#### Creating/Updating Assistants:
+```bash
+# Development assistants
+npm run create-assistants
+
+# Production assistants
+npm run create-assistants:prod
+```
+
+#### Assistant ID Rules:
+1. **NEVER share assistant IDs between environments**
+2. **Each environment has 5 separate assistants**
+3. **Feed assistant uses different env var names**:
+   - Dev: `THRIVE_DEV_FEED_ASSISTANT_ID`
+   - Prod: `THRIVE_FEED_ASSISTANT_ID`
+
+### 📝 Deployment
+```bash
+# Upload all secrets from .env.local to current project
+./scripts/upload-secrets.sh
+
+# Deploy to dev
+gcloud config set project thrive-dev-465922
+gcloud run deploy thrive-app --region=us-central1
+
+# Deploy to prod
+gcloud config set project thrive-465618
+gcloud run deploy thrive-app --region=us-central1
+```
+
+### ✅ Verification Commands
+```bash
+# List all secrets in dev
+gcloud secrets list --project=thrive-dev-465922
+
+# List all secrets in prod
+gcloud secrets list --project=thrive-465618
+
+# Compare assistant IDs
+for secret in THRIVE_CHAT_ASSISTANT_ID THRIVE_ROUTINE_ASSISTANT_ID THRIVE_PANTRY_ASSISTANT_ID THRIVE_RECOMMENDATION_ASSISTANT_ID; do
+  echo "=== $secret ==="
+  echo -n "Dev: " && gcloud secrets versions access latest --secret=$secret --project=thrive-dev-465922 2>/dev/null | head -c 20
+  echo
+  echo -n "Prod: " && gcloud secrets versions access latest --secret=$secret --project=thrive-465618 2>/dev/null | head -c 20
+  echo
+  echo
+done
 ```
 
 ### API Routes - CRITICAL
@@ -409,3 +526,309 @@ webView.injectJavaScript(`
 - Affiliate click tracking with conversion attribution
 - Ready for Shopify Storefront API integration
 - Mobile-first product cards with touch feedback
+
+## 🏭 Production Code Standards
+
+### Error Handling Patterns
+```typescript
+// ✅ CORRECT - Production-ready error handling
+export async function POST(request: Request) {
+  const traceId = crypto.randomUUID();
+  
+  try {
+    // Validate request
+    const body = await request.json().catch(() => {
+      throw new Error('Invalid JSON body');
+    });
+    
+    // Log request (without sensitive data)
+    console.log(`[${traceId}] API request received`, {
+      endpoint: request.url,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Business logic with proper error context
+    const result = await processRequest(body);
+    
+    return NextResponse.json(result);
+  } catch (error) {
+    // Log full error internally
+    console.error(`[${traceId}] API error:`, error);
+    
+    // Return sanitized error to client
+    const statusCode = error.statusCode || 500;
+    const message = statusCode === 500 
+      ? 'Internal server error' 
+      : error.message;
+      
+    return NextResponse.json(
+      { error: message, traceId },
+      { status: statusCode }
+    );
+  }
+}
+```
+
+### Environment-Specific Configuration
+```typescript
+// ✅ CORRECT - Environment-aware configuration
+import { getEnvConfig } from '@/lib/config';
+
+const config = getEnvConfig();
+
+// Use environment-specific values
+const assistantId = config.isDev 
+  ? process.env.THRIVE_DEV_FEED_ASSISTANT_ID
+  : process.env.THRIVE_FEED_ASSISTANT_ID;
+
+// API URLs change per environment
+const apiUrl = config.isDev
+  ? 'https://api-dev.thrive.com'
+  : 'https://api.thrive.com';
+
+// Feature flags per environment
+if (config.features.enableBetaFeatures) {
+  // Beta features only in dev
+}
+```
+
+### Secret Management Workflow
+```bash
+# BEFORE making any secret changes:
+# 1. Document the secret purpose
+# 2. Add to BOTH dev and prod
+# 3. Update Claude.md immediately
+# 4. Test in dev first
+
+# Safe secret update pattern
+./scripts/backup-secrets.sh          # Backup current secrets
+echo -n "new-value" | gcloud secrets versions add SECRET_NAME --data-file=- --project=thrive-dev-465922
+./scripts/test-secret.sh SECRET_NAME # Verify it works
+echo -n "new-value" | gcloud secrets versions add SECRET_NAME --data-file=- --project=thrive-465618
+```
+
+## 🧪 Testing Requirements
+
+### Test File Structure
+```typescript
+// Every feature MUST have tests
+// Location: __tests__/[feature-path].test.ts
+
+// Example: src/services/openai/assistant/chatService.ts
+// Test: __tests__/services/openai/assistant/chatService.test.ts
+
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { ChatService } from '@/services/openai/assistant/chatService';
+
+describe('ChatService', () => {
+  let service: ChatService;
+  
+  beforeEach(() => {
+    // Mock external dependencies
+    jest.mock('openai');
+    service = new ChatService();
+  });
+  
+  describe('production scenarios', () => {
+    it('handles API rate limits gracefully', async () => {
+      // Test rate limit handling
+    });
+    
+    it('falls back when primary service fails', async () => {
+      // Test fallback mechanisms
+    });
+    
+    it('sanitizes user input for security', async () => {
+      // Test XSS/injection prevention
+    });
+  });
+});
+```
+
+### Component Testing Pattern
+```typescript
+// Mobile-first component tests
+import { render, screen, fireEvent } from '@testing-library/react';
+import { Button } from '@/components/ui/Button';
+
+describe('Button Component', () => {
+  it('provides haptic feedback on mobile', () => {
+    const hapticMock = jest.fn();
+    window.navigator.vibrate = hapticMock;
+    
+    render(<Button haptic="medium">Test</Button>);
+    fireEvent.click(screen.getByText('Test'));
+    
+    expect(hapticMock).toHaveBeenCalledWith(10);
+  });
+  
+  it('scales correctly on different viewports', () => {
+    // Test viewport-based sizing
+  });
+});
+```
+
+## 🔄 Reusable Component Framework
+
+### Component Creation Checklist
+```typescript
+// When creating ANY new component:
+// 1. Check if similar component exists
+// 2. Use composition over duplication
+// 3. Follow mobile-first viewport pattern
+// 4. Add to component library
+// 5. Document props and usage
+
+// Pattern: components/ui/[ComponentName]/
+// ├── index.tsx          (main component)
+// ├── [ComponentName].test.tsx
+// ├── [ComponentName].stories.tsx (if applicable)
+// └── README.md          (auto-generated)
+```
+
+### Composition Pattern
+```typescript
+// ✅ CORRECT - Composable components
+import { BaseCard } from '@/components/ui/BaseCard';
+import { TouchFeedback } from '@/components/ui/TouchFeedback';
+
+export const InteractiveCard = ({ children, ...props }) => (
+  <TouchFeedback haptic="medium" scale={0.98}>
+    <BaseCard {...props}>
+      {children}
+    </BaseCard>
+  </TouchFeedback>
+);
+
+// ❌ WRONG - Duplicating functionality
+export const MySpecialCard = () => {
+  // Re-implementing touch feedback and card styles
+};
+```
+
+## 📝 Automatic Documentation
+
+### Feature Documentation Workflow
+```bash
+# After implementing any feature:
+# 1. Auto-generate docs from code
+npm run generate-docs
+
+# 2. Update features manifest
+# Location: docs/features/manifest.json
+{
+  "features": [
+    {
+      "name": "Pantry Management",
+      "implemented": "2025-07-24",
+      "files": [
+        "src/services/pantry/",
+        "components/pantry/"
+      ],
+      "description": "User supplement tracking and recommendations",
+      "assistants": ["pantry"],
+      "endpoints": ["/api/pantry/*"]
+    }
+  ]
+}
+```
+
+### Code Annotation for Auto-docs
+```typescript
+/**
+ * @feature Pantry Management
+ * @description Manages user's supplement inventory
+ * @assistant pantry
+ * @endpoint /api/pantry/items
+ */
+export class PantryService {
+  // Implementation
+}
+```
+
+## 🧹 Code Cleanup Procedures
+
+### Module Deprecation Pattern
+```typescript
+// Step 1: Mark as deprecated
+/**
+ * @deprecated Since v2.0 - Use MultiAssistantService instead
+ * @removeBy 2025-08-01
+ */
+export class OldAssistantService {
+  constructor() {
+    console.warn('OldAssistantService is deprecated');
+  }
+}
+
+// Step 2: Track in deprecation log
+// Location: docs/deprecations.md
+```
+
+### Cleanup Checklist
+```bash
+# Run weekly cleanup check
+npm run cleanup:check
+
+# This will:
+# 1. Find unused exports
+# 2. Identify deprecated code past removal date
+# 3. Find orphaned test files
+# 4. Detect duplicate implementations
+
+# Safe removal process
+npm run cleanup:analyze [file/module]
+# Shows all dependencies and usage
+```
+
+## 🔐 Production Deployment Checklist
+
+### Pre-deployment Verification
+```bash
+# MANDATORY before ANY production deployment:
+
+# 1. Run full test suite
+npm run test:all
+
+# 2. Check environment variables
+npm run verify:env
+
+# 3. Verify assistant IDs are different
+npm run verify:assistants
+
+# 4. Security audit
+npm audit
+
+# 5. Build verification
+npm run build:prod
+
+# 6. Lighthouse mobile test
+npm run lighthouse:mobile
+```
+
+### Post-deployment Monitoring
+```typescript
+// All production errors MUST include:
+// 1. Trace ID for debugging
+// 2. User context (anonymized)
+// 3. Environment info
+// 4. Performance metrics
+
+// Monitoring dashboard: https://console.cloud.google.com/monitoring
+```
+
+## 🎯 Development Priorities
+
+### When implementing features, ALWAYS:
+1. **Think Mobile-First**: Every feature starts at 320px
+2. **Consider Both Environments**: Dev behavior might differ from prod
+3. **Write Tests First**: TDD for complex logic
+4. **Use Existing Patterns**: Check for similar implementations
+5. **Document Changes**: Update relevant docs immediately
+6. **Clean As You Go**: Remove old code when replacing
+
+### Performance Standards
+- Page load: < 2s on 3G
+- Interaction delay: < 100ms
+- Bundle size increase: < 10KB per feature
+- Memory usage: Monitor for leaks in long sessions

@@ -10,9 +10,10 @@ import Image from 'next/image';
 import Button from '@/components/ui/Button';
 import { FAB } from '@/components/ui/Button';
 import { PhoneAuthModal } from '@/components/auth/PhoneAuthModal';
-import { CreatePostModal } from '@/components/discovery/CreatePostModal';
-import { PostApprovalModal } from '@/components/discovery/PostApprovalModal';
+// import { CreatePostModal } from '@/components/discovery/CreatePostModal'; // Removed - using dedicated page
+// import { PostApprovalModal } from '@/components/discovery/PostApprovalModal'; // Removed - using progress bar
 import { formatDistanceToNow } from 'date-fns';
+import toast from 'react-hot-toast';
 
 // Mock posts for demonstration
 const mockPosts: DiscoveryPost[] = [
@@ -215,8 +216,9 @@ export default function DiscoverPage() {
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [lastPostId, setLastPostId] = useState<string | null>(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  // const [showCreateModal, setShowCreateModal] = useState(false); // Removed - using dedicated page
   const [pendingPostId, setPendingPostId] = useState<string | null>(null);
+  const [approvalProgress, setApprovalProgress] = useState<number | null>(null);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [showAuthModal, setShowAuthModal] = useState(false);
 
@@ -273,6 +275,62 @@ export default function DiscoverPage() {
     }
   }, [user]);
 
+  const checkPostApproval = useCallback(async (postId: string) => {
+    if (!user) return;
+    
+    try {
+      const token = await user.getIdToken();
+      const checkInterval = setInterval(async () => {
+        try {
+          const response = await fetch(`/api/discovery/posts/${postId}/approval`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (!response.ok) throw new Error('Failed to check approval status');
+
+          const data = await response.json();
+          
+          if (data.status === 'approved') {
+            clearInterval(checkInterval);
+            setApprovalProgress(100);
+            setTimeout(() => {
+              setApprovalProgress(null);
+              setPendingPostId(null);
+              localStorage.removeItem('pendingPostId');
+              fetchPosts(); // Refresh feed
+              toast.success('Your post has been approved and is now live! 🎉');
+            }, 1000);
+          } else if (data.status === 'rejected') {
+            clearInterval(checkInterval);
+            setApprovalProgress(null);
+            setPendingPostId(null);
+            localStorage.removeItem('pendingPostId');
+            toast.error(data.feedback || 'Your post was not approved due to community guideline violations.');
+          } else if (data.approvalProgress) {
+            setApprovalProgress(data.approvalProgress);
+          }
+        } catch (error) {
+          console.error('Error checking approval:', error);
+        }
+      }, 2000); // Check every 2 seconds
+
+      // Stop checking after 5 minutes
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        if (pendingPostId === postId) {
+          setApprovalProgress(null);
+          setPendingPostId(null);
+          localStorage.removeItem('pendingPostId');
+          toast.error('Post approval is taking longer than expected. Please check back later.');
+        }
+      }, 300000);
+    } catch (error) {
+      console.error('Error setting up approval check:', error);
+    }
+  }, [user, pendingPostId, fetchPosts]);
+
   useEffect(() => {
     // Allow non-authenticated users to view discover page
     // They just won't be able to create posts or like
@@ -281,15 +339,16 @@ export default function DiscoverPage() {
     }
   }, [authLoading, fetchPosts]);
 
-  const handlePostCreated = (postId: string) => {
-    setPendingPostId(postId);
-    setShowCreateModal(false);
-  };
-
-  const handlePostApproved = () => {
-    setPendingPostId(null);
-    fetchPosts(); // Refresh the feed
-  };
+  // Check for pending post on mount and start tracking
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const pendingId = localStorage.getItem('pendingPostId');
+      if (pendingId) {
+        setPendingPostId(pendingId);
+        checkPostApproval(pendingId);
+      }
+    }
+  }, [checkPostApproval]);
 
   const handleLike = async (postId: string) => {
     if (!userId) {
@@ -449,7 +508,7 @@ export default function DiscoverPage() {
                   <Button
                     variant="gradient"
                     gradient={{ from: 'purple-500', to: 'pink-500' }}
-                    onClick={() => setShowCreateModal(true)}
+                    onClick={() => router.push('/discover/create')}
                     springAnimation
                     gradientOverlay
                     cardGlow
@@ -577,32 +636,36 @@ export default function DiscoverPage() {
         )}
       </div>
 
+      {/* Progress Bar for Post Approval */}
+      {approvalProgress !== null && (
+        <div className="fixed top-[min(14vw,3.5rem)] left-0 right-0 bg-white border-b border-gray-200 p-[min(3vw,0.75rem)] z-50" style={{ marginTop: 'env(safe-area-inset-top, 0)' }}>
+          <div className="max-w-[min(100vw,800px)] mx-auto">
+            <div className="flex items-center justify-between mb-[min(2vw,0.5rem)]">
+              <span className="text-[min(3.5vw,0.875rem)] text-gray-700 font-medium">
+                Reviewing your post...
+              </span>
+              <span className="text-[min(3vw,0.75rem)] text-gray-500">
+                {approvalProgress}%
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-[min(1.5vw,0.375rem)] overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500 ease-out"
+                style={{ width: `${approvalProgress}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Floating Action Button - Only show for authenticated users */}
       {user && (
         <FAB
-          onClick={() => setShowCreateModal(true)}
+          onClick={() => router.push('/discover/create')}
           haptic="medium"
         >
           <Plus className="w-6 h-6" />
         </FAB>
-      )}
-
-      {/* Create Post Modal */}
-      {showCreateModal && (
-        <CreatePostModal
-          isOpen={showCreateModal}
-          onClose={() => setShowCreateModal(false)}
-          onPostCreated={handlePostCreated}
-        />
-      )}
-
-      {/* Post Approval Modal */}
-      {pendingPostId && (
-        <PostApprovalModal
-          postId={pendingPostId}
-          onClose={() => setPendingPostId(null)}
-          onApproved={handlePostApproved}
-        />
       )}
 
       {/* Phone Auth Modal */}

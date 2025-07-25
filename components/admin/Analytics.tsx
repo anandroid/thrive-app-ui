@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { TrendingUp, ShoppingCart, Eye, MousePointerClick } from 'lucide-react';
 import { VendorStats } from '@/src/types/shop';
 
@@ -9,11 +9,7 @@ export default function Analytics() {
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('7d');
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, [timeRange]);
-
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/admin/analytics?range=${timeRange}`);
@@ -25,7 +21,12 @@ export default function Analytics() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [timeRange]);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, [fetchAnalytics]);
+
 
   const totalStats = stats.reduce((acc, vendor) => ({
     totalViews: acc.totalViews + vendor.totalViews,

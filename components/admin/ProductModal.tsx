@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import { Input, Textarea } from '@/components/ui/form-inputs';
-import { X, Upload, Plus } from 'lucide-react';
+import { X, Upload } from 'lucide-react';
 import { Product, CreateProductRequest, Vendor } from '@/src/types/shop';
 import { useToast } from '@/src/hooks/useToast';
 
@@ -36,20 +36,21 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
     searchKeywords: product?.searchKeywords || [],
   });
 
-  useEffect(() => {
-    fetchVendors();
-  }, []);
-
-  const fetchVendors = async () => {
+  const fetchVendors = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/vendors');
       if (!response.ok) throw new Error('Failed to fetch vendors');
       const data = await response.json();
       setVendors(data.vendors);
-    } catch (error) {
+    } catch {
       showToast('Failed to load vendors', 'error');
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    fetchVendors();
+  }, [fetchVendors]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +85,7 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = () => {
     // TODO: Implement image upload to storage
     showToast('Image upload not implemented yet', 'info');
   };
@@ -163,6 +164,7 @@ export default function ProductModal({ product, onClose, onSave }: ProductModalP
             <div className="grid grid-cols-3 gap-[min(2vw,0.5rem)]">
               {formData.images.map((image, index) => (
                 <div key={index} className="relative aspect-square bg-gray-100 rounded-[min(2vw,0.5rem)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={image} alt="" className="w-full h-full object-cover rounded-[min(2vw,0.5rem)]" />
                   <button
                     type="button"

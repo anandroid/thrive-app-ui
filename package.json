@@ -14,9 +14,21 @@
     "create-assistants": "node scripts/create-assistant-team.js",
     "create-assistants:prod": "node scripts/create-assistant-team.js --prod",
     "update-assistants": "node scripts/create-assistant-team.js",
-    "update-assistant": "node scripts/update-assistants-with-functions.js"
+    "update-assistant": "node scripts/update-assistants-with-functions.js",
+    "docs:generate": "node scripts/generate-docs.js",
+    "docs:update-manifest": "node scripts/generate-docs.js",
+    "cleanup:check": "node scripts/cleanup-check.js",
+    "cleanup:analyze": "echo 'TODO: Implement dependency analysis'",
+    "cleanup:fix": "echo 'TODO: Implement automatic cleanup'",
+    "verify:env": "node scripts/verify-env.js",
+    "verify:assistants": "node scripts/verify-assistants.js",
+    "verify:all": "npm run verify:env && npm run verify:assistants",
+    "test:all": "npm run test && npm run build",
+    "build:prod": "NODE_ENV=production npm run build",
+    "lighthouse:mobile": "npx lighthouse --only-categories=performance,accessibility --form-factor=mobile --screenEmulation.mobile --throttling-method=simulate --output=html --output-path=./lighthouse-report.html"
   },
   "dependencies": {
+    "@shopify/storefront-api-client": "^1.0.9",
     "chart.js": "^4.5.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

@@ -23,6 +23,34 @@ export default function ProductCard({ product, onAddToCart, onAffiliateLinkClick
         onAddToCart(product);
         showToast(`${product.name} added to cart!`, 'success');
       }
+      
+      // If it's a Shopify product, we can also handle Shopify cart
+      if (product.shopifyVariantId) {
+        try {
+          // Import dynamically to avoid client/server mismatch
+          const { createCart, addToCart } = await import('@/src/lib/shopify/client');
+          
+          // Get or create cart ID from localStorage
+          let cartId = localStorage.getItem('shopify_cart_id');
+          
+          if (!cartId) {
+            const cart = await createCart([{
+              merchandiseId: product.shopifyVariantId,
+              quantity: 1
+            }]);
+            cartId = cart.id;
+            localStorage.setItem('shopify_cart_id', cart.id);
+            localStorage.setItem('shopify_checkout_url', cart.checkoutUrl);
+          } else {
+            await addToCart(cartId, [{
+              merchandiseId: product.shopifyVariantId,
+              quantity: 1
+            }]);
+          }
+        } catch (error) {
+          console.error('Failed to add to Shopify cart:', error);
+        }
+      }
     } else {
       // Track affiliate click and open link
       if (onAffiliateLinkClick) {
@@ -60,12 +88,15 @@ export default function ProductCard({ product, onAddToCart, onAffiliateLinkClick
       {/* Product Image */}
       <div className="aspect-square bg-gray-100 relative overflow-hidden rounded-t-[min(2vw,0.5rem)]">
         {product.images[0] && !imageError ? (
-          <img
-            src={product.images[0]}
-            alt={product.name}
-            className="w-full h-full object-cover"
-            onError={() => setImageError(true)}
-          />
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={product.images[0]}
+              alt={product.name}
+              className="w-full h-full object-cover"
+              onError={() => setImageError(true)}
+            />
+          </>
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <Package className="w-[min(12vw,3rem)] h-[min(12vw,3rem)] text-gray-300" />

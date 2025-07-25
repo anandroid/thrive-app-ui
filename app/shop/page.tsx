@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import EmbeddedShop from '@/components/features/EmbeddedShop'
-import EnhancedShop from '@/components/shop/EnhancedShop'
-import { BottomNavLayout } from '@/components/layout/BottomNavLayout'
+import dynamic from 'next/dynamic';
+import { BottomNavLayout } from '@/components/layout/BottomNavLayout';
 import Button from '@/components/ui/Button';
+
+const EmbeddedShop = dynamic(() => import('@/components/features/EmbeddedShop'), { ssr: false });
+const EnhancedShop = dynamic(() => import('@/components/shop/EnhancedShop'), { ssr: false });
 
 export default function ShopPage() {
   const [viewMode, setViewMode] = useState<'enhanced' | 'embedded'>('enhanced');

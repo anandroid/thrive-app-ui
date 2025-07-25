@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Product, ProductFilter } from '@/src/types/shop';
 import ProductCard from './ProductCard';
 import { Search, Filter, X } from 'lucide-react';
@@ -13,7 +13,6 @@ interface ProductGridProps {
 }
 
 export default function ProductGrid({ 
-  initialFilter = {}, 
   onAddToCart, 
   onAffiliateLinkClick 
 }: ProductGridProps) {
@@ -36,11 +35,7 @@ export default function ProductGrid({
     { id: 'immune', label: 'Immune Support' },
   ];
 
-  useEffect(() => {
-    fetchProducts(true);
-  }, [selectedCategory, vendorTypeFilter, sortBy]);
-
-  const fetchProducts = async (reset = false) => {
+  const fetchProducts = useCallback(async (reset = false) => {
     try {
       setLoading(true);
       
@@ -49,11 +44,31 @@ export default function ProductGrid({
         pageSize: '12',
         isActive: 'true',
       });
-
+      
       if (selectedCategory) params.append('category', selectedCategory);
       if (vendorTypeFilter !== 'all') params.append('vendorType', vendorTypeFilter);
       if (searchQuery) params.append('search', searchQuery);
-
+      
+      // Apply sort
+      switch (sortBy) {
+        case 'price-low':
+          params.append('sortBy', 'price');
+          params.append('sortOrder', 'asc');
+          break;
+        case 'price-high':
+          params.append('sortBy', 'price');
+          params.append('sortOrder', 'desc');
+          break;
+        case 'newest':
+          params.append('sortBy', 'createdAt');
+          params.append('sortOrder', 'desc');
+          break;
+        case 'featured':
+        default:
+          params.append('sortBy', 'featured');
+          break;
+      }
+      
       const response = await fetch(`/api/shop/products?${params}`);
       if (!response.ok) throw new Error('Failed to fetch products');
       
@@ -63,21 +78,26 @@ export default function ProductGrid({
         setProducts(data.products);
         setPage(1);
       } else {
-        setProducts([...products, ...data.products]);
+        setProducts(prev => [...prev, ...data.products]);
       }
       
-      setHasMore(data.pagination.page < data.pagination.totalPages);
+      setHasMore(data.hasMore || false);
     } catch (error) {
       console.error('Failed to load products:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, selectedCategory, vendorTypeFilter, sortBy, searchQuery]);
 
-  const handleSearch = (e: React.FormEvent) => {
+  useEffect(() => {
+    fetchProducts(true);
+  }, [fetchProducts]);
+
+
+  const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     fetchProducts(true);
-  };
+  }, [fetchProducts]);
 
   const sortedProducts = [...products].sort((a, b) => {
     switch (sortBy) {
@@ -158,7 +178,7 @@ export default function ProductGrid({
             </label>
             <select
               value={vendorTypeFilter}
-              onChange={(e) => setVendorTypeFilter(e.target.value as any)}
+              onChange={(e) => setVendorTypeFilter(e.target.value as 'all' | 'thrive' | 'affiliate')}
               className="w-full px-[min(3vw,0.75rem)] py-[min(2.5vw,0.625rem)] border border-gray-300 rounded-[min(2vw,0.5rem)] text-[min(3.75vw,0.9375rem)]"
             >
               <option value="all">All Products</option>
@@ -174,7 +194,7 @@ export default function ProductGrid({
             </label>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
+              onChange={(e) => setSortBy(e.target.value as 'featured' | 'price-low' | 'price-high' | 'newest')}
               className="w-full px-[min(3vw,0.75rem)] py-[min(2.5vw,0.625rem)] border border-gray-300 rounded-[min(2vw,0.5rem)] text-[min(3.75vw,0.9375rem)]"
             >
               <option value="featured">Featured</option>

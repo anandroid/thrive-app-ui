@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from '@/src/lib/auth';
 import { adminDb, FieldValue } from '@/lib/firebase-admin';
-import { Product, CreateProductRequest, ProductFilter } from '@/src/types/shop';
+import { Product, CreateProductRequest } from '@/src/types/shop';
 
 // GET /api/admin/products - Get all products with filters
 export async function GET(request: NextRequest) {

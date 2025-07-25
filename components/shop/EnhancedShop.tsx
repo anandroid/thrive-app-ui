@@ -4,16 +4,22 @@ import { useState, useEffect } from 'react';
 import ProductGrid from './ProductGrid';
 import { Product, ShopSettings as ShopSettingsType } from '@/src/types/shop';
 import { ChevronRight } from 'lucide-react';
-import { useAuth } from '@/src/contexts/AuthContext';
-import { useToast } from '@/src/hooks/useToast';
+
+declare global {
+  interface Window {
+    gtag?: (
+      command: string,
+      action: string,
+      parameters: Record<string, unknown>
+    ) => void;
+  }
+}
 
 interface EnhancedShopProps {
   embedded?: boolean;
 }
 
 export default function EnhancedShop({ embedded = false }: EnhancedShopProps) {
-  const { user } = useAuth();
-  const { showToast } = useToast();
   const [settings, setSettings] = useState<ShopSettingsType | null>(null);
   const [cart, setCart] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,7 +66,7 @@ export default function EnhancedShop({ embedded = false }: EnhancedShopProps) {
 
   const handleAffiliateLinkClick = (product: Product) => {
     // Track in analytics
-    if (window.gtag) {
+    if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('event', 'affiliate_click', {
         product_id: product.id,
         product_name: product.name,
@@ -91,6 +97,7 @@ export default function EnhancedShop({ embedded = false }: EnhancedShopProps) {
                 className={`block relative ${index > 0 ? 'hidden' : ''}`}
               >
                 <div className="aspect-[3/1] md:aspect-[4/1] relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={banner.image}
                     alt={banner.title}

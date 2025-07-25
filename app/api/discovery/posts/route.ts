@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from '@/src/lib/auth';
 import { adminDb, FieldValue } from '@/lib/firebase-admin';
 import { CreatePostRequest, DiscoveryPost } from '@/src/types/discovery';
+import { getFeedAssistant } from '@/src/services/openai/assistant/feedAssistantService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -193,47 +194,69 @@ export async function GET(request: NextRequest) {
 // Helper function to start the approval process
 async function startApprovalProcess(postId: string, post: Omit<DiscoveryPost, 'id'>) {
   try {
-    // For now, simulate the approval process without OpenAI
-    // TODO: Implement proper OpenAI assistant integration when SDK is updated
-    
+    // Update progress to show review has started
     await adminDb.collection('discovery_posts').doc(postId).update({
       'approvalData.approvalProgress': 10
     });
 
-    // Simulate review progress
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Get the feed assistant
+    const feedAssistant = getFeedAssistant();
+    
+    // Update progress
     await adminDb.collection('discovery_posts').doc(postId).update({
       'approvalData.approvalProgress': 30
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await adminDb.collection('discovery_posts').doc(postId).update({
-      'approvalData.approvalProgress': 50
-    });
+    // Review the post content
+    const reviewResult = await feedAssistant.reviewPost(
+      post.content.title,
+      post.content.body,
+      post.content.tags
+    );
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Update progress
     await adminDb.collection('discovery_posts').doc(postId).update({
       'approvalData.approvalProgress': 80
     });
 
-    // Final update - auto-approve for now
-    await adminDb.collection('discovery_posts').doc(postId).update({
-      status: 'approved',
-      'approvalData.approvalProgress': 100,
-      'approvalData.approvalMessage': 'Content approved',
-      'approvalData.approvedAt': FieldValue.serverTimestamp(),
+    // Get user reference for stats update
+    const userRef = adminDb.collection('users').doc(post.userId);
+
+    // Apply the review result
+    if (reviewResult.status === 'approved') {
+      await adminDb.collection('discovery_posts').doc(postId).update({
+        status: 'approved',
+        'approvalData.approvalProgress': 100,
+        'approvalData.approvalMessage': reviewResult.feedback || 'Content approved',
+        'approvalData.approvedAt': FieldValue.serverTimestamp(),
+        'metadata.updatedAt': FieldValue.serverTimestamp()
+      });
+
+      // Update user stats
+      await userRef.update({
+        'discoveryStats.totalPosts': FieldValue.increment(1),
+        'discoveryStats.approvedPosts': FieldValue.increment(1),
+        'discoveryStats.anonymousPosts': post.isAnonymous 
+          ? FieldValue.increment(1)
+          : FieldValue.increment(0)
+      });
+    } else {
+      // Post rejected
+      await adminDb.collection('discovery_posts').doc(postId).update({
+        status: 'rejected',
+        'approvalData.approvalProgress': 100,
+        'approvalData.approvalMessage': reviewResult.feedback || 'Content did not meet community guidelines',
+        'approvalData.rejectedAt': FieldValue.serverTimestamp(),
+        'approvalData.suggestions': reviewResult.suggestions || [],
       'metadata.updatedAt': FieldValue.serverTimestamp()
     });
 
-    // Update user stats
-    const userRef = adminDb.collection('users').doc(post.userId);
-    await userRef.update({
-      'discoveryStats.totalPosts': FieldValue.increment(1),
-      'discoveryStats.approvedPosts': FieldValue.increment(1),
-      'discoveryStats.anonymousPosts': post.isAnonymous 
-        ? FieldValue.increment(1) 
-        : FieldValue.increment(0)
-    });
+      // Update user stats for rejected posts
+      await userRef.update({
+        'discoveryStats.totalPosts': FieldValue.increment(1),
+        'discoveryStats.rejectedPosts': FieldValue.increment(1)
+      });
+    }
 
   } catch (error) {
     console.error('Error in approval process:', error);

@@ -6,15 +6,16 @@ import { UpdateProductRequest } from '@/src/types/shop';
 // GET /api/admin/products/[productId] - Get a single product
 export async function GET(
   request: NextRequest,
-  { params }: { params: { productId: string } }
+  { params }: { params: Promise<{ productId: string }> }
 ) {
   try {
+    const { productId } = await params;
     const { userId } = await getAuth(request);
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const doc = await adminDb.collection('products').doc(params.productId).get();
+    const doc = await adminDb.collection('products').doc(productId).get();
     
     if (!doc.exists) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
@@ -37,9 +38,10 @@ export async function GET(
 // PUT /api/admin/products/[productId] - Update a product
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { productId: string } }
+  { params }: { params: Promise<{ productId: string }> }
 ) {
   try {
+    const { productId } = await params;
     const { userId } = await getAuth(request);
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -48,7 +50,7 @@ export async function PUT(
     const body: UpdateProductRequest = await request.json();
     
     // Check if product exists
-    const doc = await adminDb.collection('products').doc(params.productId).get();
+    const doc = await adminDb.collection('products').doc(productId).get();
     if (!doc.exists) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
@@ -57,7 +59,7 @@ export async function PUT(
     const oldCategories = currentProduct?.categories || [];
 
     // Update product
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       ...body,
       updatedAt: FieldValue.serverTimestamp()
     };
@@ -69,14 +71,14 @@ export async function PUT(
         .replace(/[^a-z0-9-]/g, '');
     }
 
-    await adminDb.collection('products').doc(params.productId).update(updateData);
+    await adminDb.collection('products').doc(productId).update(updateData);
 
     // Update category counts if categories changed
     if (body.categories && JSON.stringify(body.categories) !== JSON.stringify(oldCategories)) {
       const batch = adminDb.batch();
       
       // Decrement count for removed categories
-      const removedCategories = oldCategories.filter(cat => !body.categories?.includes(cat));
+      const removedCategories = oldCategories.filter((cat: string) => !body.categories?.includes(cat));
       for (const categoryId of removedCategories) {
         const categoryRef = adminDb.collection('categories').doc(categoryId);
         batch.update(categoryRef, {
@@ -85,7 +87,7 @@ export async function PUT(
       }
       
       // Increment count for added categories
-      const addedCategories = body.categories.filter(cat => !oldCategories.includes(cat));
+      const addedCategories = body.categories.filter((cat: string) => !oldCategories.includes(cat));
       for (const categoryId of addedCategories) {
         const categoryRef = adminDb.collection('categories').doc(categoryId);
         batch.update(categoryRef, {
@@ -113,16 +115,17 @@ export async function PUT(
 // DELETE /api/admin/products/[productId] - Delete a product
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { productId: string } }
+  { params }: { params: Promise<{ productId: string }> }
 ) {
   try {
+    const { productId } = await params;
     const { userId } = await getAuth(request);
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get product to access its categories
-    const doc = await adminDb.collection('products').doc(params.productId).get();
+    const doc = await adminDb.collection('products').doc(productId).get();
     if (!doc.exists) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
@@ -131,7 +134,7 @@ export async function DELETE(
     const categories = product?.categories || [];
 
     // Soft delete - just mark as inactive
-    await adminDb.collection('products').doc(params.productId).update({
+    await adminDb.collection('products').doc(productId).update({
       isActive: false,
       isDeleted: true,
       deletedAt: FieldValue.serverTimestamp(),

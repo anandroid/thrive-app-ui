@@ -101,7 +101,7 @@ export default function VendorModal({ vendor, onClose, onSave }: VendorModalProp
                   name="type"
                   value="thrive"
                   checked={formData.type === 'thrive'}
-                  onChange={(e) => setFormData({ ...formData, type: 'thrive' })}
+                  onChange={() => setFormData({ ...formData, type: 'thrive' })}
                   className="w-[min(4vw,1rem)] h-[min(4vw,1rem)]"
                 />
                 <span className="text-[min(3.75vw,0.9375rem)]">Thrive (Shopify)</span>
@@ -112,7 +112,7 @@ export default function VendorModal({ vendor, onClose, onSave }: VendorModalProp
                   name="type"
                   value="affiliate"
                   checked={formData.type === 'affiliate'}
-                  onChange={(e) => setFormData({ ...formData, type: 'affiliate' })}
+                  onChange={() => setFormData({ ...formData, type: 'affiliate' })}
                   className="w-[min(4vw,1rem)] h-[min(4vw,1rem)]"
                 />
                 <span className="text-[min(3.75vw,0.9375rem)]">Affiliate Partner</span>
