@@ -18,54 +18,86 @@ steps:
       - '--all-tags'
       - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/thrive-app-ui'
 
-  # Deploy to Cloud Run
+  # Deploy to Cloud Run with environment-specific configuration
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: gcloud
+    entrypoint: bash
     args:
-      - 'run'
-      - 'deploy'
-      - 'thrive-app-ui'
-      - '--image'
-      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/thrive-app-ui:${BUILD_ID}'
-      - '--region'
-      - 'us-central1'
-      - '--platform'
-      - 'managed'
-      - '--port'
-      - '8080'
-      - '--memory'
-      - '1Gi'
-      - '--timeout'
-      - '300'
-      - '--concurrency'
-      - '80'
-      - '--max-instances'
-      - '100'
-      - '--allow-unauthenticated'
-      - '--set-secrets'
-      - 'ENABLE_ASSISTANT_FUNCTIONS=ENABLE_ASSISTANT_FUNCTIONS:latest'
-      - '--set-secrets'
-      - 'NEXT_PUBLIC_APP_URL=NEXT_PUBLIC_APP_URL:latest'
-      - '--set-secrets'
-      - 'NEXT_PUBLIC_ENABLE_ASSISTANT_FUNCTIONS=NEXT_PUBLIC_ENABLE_ASSISTANT_FUNCTIONS:latest'
-      - '--set-secrets'
-      - 'NEXT_PUBLIC_SHOP_URL=NEXT_PUBLIC_SHOP_URL:latest'
-      - '--set-secrets'
-      - 'NODE_ENV=NODE_ENV:latest'
-      - '--set-secrets'
-      - 'OPENAI_API_KEY=OPENAI_API_KEY:latest'
-      - '--set-secrets'
-      - 'THRIVE_CHAT_ASSISTANT_ID=THRIVE_CHAT_ASSISTANT_ID:latest'
-      - '--set-secrets'
-      - 'THRIVE_GEMINI_API_KEY=THRIVE_GEMINI_API_KEY:latest'
-      - '--set-secrets'
-      - 'THRIVE_OPENAI_API_KEY=THRIVE_OPENAI_API_KEY:latest'
-      - '--set-secrets'
-      - 'THRIVE_PANTRY_ASSISTANT_ID=THRIVE_PANTRY_ASSISTANT_ID:latest'
-      - '--set-secrets'
-      - 'THRIVE_ROUTINE_ASSISTANT_ID=THRIVE_ROUTINE_ASSISTANT_ID:latest'
-      - '--set-secrets'
-      - 'THRIVE_RECOMMENDATION_ASSISTANT_ID=THRIVE_RECOMMENDATION_ASSISTANT_ID:latest'
+      - '-c'
+      - |
+        # Base deployment command
+        DEPLOY_CMD=(
+          gcloud run deploy thrive-app-ui
+          --image=us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/thrive-app-ui:${BUILD_ID}
+          --region=us-central1
+          --platform=managed
+          --port=8080
+          --memory=1Gi
+          --timeout=300
+          --concurrency=80
+          --max-instances=100
+          --allow-unauthenticated
+        )
+        
+        # Common secrets for both environments
+        COMMON_SECRETS=(
+          "ENABLE_ASSISTANT_FUNCTIONS=ENABLE_ASSISTANT_FUNCTIONS:latest"
+          "NEXT_PUBLIC_APP_URL=NEXT_PUBLIC_APP_URL:latest"
+          "NEXT_PUBLIC_ENABLE_ASSISTANT_FUNCTIONS=NEXT_PUBLIC_ENABLE_ASSISTANT_FUNCTIONS:latest"
+          "NEXT_PUBLIC_SHOP_URL=NEXT_PUBLIC_SHOP_URL:latest"
+          "NODE_ENV=NODE_ENV:latest"
+          "OPENAI_API_KEY=OPENAI_API_KEY:latest"
+          "THRIVE_CHAT_ASSISTANT_ID=THRIVE_CHAT_ASSISTANT_ID:latest"
+          "THRIVE_GEMINI_API_KEY=THRIVE_GEMINI_API_KEY:latest"
+          "THRIVE_OPENAI_API_KEY=THRIVE_OPENAI_API_KEY:latest"
+          "THRIVE_PANTRY_ASSISTANT_ID=THRIVE_PANTRY_ASSISTANT_ID:latest"
+          "THRIVE_ROUTINE_ASSISTANT_ID=THRIVE_ROUTINE_ASSISTANT_ID:latest"
+          "THRIVE_RECOMMENDATION_ASSISTANT_ID=THRIVE_RECOMMENDATION_ASSISTANT_ID:latest"
+          "THRIVE_SHOPIFY_API_KEY=THRIVE_SHOPIFY_API_KEY:latest"
+          "THRIVE_SHOPIFY_API_SECRET_KEY=THRIVE_SHOPIFY_API_SECRET_KEY:latest"
+          "THRIVE_SHOPIFY_STOREFRONT_API_TOKEN=THRIVE_SHOPIFY_STOREFRONT_API_TOKEN:latest"
+          "THRIVE_SHOPIFY_STORE_DOMAIN=THRIVE_SHOPIFY_STORE_DOMAIN:latest"
+          "NEXT_PUBLIC_THRIVE_SHOPIFY_STORE_DOMAIN=NEXT_PUBLIC_THRIVE_SHOPIFY_STORE_DOMAIN:latest"
+        )
+        
+        # Add common secrets
+        for secret in "${COMMON_SECRETS[@]}"; do
+          DEPLOY_CMD+=(--set-secrets "$secret")
+        done
+        
+        # Environment-specific configuration
+        if [[ "${PROJECT_ID}" == "thrive-dev-465922" ]]; then
+          echo "Deploying to development environment"
+          # Dev uses THRIVE_DEV_FEED_ASSISTANT_ID
+          DEPLOY_CMD+=(--set-secrets "THRIVE_DEV_FEED_ASSISTANT_ID=THRIVE_DEV_FEED_ASSISTANT_ID:latest")
+        elif [[ "${PROJECT_ID}" == "thrive-465618" ]]; then
+          echo "Deploying to production environment"
+          # Prod uses THRIVE_FEED_ASSISTANT_ID and includes Firebase secrets
+          DEPLOY_CMD+=(--set-secrets "THRIVE_FEED_ASSISTANT_ID=THRIVE_FEED_ASSISTANT_ID:latest")
+          
+          # Production-only Firebase secrets
+          FIREBASE_SECRETS=(
+            "FIREBASE_ADMIN_CLIENT_EMAIL=FIREBASE_ADMIN_CLIENT_EMAIL:latest"
+            "FIREBASE_ADMIN_PRIVATE_KEY=FIREBASE_ADMIN_PRIVATE_KEY:latest"
+            "FIREBASE_PROJECT_ID=FIREBASE_PROJECT_ID:latest"
+            "FIREBASE_SERVICE_ACCOUNT_JSON=FIREBASE_SERVICE_ACCOUNT_JSON:latest"
+            "NEXT_PUBLIC_FIREBASE_API_KEY=NEXT_PUBLIC_FIREBASE_API_KEY:latest"
+            "NEXT_PUBLIC_FIREBASE_APP_ID=NEXT_PUBLIC_FIREBASE_APP_ID:latest"
+            "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN:latest"
+            "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID:latest"
+            "NEXT_PUBLIC_FIREBASE_PROJECT_ID=NEXT_PUBLIC_FIREBASE_PROJECT_ID:latest"
+            "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET:latest"
+          )
+          
+          for secret in "${FIREBASE_SECRETS[@]}"; do
+            DEPLOY_CMD+=(--set-secrets "$secret")
+          done
+        else
+          echo "WARNING: Unknown project ID: ${PROJECT_ID}"
+        fi
+        
+        # Execute the deployment
+        echo "Executing deployment command..."
+        "${DEPLOY_CMD[@]}"
 
 # Build timeout
 timeout: 1800s
