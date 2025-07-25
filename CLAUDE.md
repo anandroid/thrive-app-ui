@@ -246,9 +246,17 @@ import { TouchLink } from '@/components/ui/TouchLink';
 ## 🔐 Environment Variables & Google Cloud Secrets
 
 ### 🚨 CRITICAL: Two-Project Architecture
-Thrive uses TWO separate projects for development and production:
-- **Development**: `thrive-dev-465922` (OpenAI project: `thrive-dev`)
-- **Production**: `thrive-465618` (OpenAI project: `thrive`)
+Thrive uses TWO separate ecosystems for development and production:
+
+#### Google Cloud Projects:
+- **Development**: `thrive-dev-465922`
+- **Production**: `thrive-465618`
+
+#### OpenAI Projects:
+- **Development**: `thrive-dev`
+- **Production**: `thrive`
+
+**IMPORTANT**: Each project has its own secrets with DIFFERENT values, but uses the SAME environment variable names
 
 ### 📋 Complete List of Secrets
 
@@ -268,19 +276,16 @@ THRIVE_SHOPIFY_STORE_DOMAIN
 
 #### Assistant IDs (Different values per environment!)
 ```bash
-# Multi-Assistant IDs (ALL must be different between dev/prod)
+# Multi-Assistant IDs (ALL have different values between dev/prod)
 THRIVE_CHAT_ASSISTANT_ID            # Chat wellness assistant
 THRIVE_ROUTINE_ASSISTANT_ID         # Routine creation assistant
 THRIVE_PANTRY_ASSISTANT_ID          # Pantry/supplement assistant
 THRIVE_RECOMMENDATION_ASSISTANT_ID  # Home screen widget assistant
-
-# Feed Assistant (Different env var names!)
-THRIVE_DEV_FEED_ASSISTANT_ID        # DEV ONLY - Community feed moderator
-THRIVE_FEED_ASSISTANT_ID            # PROD ONLY - Community feed moderator
+THRIVE_FEED_ASSISTANT_ID            # Community feed moderator
 
 # Legacy (being phased out)
 THRIVE_OPENAI_ASSISTANT_ID          # Original single assistant
-THRIVE_DISCOVERY_ASSISTANT_ID       # Old discovery assistant (prod only)
+THRIVE_DISCOVERY_ASSISTANT_ID       # Old discovery assistant (if still exists)
 ```
 
 #### Public Environment Variables
@@ -319,8 +324,8 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
 ### 🔄 Secret Management Rules
 
 #### When Adding New Secrets:
-1. **ALWAYS add to BOTH projects** (dev and prod)
-2. **Use consistent naming** (except feed assistant which has dev-specific naming)
+1. **ALWAYS add to BOTH projects** (dev and prod) with environment-specific values
+2. **Use consistent naming** across both environments
 3. **Document in this file immediately**
 4. **Update upload-secrets.sh if needed**
 
@@ -354,9 +359,8 @@ npm run create-assistants:prod
 #### Assistant ID Rules:
 1. **NEVER share assistant IDs between environments**
 2. **Each environment has 5 separate assistants**
-3. **Feed assistant uses different env var names**:
-   - Dev: `THRIVE_DEV_FEED_ASSISTANT_ID`
-   - Prod: `THRIVE_FEED_ASSISTANT_ID`
+3. **All assistants use the same env var names across environments**
+4. **The assistant ID values are different between dev and prod**
 
 ### 📝 Deployment
 ```bash

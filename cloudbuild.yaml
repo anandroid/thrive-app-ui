@@ -38,7 +38,7 @@ steps:
           --allow-unauthenticated
         )
         
-        # Common secrets for both environments
+        # Common secrets for both environments (each project has its own values)
         COMMON_SECRETS=(
           "ENABLE_ASSISTANT_FUNCTIONS=ENABLE_ASSISTANT_FUNCTIONS:latest"
           "NEXT_PUBLIC_APP_URL=NEXT_PUBLIC_APP_URL:latest"
@@ -47,6 +47,7 @@ steps:
           "NODE_ENV=NODE_ENV:latest"
           "OPENAI_API_KEY=OPENAI_API_KEY:latest"
           "THRIVE_CHAT_ASSISTANT_ID=THRIVE_CHAT_ASSISTANT_ID:latest"
+          "THRIVE_FEED_ASSISTANT_ID=THRIVE_FEED_ASSISTANT_ID:latest"
           "THRIVE_GEMINI_API_KEY=THRIVE_GEMINI_API_KEY:latest"
           "THRIVE_OPENAI_API_KEY=THRIVE_OPENAI_API_KEY:latest"
           "THRIVE_PANTRY_ASSISTANT_ID=THRIVE_PANTRY_ASSISTANT_ID:latest"
@@ -64,15 +65,9 @@ steps:
           DEPLOY_CMD+=(--set-secrets "$secret")
         done
         
-        # Environment-specific configuration
-        if [[ "${PROJECT_ID}" == "thrive-dev-465922" ]]; then
-          echo "Deploying to development environment"
-          # Dev uses THRIVE_DEV_FEED_ASSISTANT_ID
-          DEPLOY_CMD+=(--set-secrets "THRIVE_DEV_FEED_ASSISTANT_ID=THRIVE_DEV_FEED_ASSISTANT_ID:latest")
-        elif [[ "${PROJECT_ID}" == "thrive-465618" ]]; then
-          echo "Deploying to production environment"
-          # Prod uses THRIVE_FEED_ASSISTANT_ID and includes Firebase secrets
-          DEPLOY_CMD+=(--set-secrets "THRIVE_FEED_ASSISTANT_ID=THRIVE_FEED_ASSISTANT_ID:latest")
+        # Production-only configuration (Firebase)
+        if [[ "${PROJECT_ID}" == "thrive-465618" ]]; then
+          echo "Deploying to production environment - adding Firebase secrets"
           
           # Production-only Firebase secrets
           FIREBASE_SECRETS=(
@@ -92,7 +87,7 @@ steps:
             DEPLOY_CMD+=(--set-secrets "$secret")
           done
         else
-          echo "WARNING: Unknown project ID: ${PROJECT_ID}"
+          echo "Deploying to development environment (${PROJECT_ID})"
         fi
         
         # Execute the deployment

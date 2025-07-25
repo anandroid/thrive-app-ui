@@ -21,7 +21,7 @@ export class FeedAssistantService {
     this.openai = new OpenAI({ apiKey });
     
     // Use feed assistant ID from environment
-    this.assistantId = process.env.THRIVE_FEED_ASSISTANT_ID || process.env.THRIVE_DEV_FEED_ASSISTANT_ID || '';
+    this.assistantId = process.env.THRIVE_FEED_ASSISTANT_ID || '';
     
     if (!this.assistantId) {
       console.warn('Feed Assistant ID not found in environment variables');

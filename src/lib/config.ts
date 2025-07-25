@@ -86,10 +86,7 @@ export function getAssistantId(assistantType: 'chat' | 'routine' | 'pantry' | 'r
     case 'recommendation':
       return process.env.THRIVE_RECOMMENDATION_ASSISTANT_ID;
     case 'feed':
-      // Feed assistant has different env var names
-      return config.isDev 
-        ? process.env.THRIVE_DEV_FEED_ASSISTANT_ID
-        : process.env.THRIVE_FEED_ASSISTANT_ID;
+      return process.env.THRIVE_FEED_ASSISTANT_ID;
     default:
       throw new Error(`Unknown assistant type: ${assistantType}`);
   }

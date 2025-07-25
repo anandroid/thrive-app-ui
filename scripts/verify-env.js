@@ -25,12 +25,9 @@ const REQUIRED_VARS = {
     'THRIVE_CHAT_ASSISTANT_ID',
     'THRIVE_ROUTINE_ASSISTANT_ID',
     'THRIVE_PANTRY_ASSISTANT_ID',
-    'THRIVE_RECOMMENDATION_ASSISTANT_ID'
+    'THRIVE_RECOMMENDATION_ASSISTANT_ID',
+    'THRIVE_FEED_ASSISTANT_ID'
   ],
-  'Feed Assistant': {
-    dev: 'THRIVE_DEV_FEED_ASSISTANT_ID',
-    prod: 'THRIVE_FEED_ASSISTANT_ID'
-  },
   'Public URLs': [
     'NEXT_PUBLIC_APP_URL',
     'NEXT_PUBLIC_SHOP_URL'
@@ -83,8 +80,7 @@ if (fs.existsSync(envPath)) {
 Object.entries(REQUIRED_VARS).forEach(([category, vars]) => {
   console.log(`\n${category}:`);
   
-  if (category === 'Feed Assistant') {
-    const varName = isDev ? vars.dev : vars.prod;
+  vars.forEach(varName => {
     const exists = envVars[varName] || process.env[varName];
     
     if (!exists) {
@@ -93,18 +89,7 @@ Object.entries(REQUIRED_VARS).forEach(([category, vars]) => {
     } else {
       console.log(`  ✅ ${varName}`);
     }
-  } else {
-    vars.forEach(varName => {
-      const exists = envVars[varName] || process.env[varName];
-      
-      if (!exists) {
-        missingVars.push(varName);
-        console.log(`  ❌ ${varName} - MISSING`);
-      } else {
-        console.log(`  ✅ ${varName}`);
-      }
-    });
-  }
+  });
 });
 
 // Check Firebase vars in production
@@ -130,7 +115,8 @@ const assistantIds = [
   'THRIVE_CHAT_ASSISTANT_ID',
   'THRIVE_ROUTINE_ASSISTANT_ID',
   'THRIVE_PANTRY_ASSISTANT_ID',
-  'THRIVE_RECOMMENDATION_ASSISTANT_ID'
+  'THRIVE_RECOMMENDATION_ASSISTANT_ID',
+  'THRIVE_FEED_ASSISTANT_ID'
 ];
 
 const idValues = new Set();
@@ -141,14 +127,6 @@ assistantIds.forEach(id => {
   }
   if (value) idValues.add(value);
 });
-
-// Check if using correct feed assistant var
-if (isDev && (envVars['THRIVE_FEED_ASSISTANT_ID'] || process.env['THRIVE_FEED_ASSISTANT_ID'])) {
-  warnings.push('⚠️  Using THRIVE_FEED_ASSISTANT_ID in dev environment (should use THRIVE_DEV_FEED_ASSISTANT_ID)');
-}
-if (isProd && (envVars['THRIVE_DEV_FEED_ASSISTANT_ID'] || process.env['THRIVE_DEV_FEED_ASSISTANT_ID'])) {
-  warnings.push('⚠️  Using THRIVE_DEV_FEED_ASSISTANT_ID in prod environment (should use THRIVE_FEED_ASSISTANT_ID)');
-}
 
 // Check secrets in GCloud
 if (isDev || isProd) {
