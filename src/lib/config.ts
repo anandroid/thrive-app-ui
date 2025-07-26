@@ -74,8 +74,6 @@ export function getEnvConfig(): EnvConfig {
  * Get the correct assistant ID based on environment
  */
 export function getAssistantId(assistantType: 'chat' | 'routine' | 'pantry' | 'recommendation' | 'feed'): string | undefined {
-  const config = getEnvConfig();
-  
   switch (assistantType) {
     case 'chat':
       return process.env.THRIVE_CHAT_ASSISTANT_ID;
