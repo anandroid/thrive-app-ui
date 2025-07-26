@@ -182,26 +182,6 @@ export default function SettingsPage() {
             </button>
 
             <button
-              onClick={() => router.push('/admin')}
-              className="w-full bg-white shadow-sm hover:shadow-md transition-all active:scale-[0.98] text-left"
-              style={{ borderRadius: '4vw', padding: '4vw' }}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center" style={{ gap: '3vw' }}>
-                  <div className="bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow" 
-                    style={{ width: '10vw', height: '10vw', borderRadius: '2.5vw' }}>
-                    <span style={{ fontSize: '6vw' }}>⚙️</span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900" style={{ fontSize: '4vw' }}>Shop Admin</h3>
-                    <p className="text-gray-600" style={{ fontSize: '3vw' }}>Manage products & vendors</p>
-                  </div>
-                </div>
-                <ChevronRight className="text-gray-400" style={{ width: '5vw', height: '5vw' }} />
-              </div>
-            </button>
-
-            <button
               onClick={() => router.push('/chat-history')}
               className="w-full bg-white shadow-sm hover:shadow-md transition-all active:scale-[0.98] text-left"
               style={{ borderRadius: '4vw', padding: '4vw' }}
